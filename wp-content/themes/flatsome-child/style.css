@@ -290,13 +290,11 @@ blockquote, dl, figure, form, ol, p, pre, ul {
 }
 
 .price-wrapper {
-	padding-left: 60px;
 	position: relative;
 }
 
 .price-wrapper:before {
 	position: absolute;
-	content: "From:";
 	left: 0;
 	font-size: 18px;
 	font-weight: 500;
