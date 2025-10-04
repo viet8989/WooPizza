@@ -23,5 +23,6 @@ global $product;
 ?>
 
 <?php if ( $price_html = $product->get_price_html() ) : ?>
-	<span class="price">From <?php echo $price_html; ?><a style="float: right">+</a></span>
+	<span class="price" style="float: left">From <?php echo $price_html; ?></span>
+	<?php do_action( 'flatsome_product_box_actions' ); ?>
 <?php endif; ?>

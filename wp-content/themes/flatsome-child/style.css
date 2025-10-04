@@ -265,7 +265,7 @@ blockquote, dl, figure, form, ol, p, pre, ul {
 }
 
 .product-small.box {
-	padding: 10px;
+	padding: 10px 10px 25px;
 } 
 
 .product-small.box:hover {
@@ -276,12 +276,12 @@ blockquote, dl, figure, form, ol, p, pre, ul {
 	position: relative;
 }
 
-.product-small.box:hover .box-image img {
-	transform: scale(1.2)
+.product-small.box:hover .price-wrapper {
+	color: #f00;
 }
 
-.product-title {
-	margin-bottom: 5px !important;
+.product-small.box:hover .box-image img {
+	transform: scale(1.2)
 }
 
 .product-title a {
@@ -305,9 +305,15 @@ blockquote, dl, figure, form, ol, p, pre, ul {
 .price-wrapper span {
 	color: #a3a3a3;
 	font-size: 18px;
-	font-weight: 500
+	font-weight: 700;
+	padding-top: 22px;
 }
 
+.price-wrapper a.quick-view {
+	position: absolute;
+	top: 0;
+	right: 0;
+}
 
 .cart .minus , .cart .plus {
 	border-radius: 100%;
@@ -340,14 +346,6 @@ blockquote, dl, figure, form, ol, p, pre, ul {
 	min-width: 400px;
 	float: right;
 }
-
-
-
-
-
-
-
-
 
 .cart-collaterals {
 	background: #fff;

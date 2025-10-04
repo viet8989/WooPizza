@@ -59,9 +59,6 @@ if ( $out_of_stock ) $classes[] = 'out-of-stock';
 			<div class="image-tools is-small hide-for-small bottom left show-on-hover">
 				<?php do_action( 'flatsome_product_box_tools_bottom' ); ?>
 			</div>
-			<div class="image-tools <?php echo flatsome_product_box_actions_class(); ?>">
-				<?php do_action( 'flatsome_product_box_actions' ); ?>
-			</div>
 			<?php if ( $out_of_stock ) { ?><div class="out-of-stock-label"><?php _e( 'Out of stock', 'woocommerce' ); ?></div><?php } ?>
 		</div>
 
