@@ -334,8 +334,9 @@ blockquote, dl, figure, form, ol, p, pre, ul {
 }
 
 .quantity input[type=number] {
-	border-radius: 100% !important;
-	width: 40px;
+	border-radius: 5px !important;
+	max-width: none;
+	width: 60px;
 	height: 40px;
 	margin: 0 10px;
 }
@@ -343,8 +344,7 @@ blockquote, dl, figure, form, ol, p, pre, ul {
 .cart .single_add_to_cart_button {
 	background-color: #CD0000;
 	color: #fff;
-	min-width: 400px;
-	float: right;
+    border-radius: 5px;
 }
 
 .cart-collaterals {
