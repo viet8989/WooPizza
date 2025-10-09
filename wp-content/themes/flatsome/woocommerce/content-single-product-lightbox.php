@@ -79,11 +79,8 @@ do_action( 'wc_quick_view_before_single_product' );
 							<!-- Pizza Grid -->
 							<div class="pizza-grid">
 								<?php $brands = wp_get_post_terms($product->get_id(), 'product_brand');
-									echo '<script>console.log("A")</script>';
 									if ( ! is_wp_error( $brands ) && ! empty( $brands ) ) {
-										echo '<script>console.log("B")</script>';
 										$first_brand_id = $brands[0]->term_id;
-										echo '<script>console.log("C")</script>';
 										$products_paired = wc_get_products( array(
 											'status' => 'publish',
 											'tax_query' => array(
@@ -94,34 +91,27 @@ do_action( 'wc_quick_view_before_single_product' );
 												),
 											),
 										) );
-										echo '<script>console.log("D")</script>';
 										if ( ! empty( $products_paired ) ) {
-											echo '<script>console.log("E")</script>';
 											foreach ( $products_paired as $prod ) {
-												echo '<script>console.log("F")</script>';
 												if ( $prod->get_id() == $product->get_id() ) {
 													continue; // Skip the current product
 												}
-												echo '<script>console.log("G")</script>';
 												// Display product details
 												$image = wp_get_attachment_image_src( get_post_thumbnail_id( $prod->get_id() ), 'single-post-thumbnail' );
-												echo '<script>console.log("H")</script>';
 												$image_url = $image ? $image[0] : wc_placeholder_img_src( 'woocommerce_single' );
-												echo '<script>console.log("K")</script>';
 												$name = $prod->get_name();
-												echo '<script>console.log("L")</script>';
-												$price = $prod->get_price_html();
-												echo '<script>console.log("M")</script>';
+												$price_html = $prod->get_price_html();
+												$price = $prod->get_price();
+												echo '<script>console.log("' . wc_price($price) . '")</script>';
 												echo '<div class="pizza-card" onclick="selectPizza(\'' . esc_url( $image_url ) . '\')">
 														<img src="' . esc_url( $image_url ) . '" 
 															alt="' . esc_attr( $name ) . '" 
 															class="pizza-card-img">
 														<div class="pizza-card-info">
 															<div class="pizza-card-title">' . esc_html( $name ) . '</div>
-															<div class="pizza-card-price">' . wp_kses_post( $price ) . '</div>
+															<div class="pizza-card-price">' . wc_price($price/2) . '</div>
 														</div>
 													</div>';	
-												echo '<script>console.log("N")</script>';
 											}	
 										}
 									}
@@ -389,6 +379,11 @@ do_action( 'wc_quick_view_before_single_product' );
         .pizza-card:hover {
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             transform: translateY(-2px);
+            color: #cd0000 !important;
+        }
+
+        .pizza-card:hover .amount{
+            color: #cd0000 !important;
         }
 
         .pizza-card-img {
@@ -408,9 +403,9 @@ do_action( 'wc_quick_view_before_single_product' );
             margin-bottom: 6px;
         }
 
-        .pizza-card-price {
+        .pizza-card-price .amount{
             font-size: 13px;
-            color: #999;
+            color: #a3a3a3;
         }
 
         /* Responsive */
