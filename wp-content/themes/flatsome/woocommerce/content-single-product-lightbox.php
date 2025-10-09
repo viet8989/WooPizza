@@ -1,6 +1,6 @@
 <?php
 /**
- * Quick View.
+ * Quick View Template - Refactored
  *
  * @package          Flatsome/WooCommerce/Templates
  * @flatsome-version 3.16.0
@@ -9,513 +9,786 @@
 defined( 'ABSPATH' ) || exit;
 
 global $post, $product;
+
+// Early validation
+if ( ! $product instanceof WC_Product ) {
+	return;
+}
+
 $product_price = $product->get_price();
-$sub_total = $product_price;
+$product_id    = $product->get_id();
 
 do_action( 'wc_quick_view_before_single_product' );
 ?>
+
 <div class="product-quick-view-container">
 	<div class="row row-collapse mb-0 product" id="product-<?php the_ID(); ?>" <?php post_class(); ?>>
-		<div class="product-gallery large-6 col" style="padding: 0 10px !important;">
+		
+		<!-- Left Column: Product Gallery & Options -->
+		<div class="product-gallery large-6 col qv-left-column">
 			<?php do_action( 'woocommerce_before_single_product_lightbox_summary' ); ?>
 
 			<!-- Custom Options Section -->
-			<div class="product-custom-options" style="margin-top: 20px; background: #fff; border-radius: 8px;">
+			<div class="product-custom-options">
+				
 				<!-- Pizza Size Selection -->
-				<div class="pizza-size-options" style="margin-bottom: 20px;">
-					<div style="display: flex; gap: 10px; margin-bottom: 15px;">
-						<button id="btn-whole" class="size-option active" data-size="whole" style="flex: 1; padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 500;">
-							<img src="/wp-content/uploads/images/pizza-icon-white.png" alt="Whole pizza" style="width: 24px; height: 24px;">
-							<span>Whole pizza</span>
+				<div class="pizza-size-options">
+					<div class="size-button-group">
+						<button id="btn-whole" class="size-option active" data-size="whole" type="button">
+							<img src="<?php echo esc_url( get_site_url() . '/wp-content/uploads/images/pizza-icon-white.png' ); ?>" 
+								 alt="<?php esc_attr_e( 'Whole pizza', 'flatsome' ); ?>" 
+								 class="size-icon">
+							<span><?php esc_html_e( 'Whole pizza', 'flatsome' ); ?></span>
 						</button>
-						<button id="btn-paired" class="size-option" data-size="paired" style="flex: 1; padding: 12px 20px; background: #f5f5f5; color: #333; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 500;">
-							<img src="/wp-content/uploads/images/pizza-icon-black.png" alt="Paired pizza" style="width: 24px; height: 24px;">
-							<span>Paired pizza</span>
+						
+						<button id="btn-paired" class="size-option" data-size="paired" type="button">
+							<img src="<?php echo esc_url( get_site_url() . '/wp-content/uploads/images/pizza-icon-black.png' ); ?>" 
+								 alt="<?php esc_attr_e( 'Paired pizza', 'flatsome' ); ?>" 
+								 class="size-icon">
+							<span><?php esc_html_e( 'Paired pizza', 'flatsome' ); ?></span>
 						</button>
-						<button class="size-nav-next" style="padding: 12px 20px; background: #f5f5f5; border: none; border-radius: 8px; cursor: pointer;">
-							<img src="/wp-content/uploads/images/arrow.png" alt="Next" />
+						
+						<button class="size-nav-next" type="button">
+							<img src="<?php echo esc_url( get_site_url() . '/wp-content/uploads/images/arrow.png' ); ?>" 
+								 alt="<?php esc_attr_e( 'Next', 'flatsome' ); ?>">
 						</button>
 					</div>
 
-					<!-- Pizza Image & Description -->
-					<div id="pizza-whole" class="pizza-display" style="text-align: center; margin-bottom: 20px;">
-						<?php if ( has_post_thumbnail() ) :
-							$image_title = esc_attr( get_the_title( get_post_thumbnail_id() ) );
-							$image_link = wp_get_attachment_url( get_post_thumbnail_id() );
-							echo sprintf( '<img src="%s" alt="%s" style="height: auto; border-radius: 3px; margin-bottom: 15px;" />', $image_link, $image_title ); // phpcs:disable WordPress.XSS.EscapeOutput.OutputNotEscaped
-						else :
-							echo sprintf( '<img src="%s" alt="%s" style="height: auto; border-radius: 3px; margin-bottom: 15px;" />', wc_placeholder_img_src( 'woocommerce_single' ), esc_html__( 'Awaiting product image', 'woocommerce' ) ); // phpcs:disable WordPress.XSS.EscapeOutput.OutputNotEscaped
-						endif;
+					<!-- Whole Pizza Display -->
+					<div id="pizza-whole" class="pizza-display">
+						<?php
+						// Product Image
+						if ( has_post_thumbnail() ) {
+							$image_id    = get_post_thumbnail_id();
+							$image_title = esc_attr( get_the_title( $image_id ) );
+							$image_url   = wp_get_attachment_url( $image_id );
+							printf(
+								'<img src="%s" alt="%s" class="pizza-main-image">',
+								esc_url( $image_url ),
+								esc_attr( $image_title )
+							);
+						} else {
+							printf(
+								'<img src="%s" alt="%s" class="pizza-main-image">',
+								esc_url( wc_placeholder_img_src( 'woocommerce_single' ) ),
+								esc_attr__( 'Awaiting product image', 'woocommerce' )
+							);
+						}
 						?>
-						<h3 style="font-size: 24px; margin: 0 0 10px 0; font-weight: bold;"><?php the_title(); ?></h3>
-						<p style="color: #666; font-size: 14px; line-height: 1.6; margin-bottom: 10px;">
-							<?php echo $product->get_short_description(); 
-							echo '<br />';  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-							$product_link = get_permalink( $product->get_id() );
-							echo '<a href="' . esc_url( $product_link ) . '" class="read-more-toggle" style="color: #dc0000; cursor: pointer; font-weight: 500;">Read more</a>';  // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						
+						<h3 class="pizza-title"><?php the_title(); ?></h3>
+						
+						<div class="pizza-description">
+							<?php
+							echo wp_kses_post( $product->get_short_description() );
 							?>
+							<br>
+							<a href="<?php echo esc_url( get_permalink( $product_id ) ); ?>" 
+							   class="read-more-toggle">
+								<?php esc_html_e( 'Read more', 'flatsome' ); ?>
+							</a>
+						</div>
+						
+						<p class="pizza-size-info">
+							<strong><?php esc_html_e( 'Pizza size: 18 Inch (8 slides)', 'flatsome' ); ?></strong>
 						</p>
-						<p style="font-size: 14px; color: #333; margin: 0;"><strong>Pizza size: 18 Inch (8 slide)</strong></p>
 					</div>
-					<!-- Paired Pizza -->
-					<div id="pizza-paired" class="container">
-						<!-- Header with Half Pizza and Choose Section -->
+
+					<!-- Paired Pizza Display -->
+					<div id="pizza-paired" class="paired-pizza-container">
 						<div class="header-section">
 							<div class="half-pizza-container">
-								<img id="left-pizza" class="left-pizza-img" src="https://terravivapizza.com/wp-content/uploads/images/pizza2.png">
+								<img id="left-pizza" 
+									 class="left-pizza-img" 
+									 src="<?php echo esc_url( get_site_url() . '/wp-content/uploads/images/pizza2.png' ); ?>"
+									 alt="<?php esc_attr_e( 'Left pizza half', 'flatsome' ); ?>">
 							</div>
 							<div class="half-pizza-container">
-								<img id="right-pizza" class="icon-row" src="https://terravivapizza.com/wp-content/uploads/images/half_pizza.png">
-								<!-- <img class="right-pizza-img" src="https://terravivapizza.com/wp-content/uploads/images/pizza2.png"> -->
+								<img id="right-pizza" 
+									 class="icon-row" 
+									 src="<?php echo esc_url( get_site_url() . '/wp-content/uploads/images/half_pizza.png' ); ?>"
+									 alt="<?php esc_attr_e( 'Right pizza half', 'flatsome' ); ?>">
 							</div>
 						</div>
 
-						<!-- Title -->
 						<div class="title-section">
-							<h1>Terravia Pizza with</h1>
+							<h1><?php printf( esc_html__( '%s with', 'flatsome' ), esc_html( get_the_title() ) ); ?></h1>
 						</div>
 
-						<div style="height: 300px; overflow: auto;">
-							<!-- Pizza Grid -->
+						<div class="pizza-grid-wrapper">
 							<div class="pizza-grid">
-								<?php $brands = wp_get_post_terms($product->get_id(), 'product_brand');
-									if ( ! is_wp_error( $brands ) && ! empty( $brands ) ) {
-										$first_brand_id = $brands[0]->term_id;
-										$products_paired = wc_get_products( array(
-											'status' => 'publish',
-											'tax_query' => array(
-												array(
-													'taxonomy' => 'product_brand',
-													'field'    => 'term_id',
-													'terms'    => $first_brand_id,
-												),
+								<?php
+								// Get paired products from the same brand
+								$brands = wp_get_post_terms( $product_id, 'product_brand' );
+								
+								if ( ! is_wp_error( $brands ) && ! empty( $brands ) ) {
+									$first_brand_id = $brands[0]->term_id;
+									
+									$paired_products = wc_get_products( array(
+										'status'    => 'publish',
+										'limit'     => -1,
+										'tax_query' => array(
+											array(
+												'taxonomy' => 'product_brand',
+												'field'    => 'term_id',
+												'terms'    => $first_brand_id,
 											),
-										) );
-										if ( ! empty( $products_paired ) ) {
-											foreach ( $products_paired as $prod ) {
-												if ( $prod->get_id() == $product->get_id() ) {
-													continue; // Skip the current product
-												}
-												// Display product details
-												$image = wp_get_attachment_image_src( get_post_thumbnail_id( $prod->get_id() ), 'single-post-thumbnail' );
-												$image_url = $image ? $image[0] : wc_placeholder_img_src( 'woocommerce_single' );
-												$name = $prod->get_name();
-												$price_html = $prod->get_price_html();
-												$price = $prod->get_price();
-												echo '<script>console.log("' . wc_price($price) . '")</script>';
-												echo '<div class="pizza-card" onclick="selectPizza(\'' . esc_url( $image_url ) . '\')">
-														<img src="' . esc_url( $image_url ) . '" 
-															alt="' . esc_attr( $name ) . '" 
-															class="pizza-card-img">
-														<div class="pizza-card-info">
-															<div class="pizza-card-title">' . esc_html( $name ) . '</div>
-															<div class="pizza-card-price">' . wc_price($price/2) . '</div>
-														</div>
-													</div>';	
-											}	
+										),
+									) );
+
+									if ( ! empty( $paired_products ) ) {
+										foreach ( $paired_products as $paired_prod ) {
+											// Skip current product
+											if ( $paired_prod->get_id() === $product_id ) {
+												continue;
+											}
+
+											$paired_id       = $paired_prod->get_id();
+											$paired_name     = $paired_prod->get_name();
+											$paired_price    = $paired_prod->get_price();
+											$paired_image_id = get_post_thumbnail_id( $paired_id );
+											$paired_image    = wp_get_attachment_image_src( $paired_image_id, 'medium' );
+											$paired_image_url = $paired_image ? $paired_image[0] : wc_placeholder_img_src();
+
+											// Half price for paired option
+											$half_price = $paired_price / 2;
+											?>
+											<div class="pizza-card" 
+												 data-product-id="<?php echo esc_attr( $paired_id ); ?>"
+												 data-product-name="<?php echo esc_attr( $paired_name ); ?>"
+												 data-product-price="<?php echo esc_attr( $half_price ); ?>"
+												 data-product-image="<?php echo esc_url( $paired_image_url ); ?>">
+												<img src="<?php echo esc_url( $paired_image_url ); ?>" 
+													 alt="<?php echo esc_attr( $paired_name ); ?>" 
+													 class="pizza-card-img">
+												<div class="pizza-card-info">
+													<div class="pizza-card-title"><?php echo esc_html( $paired_name ); ?></div>
+													<div class="pizza-card-price"><?php echo wp_kses_post( wc_price( $half_price ) ); ?></div>
+												</div>
+											</div>
+											<?php
 										}
 									}
+								}
 								?>
 							</div>
 						</div>
 					</div>
-				<script>
-					function selectPizza(src_image) {
-						// Update the main pizza image
-						const mainImage = document.getElementById('right-pizza');
-						mainImage.src = src_image;
-						mainImage.className = 'right-pizza-img';
-					}
-				</script>
 				</div>
 			</div>
 		</div>
 
-		<div class="product-info summary large-6 col entry-summary" style="padding: 0 20px !important; font-size:90%;">
+		<!-- Right Column: Product Info & Extras -->
+		<div class="product-info summary large-6 col entry-summary qv-right-column">
+			
 			<!-- Extra Cheese Options -->
-			<div class="extra-options-section" style="margin: 20px 0;">
-				<h4 style="font-size: 16px; font-weight: bold; margin-bottom: 12px;">Add extra chees:</h4>
-				   <!-- Dynamically load all products with category_id = 25 and display as checkboxes -->
-				   <div class="checkbox-group">
-					   <?php
-					   $args = array(
-						   'post_type' => 'product',
-						   'posts_per_page' => -1,
-						   'tax_query' => array(
-							   array(
-								   'taxonomy' => 'product_cat',
-								   'field'    => 'term_id',
-								   'terms'    => 25,
-							   ),
-						   ),
-					   );
-					   $cheese_query = new WP_Query($args);
-					   if ( $cheese_query->have_posts() ) :
-						   while ( $cheese_query->have_posts() ) : $cheese_query->the_post();
-							   global $product;
-							   $price = $product->get_price();
-							   $name = get_the_title();
-					   ?>
-					   <label style="display: flex; align-items: center; padding: 0 20px 0; cursor: pointer; margin: 0 !important;">
-							<input type="checkbox" value="<?php echo esc_attr($name); ?> (<?php echo esc_attr($price); ?>)" class="topping-checkbox" data-price="<?php echo esc_attr($price); ?>" data-product-id="<?php echo esc_attr(get_the_ID()); ?>" style="margin-right: 10px; width: 18px; height: 18px;">
-						   	<span style='padding-bottom: 10px;'><?php echo esc_html($name); ?> (<?php echo wc_price($price); ?>)</span>
-					   </label>
-					   <?php
-						   endwhile;
-						   wp_reset_postdata();
-					   else :
-					   ?>
-					   <span>No cheese options found.</span>
-					   <?php endif; ?>
-				   </div>
+			<?php
+			$cheese_products = get_products_by_category( 25 );
+			if ( ! empty( $cheese_products ) ) :
+			?>
+			<div class="extra-options-section">
+				<h4 class="extra-options-title"><?php esc_html_e( 'Add extra cheese:', 'flatsome' ); ?></h4>
+				<div class="checkbox-group">
+					<?php foreach ( $cheese_products as $cheese ) : ?>
+						<label class="topping-label">
+							<input type="checkbox" 
+								   value="<?php echo esc_attr( $cheese['name'] ); ?>" 
+								   class="topping-checkbox" 
+								   data-price="<?php echo esc_attr( $cheese['price'] ); ?>" 
+								   data-product-id="<?php echo esc_attr( $cheese['id'] ); ?>">
+							<span class="topping-text">
+								<?php echo esc_html( $cheese['name'] ); ?> 
+								(<?php echo wp_kses_post( wc_price( $cheese['price'] ) ); ?>)
+							</span>
+						</label>
+					<?php endforeach; ?>
+				</div>
 			</div>
-
-			<!-- <button class="toggle-more" style="margin-top: 10px; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 5px; color: #666;">
-				<img src="https://terravivapizza.com/wp-content/uploads/images/arrow-down.png" alt="Show more" style="width: 16px; height: 16px;">
-			</button> -->
+			<?php endif; ?>
 
 			<!-- Extra Cold Cuts Options -->
+			<?php
+			$coldcuts_products = get_products_by_category( 26 );
+			if ( ! empty( $coldcuts_products ) ) :
+			?>
 			<div class="extra-options-section">
-				<h4 style="font-size: 16px; font-weight: bold; margin-bottom: 12px;">Add extra cold cuts:</h4>
-				<!-- Dynamically load all products with category_id = 26 and display as checkboxes -->
-				   <div class="checkbox-group">
-					   <?php
-					   $args = array(
-						   'post_type' => 'product',
-						   'posts_per_page' => -1,
-						   'tax_query' => array(
-							   array(
-								   'taxonomy' => 'product_cat',
-								   'field'    => 'term_id',
-								   'terms'    => 26,
-							   ),
-						   ),
-					   );
-					   $cheese_query = new WP_Query($args);
-					   if ( $cheese_query->have_posts() ) :
-						   while ( $cheese_query->have_posts() ) : $cheese_query->the_post();
-							   global $product;
-							   $price = $product->get_price();
-							   $name = get_the_title();
-					   ?>
-					   <label style="display: flex; align-items: center; padding: 0 20px 0; cursor: pointer; margin: 0 !important;">
-						   <input type="checkbox" value="<?php echo esc_attr($name); ?> (<?php echo esc_attr($price); ?>)" class="topping-checkbox" data-price="<?php echo esc_attr($price); ?>" data-product-id="<?php echo esc_attr(get_the_ID()); ?>" style="margin-right: 10px; width: 18px; height: 18px;">
-						   <span style='padding-bottom: 10px;'><?php echo esc_html($name); ?> (<?php echo wc_price($price); ?>)</span>
-					   </label>
-					   <?php
-						   endwhile;
-						   wp_reset_postdata();
-					   else :
-					   ?>
-					   <span>No cheese options found.</span>
-					   <?php endif; ?>
-				   </div>
+				<h4 class="extra-options-title"><?php esc_html_e( 'Add extra cold cuts:', 'flatsome' ); ?></h4>
+				<div class="checkbox-group">
+					<?php foreach ( $coldcuts_products as $coldcut ) : ?>
+						<label class="topping-label">
+							<input type="checkbox" 
+								   value="<?php echo esc_attr( $coldcut['name'] ); ?>" 
+								   class="topping-checkbox" 
+								   data-price="<?php echo esc_attr( $coldcut['price'] ); ?>" 
+								   data-product-id="<?php echo esc_attr( $coldcut['id'] ); ?>">
+							<span class="topping-text">
+								<?php echo esc_html( $coldcut['name'] ); ?> 
+								(<?php echo wp_kses_post( wc_price( $coldcut['price'] ) ); ?>)
+							</span>
+						</label>
+					<?php endforeach; ?>
+				</div>
 			</div>
+			<?php endif; ?>
 		</div>
 	</div>
 </div>
-<div style="height: 100px; margin-top: 20px;"></div> <!-- Spacer to avoid content being hidden behind fixed bottom bar -->	
-	<div class="large-6 col" style="bottom: 20px; left: 50%; transform: translateX(-50%); width: calc(100% - 40px);">
-		<!-- Subtotal -->
-		<div style="background: #ffc107; padding: 12px 20px; border-radius: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
-			<span style="font-weight: 500;">Subtotal:</span>
-			<span id='sub_total' style="font-size: 20px; font-weight: bold; color: #dc0000;"><?php echo wc_price($sub_total); ?></span>
-		</div>
-		<!-- Quantity & Add to Cart -->
-		<?php do_action( 'woocommerce_single_product_lightbox_summary' ); ?>
-	</div>
-</div> <!-- Spacer to avoid content being hidden behind fixed bottom bar -->
 
+<!-- Bottom Fixed Bar -->
+<div class="qv-spacer"></div>
+<div class="qv-bottom-bar">
+	<!-- Subtotal -->
+	<div class="qv-subtotal">
+		<span><?php esc_html_e( 'Subtotal:', 'flatsome' ); ?></span>
+		<span id="sub_total" class="qv-subtotal-amount" data-base-price="<?php echo esc_attr( $product_price ); ?>">
+			<?php echo wp_kses_post( wc_price( $product_price ) ); ?>
+		</span>
+	</div>
+	
+	<!-- Quantity & Add to Cart -->
+	<?php do_action( 'woocommerce_single_product_lightbox_summary' ); ?>
+</div>
+
+<?php
+/**
+ * Helper function to get products by category
+ *
+ * @param int $category_id Category term ID
+ * @return array Array of product data
+ */
+function get_products_by_category( $category_id ) {
+	$args = array(
+		'post_type'      => 'product',
+		'posts_per_page' => -1,
+		'post_status'    => 'publish',
+		'tax_query'      => array(
+			array(
+				'taxonomy' => 'product_cat',
+				'field'    => 'term_id',
+				'terms'    => absint( $category_id ),
+			),
+		),
+	);
+
+	$query    = new WP_Query( $args );
+	$products = array();
+
+	if ( $query->have_posts() ) {
+		while ( $query->have_posts() ) {
+			$query->the_post();
+			global $product;
+			
+			if ( $product instanceof WC_Product ) {
+				$products[] = array(
+					'id'    => get_the_ID(),
+					'name'  => get_the_title(),
+					'price' => $product->get_price(),
+				);
+			}
+		}
+		wp_reset_postdata();
+	}
+
+	return $products;
+}
+
+do_action( 'wc_quick_view_after_single_product' );
+?>
 
 <style>
-	.size-option.active {
-		background: #dc0000 !important;
-		color: white !important;
+/* ===========================
+   Quick View Styles
+   =========================== */
+
+/* Column Layout */
+.qv-left-column {
+	padding: 0 10px !important;
+}
+
+.qv-right-column {
+	padding: 0 20px !important;
+	font-size: 90%;
+}
+
+/* Product Custom Options */
+.product-custom-options {
+	margin-top: 20px;
+	background: #fff;
+	border-radius: 8px;
+}
+
+.pizza-size-options {
+	margin-bottom: 20px;
+}
+
+/* Size Button Group */
+.size-button-group {
+	display: flex;
+	gap: 10px;
+	margin-bottom: 15px;
+}
+
+.size-option {
+	flex: 1;
+	padding: 12px 20px;
+	background: #f5f5f5;
+	color: #333;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	font-weight: 500;
+	transition: all 0.3s ease;
+}
+
+.size-option.active {
+	background: #dc0000 !important;
+	color: white !important;
+}
+
+.size-option.active .size-icon {
+	filter: brightness(0) invert(1);
+}
+
+.size-option:hover {
+	opacity: 0.9;
+}
+
+.size-icon {
+	width: 24px;
+	height: 24px;
+}
+
+.size-nav-next {
+	padding: 12px 20px;
+	background: #f5f5f5;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: background 0.3s ease;
+}
+
+.size-nav-next:hover {
+	background: #e0e0e0;
+}
+
+/* Whole Pizza Display */
+.pizza-display {
+	text-align: center;
+	margin-bottom: 20px;
+}
+
+.pizza-main-image {
+	max-width: 100%;
+	height: auto;
+	border-radius: 3px;
+	margin-bottom: 15px;
+}
+
+.pizza-title {
+	font-size: 24px;
+	margin: 0 0 10px 0;
+	font-weight: bold;
+}
+
+.pizza-description {
+	color: #666;
+	font-size: 14px;
+	line-height: 1.6;
+	margin-bottom: 10px;
+}
+
+.read-more-toggle {
+	color: #dc0000;
+	cursor: pointer;
+	font-weight: 500;
+	text-decoration: none;
+}
+
+.read-more-toggle:hover {
+	text-decoration: underline;
+}
+
+.pizza-size-info {
+	font-size: 14px;
+	color: #333;
+	margin: 0;
+}
+
+/* Paired Pizza Container */
+.paired-pizza-container {
+	display: none;
+}
+
+/* Header Section */
+.header-section {
+	display: flex;
+	height: 200px;
+}
+
+.half-pizza-container {
+	width: 50%;
+	overflow: hidden;
+	background: #f0f0f0;
+}
+
+.left-pizza-img {
+	width: 200%;
+	height: 100%;
+	object-fit: cover;
+	object-position: right center;
+	transform: translateX(50%);
+	display: block;
+}
+
+.right-pizza-img {
+	width: 200%;
+	height: 100%;
+	object-fit: cover;
+	object-position: left center;
+	transform: translateX(-50%);
+	display: block;
+}
+
+.icon-row {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* Title Section */
+.title-section {
+	padding: 24px 20px 20px;
+}
+
+.title-section h1 {
+	font-size: 28px;
+	font-weight: 700;
+	color: #000;
+	margin: 0;
+}
+
+/* Pizza Grid */
+.pizza-grid-wrapper {
+	height: 300px;
+	overflow: auto;
+}
+
+.pizza-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 16px;
+	padding: 0 20px 30px;
+}
+
+.pizza-card {
+	background: white;
+	border-radius: 8px;
+	overflow: hidden;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	transition: all 0.3s ease;
+	cursor: pointer;
+}
+
+.pizza-card:hover {
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	transform: translateY(-2px);
+}
+
+.pizza-card.selected {
+	border: 2px solid #dc0000;
+	box-shadow: 0 4px 12px rgba(220, 0, 0, 0.3);
+}
+
+.pizza-card-img {
+	width: 100%;
+	aspect-ratio: 1;
+	object-fit: cover;
+}
+
+.pizza-card-info {
+	padding: 12px;
+}
+
+.pizza-card-title {
+	font-size: 15px;
+	font-weight: 600;
+	color: #000;
+	margin-bottom: 6px;
+}
+
+.pizza-card:hover .pizza-card-title {
+	color: #cd0000;
+}
+
+.pizza-card-price {
+	font-size: 13px;
+	color: #a3a3a3;
+}
+
+.pizza-card:hover .pizza-card-price .amount {
+	color: #cd0000;
+}
+
+/* Extra Options Section */
+.extra-options-section {
+	margin: 20px 0;
+}
+
+.extra-options-title {
+	font-size: 16px;
+	font-weight: bold;
+	margin-bottom: 12px;
+}
+
+.checkbox-group {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.topping-label {
+	display: flex;
+	align-items: center;
+	padding: 8px 20px;
+	cursor: pointer;
+	margin: 0 !important;
+	transition: background 0.2s ease;
+	border-radius: 4px;
+}
+
+.topping-label:hover {
+	background: #f9f9f9;
+}
+
+.topping-checkbox {
+	margin-right: 10px;
+	width: 18px;
+	height: 18px;
+	cursor: pointer;
+}
+
+.topping-text {
+	padding-bottom: 2px;
+}
+
+/* Bottom Bar */
+.qv-spacer {
+	height: 100px;
+	margin-top: 20px;
+}
+
+.qv-bottom-bar {
+	position: fixed;
+	bottom: 20px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: calc(100% - 40px);
+	max-width: 600px;
+	z-index: 999;
+}
+
+.qv-subtotal {
+	background: #ffc107;
+	padding: 12px 20px;
+	border-radius: 8px;
+	margin-bottom: 15px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.qv-subtotal-amount {
+	font-size: 20px;
+	font-weight: bold;
+	color: #dc0000;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+	.header-section {
+		height: 160px;
 	}
-	.size-option.active img {
-		filter: brightness(0) invert(1);
-	}
-	.size-option:hover {
-		opacity: 0.9;
-	}
-	.add-to-cart-btn:hover {
-		background: #b30000;
-	}
-	.qty-minus:hover, .qty-plus:hover {
-		background: #f5f5f5 !important;
+
+	.title-section h1 {
+		font-size: 24px;
 	}
 
-	.container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-        }
+	.pizza-grid {
+		gap: 12px;
+		padding: 0 16px 24px;
+	}
+	
+	.qv-bottom-bar {
+		width: calc(100% - 20px);
+	}
+}
 
-        /* Header Section */
-        .header-section {
-            display: flex;
-            height: 200px;
-        }
-
-        .half-pizza-container {
-            width: 50%;
-            overflow: hidden;
-            background: #f0f0f0;
-        }
-
-		.left-pizza-img {
-			width: 200%;
-			height: 100%;
-			object-fit: cover;
-			object-position: right center;
-			transform: translateX(50%);
-			display: block;
-		}
-
-		.right-pizza-img {
-			width: 200%;
-			height: 100%;
-			object-fit: cover;
-			object-position: left center;
-			transform: translateX(-50%);
-			display: block;
-		}
-
-        .choose-section {
-            width: 50%;
-            background: #a67c52;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            color: white;
-            padding: 20px;
-        }
-
-        .icon-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .sound-icon, .plus-icon {
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .sound-icon:hover, .plus-icon:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.05);
-        }
-
-        .sound-icon::before {
-            content: '';
-            width: 0;
-            height: 0;
-            border-left: 8px solid white;
-            border-top: 5px solid transparent;
-            border-bottom: 5px solid transparent;
-            margin-right: -4px;
-        }
-
-        .sound-icon::after {
-            content: '';
-            width: 6px;
-            height: 10px;
-            border: 2px solid white;
-            border-left: none;
-            border-radius: 0 3px 3px 0;
-        }
-
-        .plus-icon {
-            font-size: 24px;
-            font-weight: bold;
-            color: white;
-            line-height: 1;
-        }
-
-        .choose-text {
-            text-align: center;
-            font-size: 15px;
-            line-height: 1.4;
-        }
-
-        /* Title Section */
-        .title-section {
-            padding: 24px 20px 20px;
-        }
-
-        .title-section h1 {
-            font-size: 28px;
-            font-weight: 700;
-            color: #000;
-        }
-
-        /* Pizza Grid */
-        .pizza-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            padding: 0 20px 30px;
-        }
-
-        .pizza-card {
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-
-        .pizza-card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            transform: translateY(-2px);
-            color: #cd0000 !important;
-        }
-
-        .pizza-card:hover .amount{
-            color: #cd0000 !important;
-        }
-
-        .pizza-card-img {
-            width: 100%;
-            aspect-ratio: 1;
-            object-fit: cover;
-        }
-
-        .pizza-card-info {
-            padding: 12px;
-        }
-
-        .pizza-card-title {
-            font-size: 15px;
-            font-weight: 600;
-            color: #000;
-            margin-bottom: 6px;
-        }
-
-        .pizza-card-price .amount{
-            font-size: 13px;
-            color: #a3a3a3;
-        }
-
-        /* Responsive */
-        @media (max-width: 600px) {
-            .header-section {
-                height: 160px;
-            }
-
-            .title-section h1 {
-                font-size: 24px;
-            }
-
-            .pizza-grid {
-                gap: 12px;
-                padding: 0 16px 24px;
-            }
-        }
+@media (max-width: 480px) {
+	.size-button-group {
+		flex-wrap: wrap;
+	}
+	
+	.size-nav-next {
+		width: 100%;
+	}
+}
 </style>
 
 <script>
-	jQuery(document).ready(function($) {
-		$('#btn-whole').on('click', function() {
-			$('#btn-paired').removeClass('active');
-			$(this).addClass('active');
-			$('#pizza-whole').show();
-			$('#pizza-paired').hide();
-		});
+(function($) {
+	'use strict';
 
-		$('#btn-paired').on('click', function() {
-			$('#btn-whole').removeClass('active');
-			$(this).addClass('active');
-			$('#pizza-whole').hide();
-			$('#pizza-paired').show();
-		});
-
-		// Quantity controls
-		$('.qty-minus').on('click', function() {
-			var input = $(this).siblings('input[type="number"]');
-			var val = parseInt(input.val());
-			if (val > 1) {
-				input.val(val - 1);
+	$(document).ready(function() {
+		// Configuration
+		const config = {
+			basePrice: parseFloat($('#sub_total').data('base-price')) || 0,
+			currencyFormat: {
+				style: 'currency',
+				currency: 'VND'
 			}
-		});
+		};
 
-		$('.qty-plus').on('click', function() {
-			var input = $(this).siblings('input[type="number"]');
-			var val = parseInt(input.val());
-			input.val(val + 1);
-		});
-
-		// Read more toggle
-		$('.read-more-toggle').on('click', function() {
-			$(this).text($(this).text() === 'Read more' ? 'Read less' : 'Read more');
-		});
-
-		$('#btn-whole').click();
-	});
-</script>
-<script>
-jQuery(document).ready(function($) {
-	// Subtotal calculation for cheese checkboxes
-	var baseSubtotal = <?php echo json_encode((float)$product_price); ?>;
-	function updateSubtotal() {
-		var subtotal = baseSubtotal;
-		$('.topping-checkbox:checked').each(function() {
-			var price = parseFloat($(this).data('price'));
-			if (!isNaN(price)) {
-				subtotal += price;
-			}
-		});
-		// Update the subtotal display
-		var formatted = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(subtotal);
-		$('#sub_total').text(formatted);
-	}
-	$(document).on('change', '.topping-checkbox', updateSubtotal);
-
-	// Add to cart: include selected cheese products
-	$(document).on('click', 'form.cart button[type="submit"], .single_add_to_cart_button', function(e) {
-		console.log('Add to cart clicked');
-		// Gather selected cheese options
-		var cheeseOptions = [];
-		$('.topping-checkbox:checked').each(function() {
-			cheeseOptions.push({
-				name: $(this).val(),
-				price: $(this).data('price'),
-				product_id: $(this).data('product-id')
+		// Size Toggle
+		function initSizeToggle() {
+			$('#btn-whole').on('click', function() {
+				$('.size-option').removeClass('active');
+				$(this).addClass('active');
+				$('#pizza-whole').show();
+				$('#pizza-paired').hide();
 			});
-		});
-		console.log('Selected cheese options:', cheeseOptions);
-		// Add to hidden input or send via AJAX (for AJAX add to cart)
-		// Remove any previous hidden input
-		$('input[name="extra_cheese_options"]').remove();
-		// Add hidden input to the form
-		if (cheeseOptions.length > 0) {
-			var input = $('<input>').attr({
-				type: 'hidden',
-				name: 'extra_cheese_options',
-				value: JSON.stringify(cheeseOptions)
+
+			$('#btn-paired').on('click', function() {
+				$('.size-option').removeClass('active');
+				$(this).addClass('active');
+				$('#pizza-whole').hide();
+				$('#pizza-paired').show();
 			});
-			// Try to append to the closest form
-			var form = $(this).closest('form.cart');
-			if (form.length) {
-				form.append(input);
-			} else {
-				// If no form, append to body (for AJAX handlers)
-				$('body').append(input);
-			}
+
+			// Initialize with whole pizza visible
+			$('#btn-whole').trigger('click');
 		}
-	});
-});
-</script>
 
-<?php do_action( 'wc_quick_view_after_single_product' ); ?>
+		// Pizza Card Selection
+		function initPizzaCardSelection() {
+			$(document).on('click', '.pizza-card', function() {
+				const $card = $(this);
+				const imageUrl = $card.data('product-image');
+				
+				// Toggle selection
+				$card.toggleClass('selected');
+				
+				// Update right pizza image if selected
+				if ($card.hasClass('selected')) {
+					$('#right-pizza')
+						.attr('src', imageUrl)
+						.removeClass('icon-row')
+						.addClass('right-pizza-img');
+				} else {
+					// Reset to default
+					$('#right-pizza')
+						.attr('src', '<?php echo esc_url( get_site_url() . "/wp-content/uploads/images/half_pizza.png" ); ?>')
+						.removeClass('right-pizza-img')
+						.addClass('icon-row');
+				}
+				
+				updateSubtotal();
+			});
+		}
+
+		// Subtotal Calculation
+		function updateSubtotal() {
+			let subtotal = config.basePrice;
+
+			// Add topping prices
+			$('.topping-checkbox:checked').each(function() {
+				const price = parseFloat($(this).data('price'));
+				if (!isNaN(price)) {
+					subtotal += price;
+				}
+			});
+
+			// Add paired pizza price
+			$('.pizza-card.selected').each(function() {
+				const price = parseFloat($(this).data('product-price'));
+				if (!isNaN(price)) {
+					subtotal += price;
+				}
+			});
+
+			// Update display
+			const formatted = new Intl.NumberFormat('vi-VN', config.currencyFormat).format(subtotal);
+			$('#sub_total').text(formatted);
+		}
+
+		// Topping Checkbox Handler
+		function initToppingCheckboxes() {
+			$(document).on('change', '.topping-checkbox', updateSubtotal);
+		}
+
+		// Add to Cart Handler
+		function initAddToCart() {
+			$(document).on('click', 'form.cart button[type="submit"], .single_add_to_cart_button', function(e) {
+				// Gather topping options
+				const toppingOptions = [];
+				$('.topping-checkbox:checked').each(function() {
+					toppingOptions.push({
+						name: $(this).val(),
+						price: $(this).data('price'),
+						product_id: $(this).data('product-id')
+					});
+				});
+
+				// Gather paired products
+				const pairedProducts = [];
+				$('.pizza-card.selected').each(function() {
+					const $card = $(this);
+					pairedProducts.push({
+						product_id: $card.data('product-id'),
+						name: $card.data('product-name'),
+						price: $card.data('product-price'),
+						image: $card.data('product-image')
+					});
+				});
+
+				// Remove existing hidden inputs
+				$('input[name="extra_topping_options"], input[name="paired_products"]').remove();
+
+				// Find the form
+				const $form = $(this).closest('form.cart');
+				const $target = $form.length ? $form : $('body');
+
+				// Add hidden inputs
+				if (toppingOptions.length > 0) {
+					$target.append(
+						$('<input>', {
+							type: 'hidden',
+							name: 'extra_topping_options',
+							value: JSON.stringify(toppingOptions)
+						})
+					);
+				}
+
+				if (pairedProducts.length > 0) {
+					$target.append(
+						$('<input>', {
+							type: 'hidden',
+							name: 'paired_products',
+							value: JSON.stringify(pairedProducts)
+						})
+					);
+				}
+			});
+		}
+
+		// Initialize all handlers
+		initSizeToggle();
+		initPizzaCardSelection();
+		initToppingCheckboxes();
+		initAddToCart();
+	});
+})(jQuery);
+</script>
