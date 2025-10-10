@@ -180,56 +180,156 @@ do_action( 'wc_quick_view_before_single_product' );
 
 		<!-- Right Column: Product Info & Extras -->
 		<div class="product-info summary large-6 col entry-summary qv-right-column">
-			
-			<!-- Extra Cheese Options -->
-			<?php
-			$cheese_products = get_products_by_category( 25 );
-			if ( ! empty( $cheese_products ) ) :
-			?>
-			<div class="extra-options-section">
-				<h4 class="extra-options-title"><?php esc_html_e( 'Add extra cheese:', 'flatsome' ); ?></h4>
-				<div class="checkbox-group">
-					<?php foreach ( $cheese_products as $cheese ) : ?>
-						<label class="topping-label">
-							<input type="checkbox" 
-								   value="<?php echo esc_attr( $cheese['name'] ); ?>" 
-								   class="topping-checkbox" 
-								   data-price="<?php echo esc_attr( $cheese['price'] ); ?>" 
-								   data-product-id="<?php echo esc_attr( $cheese['id'] ); ?>">
-							<span class="topping-text">
-								<?php echo esc_html( $cheese['name'] ); ?> 
-								(<?php echo wp_kses_post( wc_price( $cheese['price'] ) ); ?>)
-							</span>
-						</label>
-					<?php endforeach; ?>
-				</div>
-			</div>
-			<?php endif; ?>
 
-			<!-- Extra Cold Cuts Options -->
-			<?php
-			$coldcuts_products = get_products_by_category( 26 );
-			if ( ! empty( $coldcuts_products ) ) :
-			?>
-			<div class="extra-options-section">
-				<h4 class="extra-options-title"><?php esc_html_e( 'Add extra cold cuts:', 'flatsome' ); ?></h4>
-				<div class="checkbox-group">
-					<?php foreach ( $coldcuts_products as $coldcut ) : ?>
-						<label class="topping-label">
-							<input type="checkbox" 
-								   value="<?php echo esc_attr( $coldcut['name'] ); ?>" 
-								   class="topping-checkbox" 
-								   data-price="<?php echo esc_attr( $coldcut['price'] ); ?>" 
-								   data-product-id="<?php echo esc_attr( $coldcut['id'] ); ?>">
-							<span class="topping-text">
-								<?php echo esc_html( $coldcut['name'] ); ?> 
-								(<?php echo wp_kses_post( wc_price( $coldcut['price'] ) ); ?>)
-							</span>
-						</label>
-					<?php endforeach; ?>
+			<!-- Whole Pizza Toppings -->
+			<div id="whole-pizza-toppings" class="toppings-container">
+				<!-- Extra Cheese Options -->
+				<?php
+				$cheese_products = get_products_by_category( 25 );
+				if ( ! empty( $cheese_products ) ) :
+				?>
+				<div class="extra-options-section">
+					<h4 class="extra-options-title"><?php esc_html_e( 'Add extra cheese:', 'flatsome' ); ?></h4>
+					<div class="checkbox-group">
+						<?php foreach ( $cheese_products as $cheese ) : ?>
+							<label class="topping-label">
+								<input type="checkbox"
+									   value="<?php echo esc_attr( $cheese['name'] ); ?>"
+									   class="topping-checkbox whole-topping"
+									   data-price="<?php echo esc_attr( $cheese['price'] ); ?>"
+									   data-product-id="<?php echo esc_attr( $cheese['id'] ); ?>">
+								<span class="topping-text">
+									<?php echo esc_html( $cheese['name'] ); ?>
+									(<?php echo wp_kses_post( wc_price( $cheese['price'] ) ); ?>)
+								</span>
+							</label>
+						<?php endforeach; ?>
+					</div>
+				</div>
+				<?php endif; ?>
+
+				<!-- Extra Cold Cuts Options -->
+				<?php
+				$coldcuts_products = get_products_by_category( 26 );
+				if ( ! empty( $coldcuts_products ) ) :
+				?>
+				<div class="extra-options-section">
+					<h4 class="extra-options-title"><?php esc_html_e( 'Add extra cold cuts:', 'flatsome' ); ?></h4>
+					<div class="checkbox-group">
+						<?php foreach ( $coldcuts_products as $coldcut ) : ?>
+							<label class="topping-label">
+								<input type="checkbox"
+									   value="<?php echo esc_attr( $coldcut['name'] ); ?>"
+									   class="topping-checkbox whole-topping"
+									   data-price="<?php echo esc_attr( $coldcut['price'] ); ?>"
+									   data-product-id="<?php echo esc_attr( $coldcut['id'] ); ?>">
+								<span class="topping-text">
+									<?php echo esc_html( $coldcut['name'] ); ?>
+									(<?php echo wp_kses_post( wc_price( $coldcut['price'] ) ); ?>)
+								</span>
+							</label>
+						<?php endforeach; ?>
+					</div>
+				</div>
+				<?php endif; ?>
+			</div>
+
+			<!-- Paired Pizza Toppings -->
+			<div id="paired-pizza-toppings" class="toppings-container" style="display: none;">
+				<!-- Left Half Toppings -->
+				<div class="half-toppings-section">
+					<h3 class="half-title"><?php esc_html_e( 'Left Half Toppings:', 'flatsome' ); ?></h3>
+
+					<?php if ( ! empty( $cheese_products ) ) : ?>
+					<div class="extra-options-section">
+						<h4 class="extra-options-title"><?php esc_html_e( 'Add extra cheese:', 'flatsome' ); ?></h4>
+						<div class="checkbox-group">
+							<?php foreach ( $cheese_products as $cheese ) : ?>
+								<label class="topping-label">
+									<input type="checkbox"
+										   value="<?php echo esc_attr( $cheese['name'] ); ?>"
+										   class="topping-checkbox left-topping"
+										   data-price="<?php echo esc_attr( $cheese['price'] ); ?>"
+										   data-product-id="<?php echo esc_attr( $cheese['id'] ); ?>">
+									<span class="topping-text">
+										<?php echo esc_html( $cheese['name'] ); ?>
+										(<?php echo wp_kses_post( wc_price( $cheese['price'] ) ); ?>)
+									</span>
+								</label>
+							<?php endforeach; ?>
+						</div>
+					</div>
+					<?php endif; ?>
+
+					<?php if ( ! empty( $coldcuts_products ) ) : ?>
+					<div class="extra-options-section">
+						<h4 class="extra-options-title"><?php esc_html_e( 'Add extra cold cuts:', 'flatsome' ); ?></h4>
+						<div class="checkbox-group">
+							<?php foreach ( $coldcuts_products as $coldcut ) : ?>
+								<label class="topping-label">
+									<input type="checkbox"
+										   value="<?php echo esc_attr( $coldcut['name'] ); ?>"
+										   class="topping-checkbox left-topping"
+										   data-price="<?php echo esc_attr( $coldcut['price'] ); ?>"
+										   data-product-id="<?php echo esc_attr( $coldcut['id'] ); ?>">
+									<span class="topping-text">
+										<?php echo esc_html( $coldcut['name'] ); ?>
+										(<?php echo wp_kses_post( wc_price( $coldcut['price'] ) ); ?>)
+									</span>
+								</label>
+							<?php endforeach; ?>
+						</div>
+					</div>
+					<?php endif; ?>
+				</div>
+
+				<!-- Right Half Toppings -->
+				<div class="half-toppings-section">
+					<h3 class="half-title"><?php esc_html_e( 'Right Half Toppings:', 'flatsome' ); ?></h3>
+
+					<?php if ( ! empty( $cheese_products ) ) : ?>
+					<div class="extra-options-section">
+						<h4 class="extra-options-title"><?php esc_html_e( 'Add extra cheese:', 'flatsome' ); ?></h4>
+						<div class="checkbox-group">
+							<?php foreach ( $cheese_products as $cheese ) : ?>
+								<label class="topping-label">
+									<input type="checkbox"
+										   value="<?php echo esc_attr( $cheese['name'] ); ?>"
+										   class="topping-checkbox right-topping"
+										   data-price="<?php echo esc_attr( $cheese['price'] ); ?>"
+										   data-product-id="<?php echo esc_attr( $cheese['id'] ); ?>">
+									<span class="topping-text">
+										<?php echo esc_html( $cheese['name'] ); ?>
+										(<?php echo wp_kses_post( wc_price( $cheese['price'] ) ); ?>)
+									</span>
+								</label>
+							<?php endforeach; ?>
+						</div>
+					</div>
+					<?php endif; ?>
+
+					<?php if ( ! empty( $coldcuts_products ) ) : ?>
+					<div class="extra-options-section">
+						<h4 class="extra-options-title"><?php esc_html_e( 'Add extra cold cuts:', 'flatsome' ); ?></h4>
+						<div class="checkbox-group">
+							<?php foreach ( $coldcuts_products as $coldcut ) : ?>
+								<label class="topping-label">
+									<input type="checkbox"
+										   value="<?php echo esc_attr( $coldcut['name'] ); ?>"
+										   class="topping-checkbox right-topping"
+										   data-price="<?php echo esc_attr( $coldcut['price'] ); ?>"
+										   data-product-id="<?php echo esc_attr( $coldcut['id'] ); ?>">
+									<span class="topping-text">
+										<?php echo esc_html( $coldcut['name'] ); ?>
+										(<?php echo wp_kses_post( wc_price( $coldcut['price'] ) ); ?>)
+									</span>
+								</label>
+							<?php endforeach; ?>
+						</div>
+					</div>
+					<?php endif; ?>
 				</div>
 			</div>
-			<?php endif; ?>
 		</div>
 	</div>
 </div>
@@ -528,6 +628,30 @@ do_action( 'wc_quick_view_after_single_product' );
 	color: #cd0000;
 }
 
+/* Toppings Container */
+.toppings-container {
+	padding: 10px 0;
+}
+
+/* Half Toppings Sections */
+.half-toppings-section {
+	margin-bottom: 25px;
+	padding-bottom: 20px;
+	border-bottom: 1px solid #e0e0e0;
+}
+
+.half-toppings-section:last-child {
+	border-bottom: none;
+}
+
+.half-title {
+	font-size: 18px;
+	font-weight: bold;
+	margin-bottom: 15px;
+	color: #dc0000;
+	text-transform: uppercase;
+}
+
 /* Extra Options Section */
 .extra-options-section {
 	margin: 20px 0;
@@ -659,6 +783,13 @@ do_action( 'wc_quick_view_after_single_product' );
 				$('#pizza-whole').show();
 				$('#pizza-paired').hide();
 
+				// Show whole toppings, hide paired toppings
+				$('#whole-pizza-toppings').show();
+				$('#paired-pizza-toppings').hide();
+
+				// Clear all topping selections
+				$('.topping-checkbox').prop('checked', false);
+
 				// Reset paired selections when switching to whole
 				selectedLeftHalf = null;
 				selectedRightHalf = null;
@@ -667,6 +798,8 @@ do_action( 'wc_quick_view_after_single_product' );
 					.attr('src', '<?php echo esc_url( get_site_url() . "/wp-content/uploads/images/half_pizza.png" ); ?>')
 					.removeClass('right-pizza-img')
 					.addClass('icon-row');
+
+				updateSubtotal();
 			});
 
 			$('#btn-paired').on('click', function() {
@@ -674,6 +807,13 @@ do_action( 'wc_quick_view_after_single_product' );
 				$(this).addClass('active');
 				$('#pizza-whole').hide();
 				$('#pizza-paired').show();
+
+				// Show paired toppings, hide whole toppings
+				$('#whole-pizza-toppings').hide();
+				$('#paired-pizza-toppings').show();
+
+				// Clear all topping selections
+				$('.topping-checkbox').prop('checked', false);
 
 				// Set main product as left half when switching to paired mode
 				const mainProductId = <?php echo esc_js( $product_id ); ?>;
@@ -761,18 +901,34 @@ do_action( 'wc_quick_view_after_single_product' );
 				if (selectedRightHalf && selectedRightHalf.price) {
 					subtotal += selectedRightHalf.price;
 				}
+
+				// Add left half toppings
+				$('.left-topping:checked').each(function() {
+					const price = parseFloat($(this).data('price'));
+					if (!isNaN(price)) {
+						subtotal += price;
+					}
+				});
+
+				// Add right half toppings
+				$('.right-topping:checked').each(function() {
+					const price = parseFloat($(this).data('price'));
+					if (!isNaN(price)) {
+						subtotal += price;
+					}
+				});
 			} else {
 				// Whole pizza mode - use base price
 				subtotal = config.basePrice;
-			}
 
-			// Add topping prices
-			$('.topping-checkbox:checked').each(function() {
-				const price = parseFloat($(this).data('price'));
-				if (!isNaN(price)) {
-					subtotal += price;
-				}
-			});
+				// Add whole pizza toppings
+				$('.whole-topping:checked').each(function() {
+					const price = parseFloat($(this).data('price'));
+					if (!isNaN(price)) {
+						subtotal += price;
+					}
+				});
+			}
 
 			// Update display
 			const formatted = new Intl.NumberFormat('vi-VN', config.currencyFormat).format(subtotal);
@@ -787,37 +943,61 @@ do_action( 'wc_quick_view_after_single_product' );
 		// Add to Cart Handler
 		function initAddToCart() {
 			$(document).on('click', 'form.cart button[type="submit"], .single_add_to_cart_button', function(e) {
-				// Gather topping options (cheese + cold cuts)
-				const toppingOptions = [];
-				$('.topping-checkbox:checked').each(function() {
-					const $checkbox = $(this);
-					toppingOptions.push({
-						name: $checkbox.val(),
-						price: parseFloat($checkbox.data('price')),
-						product_id: parseInt($checkbox.data('product-id'))
-					});
-				});
-
 				// Check if paired mode is active
 				const isPairedMode = $('#btn-paired').hasClass('active');
 				let pizzaHalves = null;
+				let leftToppings = [];
+				let rightToppings = [];
+				let wholeToppings = [];
 
 				if (isPairedMode) {
-					// Paired mode: send both halves
+					// Paired mode: gather left and right toppings separately
+					$('.left-topping:checked').each(function() {
+						const $checkbox = $(this);
+						leftToppings.push({
+							name: $checkbox.val(),
+							price: parseFloat($checkbox.data('price')),
+							product_id: parseInt($checkbox.data('product-id'))
+						});
+					});
+
+					$('.right-topping:checked').each(function() {
+						const $checkbox = $(this);
+						rightToppings.push({
+							name: $checkbox.val(),
+							price: parseFloat($checkbox.data('price')),
+							product_id: parseInt($checkbox.data('product-id'))
+						});
+					});
+
+					// Add toppings to halves
 					pizzaHalves = {
-						left_half: selectedLeftHalf,
-						right_half: selectedRightHalf
+						left_half: {
+							...selectedLeftHalf,
+							toppings: leftToppings
+						},
+						right_half: {
+							...selectedRightHalf,
+							toppings: rightToppings
+						}
 					};
 
-					console.log('Paired mode - Left half:', selectedLeftHalf);
-					console.log('Paired mode - Right half:', selectedRightHalf);
+					console.log('Paired mode - Left half:', pizzaHalves.left_half);
+					console.log('Paired mode - Right half:', pizzaHalves.right_half);
 				} else {
-					console.log('Whole pizza mode');
-				}
+					// Whole pizza mode: gather whole pizza toppings
+					$('.whole-topping:checked').each(function() {
+						const $checkbox = $(this);
+						wholeToppings.push({
+							name: $checkbox.val(),
+							price: parseFloat($checkbox.data('price')),
+							product_id: parseInt($checkbox.data('product-id'))
+						});
+					});
 
-				// Debug log
-				console.log('Toppings to add:', toppingOptions);
-				console.log('Pizza halves:', pizzaHalves);
+					console.log('Whole pizza mode');
+					console.log('Whole pizza toppings:', wholeToppings);
+				}
 
 				// Remove existing hidden inputs to avoid duplicates
 				$('input[name="extra_topping_options"]').remove();
@@ -829,24 +1009,26 @@ do_action( 'wc_quick_view_after_single_product' );
 				const $target = $form.length ? $form : $('body');
 
 				// Add hidden inputs with JSON data
-				if (toppingOptions.length > 0) {
+				if (!isPairedMode && wholeToppings.length > 0) {
+					// Whole pizza toppings
 					$('<input>')
 						.attr('type', 'hidden')
 						.attr('name', 'extra_topping_options')
-						.val(JSON.stringify(toppingOptions))
+						.val(JSON.stringify(wholeToppings))
 						.appendTo($target);
 
-					console.log('Added topping options input:', JSON.stringify(toppingOptions));
+					console.log('Added whole pizza topping options:', JSON.stringify(wholeToppings));
 				}
 
 				if (pizzaHalves) {
+					// Paired pizza with halves and their toppings
 					$('<input>')
 						.attr('type', 'hidden')
 						.attr('name', 'pizza_halves')
 						.val(JSON.stringify(pizzaHalves))
 						.appendTo($target);
 
-					console.log('Added pizza halves input:', JSON.stringify(pizzaHalves));
+					console.log('Added pizza halves with toppings:', JSON.stringify(pizzaHalves));
 				}
 
 				// Allow form submission to proceed

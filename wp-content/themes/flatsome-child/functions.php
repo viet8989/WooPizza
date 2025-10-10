@@ -52,14 +52,14 @@ function save_custom_pizza_options_to_cart( $cart_item_data, $product_id, $varia
 // Display custom options in cart
 add_filter( 'woocommerce_get_item_data', 'display_custom_pizza_options_in_cart', 10, 2 );
 function display_custom_pizza_options_in_cart( $item_data, $cart_item ) {
-	// Display extra toppings
+	// Display extra toppings (whole pizza)
 	if ( isset( $cart_item['extra_topping_options'] ) && ! empty( $cart_item['extra_topping_options'] ) ) {
 		$topping_names = array();
 
 		foreach ( $cart_item['extra_topping_options'] as $topping ) {
 			if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
 				$topping_names[] = sprintf(
-					'%s (+%s)',
+					'%s %s',
 					esc_html( $topping['name'] ),
 					wc_price( $topping['price'] )
 				);
@@ -68,28 +68,44 @@ function display_custom_pizza_options_in_cart( $item_data, $cart_item ) {
 
 		if ( ! empty( $topping_names ) ) {
 			$item_data[] = array(
-				'key'     => __( 'Extra Toppings', 'flatsome' ),
-				'value'   => implode( ', ', $topping_names ),
+				'key'     => __( 'Add', 'flatsome' ),
+				'value'   => implode( '<br>', $topping_names ),
 				'display' => '',
 			);
 		}
 	}
 
-	// Display pizza halves (new structure)
+	// Display pizza halves (new structure with per-half toppings)
 	if ( isset( $cart_item['pizza_halves'] ) && ! empty( $cart_item['pizza_halves'] ) ) {
 		$halves = $cart_item['pizza_halves'];
 
 		// Display left half
 		if ( isset( $halves['left_half'] ) && ! empty( $halves['left_half'] ) ) {
 			$left = $halves['left_half'];
-			if ( isset( $left['name'] ) && isset( $left['price'] ) ) {
+			if ( isset( $left['name'] ) ) {
+				$left_display = esc_html( $left['name'] );
+
+				// Add left half toppings
+				if ( isset( $left['toppings'] ) && ! empty( $left['toppings'] ) ) {
+					$left_topping_names = array();
+					foreach ( $left['toppings'] as $topping ) {
+						if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
+							$left_topping_names[] = sprintf(
+								'%s %s',
+								esc_html( $topping['name'] ),
+								wc_price( $topping['price'] )
+							);
+						}
+					}
+
+					if ( ! empty( $left_topping_names ) ) {
+						$left_display .= '<br>Add ' . implode( '<br>', $left_topping_names );
+					}
+				}
+
 				$item_data[] = array(
-					'key'     => __( 'Left Half', 'flatsome' ),
-					'value'   => sprintf(
-						'%s (+%s)',
-						esc_html( $left['name'] ),
-						wc_price( $left['price'] )
-					),
+					'key'     => strtoupper( $left['name'] ),
+					'value'   => $left_display,
 					'display' => '',
 				);
 			}
@@ -98,14 +114,30 @@ function display_custom_pizza_options_in_cart( $item_data, $cart_item ) {
 		// Display right half
 		if ( isset( $halves['right_half'] ) && ! empty( $halves['right_half'] ) ) {
 			$right = $halves['right_half'];
-			if ( isset( $right['name'] ) && isset( $right['price'] ) ) {
+			if ( isset( $right['name'] ) ) {
+				$right_display = esc_html( $right['name'] );
+
+				// Add right half toppings
+				if ( isset( $right['toppings'] ) && ! empty( $right['toppings'] ) ) {
+					$right_topping_names = array();
+					foreach ( $right['toppings'] as $topping ) {
+						if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
+							$right_topping_names[] = sprintf(
+								'%s %s',
+								esc_html( $topping['name'] ),
+								wc_price( $topping['price'] )
+							);
+						}
+					}
+
+					if ( ! empty( $right_topping_names ) ) {
+						$right_display .= '<br>Add ' . implode( '<br>', $right_topping_names );
+					}
+				}
+
 				$item_data[] = array(
-					'key'     => __( 'Right Half', 'flatsome' ),
-					'value'   => sprintf(
-						'%s (+%s)',
-						esc_html( $right['name'] ),
-						wc_price( $right['price'] )
-					),
+					'key'     => strtoupper( $right['name'] ),
+					'value'   => $right_display,
 					'display' => '',
 				);
 			}
@@ -147,7 +179,7 @@ function add_custom_pizza_options_price( $cart ) {
 		$new_total_price = 0;
 		$is_paired_mode = false;
 
-		// Check if pizza halves (new structure)
+		// Check if pizza halves (new structure with per-half toppings)
 		if ( isset( $cart_item['pizza_halves'] ) && ! empty( $cart_item['pizza_halves'] ) ) {
 			$is_paired_mode = true;
 			$halves = $cart_item['pizza_halves'];
@@ -157,16 +189,34 @@ function add_custom_pizza_options_price( $cart ) {
 				$new_total_price += floatval( $halves['left_half']['price'] );
 			}
 
+			// Add left half toppings
+			if ( isset( $halves['left_half']['toppings'] ) && ! empty( $halves['left_half']['toppings'] ) ) {
+				foreach ( $halves['left_half']['toppings'] as $topping ) {
+					if ( isset( $topping['price'] ) ) {
+						$new_total_price += floatval( $topping['price'] );
+					}
+				}
+			}
+
 			// Add right half price
 			if ( isset( $halves['right_half']['price'] ) ) {
 				$new_total_price += floatval( $halves['right_half']['price'] );
+			}
+
+			// Add right half toppings
+			if ( isset( $halves['right_half']['toppings'] ) && ! empty( $halves['right_half']['toppings'] ) ) {
+				foreach ( $halves['right_half']['toppings'] as $topping ) {
+					if ( isset( $topping['price'] ) ) {
+						$new_total_price += floatval( $topping['price'] );
+					}
+				}
 			}
 		} else {
 			// Whole pizza mode - start with base price
 			$new_total_price = $cart_item['data']->get_price();
 		}
 
-		// Add topping prices
+		// Add topping prices (whole pizza toppings)
 		if ( isset( $cart_item['extra_topping_options'] ) && ! empty( $cart_item['extra_topping_options'] ) ) {
 			foreach ( $cart_item['extra_topping_options'] as $topping ) {
 				if ( isset( $topping['price'] ) ) {
@@ -194,7 +244,7 @@ function add_custom_pizza_options_price( $cart ) {
 // Save custom options to order items
 add_action( 'woocommerce_checkout_create_order_line_item', 'save_custom_pizza_options_to_order_items', 10, 4 );
 function save_custom_pizza_options_to_order_items( $item, $cart_item_key, $values, $order ) {
-	// Save topping options
+	// Save topping options (whole pizza)
 	if ( isset( $values['extra_topping_options'] ) && ! empty( $values['extra_topping_options'] ) ) {
 		$item->add_meta_data( '_extra_topping_options', $values['extra_topping_options'], true );
 
@@ -203,7 +253,7 @@ function save_custom_pizza_options_to_order_items( $item, $cart_item_key, $value
 		foreach ( $values['extra_topping_options'] as $topping ) {
 			if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
 				$topping_names[] = sprintf(
-					'%s (+%s)',
+					'%s %s',
 					esc_html( $topping['name'] ),
 					wc_price( $topping['price'] )
 				);
@@ -211,11 +261,11 @@ function save_custom_pizza_options_to_order_items( $item, $cart_item_key, $value
 		}
 
 		if ( ! empty( $topping_names ) ) {
-			$item->add_meta_data( __( 'Extra Toppings', 'flatsome' ), implode( ', ', $topping_names ), true );
+			$item->add_meta_data( __( 'Add', 'flatsome' ), implode( "\n", $topping_names ), true );
 		}
 	}
 
-	// Save pizza halves (new structure)
+	// Save pizza halves (new structure with per-half toppings)
 	if ( isset( $values['pizza_halves'] ) && ! empty( $values['pizza_halves'] ) ) {
 		$item->add_meta_data( '_pizza_halves', $values['pizza_halves'], true );
 
@@ -224,32 +274,56 @@ function save_custom_pizza_options_to_order_items( $item, $cart_item_key, $value
 		// Display left half
 		if ( isset( $halves['left_half'] ) && ! empty( $halves['left_half'] ) ) {
 			$left = $halves['left_half'];
-			if ( isset( $left['name'] ) && isset( $left['price'] ) ) {
-				$item->add_meta_data(
-					__( 'Left Half', 'flatsome' ),
-					sprintf(
-						'%s (+%s)',
-						esc_html( $left['name'] ),
-						wc_price( $left['price'] )
-					),
-					true
-				);
+			if ( isset( $left['name'] ) ) {
+				$left_display = esc_html( $left['name'] );
+
+				// Add left half toppings
+				if ( isset( $left['toppings'] ) && ! empty( $left['toppings'] ) ) {
+					$left_topping_names = array();
+					foreach ( $left['toppings'] as $topping ) {
+						if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
+							$left_topping_names[] = sprintf(
+								'%s %s',
+								esc_html( $topping['name'] ),
+								wc_price( $topping['price'] )
+							);
+						}
+					}
+
+					if ( ! empty( $left_topping_names ) ) {
+						$left_display .= "\nAdd " . implode( "\n", $left_topping_names );
+					}
+				}
+
+				$item->add_meta_data( strtoupper( $left['name'] ), $left_display, true );
 			}
 		}
 
 		// Display right half
 		if ( isset( $halves['right_half'] ) && ! empty( $halves['right_half'] ) ) {
 			$right = $halves['right_half'];
-			if ( isset( $right['name'] ) && isset( $right['price'] ) ) {
-				$item->add_meta_data(
-					__( 'Right Half', 'flatsome' ),
-					sprintf(
-						'%s (+%s)',
-						esc_html( $right['name'] ),
-						wc_price( $right['price'] )
-					),
-					true
-				);
+			if ( isset( $right['name'] ) ) {
+				$right_display = esc_html( $right['name'] );
+
+				// Add right half toppings
+				if ( isset( $right['toppings'] ) && ! empty( $right['toppings'] ) ) {
+					$right_topping_names = array();
+					foreach ( $right['toppings'] as $topping ) {
+						if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
+							$right_topping_names[] = sprintf(
+								'%s %s',
+								esc_html( $topping['name'] ),
+								wc_price( $topping['price'] )
+							);
+						}
+					}
+
+					if ( ! empty( $right_topping_names ) ) {
+						$right_display .= "\nAdd " . implode( "\n", $right_topping_names );
+					}
+				}
+
+				$item->add_meta_data( strtoupper( $right['name'] ), $right_display, true );
 			}
 		}
 	}
