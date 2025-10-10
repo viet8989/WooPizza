@@ -238,11 +238,15 @@ do_action( 'wc_quick_view_before_single_product' );
 			<div id="paired-pizza-toppings" class="toppings-container" style="display: none;">
 				<!-- Left Half Toppings -->
 				<div class="half-toppings-section">
-					<h3 class="half-title"><?php esc_html_e( 'Left Half Toppings:', 'flatsome' ); ?></h3>
+					<h3 class="half-title half-title-toggle" data-target="left-toppings-content">
+						<?php esc_html_e( 'Left Half Toppings:', 'flatsome' ); ?>
+						<span class="toggle-icon">▼</span>
+					</h3>
 
-					<?php if ( ! empty( $cheese_products ) ) : ?>
-					<div class="extra-options-section">
-						<h4 class="extra-options-title"><?php esc_html_e( 'Add extra cheese:', 'flatsome' ); ?></h4>
+					<div id="left-toppings-content" class="half-toppings-content">
+						<?php if ( ! empty( $cheese_products ) ) : ?>
+						<div class="extra-options-section">
+							<h4 class="extra-options-title"><?php esc_html_e( 'Add extra cheese:', 'flatsome' ); ?></h4>
 						<div class="checkbox-group">
 							<?php foreach ( $cheese_products as $cheese ) : ?>
 								<label class="topping-label">
@@ -281,13 +285,18 @@ do_action( 'wc_quick_view_before_single_product' );
 						</div>
 					</div>
 					<?php endif; ?>
+					</div>
 				</div>
 
 				<!-- Right Half Toppings -->
 				<div class="half-toppings-section">
-					<h3 class="half-title"><?php esc_html_e( 'Right Half Toppings:', 'flatsome' ); ?></h3>
+					<h3 class="half-title half-title-toggle" data-target="right-toppings-content">
+						<?php esc_html_e( 'Right Half Toppings:', 'flatsome' ); ?>
+						<span class="toggle-icon">▼</span>
+					</h3>
 
-					<?php if ( ! empty( $cheese_products ) ) : ?>
+					<div id="right-toppings-content" class="half-toppings-content">
+						<?php if ( ! empty( $cheese_products ) ) : ?>
 					<div class="extra-options-section">
 						<h4 class="extra-options-title"><?php esc_html_e( 'Add extra cheese:', 'flatsome' ); ?></h4>
 						<div class="checkbox-group">
@@ -328,6 +337,7 @@ do_action( 'wc_quick_view_before_single_product' );
 						</div>
 					</div>
 					<?php endif; ?>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -650,6 +660,41 @@ do_action( 'wc_quick_view_after_single_product' );
 	margin-bottom: 15px;
 	color: #dc0000;
 	text-transform: uppercase;
+}
+
+.half-title-toggle {
+	cursor: pointer;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	user-select: none;
+	transition: color 0.3s ease;
+}
+
+.half-title-toggle:hover {
+	color: #a30000;
+}
+
+.toggle-icon {
+	font-size: 14px;
+	transition: transform 0.3s ease;
+	display: inline-block;
+}
+
+.half-title-toggle.collapsed .toggle-icon {
+	transform: rotate(-90deg);
+}
+
+.half-toppings-content {
+	max-height: 1000px;
+	overflow: hidden;
+	transition: max-height 0.4s ease, opacity 0.3s ease;
+	opacity: 1;
+}
+
+.half-toppings-content.collapsed {
+	max-height: 0;
+	opacity: 0;
 }
 
 /* Extra Options Section */
@@ -1036,11 +1081,25 @@ do_action( 'wc_quick_view_after_single_product' );
 			});
 		}
 
+		// Toggle Half Toppings Sections
+		function initToppingsToggle() {
+			$(document).on('click', '.half-title-toggle', function() {
+				const $title = $(this);
+				const targetId = $title.data('target');
+				const $content = $('#' + targetId);
+
+				// Toggle collapsed class
+				$title.toggleClass('collapsed');
+				$content.toggleClass('collapsed');
+			});
+		}
+
 		// Initialize all handlers
 		initSizeToggle();
 		initPizzaCardSelection();
 		initToppingCheckboxes();
 		initAddToCart();
+		initToppingsToggle();
 	});
 })(jQuery);
 </script>
