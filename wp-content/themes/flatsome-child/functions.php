@@ -46,6 +46,12 @@ function save_custom_pizza_options_to_cart( $cart_item_data, $product_id, $varia
 		}
 	}
 
+	// Handle special request
+	if ( isset( $_POST['special_request'] ) && ! empty( trim( $_POST['special_request'] ) ) ) {
+		$special_request = sanitize_textarea_field( $_POST['special_request'] );
+		$cart_item_data['special_request'] = $special_request;
+	}
+
 	return $cart_item_data;
 }
 
@@ -159,6 +165,15 @@ function display_custom_pizza_options_in_cart( $item_data, $cart_item ) {
 				);
 			}
 		}
+	}
+
+	// Display special request
+	if ( isset( $cart_item['special_request'] ) && ! empty( $cart_item['special_request'] ) ) {
+		$item_data[] = array(
+			'key'     => __( 'Special Request', 'flatsome' ),
+			'value'   => esc_html( $cart_item['special_request'] ),
+			'display' => '',
+		);
 	}
 
 	return $item_data;
@@ -347,6 +362,12 @@ function save_custom_pizza_options_to_order_items( $item, $cart_item_key, $value
 			}
 		}
 	}
+
+	// Save special request
+	if ( isset( $values['special_request'] ) && ! empty( $values['special_request'] ) ) {
+		$item->add_meta_data( '_special_request', $values['special_request'], true );
+		$item->add_meta_data( __( 'Special Request', 'flatsome' ), esc_html( $values['special_request'] ), true );
+	}
 }
 
 // Display custom options in admin order
@@ -363,7 +384,7 @@ function customize_pizza_options_meta_key( $display_key, $meta, $item ) {
 add_filter( 'woocommerce_add_cart_item', 'make_pizza_cart_items_unique', 10, 2 );
 function make_pizza_cart_items_unique( $cart_item, $cart_item_key ) {
 	// Generate unique key based on custom options
-	if ( isset( $cart_item['extra_topping_options'] ) || isset( $cart_item['pizza_halves'] ) || isset( $cart_item['paired_products'] ) ) {
+	if ( isset( $cart_item['extra_topping_options'] ) || isset( $cart_item['pizza_halves'] ) || isset( $cart_item['paired_products'] ) || isset( $cart_item['special_request'] ) ) {
 		$unique_key = md5( serialize( $cart_item ) );
 		$cart_item['unique_key'] = $unique_key;
 	}

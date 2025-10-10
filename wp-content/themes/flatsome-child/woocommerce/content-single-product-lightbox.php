@@ -188,6 +188,7 @@ do_action( 'wc_quick_view_before_single_product' );
 				$cheese_products = get_products_by_category( 25 );
 				if ( ! empty( $cheese_products ) ) :
 				?>
+				<h3 style="color: #cd0000; text-align: center;">Whole Pizza Upgrade</h3>
 				<div class="extra-options-section">
 					<h4 class="extra-options-title"><?php esc_html_e( 'Add extra cheese:', 'flatsome' ); ?></h4>
 					<div class="checkbox-group">
@@ -337,11 +338,17 @@ do_action( 'wc_quick_view_before_single_product' );
 				</div>
 			</div>
 
-			<div class="extra-options-section">
-				<h4 class="extra-options-title"><?php esc_html_e( 'Special request', 'flatsome' ); ?></h4>
-				<div class="checkbox-group">
-					<textarea id="special-request" name="special_request" rows="3" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;" placeholder="<?php esc_attr_e( 'Enter any special requests here...', 'flatsome' ); ?>"></textarea>	
-				</div>
+			<!-- Special Request Section -->
+			<div class="extra-options-section special-request-section">
+				<h4 class="extra-options-title"><?php esc_html_e( 'Special Request:', 'flatsome' ); ?></h4>
+				<textarea
+					id="special-request"
+					name="special_request"
+					class="special-request-textarea"
+					placeholder="<?php esc_attr_e( 'Add any special instructions here...', 'flatsome' ); ?>"
+					rows="3"
+					maxlength="500"></textarea>
+				<span class="special-request-counter">0/500</span>
 			</div>
 		</div>
 	</div>
@@ -747,6 +754,38 @@ do_action( 'wc_quick_view_after_single_product' );
 	padding-top: 5px;
 }
 
+/* Special Request Section */
+.special-request-section {
+	margin-top: 25px;
+	padding-top: 20px;
+	border-top: 2px solid #e0e0e0;
+}
+
+.special-request-textarea {
+	width: 100%;
+	padding: 12px;
+	border: 1px solid #ddd;
+	border-radius: 6px;
+	font-size: 14px;
+	font-family: inherit;
+	resize: vertical;
+	transition: border-color 0.3s ease;
+}
+
+.special-request-textarea:focus {
+	outline: none;
+	border-color: #dc0000;
+	box-shadow: 0 0 0 1px rgba(220, 0, 0, 0.1);
+}
+
+.special-request-counter {
+	display: block;
+	text-align: right;
+	font-size: 12px;
+	color: #999;
+	margin-top: 5px;
+}
+
 /* Bottom Bar */
 .qv-spacer {
 	height: 100px;
@@ -1052,10 +1091,14 @@ do_action( 'wc_quick_view_after_single_product' );
 					console.log('Whole pizza toppings:', wholeToppings);
 				}
 
+				// Get special request text
+				const specialRequest = $('#special-request').val().trim();
+
 				// Remove existing hidden inputs to avoid duplicates
 				$('input[name="extra_topping_options"]').remove();
 				$('input[name="pizza_halves"]').remove();
 				$('input[name="paired_products"]').remove(); // Keep for backward compatibility
+				$('input[name="special_request"]').remove();
 
 				// Find the form
 				const $form = $(this).closest('form.cart');
@@ -1084,6 +1127,17 @@ do_action( 'wc_quick_view_after_single_product' );
 					console.log('Added pizza halves with toppings:', JSON.stringify(pizzaHalves));
 				}
 
+				// Add special request if provided
+				if (specialRequest) {
+					$('<input>')
+						.attr('type', 'hidden')
+						.attr('name', 'special_request')
+						.val(specialRequest)
+						.appendTo($target);
+
+					console.log('Added special request:', specialRequest);
+				}
+
 				// Allow form submission to proceed
 				console.log('Form submission proceeding...');
 			});
@@ -1105,12 +1159,22 @@ do_action( 'wc_quick_view_after_single_product' );
 			});
 		}
 
+		// Special Request Character Counter
+		function initSpecialRequestCounter() {
+			$(document).on('input', '#special-request', function() {
+				const length = $(this).val().length;
+				const maxLength = $(this).attr('maxlength');
+				$('.special-request-counter').text(length + '/' + maxLength);
+			});
+		}
+
 		// Initialize all handlers
 		initSizeToggle();
 		initPizzaCardSelection();
 		initToppingCheckboxes();
 		initAddToCart();
 		initToppingTabs();
+		initSpecialRequestCounter();
 	});
 })(jQuery);
 </script>
