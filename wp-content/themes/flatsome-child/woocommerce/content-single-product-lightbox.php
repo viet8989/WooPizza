@@ -101,13 +101,13 @@ do_action( 'wc_quick_view_before_single_product' );
 								<img id="left-pizza" 
 									 class="left-pizza-img" 
 									 src="<?php echo esc_url( get_site_url() . '/wp-content/uploads/images/pizza2.png' ); ?>"
-									 alt="<?php esc_attr_e( 'Left pizza half', 'flatsome' ); ?>">
+									 alt="<?php esc_attr_e( 'Left Pizza Upgrade', 'flatsome' ); ?>">
 							</div>
 							<div class="half-pizza-container">
 								<img id="right-pizza" 
 									 class="icon-row" 
 									 src="<?php echo esc_url( get_site_url() . '/wp-content/uploads/images/half_pizza.png' ); ?>"
-									 alt="<?php esc_attr_e( 'Right pizza half', 'flatsome' ); ?>">
+									 alt="<?php esc_attr_e( 'Right Pizza Upgrade', 'flatsome' ); ?>">
 							</div>
 						</div>
 
@@ -236,14 +236,18 @@ do_action( 'wc_quick_view_before_single_product' );
 
 			<!-- Paired Pizza Toppings -->
 			<div id="paired-pizza-toppings" class="toppings-container" style="display: none;">
-				<!-- Left Half Toppings -->
-				<div class="half-toppings-section">
-					<h3 class="half-title half-title-toggle" data-target="left-toppings-content">
-						<?php esc_html_e( 'Left Half Toppings:', 'flatsome' ); ?>
-						<span class="toggle-icon">▼</span>
-					</h3>
+				<!-- Topping Tabs -->
+				<div class="topping-tabs">
+					<button type="button" class="topping-tab active" data-tab="left-toppings">
+						<?php esc_html_e( 'Left Pizza Upgrade', 'flatsome' ); ?>
+					</button>
+					<button type="button" class="topping-tab" data-tab="right-toppings">
+						<?php esc_html_e( 'Right Pizza Upgrade', 'flatsome' ); ?>
+					</button>
+				</div>
 
-					<div id="left-toppings-content" class="half-toppings-content">
+				<!-- Left Half Toppings -->
+				<div id="left-toppings" class="half-toppings-section tab-content active">
 						<?php if ( ! empty( $cheese_products ) ) : ?>
 						<div class="extra-options-section">
 							<h4 class="extra-options-title"><?php esc_html_e( 'Add extra cheese:', 'flatsome' ); ?></h4>
@@ -285,18 +289,11 @@ do_action( 'wc_quick_view_before_single_product' );
 						</div>
 					</div>
 					<?php endif; ?>
-					</div>
 				</div>
 
 				<!-- Right Half Toppings -->
-				<div class="half-toppings-section">
-					<h3 class="half-title half-title-toggle" data-target="right-toppings-content">
-						<?php esc_html_e( 'Right Half Toppings:', 'flatsome' ); ?>
-						<span class="toggle-icon">▼</span>
-					</h3>
-
-					<div id="right-toppings-content" class="half-toppings-content">
-						<?php if ( ! empty( $cheese_products ) ) : ?>
+				<div id="right-toppings" class="half-toppings-section tab-content">
+					<?php if ( ! empty( $cheese_products ) ) : ?>
 					<div class="extra-options-section">
 						<h4 class="extra-options-title"><?php esc_html_e( 'Add extra cheese:', 'flatsome' ); ?></h4>
 						<div class="checkbox-group">
@@ -337,7 +334,13 @@ do_action( 'wc_quick_view_before_single_product' );
 						</div>
 					</div>
 					<?php endif; ?>
-					</div>
+				</div>
+			</div>
+
+			<div class="extra-options-section">
+				<h4 class="extra-options-title"><?php esc_html_e( 'Special request', 'flatsome' ); ?></h4>
+				<div class="checkbox-group">
+					<textarea id="special-request" name="special_request" rows="3" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc;" placeholder="<?php esc_attr_e( 'Enter any special requests here...', 'flatsome' ); ?>"></textarea>	
 				</div>
 			</div>
 		</div>
@@ -430,7 +433,7 @@ do_action( 'wc_quick_view_after_single_product' );
 .size-button-group {
 	display: flex;
 	gap: 10px;
-	margin-bottom: 15px;
+	margin: 10px;
 }
 
 .size-option {
@@ -538,6 +541,8 @@ do_action( 'wc_quick_view_after_single_product' );
 	width: 50%;
 	overflow: hidden;
 	background: #f0f0f0;
+	display: flex;
+	align-items: center;
 }
 
 .left-pizza-img {
@@ -559,9 +564,7 @@ do_action( 'wc_quick_view_after_single_product' );
 }
 
 .icon-row {
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
+	margin-left: 80px;
 }
 
 /* Title Section */
@@ -643,63 +646,68 @@ do_action( 'wc_quick_view_after_single_product' );
 	padding: 10px 0;
 }
 
+/* Topping Tabs */
+.topping-tabs {
+	display: flex;
+	gap: 10px;
+}
+
+.topping-tab {
+	flex: 1;
+	padding: 12px 20px;
+	background: transparent;
+	border: none;
+	border-bottom: 3px solid transparent;
+	font-size: 12px;
+	font-weight: 600;
+	color: #666;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	position: relative;
+	bottom: -2px;
+}
+
+.topping-tab:hover {
+	color: #dc0000;
+	background: #f9f9f9;
+}
+
+.topping-tab.active {
+	color: #dc0000;
+	border-bottom-color: #dc0000;
+	background: transparent;
+}
+
+/* Tab Content */
+.tab-content {
+	display: none;
+	animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+	display: block;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
 /* Half Toppings Sections */
 .half-toppings-section {
-	margin-bottom: 25px;
-	padding-bottom: 20px;
-	border-bottom: 1px solid #e0e0e0;
-}
-
-.half-toppings-section:last-child {
-	border-bottom: none;
-}
-
-.half-title {
-	font-size: 18px;
-	font-weight: bold;
-	margin-bottom: 15px;
-	color: #dc0000;
-	text-transform: uppercase;
-}
-
-.half-title-toggle {
-	cursor: pointer;
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	user-select: none;
-	transition: color 0.3s ease;
-}
-
-.half-title-toggle:hover {
-	color: #a30000;
-}
-
-.toggle-icon {
-	font-size: 14px;
-	transition: transform 0.3s ease;
-	display: inline-block;
-}
-
-.half-title-toggle.collapsed .toggle-icon {
-	transform: rotate(-90deg);
-}
-
-.half-toppings-content {
-	max-height: 1000px;
-	overflow: hidden;
-	transition: max-height 0.4s ease, opacity 0.3s ease;
-	opacity: 1;
-}
-
-.half-toppings-content.collapsed {
-	max-height: 0;
-	opacity: 0;
+	padding: 10px 10px;
 }
 
 /* Extra Options Section */
 .extra-options-section {
 	margin: 20px 0;
+	padding: 0 20px;
 }
 
 .extra-options-title {
@@ -717,7 +725,7 @@ do_action( 'wc_quick_view_after_single_product' );
 .topping-label {
 	display: flex;
 	align-items: center;
-	padding: 8px 20px;
+	padding: 0px 20px;
 	cursor: pointer;
 	margin: 0 !important;
 	transition: background 0.2s ease;
@@ -729,14 +737,14 @@ do_action( 'wc_quick_view_after_single_product' );
 }
 
 .topping-checkbox {
-	margin-right: 10px;
+	margin-bottom: 0px !important;
 	width: 18px;
 	height: 18px;
 	cursor: pointer;
 }
 
 .topping-text {
-	padding-bottom: 2px;
+	padding-top: 5px;
 }
 
 /* Bottom Bar */
@@ -747,7 +755,7 @@ do_action( 'wc_quick_view_after_single_product' );
 
 .qv-bottom-bar {
 	position: fixed;
-	bottom: 20px;
+	bottom: 0;
 	left: 50%;
 	transform: translateX(-50%);
 	width: calc(100% - 40px);
@@ -771,12 +779,12 @@ do_action( 'wc_quick_view_after_single_product' );
 	color: #dc0000;
 }
 
+.cart {
+	margin: 0;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
-	.header-section {
-		height: 160px;
-	}
-
 	.title-section h1 {
 		font-size: 24px;
 	}
@@ -1081,16 +1089,19 @@ do_action( 'wc_quick_view_after_single_product' );
 			});
 		}
 
-		// Toggle Half Toppings Sections
-		function initToppingsToggle() {
-			$(document).on('click', '.half-title-toggle', function() {
-				const $title = $(this);
-				const targetId = $title.data('target');
-				const $content = $('#' + targetId);
+		// Topping Tabs Handler
+		function initToppingTabs() {
+			$(document).on('click', '.topping-tab', function() {
+				const $tab = $(this);
+				const tabId = $tab.data('tab');
 
-				// Toggle collapsed class
-				$title.toggleClass('collapsed');
-				$content.toggleClass('collapsed');
+				// Remove active class from all tabs and contents
+				$('.topping-tab').removeClass('active');
+				$('.tab-content').removeClass('active');
+
+				// Add active class to clicked tab and corresponding content
+				$tab.addClass('active');
+				$('#' + tabId).addClass('active');
 			});
 		}
 
@@ -1099,7 +1110,7 @@ do_action( 'wc_quick_view_after_single_product' );
 		initPizzaCardSelection();
 		initToppingCheckboxes();
 		initAddToCart();
-		initToppingsToggle();
+		initToppingTabs();
 	});
 })(jQuery);
 </script>

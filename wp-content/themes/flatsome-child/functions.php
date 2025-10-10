@@ -9,7 +9,7 @@ add_action('wp_enqueue_scripts', 'enqueue_custom_js');
 
 add_filter('woocommerce_currency_symbol', function ($currency_symbol, $currency) {
     if ($currency === 'VND') {
-        $currency_symbol = 'VND'; // Đổi từ ₫ sang VND
+        $currency_symbol = '₫'; // Đổi từ ₫ sang VND
     }
     return $currency_symbol;
 }, 10, 2);
