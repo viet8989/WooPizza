@@ -22,16 +22,25 @@ function save_custom_pizza_options_to_cart( $cart_item_data, $product_id, $varia
 	// Handle extra topping options (cheese + cold cuts)
 	if ( isset( $_POST['extra_topping_options'] ) && ! empty( $_POST['extra_topping_options'] ) ) {
 		$topping_options = json_decode( stripslashes( $_POST['extra_topping_options'] ), true );
-		
+
 		if ( is_array( $topping_options ) && ! empty( $topping_options ) ) {
 			$cart_item_data['extra_topping_options'] = $topping_options;
 		}
 	}
 
-	// Handle paired products
+	// Handle pizza halves (new structure)
+	if ( isset( $_POST['pizza_halves'] ) && ! empty( $_POST['pizza_halves'] ) ) {
+		$pizza_halves = json_decode( stripslashes( $_POST['pizza_halves'] ), true );
+
+		if ( is_array( $pizza_halves ) && ! empty( $pizza_halves ) ) {
+			$cart_item_data['pizza_halves'] = $pizza_halves;
+		}
+	}
+
+	// Handle paired products (legacy support - backward compatibility)
 	if ( isset( $_POST['paired_products'] ) && ! empty( $_POST['paired_products'] ) ) {
 		$paired_products = json_decode( stripslashes( $_POST['paired_products'] ), true );
-		
+
 		if ( is_array( $paired_products ) && ! empty( $paired_products ) ) {
 			$cart_item_data['paired_products'] = $paired_products;
 		}
@@ -46,7 +55,7 @@ function display_custom_pizza_options_in_cart( $item_data, $cart_item ) {
 	// Display extra toppings
 	if ( isset( $cart_item['extra_topping_options'] ) && ! empty( $cart_item['extra_topping_options'] ) ) {
 		$topping_names = array();
-		
+
 		foreach ( $cart_item['extra_topping_options'] as $topping ) {
 			if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
 				$topping_names[] = sprintf(
@@ -56,7 +65,7 @@ function display_custom_pizza_options_in_cart( $item_data, $cart_item ) {
 				);
 			}
 		}
-		
+
 		if ( ! empty( $topping_names ) ) {
 			$item_data[] = array(
 				'key'     => __( 'Extra Toppings', 'flatsome' ),
@@ -66,7 +75,44 @@ function display_custom_pizza_options_in_cart( $item_data, $cart_item ) {
 		}
 	}
 
-	// Display paired products
+	// Display pizza halves (new structure)
+	if ( isset( $cart_item['pizza_halves'] ) && ! empty( $cart_item['pizza_halves'] ) ) {
+		$halves = $cart_item['pizza_halves'];
+
+		// Display left half
+		if ( isset( $halves['left_half'] ) && ! empty( $halves['left_half'] ) ) {
+			$left = $halves['left_half'];
+			if ( isset( $left['name'] ) && isset( $left['price'] ) ) {
+				$item_data[] = array(
+					'key'     => __( 'Left Half', 'flatsome' ),
+					'value'   => sprintf(
+						'%s (+%s)',
+						esc_html( $left['name'] ),
+						wc_price( $left['price'] )
+					),
+					'display' => '',
+				);
+			}
+		}
+
+		// Display right half
+		if ( isset( $halves['right_half'] ) && ! empty( $halves['right_half'] ) ) {
+			$right = $halves['right_half'];
+			if ( isset( $right['name'] ) && isset( $right['price'] ) ) {
+				$item_data[] = array(
+					'key'     => __( 'Right Half', 'flatsome' ),
+					'value'   => sprintf(
+						'%s (+%s)',
+						esc_html( $right['name'] ),
+						wc_price( $right['price'] )
+					),
+					'display' => '',
+				);
+			}
+		}
+	}
+
+	// Display paired products (legacy support)
 	if ( isset( $cart_item['paired_products'] ) && ! empty( $cart_item['paired_products'] ) ) {
 		foreach ( $cart_item['paired_products'] as $paired ) {
 			if ( isset( $paired['name'] ) && isset( $paired['price'] ) ) {
@@ -98,30 +144,49 @@ function add_custom_pizza_options_price( $cart ) {
 	}
 
 	foreach ( $cart->get_cart() as $cart_item_key => $cart_item ) {
-		$additional_price = 0;
+		$new_total_price = 0;
+		$is_paired_mode = false;
+
+		// Check if pizza halves (new structure)
+		if ( isset( $cart_item['pizza_halves'] ) && ! empty( $cart_item['pizza_halves'] ) ) {
+			$is_paired_mode = true;
+			$halves = $cart_item['pizza_halves'];
+
+			// Add left half price
+			if ( isset( $halves['left_half']['price'] ) ) {
+				$new_total_price += floatval( $halves['left_half']['price'] );
+			}
+
+			// Add right half price
+			if ( isset( $halves['right_half']['price'] ) ) {
+				$new_total_price += floatval( $halves['right_half']['price'] );
+			}
+		} else {
+			// Whole pizza mode - start with base price
+			$new_total_price = $cart_item['data']->get_price();
+		}
 
 		// Add topping prices
 		if ( isset( $cart_item['extra_topping_options'] ) && ! empty( $cart_item['extra_topping_options'] ) ) {
 			foreach ( $cart_item['extra_topping_options'] as $topping ) {
 				if ( isset( $topping['price'] ) ) {
-					$additional_price += floatval( $topping['price'] );
+					$new_total_price += floatval( $topping['price'] );
 				}
 			}
 		}
 
-		// Add paired product prices
+		// Add paired product prices (legacy support)
 		if ( isset( $cart_item['paired_products'] ) && ! empty( $cart_item['paired_products'] ) ) {
 			foreach ( $cart_item['paired_products'] as $paired ) {
 				if ( isset( $paired['price'] ) ) {
-					$additional_price += floatval( $paired['price'] );
+					$new_total_price += floatval( $paired['price'] );
 				}
 			}
 		}
 
-		// Set new price
-		if ( $additional_price > 0 ) {
-			$new_price = $cart_item['data']->get_price() + $additional_price;
-			$cart_item['data']->set_price( $new_price );
+		// Set the new price
+		if ( $is_paired_mode || isset( $cart_item['extra_topping_options'] ) || isset( $cart_item['paired_products'] ) ) {
+			$cart_item['data']->set_price( $new_total_price );
 		}
 	}
 }
@@ -132,7 +197,7 @@ function save_custom_pizza_options_to_order_items( $item, $cart_item_key, $value
 	// Save topping options
 	if ( isset( $values['extra_topping_options'] ) && ! empty( $values['extra_topping_options'] ) ) {
 		$item->add_meta_data( '_extra_topping_options', $values['extra_topping_options'], true );
-		
+
 		// Format for display
 		$topping_names = array();
 		foreach ( $values['extra_topping_options'] as $topping ) {
@@ -144,16 +209,55 @@ function save_custom_pizza_options_to_order_items( $item, $cart_item_key, $value
 				);
 			}
 		}
-		
+
 		if ( ! empty( $topping_names ) ) {
 			$item->add_meta_data( __( 'Extra Toppings', 'flatsome' ), implode( ', ', $topping_names ), true );
 		}
 	}
 
-	// Save paired products
+	// Save pizza halves (new structure)
+	if ( isset( $values['pizza_halves'] ) && ! empty( $values['pizza_halves'] ) ) {
+		$item->add_meta_data( '_pizza_halves', $values['pizza_halves'], true );
+
+		$halves = $values['pizza_halves'];
+
+		// Display left half
+		if ( isset( $halves['left_half'] ) && ! empty( $halves['left_half'] ) ) {
+			$left = $halves['left_half'];
+			if ( isset( $left['name'] ) && isset( $left['price'] ) ) {
+				$item->add_meta_data(
+					__( 'Left Half', 'flatsome' ),
+					sprintf(
+						'%s (+%s)',
+						esc_html( $left['name'] ),
+						wc_price( $left['price'] )
+					),
+					true
+				);
+			}
+		}
+
+		// Display right half
+		if ( isset( $halves['right_half'] ) && ! empty( $halves['right_half'] ) ) {
+			$right = $halves['right_half'];
+			if ( isset( $right['name'] ) && isset( $right['price'] ) ) {
+				$item->add_meta_data(
+					__( 'Right Half', 'flatsome' ),
+					sprintf(
+						'%s (+%s)',
+						esc_html( $right['name'] ),
+						wc_price( $right['price'] )
+					),
+					true
+				);
+			}
+		}
+	}
+
+	// Save paired products (legacy support)
 	if ( isset( $values['paired_products'] ) && ! empty( $values['paired_products'] ) ) {
 		$item->add_meta_data( '_paired_products', $values['paired_products'], true );
-		
+
 		// Format for display
 		foreach ( $values['paired_products'] as $paired ) {
 			if ( isset( $paired['name'] ) && isset( $paired['price'] ) ) {
@@ -185,10 +289,10 @@ function customize_pizza_options_meta_key( $display_key, $meta, $item ) {
 add_filter( 'woocommerce_add_cart_item', 'make_pizza_cart_items_unique', 10, 2 );
 function make_pizza_cart_items_unique( $cart_item, $cart_item_key ) {
 	// Generate unique key based on custom options
-	if ( isset( $cart_item['extra_topping_options'] ) || isset( $cart_item['paired_products'] ) ) {
+	if ( isset( $cart_item['extra_topping_options'] ) || isset( $cart_item['pizza_halves'] ) || isset( $cart_item['paired_products'] ) ) {
 		$unique_key = md5( serialize( $cart_item ) );
 		$cart_item['unique_key'] = $unique_key;
 	}
-	
+
 	return $cart_item;
 }

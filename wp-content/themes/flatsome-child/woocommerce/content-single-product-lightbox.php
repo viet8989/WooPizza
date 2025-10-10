@@ -17,7 +17,7 @@ if ( ! $product instanceof WC_Product ) {
 
 $product_price = $product->get_price();
 $product_id    = $product->get_id();
-
+echo '<script>console.log("Quick View loaded for product ID:", ' . esc_js( $product_id ) . ');</script>';
 do_action( 'wc_quick_view_before_single_product' );
 ?>
 
@@ -652,6 +652,10 @@ do_action( 'wc_quick_view_after_single_product' );
 			}
 		};
 
+		// Track selected pizza halves
+		let selectedLeftHalf = null;
+		let selectedRightHalf = null;
+
 		// Size Toggle
 		function initSizeToggle() {
 			$('#btn-whole').on('click', function() {
@@ -659,6 +663,15 @@ do_action( 'wc_quick_view_after_single_product' );
 				$(this).addClass('active');
 				$('#pizza-whole').show();
 				$('#pizza-paired').hide();
+
+				// Reset paired selections when switching to whole
+				selectedLeftHalf = null;
+				selectedRightHalf = null;
+				$('.pizza-card').removeClass('selected');
+				$('#right-pizza')
+					.attr('src', '<?php echo esc_url( get_site_url() . "/wp-content/uploads/images/half_pizza.png" ); ?>')
+					.removeClass('right-pizza-img')
+					.addClass('icon-row');
 			});
 
 			$('#btn-paired').on('click', function() {
@@ -666,58 +679,101 @@ do_action( 'wc_quick_view_after_single_product' );
 				$(this).addClass('active');
 				$('#pizza-whole').hide();
 				$('#pizza-paired').show();
+
+				// Set main product as left half when switching to paired mode
+				const mainProductId = <?php echo esc_js( $product_id ); ?>;
+				const mainProductName = <?php echo json_encode( get_the_title() ); ?>;
+				const mainProductPrice = <?php echo esc_js( $product_price ); ?>;
+				const mainProductImage = <?php
+					if ( has_post_thumbnail() ) {
+						$image_id = get_post_thumbnail_id();
+						echo json_encode( wp_get_attachment_url( $image_id ) );
+					} else {
+						echo json_encode( wc_placeholder_img_src( 'woocommerce_single' ) );
+					}
+				?>;
+
+				selectedLeftHalf = {
+					product_id: mainProductId,
+					name: mainProductName,
+					price: mainProductPrice / 2, // Half price for paired
+					image: mainProductImage
+				};
+
+				updateSubtotal();
 			});
 
 			// Initialize with whole pizza visible
 			$('#btn-whole').trigger('click');
 		}
 
-		// Pizza Card Selection (Only ONE paired pizza allowed)
+		// Pizza Card Selection (for right half)
 		function initPizzaCardSelection() {
 			$(document).on('click', '.pizza-card', function() {
 				const $card = $(this);
 				const imageUrl = $card.data('product-image');
 				const isCurrentlySelected = $card.hasClass('selected');
-				
+
 				// Remove selection from all cards
 				$('.pizza-card').removeClass('selected');
-				
+
 				// If clicking a different card (not deselecting), select it
 				if (!isCurrentlySelected) {
 					$card.addClass('selected');
-					
+
 					// Update right pizza image
 					$('#right-pizza')
 						.attr('src', imageUrl)
 						.removeClass('icon-row')
 						.addClass('right-pizza-img');
+
+					// Store right half data
+					selectedRightHalf = {
+						product_id: parseInt($card.data('product-id')),
+						name: $card.data('product-name'),
+						price: parseFloat($card.data('product-price')),
+						image: imageUrl
+					};
 				} else {
 					// Reset to default placeholder
 					$('#right-pizza')
 						.attr('src', '<?php echo esc_url( get_site_url() . "/wp-content/uploads/images/half_pizza.png" ); ?>')
 						.removeClass('right-pizza-img')
 						.addClass('icon-row');
+
+					// Clear right half selection
+					selectedRightHalf = null;
 				}
-				
+
 				updateSubtotal();
 			});
 		}
 
 		// Subtotal Calculation
 		function updateSubtotal() {
-			let subtotal = config.basePrice;
+			let subtotal = 0;
+
+			// Check if paired mode is active
+			const isPairedMode = $('#btn-paired').hasClass('active');
+
+			if (isPairedMode) {
+				// Add left half price (if exists)
+				if (selectedLeftHalf && selectedLeftHalf.price) {
+					subtotal += selectedLeftHalf.price;
+				}
+
+				// Add right half price (if exists)
+				if (selectedRightHalf && selectedRightHalf.price) {
+					subtotal += selectedRightHalf.price;
+				}
+			} else {
+				// Whole pizza mode - use base price
+				subtotal = config.basePrice;
+			}
 
 			// Add topping prices
 			$('.topping-checkbox:checked').each(function() {
 				const price = parseFloat($(this).data('price'));
-				if (!isNaN(price)) {
-					subtotal += price;
-				}
-			});
-
-			// Add paired pizza price
-			$('.pizza-card.selected').each(function() {
-				const price = parseFloat($(this).data('product-price'));
 				if (!isNaN(price)) {
 					subtotal += price;
 				}
@@ -747,25 +803,31 @@ do_action( 'wc_quick_view_after_single_product' );
 					});
 				});
 
-				// Gather paired products (only one should be selected)
-				const pairedProducts = [];
-				$('.pizza-card.selected').each(function() {
-					const $card = $(this);
-					pairedProducts.push({
-						product_id: parseInt($card.data('product-id')),
-						name: $card.data('product-name'),
-						price: parseFloat($card.data('product-price')),
-						image: $card.data('product-image')
-					});
-				});
+				// Check if paired mode is active
+				const isPairedMode = $('#btn-paired').hasClass('active');
+				let pizzaHalves = null;
+
+				if (isPairedMode) {
+					// Paired mode: send both halves
+					pizzaHalves = {
+						left_half: selectedLeftHalf,
+						right_half: selectedRightHalf
+					};
+
+					console.log('Paired mode - Left half:', selectedLeftHalf);
+					console.log('Paired mode - Right half:', selectedRightHalf);
+				} else {
+					console.log('Whole pizza mode');
+				}
 
 				// Debug log
 				console.log('Toppings to add:', toppingOptions);
-				console.log('Paired products to add:', pairedProducts);
+				console.log('Pizza halves:', pizzaHalves);
 
 				// Remove existing hidden inputs to avoid duplicates
 				$('input[name="extra_topping_options"]').remove();
-				$('input[name="paired_products"]').remove();
+				$('input[name="pizza_halves"]').remove();
+				$('input[name="paired_products"]').remove(); // Keep for backward compatibility
 
 				// Find the form
 				const $form = $(this).closest('form.cart');
@@ -778,19 +840,22 @@ do_action( 'wc_quick_view_after_single_product' );
 						.attr('name', 'extra_topping_options')
 						.val(JSON.stringify(toppingOptions))
 						.appendTo($target);
-					
-					console.log('Added topping options input');
+
+					console.log('Added topping options input:', JSON.stringify(toppingOptions));
 				}
 
-				if (pairedProducts.length > 0) {
+				if (pizzaHalves) {
 					$('<input>')
 						.attr('type', 'hidden')
-						.attr('name', 'paired_products')
-						.val(JSON.stringify(pairedProducts))
+						.attr('name', 'pizza_halves')
+						.val(JSON.stringify(pizzaHalves))
 						.appendTo($target);
-					
-					console.log('Added paired products input');
+
+					console.log('Added pizza halves input:', JSON.stringify(pizzaHalves));
 				}
+
+				// Allow form submission to proceed
+				console.log('Form submission proceeding...');
 			});
 		}
 
