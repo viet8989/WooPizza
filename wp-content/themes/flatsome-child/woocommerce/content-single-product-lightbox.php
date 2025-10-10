@@ -257,36 +257,31 @@ do_action( 'wc_quick_view_before_single_product' );
  * @return array Array of product data
  */
 function get_products_by_category( $category_id ) {
-	$args = array(
-		'post_type'      => 'product',
-		'posts_per_page' => -1,
-		'post_status'    => 'publish',
-		'tax_query'      => array(
+	// Use wc_get_products instead of WP_Query to avoid polluting global scope
+	$wc_products = wc_get_products( array(
+		'status'    => 'publish',
+		'limit'     => -1,
+		'tax_query' => array(
 			array(
 				'taxonomy' => 'product_cat',
 				'field'    => 'term_id',
-				'terms'    => absint( $category_id ),
+				'terms'    => $category_id,
 			),
 		),
-	);
+	) );
 
-	$query    = new WP_Query( $args );
 	$products = array();
 
-	if ( $query->have_posts() ) {
-		while ( $query->have_posts() ) {
-			$query->the_post();
-			global $product;
-			
-			if ( $product instanceof WC_Product ) {
+	if ( ! empty( $wc_products ) ) {
+		foreach ( $wc_products as $wc_product ) {
+			if ( $wc_product instanceof WC_Product ) {
 				$products[] = array(
-					'id'    => get_the_ID(),
-					'name'  => get_the_title(),
-					'price' => $product->get_price(),
+					'id'    => $wc_product->get_id(),
+					'name'  => $wc_product->get_name(),
+					'price' => $wc_product->get_price(),
 				);
 			}
 		}
-		wp_reset_postdata();
 	}
 
 	return $products;
