@@ -1,0 +1,101 @@
+[block id="283"]
+
+[section bg_color="rgb(251, 249, 246)" padding="0px"]
+
+[row]
+
+[col span__sm="12"]
+
+[gap height="50px"]
+
+[ux_product_categories style="default" columns="8" columns__sm="3" ids="15,16,17,18,19,20,21,22"]
+
+[/col]
+
+[/row]
+
+[/section]
+[section bg_color="rgb(251, 249, 246)"]
+
+[row]
+
+[col span__sm="8"]
+
+[row v_align="middle"]
+
+[col span="6" span__sm="6"]
+
+[ux_text font_size="1.5"]
+<h3>Staters</h3>
+[/ux_text]
+
+[/col]
+[col span="6" span__sm="6"]
+
+[ux_text text_align="right"]
+
+<a href="#">Show all</a>
+
+[/ux_text]
+
+[/col]
+
+[/row]
+[row v_align="middle"]
+
+[col span__sm="12"]
+
+[ux_products col_spacing="normal" slider_nav_style="simple" slider_nav_position="outside" show_cat="0" show_rating="0" show_add_to_cart="0" cat="16"]
+
+[gap]
+
+[/col]
+
+[/row]
+[row v_align="middle"]
+
+[col span="6" span__sm="6"]
+
+[ux_text font_size="1.5"]
+<h3>Pizza</h3>
+[/ux_text]
+
+[/col]
+[col span="6" span__sm="6"]
+
+[ux_text text_align="right"]
+
+<a href="#">Show all</a>
+
+[/ux_text]
+
+[/col]
+
+[/row]
+[row v_align="middle"]
+
+[col span__sm="12"]
+
+[ux_products col_spacing="normal" slider_nav_style="simple" slider_nav_position="outside" show_cat="0" show_rating="0" show_add_to_cart="0" cat="17"]
+
+[gap]
+
+[/col]
+
+[/row]
+
+[/col]
+
+[col span__sm="4"]
+
+[gap height="20px"]
+
+[ux_text]
+<p>Right column content here</p>
+[/ux_text]
+
+[/col]
+
+[/row]
+
+[/section]
