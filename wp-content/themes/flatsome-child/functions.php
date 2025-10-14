@@ -16,6 +16,275 @@ add_filter('woocommerce_currency_symbol', function ($currency_symbol, $currency)
 
 // Viet add custom functions below this line
 
+// Split Products menu into Pizza and Topping menus in WordPress admin
+add_action( 'admin_menu', 'add_pizza_and_topping_admin_menus', 99 );
+function add_pizza_and_topping_admin_menus() {
+	// Add Pizza menu (top level)
+	add_menu_page(
+		__( 'Pizzas', 'flatsome' ),          // Page title
+		__( 'Pizzas', 'flatsome' ),          // Menu title
+		'edit_products',                      // Capability
+		'edit-pizza-products',                // Menu slug
+		'display_pizza_products_page',        // Function to display the page
+		'dashicons-food',                     // Icon
+		56                                    // Position (after WooCommerce Products)
+	);
+
+	// Add submenu for All Pizzas
+	add_submenu_page(
+		'edit-pizza-products',
+		__( 'All Pizzas', 'flatsome' ),
+		__( 'All Pizzas', 'flatsome' ),
+		'edit_products',
+		'edit-pizza-products',
+		'display_pizza_products_page'
+	);
+
+	// Add submenu for Add New Pizza
+	add_submenu_page(
+		'edit-pizza-products',
+		__( 'Add New Pizza', 'flatsome' ),
+		__( 'Add New', 'flatsome' ),
+		'edit_products',
+		'post-new.php?post_type=product&product_type=pizza'
+	);
+
+	// Add Topping menu (top level)
+	add_menu_page(
+		__( 'Toppings', 'flatsome' ),        // Page title
+		__( 'Toppings', 'flatsome' ),        // Menu title
+		'edit_products',                      // Capability
+		'edit-topping-products',              // Menu slug
+		'display_topping_products_page',      // Function to display the page
+		'dashicons-carrot',                   // Icon
+		57                                    // Position (after Pizza)
+	);
+
+	// Add submenu for All Toppings
+	add_submenu_page(
+		'edit-topping-products',
+		__( 'All Toppings', 'flatsome' ),
+		__( 'All Toppings', 'flatsome' ),
+		'edit_products',
+		'edit-topping-products',
+		'display_topping_products_page'
+	);
+
+	// Add submenu for Add New Topping
+	add_submenu_page(
+		'edit-topping-products',
+		__( 'Add New Topping', 'flatsome' ),
+		__( 'Add New', 'flatsome' ),
+		'edit_products',
+		'post-new.php?post_type=product&product_type=topping'
+	);
+}
+
+// Display Pizza products page
+function display_pizza_products_page() {
+	// Redirect to WooCommerce products page with pizza filter
+	?>
+	<div class="wrap">
+		<h1 class="wp-heading-inline"><?php esc_html_e( 'Pizzas', 'flatsome' ); ?></h1>
+		<a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&product_type=pizza' ) ); ?>" class="page-title-action">
+			<?php esc_html_e( 'Add New', 'flatsome' ); ?>
+		</a>
+		<hr class="wp-header-end">
+		<?php
+		// Get pizza category term
+		$pizza_cat = get_term_by( 'slug', 'pizza', 'product_cat' );
+		if ( ! $pizza_cat ) {
+			// Try to find by name
+			$pizza_terms = get_terms( array(
+				'taxonomy' => 'product_cat',
+				'name' => 'Pizza',
+				'hide_empty' => false,
+			) );
+			if ( ! empty( $pizza_terms ) && ! is_wp_error( $pizza_terms ) ) {
+				$pizza_cat = $pizza_terms[0];
+			}
+		}
+
+		// Query pizza products
+		$args = array(
+			'post_type' => 'product',
+			'posts_per_page' => -1,
+			'orderby' => 'title',
+			'order' => 'ASC',
+		);
+
+		// Add category filter if pizza category exists
+		if ( $pizza_cat ) {
+			$args['tax_query'] = array(
+				array(
+					'taxonomy' => 'product_cat',
+					'field' => 'term_id',
+					'terms' => $pizza_cat->term_id,
+					'operator' => 'IN',
+				),
+			);
+		}
+
+		$products = new WP_Query( $args );
+
+		// Display products in a table
+		?>
+		<table class="wp-list-table widefat fixed striped">
+			<thead>
+				<tr>
+					<th style="width: 50px;">ID</th>
+					<th style="width: 80px;">Image</th>
+					<th>Name</th>
+					<th>Price</th>
+					<th>Categories</th>
+					<th>Stock</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php
+				if ( $products->have_posts() ) :
+					while ( $products->have_posts() ) : $products->the_post();
+						$product = wc_get_product( get_the_ID() );
+						?>
+						<tr>
+							<td><?php echo esc_html( get_the_ID() ); ?></td>
+							<td><?php echo $product->get_image( 'thumbnail' ); ?></td>
+							<td>
+								<strong>
+									<a href="<?php echo esc_url( get_edit_post_link( get_the_ID() ) ); ?>">
+										<?php echo esc_html( get_the_title() ); ?>
+									</a>
+								</strong>
+							</td>
+							<td><?php echo $product->get_price_html(); ?></td>
+							<td><?php echo wc_get_product_category_list( get_the_ID(), ', ' ); ?></td>
+							<td><?php echo esc_html( $product->get_stock_status() ); ?></td>
+							<td>
+								<a href="<?php echo esc_url( get_edit_post_link( get_the_ID() ) ); ?>" class="button button-small">
+									<?php esc_html_e( 'Edit', 'flatsome' ); ?>
+								</a>
+							</td>
+						</tr>
+						<?php
+					endwhile;
+				else :
+					?>
+					<tr>
+						<td colspan="7"><?php esc_html_e( 'No pizzas found.', 'flatsome' ); ?></td>
+					</tr>
+					<?php
+				endif;
+				wp_reset_postdata();
+				?>
+			</tbody>
+		</table>
+	</div>
+	<?php
+}
+
+// Display Topping products page
+function display_topping_products_page() {
+	?>
+	<div class="wrap">
+		<h1 class="wp-heading-inline"><?php esc_html_e( 'Toppings', 'flatsome' ); ?></h1>
+		<a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&product_type=topping' ) ); ?>" class="page-title-action">
+			<?php esc_html_e( 'Add New', 'flatsome' ); ?>
+		</a>
+		<hr class="wp-header-end">
+		<?php
+		// Get topping categories (categories 25 and 26 based on CLAUDE.md)
+		$topping_cats = array( 25, 26 );
+
+		// Try to find by slug as well
+		$extra_cats = get_terms( array(
+			'taxonomy' => 'product_cat',
+			'slug' => array( 'topping', 'extra-cheese', 'extra-cold-cuts' ),
+			'hide_empty' => false,
+		) );
+
+		if ( ! empty( $extra_cats ) && ! is_wp_error( $extra_cats ) ) {
+			foreach ( $extra_cats as $cat ) {
+				if ( ! in_array( $cat->term_id, $topping_cats ) ) {
+					$topping_cats[] = $cat->term_id;
+				}
+			}
+		}
+
+		// Query topping products
+		$args = array(
+			'post_type' => 'product',
+			'posts_per_page' => -1,
+			'orderby' => 'title',
+			'order' => 'ASC',
+			'tax_query' => array(
+				array(
+					'taxonomy' => 'product_cat',
+					'field' => 'term_id',
+					'terms' => $topping_cats,
+					'operator' => 'IN',
+				),
+			),
+		);
+
+		$products = new WP_Query( $args );
+
+		// Display products in a table
+		?>
+		<table class="wp-list-table widefat fixed striped">
+			<thead>
+				<tr>
+					<th style="width: 50px;">ID</th>
+					<th style="width: 80px;">Image</th>
+					<th>Name</th>
+					<th>Price</th>
+					<th>Categories</th>
+					<th>Stock</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php
+				if ( $products->have_posts() ) :
+					while ( $products->have_posts() ) : $products->the_post();
+						$product = wc_get_product( get_the_ID() );
+						?>
+						<tr>
+							<td><?php echo esc_html( get_the_ID() ); ?></td>
+							<td><?php echo $product->get_image( 'thumbnail' ); ?></td>
+							<td>
+								<strong>
+									<a href="<?php echo esc_url( get_edit_post_link( get_the_ID() ) ); ?>">
+										<?php echo esc_html( get_the_title() ); ?>
+									</a>
+								</strong>
+							</td>
+							<td><?php echo $product->get_price_html(); ?></td>
+							<td><?php echo wc_get_product_category_list( get_the_ID(), ', ' ); ?></td>
+							<td><?php echo esc_html( $product->get_stock_status() ); ?></td>
+							<td>
+								<a href="<?php echo esc_url( get_edit_post_link( get_the_ID() ) ); ?>" class="button button-small">
+									<?php esc_html_e( 'Edit', 'flatsome' ); ?>
+								</a>
+							</td>
+						</tr>
+						<?php
+					endwhile;
+				else :
+					?>
+					<tr>
+						<td colspan="7"><?php esc_html_e( 'No toppings found.', 'flatsome' ); ?></td>
+					</tr>
+					<?php
+				endif;
+				wp_reset_postdata();
+				?>
+			</tbody>
+		</table>
+	</div>
+	<?php
+}
+
 // Save custom options to cart item data
 add_filter( 'woocommerce_add_cart_item_data', 'save_custom_pizza_options_to_cart', 10, 3 );
 function save_custom_pizza_options_to_cart( $cart_item_data, $product_id, $variation_id ) {
