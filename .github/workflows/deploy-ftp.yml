@@ -1,0 +1,95 @@
+name: 🚀 Smart WooCommerce CI/CD to Hostinger via FTP
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  detect_changes:
+    name: 🔍 Detect changed folders
+    runs-on: ubuntu-latest
+    outputs:
+      theme_changed: ${{ steps.detect.outputs.theme_changed }}
+      plugin_changed: ${{ steps.detect.outputs.plugin_changed }}
+    steps:
+      - name: 🧩 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # cần để diff commit
+
+      - name: 🔎 Detect changes in theme/plugin folders
+        id: detect
+        run: |
+          # Kiểm tra có thay đổi trong theme không
+          if git diff --name-only HEAD~1 HEAD | grep -q "wp-content/themes/my-theme/"; then
+            echo "theme_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "theme_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+          # Kiểm tra có thay đổi trong plugin không
+          if git diff --name-only HEAD~1 HEAD | grep -q "wp-content/plugins/my-plugin/"; then
+            echo "plugin_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "plugin_changed=false" >> $GITHUB_OUTPUT
+          fi
+
+  deploy_theme:
+    name: 🎨 Deploy Theme
+    needs: detect_changes
+    if: needs.detect_changes.outputs.theme_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🧩 Checkout source
+        uses: actions/checkout@v4
+
+      # (Tùy chọn) build theme nếu cần
+      # - name: 🔧 Build theme assets
+      #   run: npm install && npm run build
+
+      - name: 📤 Upload WooCommerce Theme via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          local-dir: ./wp-content/themes/my-theme/
+          server-dir: /public_html/wp-content/themes/my-theme/
+          exclude: |
+            **/.git*
+            **/.github*
+            node_modules/**
+            .DS_Store
+            package-lock.json
+
+  deploy_plugin:
+    name: ⚙️ Deploy Plugin
+    needs: detect_changes
+    if: needs.detect_changes.outputs.plugin_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🧩 Checkout source
+        uses: actions/checkout@v4
+
+      # (Tùy chọn) build plugin nếu cần
+      # - name: 🔧 Build plugin
+      #   run: npm install && npm run build
+
+      - name: 📤 Upload WooCommerce Plugin via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          local-dir: ./wp-content/plugins/my-plugin/
+          server-dir: /public_html/wp-content/plugins/my-plugin/
+          exclude: |
+            **/.git*
+            **/.github*
+            node_modules/**
+            .DS_Store
