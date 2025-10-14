@@ -42,7 +42,7 @@ echo '<script>console.log("Call flatsome-child/woocommerce/content-product.php")
 	<div class="product-small box <?php echo flatsome_product_box_class(); ?>">
 		<div class="box-image">
 			<div class="<?php echo flatsome_product_box_image_class(); ?>">
-				<a class="quick-view" data-prod="<?php echo esc_attr( $product->get_id() ); ?>" href="#quick-view" aria-label="<?php echo esc_attr( $product->get_title() ); ?>">
+				<a class="quick-view" data-prod="<?php echo esc_attr( $product->get_id() ); ?>" href="#quick-view?t=1" aria-label="<?php echo esc_attr( $product->get_title() ); ?>">
 					<?php
 						/**
 						 *
