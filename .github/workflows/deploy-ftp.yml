@@ -22,14 +22,14 @@ jobs:
         id: detect
         run: |
           # Kiểm tra có thay đổi trong theme không
-          if git diff --name-only HEAD~1 HEAD | grep -q "wp-content/themes/my-theme/"; then
+          if git diff --name-only HEAD~1 HEAD | grep -q "wp-content/themes/flatsome-child/"; then
             echo "theme_changed=true" >> $GITHUB_OUTPUT
           else
             echo "theme_changed=false" >> $GITHUB_OUTPUT
           fi
 
           # Kiểm tra có thay đổi trong plugin không
-          if git diff --name-only HEAD~1 HEAD | grep -q "wp-content/plugins/my-plugin/"; then
+          if git diff --name-only HEAD~1 HEAD | grep -q "wp-content/plugins/woocommerce/"; then
             echo "plugin_changed=true" >> $GITHUB_OUTPUT
           else
             echo "plugin_changed=false" >> $GITHUB_OUTPUT
@@ -56,8 +56,8 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftp
           port: 21
-          local-dir: ./wp-content/themes/my-theme/
-          server-dir: /public_html/wp-content/themes/my-theme/
+          local-dir: ./wp-content/themes/flatsome-child/
+          server-dir: /public_html/wp-content/themes/flatsome-child/
           exclude: |
             **/.git*
             **/.github*
@@ -86,8 +86,8 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftp
           port: 21
-          local-dir: ./wp-content/plugins/my-plugin/
-          server-dir: /public_html/wp-content/plugins/my-plugin/
+          local-dir: ./wp-content/plugins/woocommerce/
+          server-dir: /public_html/wp-content/plugins/woocommerce/
           exclude: |
             **/.git*
             **/.github*
