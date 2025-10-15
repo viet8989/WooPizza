@@ -35,14 +35,14 @@ $classes[] = 'col';
 $classes[] = 'has-hover';
 
 if ( $out_of_stock ) $classes[] = 'out-of-stock';
-echo '<script>console.log("Call flatsome-child/woocommerce/content-product.php")</script>';
+
 ?><div <?php wc_product_class( $classes, $product ); ?>>
 	<div class="col-inner">
 	<?php do_action( 'woocommerce_before_shop_loop_item' ); ?>
 	<div class="product-small box <?php echo flatsome_product_box_class(); ?>">
 		<div class="box-image">
 			<div class="<?php echo flatsome_product_box_image_class(); ?>">
-				<a class="quick-view" data-prod="<?php echo esc_attr( $product->get_id() ); ?>" href="#quick-view?t=1" aria-label="<?php echo esc_attr( $product->get_title() ); ?>">
+				<a class="quick-view" data-prod="<?php echo esc_attr( $product->get_id() ); ?>" href="#quick-view?source=grid" aria-label="<?php echo esc_attr( $product->get_title() ); ?>">
 					<?php
 						/**
 						 *

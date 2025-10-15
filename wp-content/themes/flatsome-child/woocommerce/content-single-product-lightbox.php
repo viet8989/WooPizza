@@ -930,8 +930,22 @@ do_action( 'wc_quick_view_after_single_product' );
 				updateSubtotal();
 			});
 
-			// Initialize with whole pizza visible
-			$('#btn-whole').trigger('click');
+			// Initialize based on the source of the quick view call
+			const hash = window.location.hash;
+			const source = hash.split('?')[1] ? new URLSearchParams(hash.split('?')[1]).get('source') : '';
+
+			// If called from grid view (product listing), show whole pizza
+			if (source === 'grid') {
+				$('#btn-whole').trigger('click');
+			}
+			// If called from the button (half pizza icon), show paired view
+			else if (source === 'button') {
+				$('#btn-paired').trigger('click');
+			}
+			// Default to whole pizza view
+			else {
+				$('#btn-whole').trigger('click');
+			}
 		}
 
 		// Pizza Card Selection (for right half)
