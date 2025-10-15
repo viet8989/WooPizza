@@ -17,6 +17,10 @@ add_filter('woocommerce_currency_symbol', function ($currency_symbol, $currency)
 // Viet add custom functions below this line
 
 // Override Flatsome Quick View Button
+remove_action('woocommerce_single_product_lightbox_summary', 'woocommerce_template_single_price', 10);
+remove_action('woocommerce_single_product_lightbox_summary', 'woocommerce_template_single_excerpt', 20);
+remove_action('woocommerce_before_single_product_lightbox_summary', 'woocommerce_show_product_sale_flash', 20);
+remove_action('woocommerce_single_product_lightbox_summary', 'woocommerce_template_single_meta', 40);
 remove_action('flatsome_product_box_actions', 'flatsome_lightbox_button', 50);
 
 function flatsome_child_lightbox_button() {
