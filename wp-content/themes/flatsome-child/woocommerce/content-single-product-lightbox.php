@@ -934,7 +934,7 @@ do_action( 'wc_quick_view_after_single_product' );
 			setTimeout(function() {
 				// Get the view type from sessionStorage
 				const viewType = sessionStorage.getItem('pizza_view') || 'whole';
-				console.log('pizza_view type in sessionStorage:', viewType);
+				console.log('pizza_view type saved sessionStorage:', viewType);
 				
 				// Show appropriate view based on stored value
 				if (viewType === 'paired') {
