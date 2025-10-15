@@ -654,31 +654,16 @@ do_action( 'wc_quick_view_after_single_product' );
 }
 
 .topping-tab {
-	flex: 1;
-	padding: 12px 20px;
-	background: transparent;
-	/* border: none;
-	border-bottom: 3px solid transparent; */
-	font-size: 12px;
-	font-weight: 600;
+	padding: 0 20px;
+	font-weight: 900;
 	color: #666;
-	cursor: pointer;
-	transition: all 0.3s ease;
 	position: relative;
-	bottom: -2px;
+	bottom: -10px;
 	display: none;
 }
 
-.topping-tab:hover {
-	color: #dc0000;
-	background: #f9f9f9;
-	display: block;
-}
-
 .topping-tab.active {
-	color: #dc0000;
-	border-bottom-color: #dc0000;
-	background: transparent;
+	display: block;
 }
 
 /* Tab Content */
