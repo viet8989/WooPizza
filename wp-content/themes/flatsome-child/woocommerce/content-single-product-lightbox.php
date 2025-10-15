@@ -930,16 +930,19 @@ do_action( 'wc_quick_view_after_single_product' );
 				updateSubtotal();
 			});
 
-			// Get the view type from the clicked quick view link
-			const viewType = $('.quick-view.is-quick-view').data('view-type') || 'whole';
-			console.log('Quick view type:', viewType);
-
-			// Show appropriate view based on data attribute
+			// Get the view type from sessionStorage
+			const viewType = sessionStorage.getItem('pizza_view') || 'whole';
+			console.log('Pizza view type from storage:', viewType);
+			
+			// Show appropriate view based on stored value
 			if (viewType === 'paired') {
 				$('#btn-paired').trigger('click');
 			} else {
 				$('#btn-whole').trigger('click');
 			}
+			
+			// Clear the storage after using it
+			sessionStorage.removeItem('pizza_view');
 		}
 
 		// Pizza Card Selection (for right half)
