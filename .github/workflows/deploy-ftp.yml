@@ -22,7 +22,7 @@ jobs:
         id: detect
         run: |
           # Kiểm tra có thay đổi trong theme không
-          if git diff --name-only HEAD~1 HEAD | grep -q "wp-content/themes/flatsome-child/"; then
+          if git diff --name-only HEAD~1 HEAD | grep -q "wp-content/themes/"; then
             echo "theme_changed=true" >> $GITHUB_OUTPUT
           else
             echo "theme_changed=false" >> $GITHUB_OUTPUT
@@ -56,8 +56,8 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           protocol: ftp
           port: 21
-          local-dir: ./wp-content/themes/flatsome-child/
-          server-dir: /public_html/wp-content/themes/flatsome-child/
+          local-dir: ./wp-content/themes/
+          server-dir: /public_html/wp-content/themes/
           exclude: |
             **/.git*
             **/.github*
