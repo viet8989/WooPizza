@@ -238,14 +238,8 @@ do_action( 'wc_quick_view_before_single_product' );
 			<!-- Paired Pizza Toppings -->
 			<div id="paired-pizza-toppings" class="toppings-container" style="display: none;">
 				<!-- Topping Tabs -->
-				<div class="topping-tabs">
-					<button type="button" class="topping-tab active" data-tab="left-toppings">
-						<?php esc_html_e( 'Left Pizza Upgrade', 'flatsome' ); ?>
-					</button>
-					<button type="button" class="topping-tab" data-tab="right-toppings">
-						<?php esc_html_e( 'Right Pizza Upgrade', 'flatsome' ); ?>
-					</button>
-				</div>
+				<h3 class="topping-tab" data-tab="left-toppings"><?php esc_html_e('Left Pizza Upgrade', 'flatsome'); ?></h3>
+				<h3 class="topping-tab" data-tab="right-toppings"><?php esc_html_e('Right Pizza Upgrade', 'flatsome'); ?></h3>
 
 				<!-- Left Half Toppings -->
 				<div id="left-toppings" class="half-toppings-section tab-content active">
@@ -663,8 +657,8 @@ do_action( 'wc_quick_view_after_single_product' );
 	flex: 1;
 	padding: 12px 20px;
 	background: transparent;
-	border: none;
-	border-bottom: 3px solid transparent;
+	/* border: none;
+	border-bottom: 3px solid transparent; */
 	font-size: 12px;
 	font-weight: 600;
 	color: #666;
@@ -672,11 +666,13 @@ do_action( 'wc_quick_view_after_single_product' );
 	transition: all 0.3s ease;
 	position: relative;
 	bottom: -2px;
+	display: none;
 }
 
 .topping-tab:hover {
 	color: #dc0000;
 	background: #f9f9f9;
+	display: block;
 }
 
 .topping-tab.active {
@@ -940,8 +936,8 @@ do_action( 'wc_quick_view_after_single_product' );
 				if (viewType === 'paired') {
 					$('#btn-paired').trigger('click');
 					// Active tab right-toppings
-					$('.topping-tab').removeClass('active');
-					$('.topping-tab[data-tab="right-toppings"]').addClass('active');
+					// $('.topping-tab').removeClass('active');
+					// $('.topping-tab[data-tab="right-toppings"]').addClass('active');
 					$('.tab-content').removeClass('active');
 					$('#right-toppings').addClass('active');					
 				} else {
@@ -1162,21 +1158,21 @@ do_action( 'wc_quick_view_after_single_product' );
 			});
 		}
 
-		// Topping Tabs Handler
-		function initToppingTabs() {
-			$(document).on('click', '.topping-tab', function() {
-				const $tab = $(this);
-				const tabId = $tab.data('tab');
+		// // Topping Tabs Handler
+		// function initToppingTabs() {
+		// 	$(document).on('click', '.topping-tab', function() {
+		// 		const $tab = $(this);
+		// 		const tabId = $tab.data('tab');
 
-				// Remove active class from all tabs and contents
-				$('.topping-tab').removeClass('active');
-				$('.tab-content').removeClass('active');
+		// 		// Remove active class from all tabs and contents
+		// 		$('.topping-tab').removeClass('active');
+		// 		$('.tab-content').removeClass('active');
 
-				// Add active class to clicked tab and corresponding content
-				$tab.addClass('active');
-				$('#' + tabId).addClass('active');
-			});
-		}
+		// 		// Add active class to clicked tab and corresponding content
+		// 		$tab.addClass('active');
+		// 		$('#' + tabId).addClass('active');
+		// 	});
+		// }
 
 		// Special Request Character Counter
 		function initSpecialRequestCounter() {
@@ -1192,7 +1188,7 @@ do_action( 'wc_quick_view_after_single_product' );
 		initPizzaCardSelection();
 		initToppingCheckboxes();
 		initAddToCart();
-		initToppingTabs();
+		// initToppingTabs();
 		initSpecialRequestCounter();
 	});
 })(jQuery);
