@@ -936,8 +936,8 @@ do_action( 'wc_quick_view_after_single_product' );
 				if (viewType === 'paired') {
 					$('#btn-paired').trigger('click');
 					// Active tab right-toppings
-					// $('.topping-tab').removeClass('active');
-					// $('.topping-tab[data-tab="right-toppings"]').addClass('active');
+					$('.topping-tab').removeClass('active');
+					$('.topping-tab[data-tab="right-toppings"]').addClass('active');
 					$('.tab-content').removeClass('active');
 					$('#right-toppings').addClass('active');					
 				} else {
