@@ -34,5 +34,5 @@ add_action('flatsome_product_box_actions2', 'flatsome_child_lightbox_button2', 5
 
 <?php if ( $price_html = $product->get_price_html() ) : ?>
 	<span class="price" style="float: left">From <?php echo $price_html; ?></span>
-	<?php do_action( 'flatsome_product_box_actions2' ); ?>
+	<?php do_action( 'flatsome_product_box_actions' ); ?>
 <?php endif; ?>
