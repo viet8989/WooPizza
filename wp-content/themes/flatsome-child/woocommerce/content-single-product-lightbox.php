@@ -939,6 +939,11 @@ do_action( 'wc_quick_view_after_single_product' );
 				// Show appropriate view based on stored value
 				if (viewType === 'paired') {
 					$('#btn-paired').trigger('click');
+					// Active tab right-toppings
+					@$('.topping-tab').removeClass('active');
+					@$('.topping-tab[data-tab="right-toppings"]').addClass('active');
+					@$('.tab-content').removeClass('active');
+					@$('#right-toppings').addClass('active');					
 				} else {
 					$('#btn-whole').trigger('click');
 				}
