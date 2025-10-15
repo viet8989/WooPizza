@@ -654,16 +654,15 @@ do_action( 'wc_quick_view_after_single_product' );
 }
 
 .topping-tab-whole {
-	padding: 0 20px;
+	padding: 0 10px;
 	font-weight: 900;
 	color: #666;
 	position: relative;
 	bottom: -10px;
-	display: none;
 }
 
 .topping-tab {
-	padding: 0 20px;
+	padding: 0 10px;
 	font-weight: 900;
 	color: #666;
 	position: relative;
