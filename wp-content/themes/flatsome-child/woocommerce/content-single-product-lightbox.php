@@ -933,7 +933,7 @@ do_action( 'wc_quick_view_after_single_product' );
 			// Initialize based on the source of the quick view call
 			const hash = window.location.hash;
 			const source = hash.split('?')[1] ? new URLSearchParams(hash.split('?')[1]).get('source') : '';
-
+			debug_backtracelog('Quick view source:', source);
 			// If called from grid view (product listing), show whole pizza
 			if (source === 'grid') {
 				$('#btn-whole').trigger('click');
