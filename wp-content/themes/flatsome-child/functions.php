@@ -16,23 +16,6 @@ add_filter('woocommerce_currency_symbol', function ($currency_symbol, $currency)
 
 // Viet add custom functions below this line
 
-// Override Flatsome Quick View Button
-remove_action('woocommerce_single_product_lightbox_summary', 'woocommerce_template_single_price', 10);
-remove_action('woocommerce_single_product_lightbox_summary', 'woocommerce_template_single_excerpt', 20);
-remove_action('woocommerce_before_single_product_lightbox_summary', 'woocommerce_show_product_sale_flash', 20);
-remove_action('woocommerce_single_product_lightbox_summary', 'woocommerce_template_single_meta', 40);
-remove_action('flatsome_product_box_actions', 'flatsome_lightbox_button', 50);
-
-function flatsome_child_lightbox_button() {
-    if ( get_theme_mod( 'disable_quick_view', 0 ) ) {
-        return;
-    }
-    wp_enqueue_script( 'wc-add-to-cart-variation' );
-    global $product;
-    echo '  <a class="quick-view" data-prod="' . $product->get_id() . '" href="#quick-view" onclick="event.preventDefault(); sessionStorage.setItem(\'pizza_view\', \'paired\');"><img src="/wp-content/uploads/images/half_pizza.png" /></a>';
-}
-add_action('flatsome_product_box_actions', 'flatsome_child_lightbox_button', 50);
-
 // Split Products menu into Pizza and Topping menus in WordPress admin
 add_action( 'admin_menu', 'add_pizza_and_topping_admin_menus', 99 );
 function add_pizza_and_topping_admin_menus() {
