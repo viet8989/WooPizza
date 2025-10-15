@@ -42,7 +42,7 @@ if ( $out_of_stock ) $classes[] = 'out-of-stock';
 	<div class="product-small box <?php echo flatsome_product_box_class(); ?>">
 		<div class="box-image">
 			<div class="<?php echo flatsome_product_box_image_class(); ?>">
-				<a class="quick-view" data-prod="<?php echo esc_attr( $product->get_id() ); ?>" href="#quick-view" onclick="console.log('pizza_view whole');" aria-label="<?php echo esc_attr( $product->get_title() ); ?>">
+				<a class="quick-view" data-prod="<?php echo esc_attr( $product->get_id() ); ?>" href="#quick-view" onclick="event.preventDefault(); sessionStorage.setItem('pizza_view', 'whole');" aria-label="<?php echo esc_attr( $product->get_title() ); ?>">
 					<?php
 						/**
 						 *
