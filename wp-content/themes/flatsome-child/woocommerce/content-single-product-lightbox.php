@@ -188,7 +188,7 @@ do_action( 'wc_quick_view_before_single_product' );
 				$cheese_products = get_products_by_category( 25 );
 				if ( ! empty( $cheese_products ) ) :
 				?>
-				<h3 style="color: #cd0000; text-align: center;">Whole Pizza Upgrade</h3>
+				<h3 class="topping-tab-whole">Whole Pizza Upgrade</h3>
 				<div class="extra-options-section">
 					<h4 class="extra-options-title"><?php esc_html_e( 'Add extra cheese:', 'flatsome' ); ?></h4>
 					<div class="checkbox-group">
@@ -653,6 +653,15 @@ do_action( 'wc_quick_view_after_single_product' );
 	gap: 10px;
 }
 
+.topping-tab-whole {
+	padding: 0 20px;
+	font-weight: 900;
+	color: #666;
+	position: relative;
+	bottom: -10px;
+	display: none;
+}
+
 .topping-tab {
 	padding: 0 20px;
 	font-weight: 900;
@@ -885,6 +894,12 @@ do_action( 'wc_quick_view_after_single_product' );
 				$('#whole-pizza-toppings').hide();
 				$('#paired-pizza-toppings').show();
 
+				// Active tab right-toppings
+				$('.topping-tab').removeClass('active');
+				$('.topping-tab[data-tab="right-toppings"]').addClass('active');
+				$('.tab-content').removeClass('active');
+				$('#right-toppings').addClass('active');
+
 				// Clear all topping selections
 				$('.topping-checkbox').prop('checked', false);
 
@@ -919,12 +934,7 @@ do_action( 'wc_quick_view_after_single_product' );
 				
 				// Show appropriate view based on stored value
 				if (viewType === 'paired') {
-					$('#btn-paired').trigger('click');
-					// Active tab right-toppings
-					$('.topping-tab').removeClass('active');
-					$('.topping-tab[data-tab="right-toppings"]').addClass('active');
-					$('.tab-content').removeClass('active');
-					$('#right-toppings').addClass('active');					
+					$('#btn-paired').trigger('click');					
 				} else {
 					$('#btn-whole').trigger('click');
 				}
