@@ -918,7 +918,7 @@ do_action( 'wc_quick_view_after_single_product' );
 					} else {
 						echo json_encode( wc_placeholder_img_src( 'woocommerce_single' ) );
 					}
-				?>;
+				?>
 
 				selectedLeftHalf = {
 					product_id: mainProductId,
