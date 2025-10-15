@@ -930,20 +930,14 @@ do_action( 'wc_quick_view_after_single_product' );
 				updateSubtotal();
 			});
 
-			// Initialize based on the source of the quick view call
-			const hash = window.location.hash;
-			const source = hash.split('?')[1] ? new URLSearchParams(hash.split('?')[1]).get('source') : '';
-			console.log('Quick view source:', source);
-			// If called from grid view (product listing), show whole pizza
-			if (source === 'grid') {
-				$('#btn-whole').trigger('click');
-			}
-			// If called from the button (half pizza icon), show paired view
-			else if (source === 'button') {
+			// Get the view type from the clicked quick view link
+			const viewType = $('.quick-view.is-quick-view').data('view-type') || 'whole';
+			console.log('Quick view type:', viewType);
+
+			// Show appropriate view based on data attribute
+			if (viewType === 'paired') {
 				$('#btn-paired').trigger('click');
-			}
-			// Default to whole pizza view
-			else {
+			} else {
 				$('#btn-whole').trigger('click');
 			}
 		}
