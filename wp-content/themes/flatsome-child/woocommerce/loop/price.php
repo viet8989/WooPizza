@@ -20,16 +20,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 global $product;
-
-function flatsome_child_lightbox_button2() {
-    if ( get_theme_mod( 'disable_quick_view', 0 ) ) {
-        return;
-    }
-    wp_enqueue_script( 'wc-add-to-cart-variation' );
-    global $product;
-    echo '  <a class="quick-view" data-prod="' . $product->get_id() . '" href="#quick-view" onclick="event.preventDefault(); sessionStorage.setItem(\'pizza_view\', \'paired\');"><img src="/wp-content/uploads/images/half_pizza.png" /></a>';
-}
-add_action('flatsome_product_box_actions2', 'flatsome_child_lightbox_button2', 49);
 ?>
 
 <?php if ( $price_html = $product->get_price_html() ) : ?>

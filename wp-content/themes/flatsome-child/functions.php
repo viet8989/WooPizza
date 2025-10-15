@@ -9,7 +9,7 @@ add_action('wp_enqueue_scripts', 'enqueue_custom_js');
 
 add_filter('woocommerce_currency_symbol', function ($currency_symbol, $currency) {
     if ($currency === 'VND') {
-        $currency_symbol = '₫'; // Đổi từ ₫ sang VND
+        $currency_symbol = '₫';
     }
     return $currency_symbol;
 }, 10, 2);
@@ -834,7 +834,6 @@ function custom_sticky_mini_cart_widget() {
 		});
 
 		// Show cart on page load if there are items
-		var initialItemCount = WC()->cart->get_cart_contents_count();
 		if (typeof wc_add_to_cart_params !== 'undefined') {
 			setTimeout(function() {
 				var itemCount = $('.cart-item .cart-icon strong').text();
