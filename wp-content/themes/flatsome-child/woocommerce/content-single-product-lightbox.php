@@ -300,15 +300,15 @@ do_action( 'wc_quick_view_before_single_product' );
 
 <?php
 /**
- * Helper function to get topping categories (children of category 25)
+ * Helper function to get topping categories (children of category 15)
  *
  * @return array Array of category data with their products
  */
 function get_topping_categories() {
-	$parent_category_id = 25;
+	$parent_category_id = 15;
 	$categories = array();
 
-	// Get child categories of category 25
+	// Get child categories of category 15
 	$child_categories = get_terms( array(
 		'taxonomy'   => 'product_cat',
 		'parent'     => $parent_category_id,
