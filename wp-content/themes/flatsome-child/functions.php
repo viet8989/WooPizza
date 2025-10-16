@@ -1058,7 +1058,7 @@ function hide_topping_categories_css_js() {
 	jQuery(document).ready(function($) {
 		// Hide category 15 (topping) and all its children
 		$('#in-product_cat-15-1').hide();
-
+		$('#product_cat-tabs li.tabs a').text('Pizza categories'); // Hide "Most Used" tab
 		// Remove "Most Used" tab
 		$('#product_cat-tabs li.hide-if-no-js').remove();
 		$('#product_cat-pop').remove();
