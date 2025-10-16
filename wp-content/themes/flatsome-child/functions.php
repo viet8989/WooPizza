@@ -1068,11 +1068,13 @@ function hide_categories_css_js() {
 
 				// Track when crosssell field is opened
 				$(document).on('select2:opening', '#crosssell_ids', function(e) {
+					console.log('Crosssell field opened');
 					isCrosssellActive = true;
 				});
 
 				// Track when crosssell field is closed
 				$(document).on('select2:closing', '#crosssell_ids', function(e) {
+					console.log('Crosssell field closed');
 					setTimeout(function() {
 						isCrosssellActive = false;
 					}, 500);
@@ -1085,9 +1087,14 @@ function hide_categories_css_js() {
 					    settings.data && typeof settings.data === 'string' &&
 					    settings.data.indexOf('woocommerce_json_search_products') > -1) {
 
+						console.log('Product search AJAX detected');
+						console.log('isCrosssellActive:', isCrosssellActive);
+						console.log('Original data:', settings.data);
+
 						// Add field=crosssell if crosssell is active
 						if (isCrosssellActive) {
 							settings.data += '&field=crosssell';
+							console.log('Added field=crosssell. New data:', settings.data);
 						}
 					}
 				});
@@ -1203,9 +1210,17 @@ function filter_products_by_field_type( $products ) {
 	// Detect which field is being searched by checking HTTP_REFERER or a custom parameter
 	$is_crosssell_search = false;
 
+	// Debug: Log the request parameters
+	error_log( 'Product Search - Field param: ' . ( isset( $_REQUEST['field'] ) ? $_REQUEST['field'] : 'not set' ) );
+	error_log( 'Product Search - All GET: ' . print_r( $_GET, true ) );
+	error_log( 'Product Search - All POST: ' . print_r( $_POST, true ) );
+
 	// Check if there's a custom parameter indicating this is cross-sell search
 	if ( isset( $_REQUEST['field'] ) && $_REQUEST['field'] === 'crosssell' ) {
 		$is_crosssell_search = true;
+		error_log( 'Cross-sell search detected - showing ONLY toppings' );
+	} else {
+		error_log( 'Regular search - EXCLUDING toppings' );
 	}
 
 	if ( $is_crosssell_search ) {
