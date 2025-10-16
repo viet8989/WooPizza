@@ -86,6 +86,83 @@ add_action('wp_head', 'remove_sticky_header_script', 999);
 
 // Viet add custom functions below this line
 
+// AJAX handler to get toppings for a product based on cross-sell IDs
+add_action( 'wp_ajax_get_product_toppings', 'ajax_get_product_toppings' );
+add_action( 'wp_ajax_nopriv_get_product_toppings', 'ajax_get_product_toppings' );
+
+function ajax_get_product_toppings() {
+	// Verify nonce for security
+	if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], 'product_toppings_nonce' ) ) {
+		wp_send_json_error( array( 'message' => 'Invalid security token' ) );
+		return;
+	}
+
+	// Get cross-sell IDs from POST data
+	if ( ! isset( $_POST['cross_sell_ids'] ) || ! is_array( $_POST['cross_sell_ids'] ) ) {
+		wp_send_json_error( array( 'message' => 'No cross-sell IDs provided' ) );
+		return;
+	}
+
+	$cross_sell_ids = array_map( 'intval', $_POST['cross_sell_ids'] );
+
+	// Get topping categories
+	$parent_category_id = 25;
+	$topping_categories = get_terms( array(
+		'taxonomy'   => 'product_cat',
+		'parent'     => $parent_category_id,
+		'hide_empty' => false,
+	) );
+
+	$toppings_by_category = array();
+
+	if ( empty( $cross_sell_ids ) ) {
+		wp_send_json_success( array( 'toppings' => $toppings_by_category ) );
+		return;
+	}
+
+	// Get all products from cross-sell IDs
+	$products = wc_get_products( array(
+		'include' => $cross_sell_ids,
+		'status'  => 'publish',
+		'limit'   => -1,
+	) );
+
+	if ( ! empty( $products ) && ! empty( $topping_categories ) && ! is_wp_error( $topping_categories ) ) {
+		foreach ( $products as $product ) {
+			if ( ! $product instanceof WC_Product ) {
+				continue;
+			}
+
+			// Get product categories
+			$product_categories = $product->get_category_ids();
+
+			// Check which topping category this product belongs to
+			foreach ( $topping_categories as $topping_cat ) {
+				if ( in_array( $topping_cat->term_id, $product_categories ) ) {
+					if ( ! isset( $toppings_by_category[ $topping_cat->term_id ] ) ) {
+						$toppings_by_category[ $topping_cat->term_id ] = array(
+							'category_name' => $topping_cat->name,
+							'category_slug' => $topping_cat->slug,
+							'products'      => array(),
+						);
+					}
+
+					$toppings_by_category[ $topping_cat->term_id ]['products'][] = array(
+						'id'    => $product->get_id(),
+						'name'  => $product->get_name(),
+						'price' => $product->get_price(),
+						'price_formatted' => wc_price( $product->get_price() ),
+					);
+
+					break; // Product found in this category, no need to check others
+				}
+			}
+		}
+	}
+
+	wp_send_json_success( array( 'toppings' => $toppings_by_category ) );
+}
+
 // Split Products menu into Pizza and Topping menus in WordPress admin
 add_action( 'admin_menu', 'add_pizza_and_topping_admin_menus', 99 );
 function add_pizza_and_topping_admin_menus() {

@@ -145,14 +145,19 @@ do_action( 'wc_quick_view_before_single_product' );
 											$paired_image    = wp_get_attachment_image_src( $paired_image_id, 'medium' );
 											$paired_image_url = $paired_image ? $paired_image[0] : wc_placeholder_img_src();
 
+											// Get cross-sell IDs for this paired product
+											$paired_cross_sells = $paired_prod->get_cross_sell_ids();
+											$paired_cross_sells_json = json_encode( $paired_cross_sells );
+
 											// Half price for paired option
 											$half_price = $paired_price / 2;
 											?>
-											<div class="pizza-card" 
+											<div class="pizza-card"
 												 data-product-id="<?php echo esc_attr( $paired_id ); ?>"
 												 data-product-name="<?php echo esc_attr( $paired_name ); ?>"
 												 data-product-price="<?php echo esc_attr( $half_price ); ?>"
-												 data-product-image="<?php echo esc_url( $paired_image_url ); ?>">
+												 data-product-image="<?php echo esc_url( $paired_image_url ); ?>"
+												 data-cross-sells="<?php echo esc_attr( $paired_cross_sells_json ); ?>">
 												<img src="<?php echo esc_url( $paired_image_url ); ?>" 
 													 alt="<?php echo esc_attr( $paired_name ); ?>" 
 													 class="pizza-card-img">
@@ -178,56 +183,41 @@ do_action( 'wc_quick_view_before_single_product' );
 
 			<!-- Whole Pizza Toppings -->
 			<div id="whole-pizza-toppings" class="toppings-container">
-				<!-- Extra Cheese Options -->
 				<?php
-				$cheese_products = get_products_by_category( 25 );
-				if ( ! empty( $cheese_products ) ) :
+				// Get toppings from cross-sell IDs for whole pizza
+				$cross_sell_ids = $product->get_cross_sell_ids();
+				$whole_toppings = get_toppings_from_cross_sells( $cross_sell_ids );
+
+				if ( ! empty( $whole_toppings ) ) :
 				?>
 				<h3 class="topping-tab-whole">Whole Pizza Upgrade</h3>
-				<div class="extra-options-section">
-					<h4 class="extra-options-title"><?php esc_html_e( 'Add extra cheese:', 'flatsome' ); ?></h4>
-					<div class="checkbox-group">
-						<?php foreach ( $cheese_products as $cheese ) : ?>
-							<label class="topping-label">
-								<input type="checkbox"
-									   value="<?php echo esc_attr( $cheese['name'] ); ?>"
-									   class="topping-checkbox whole-topping"
-									   data-price="<?php echo esc_attr( $cheese['price'] ); ?>"
-									   data-product-id="<?php echo esc_attr( $cheese['id'] ); ?>">
-								<span class="topping-text">
-									<?php echo esc_html( $cheese['name'] ); ?>
-									(<?php echo wp_kses_post( wc_price( $cheese['price'] ) ); ?>)
-								</span>
-							</label>
-						<?php endforeach; ?>
-					</div>
-				</div>
-				<?php endif; ?>
-
-				<!-- Extra Cold Cuts Options -->
 				<?php
-				$coldcuts_products = get_products_by_category( 26 );
-				if ( ! empty( $coldcuts_products ) ) :
+					foreach ( $whole_toppings as $category_id => $topping_category ) :
+						if ( ! empty( $topping_category['products'] ) ) :
 				?>
 				<div class="extra-options-section">
-					<h4 class="extra-options-title"><?php esc_html_e( 'Add extra cold cuts:', 'flatsome' ); ?></h4>
+					<h4 class="extra-options-title"><?php echo esc_html( $topping_category['category_name'] ); ?>:</h4>
 					<div class="checkbox-group">
-						<?php foreach ( $coldcuts_products as $coldcut ) : ?>
+						<?php foreach ( $topping_category['products'] as $topping ) : ?>
 							<label class="topping-label">
 								<input type="checkbox"
-									   value="<?php echo esc_attr( $coldcut['name'] ); ?>"
+									   value="<?php echo esc_attr( $topping['name'] ); ?>"
 									   class="topping-checkbox whole-topping"
-									   data-price="<?php echo esc_attr( $coldcut['price'] ); ?>"
-									   data-product-id="<?php echo esc_attr( $coldcut['id'] ); ?>">
+									   data-price="<?php echo esc_attr( $topping['price'] ); ?>"
+									   data-product-id="<?php echo esc_attr( $topping['id'] ); ?>">
 								<span class="topping-text">
-									<?php echo esc_html( $coldcut['name'] ); ?>
-									(<?php echo wp_kses_post( wc_price( $coldcut['price'] ) ); ?>)
+									<?php echo esc_html( $topping['name'] ); ?>
+									(<?php echo wp_kses_post( wc_price( $topping['price'] ) ); ?>)
 								</span>
 							</label>
 						<?php endforeach; ?>
 					</div>
 				</div>
-				<?php endif; ?>
+				<?php
+						endif;
+					endforeach;
+				endif;
+				?>
 			</div>
 
 			<!-- Paired Pizza Toppings -->
@@ -236,94 +226,44 @@ do_action( 'wc_quick_view_before_single_product' );
 				<h3 class="topping-tab" data-tab="left-toppings"><?php esc_html_e('Left Pizza Upgrade', 'flatsome'); ?></h3>
 				<h3 class="topping-tab" data-tab="right-toppings"><?php esc_html_e('Right Pizza Upgrade', 'flatsome'); ?></h3>
 
-				<!-- Left Half Toppings -->
+				<!-- Left Half Toppings (same as whole pizza, using main product cross-sells) -->
 				<div id="left-toppings" class="half-toppings-section tab-content active">
-						<?php if ( ! empty( $cheese_products ) ) : ?>
-						<div class="extra-options-section">
-							<h4 class="extra-options-title"><?php esc_html_e( 'Add extra cheese:', 'flatsome' ); ?></h4>
-						<div class="checkbox-group">
-							<?php foreach ( $cheese_products as $cheese ) : ?>
-								<label class="topping-label">
-									<input type="checkbox"
-										   value="<?php echo esc_attr( $cheese['name'] ); ?>"
-										   class="topping-checkbox left-topping"
-										   data-price="<?php echo esc_attr( $cheese['price'] ); ?>"
-										   data-product-id="<?php echo esc_attr( $cheese['id'] ); ?>">
-									<span class="topping-text">
-										<?php echo esc_html( $cheese['name'] ); ?>
-										(<?php echo wp_kses_post( wc_price( $cheese['price'] ) ); ?>)
-									</span>
-								</label>
-							<?php endforeach; ?>
-						</div>
-					</div>
-					<?php endif; ?>
-
-					<?php if ( ! empty( $coldcuts_products ) ) : ?>
+					<?php
+					// Reuse whole_toppings for left half (same as main product)
+					if ( ! empty( $whole_toppings ) ) :
+						foreach ( $whole_toppings as $category_id => $topping_category ) :
+							if ( ! empty( $topping_category['products'] ) ) :
+					?>
 					<div class="extra-options-section">
-						<h4 class="extra-options-title"><?php esc_html_e( 'Add extra cold cuts:', 'flatsome' ); ?></h4>
+						<h4 class="extra-options-title"><?php echo esc_html( $topping_category['category_name'] ); ?>:</h4>
 						<div class="checkbox-group">
-							<?php foreach ( $coldcuts_products as $coldcut ) : ?>
+							<?php foreach ( $topping_category['products'] as $topping ) : ?>
 								<label class="topping-label">
 									<input type="checkbox"
-										   value="<?php echo esc_attr( $coldcut['name'] ); ?>"
+										   value="<?php echo esc_attr( $topping['name'] ); ?>"
 										   class="topping-checkbox left-topping"
-										   data-price="<?php echo esc_attr( $coldcut['price'] ); ?>"
-										   data-product-id="<?php echo esc_attr( $coldcut['id'] ); ?>">
+										   data-price="<?php echo esc_attr( $topping['price'] ); ?>"
+										   data-product-id="<?php echo esc_attr( $topping['id'] ); ?>">
 									<span class="topping-text">
-										<?php echo esc_html( $coldcut['name'] ); ?>
-										(<?php echo wp_kses_post( wc_price( $coldcut['price'] ) ); ?>)
+										<?php echo esc_html( $topping['name'] ); ?>
+										(<?php echo wp_kses_post( wc_price( $topping['price'] ) ); ?>)
 									</span>
 								</label>
 							<?php endforeach; ?>
 						</div>
 					</div>
-					<?php endif; ?>
+					<?php
+							endif;
+						endforeach;
+					endif;
+					?>
 				</div>
 
-				<!-- Right Half Toppings -->
+				<!-- Right Half Toppings (will be dynamically loaded via JavaScript) -->
 				<div id="right-toppings" class="half-toppings-section tab-content">
-					<?php if ( ! empty( $cheese_products ) ) : ?>
-					<div class="extra-options-section">
-						<h4 class="extra-options-title"><?php esc_html_e( 'Add extra cheese:', 'flatsome' ); ?></h4>
-						<div class="checkbox-group">
-							<?php foreach ( $cheese_products as $cheese ) : ?>
-								<label class="topping-label">
-									<input type="checkbox"
-										   value="<?php echo esc_attr( $cheese['name'] ); ?>"
-										   class="topping-checkbox right-topping"
-										   data-price="<?php echo esc_attr( $cheese['price'] ); ?>"
-										   data-product-id="<?php echo esc_attr( $cheese['id'] ); ?>">
-									<span class="topping-text">
-										<?php echo esc_html( $cheese['name'] ); ?>
-										(<?php echo wp_kses_post( wc_price( $cheese['price'] ) ); ?>)
-									</span>
-								</label>
-							<?php endforeach; ?>
-						</div>
+					<div class="right-toppings-placeholder">
+						<p><?php esc_html_e( 'Please select a pizza from the options below to see available toppings.', 'flatsome' ); ?></p>
 					</div>
-					<?php endif; ?>
-
-					<?php if ( ! empty( $coldcuts_products ) ) : ?>
-					<div class="extra-options-section">
-						<h4 class="extra-options-title"><?php esc_html_e( 'Add extra cold cuts:', 'flatsome' ); ?></h4>
-						<div class="checkbox-group">
-							<?php foreach ( $coldcuts_products as $coldcut ) : ?>
-								<label class="topping-label">
-									<input type="checkbox"
-										   value="<?php echo esc_attr( $coldcut['name'] ); ?>"
-										   class="topping-checkbox right-topping"
-										   data-price="<?php echo esc_attr( $coldcut['price'] ); ?>"
-										   data-product-id="<?php echo esc_attr( $coldcut['id'] ); ?>">
-									<span class="topping-text">
-										<?php echo esc_html( $coldcut['name'] ); ?>
-										(<?php echo wp_kses_post( wc_price( $coldcut['price'] ) ); ?>)
-									</span>
-								</label>
-							<?php endforeach; ?>
-						</div>
-					</div>
-					<?php endif; ?>
 				</div>
 			</div>
 
@@ -360,40 +300,90 @@ do_action( 'wc_quick_view_before_single_product' );
 
 <?php
 /**
- * Helper function to get products by category
+ * Helper function to get topping categories (children of category 25)
  *
- * @param int $category_id Category term ID
- * @return array Array of product data
+ * @return array Array of category data with their products
  */
-function get_products_by_category( $category_id ) {
-	// Use wc_get_products instead of WP_Query to avoid polluting global scope
-	$wc_products = wc_get_products( array(
-		'status'    => 'publish',
-		'limit'     => -1,
-		'tax_query' => array(
-			array(
-				'taxonomy' => 'product_cat',
-				'field'    => 'term_id',
-				'terms'    => $category_id,
-			),
-		),
+function get_topping_categories() {
+	$parent_category_id = 25;
+	$categories = array();
+
+	// Get child categories of category 25
+	$child_categories = get_terms( array(
+		'taxonomy'   => 'product_cat',
+		'parent'     => $parent_category_id,
+		'hide_empty' => false,
 	) );
 
-	$products = array();
+	if ( ! empty( $child_categories ) && ! is_wp_error( $child_categories ) ) {
+		foreach ( $child_categories as $category ) {
+			$categories[] = array(
+				'id'   => $category->term_id,
+				'name' => $category->name,
+				'slug' => $category->slug,
+			);
+		}
+	}
 
-	if ( ! empty( $wc_products ) ) {
-		foreach ( $wc_products as $wc_product ) {
-			if ( $wc_product instanceof WC_Product ) {
-				$products[] = array(
-					'id'    => $wc_product->get_id(),
-					'name'  => $wc_product->get_name(),
-					'price' => $wc_product->get_price(),
-				);
+	return $categories;
+}
+
+/**
+ * Helper function to get toppings from cross-sell IDs
+ *
+ * @param array $cross_sell_ids Array of product IDs
+ * @return array Grouped array of toppings by category
+ */
+function get_toppings_from_cross_sells( $cross_sell_ids ) {
+	$toppings_by_category = array();
+
+	if ( empty( $cross_sell_ids ) ) {
+		return $toppings_by_category;
+	}
+
+	// Get all topping categories
+	$topping_categories = get_topping_categories();
+
+	// Get all products from cross-sell IDs
+	$products = wc_get_products( array(
+		'include' => $cross_sell_ids,
+		'status'  => 'publish',
+		'limit'   => -1,
+	) );
+
+	if ( ! empty( $products ) ) {
+		foreach ( $products as $product ) {
+			if ( ! $product instanceof WC_Product ) {
+				continue;
+			}
+
+			// Get product categories
+			$product_categories = $product->get_category_ids();
+
+			// Check which topping category this product belongs to
+			foreach ( $topping_categories as $topping_cat ) {
+				if ( in_array( $topping_cat['id'], $product_categories ) ) {
+					if ( ! isset( $toppings_by_category[ $topping_cat['id'] ] ) ) {
+						$toppings_by_category[ $topping_cat['id'] ] = array(
+							'category_name' => $topping_cat['name'],
+							'category_slug' => $topping_cat['slug'],
+							'products'      => array(),
+						);
+					}
+
+					$toppings_by_category[ $topping_cat['id'] ]['products'][] = array(
+						'id'    => $product->get_id(),
+						'name'  => $product->get_name(),
+						'price' => $product->get_price(),
+					);
+
+					break; // Product found in this category, no need to check others
+				}
 			}
 		}
 	}
 
-	return $products;
+	return $toppings_by_category;
 }
 
 do_action( 'wc_quick_view_after_single_product' );
@@ -955,12 +945,74 @@ do_action( 'wc_quick_view_after_single_product' );
 			}, 100);
 		}
 
+		// Function to load right half toppings via AJAX
+		function loadRightHalfToppings(crossSellIds) {
+			const $rightToppings = $('#right-toppings');
+
+			// Show loading state
+			$rightToppings.html('<div class="right-toppings-placeholder"><p>Loading toppings...</p></div>');
+
+			// Make AJAX request to get toppings
+			$.ajax({
+				url: '<?php echo esc_url( admin_url( "admin-ajax.php" ) ); ?>',
+				type: 'POST',
+				data: {
+					action: 'get_product_toppings',
+					nonce: '<?php echo wp_create_nonce( "product_toppings_nonce" ); ?>',
+					cross_sell_ids: crossSellIds
+				},
+				success: function(response) {
+					if (response.success && response.data.toppings) {
+						const toppings = response.data.toppings;
+						let html = '';
+
+						// Build HTML for each topping category
+						Object.keys(toppings).forEach(function(categoryId) {
+							const category = toppings[categoryId];
+							if (category.products && category.products.length > 0) {
+								html += '<div class="extra-options-section">';
+								html += '<h4 class="extra-options-title">' + category.category_name + ':</h4>';
+								html += '<div class="checkbox-group">';
+
+								category.products.forEach(function(topping) {
+									html += '<label class="topping-label">';
+									html += '<input type="checkbox" ';
+									html += 'value="' + topping.name + '" ';
+									html += 'class="topping-checkbox right-topping" ';
+									html += 'data-price="' + topping.price + '" ';
+									html += 'data-product-id="' + topping.id + '">';
+									html += '<span class="topping-text">';
+									html += topping.name + ' (' + topping.price_formatted + ')';
+									html += '</span>';
+									html += '</label>';
+								});
+
+								html += '</div></div>';
+							}
+						});
+
+						if (html) {
+							$rightToppings.html(html);
+						} else {
+							$rightToppings.html('<div class="right-toppings-placeholder"><p>No toppings available for this pizza.</p></div>');
+						}
+					} else {
+						$rightToppings.html('<div class="right-toppings-placeholder"><p>Error loading toppings. Please try again.</p></div>');
+					}
+				},
+				error: function() {
+					$rightToppings.html('<div class="right-toppings-placeholder"><p>Error loading toppings. Please try again.</p></div>');
+				}
+			});
+		}
+
 		// Pizza Card Selection (for right half)
 		function initPizzaCardSelection() {
 			$(document).on('click', '.pizza-card', function() {
 				const $card = $(this);
 				const imageUrl = $card.data('product-image');
 				const isCurrentlySelected = $card.hasClass('selected');
+				const crossSells = $card.data('cross-sells');
 
 				// Remove selection from all cards
 				$('.pizza-card').removeClass('selected');
@@ -982,6 +1034,14 @@ do_action( 'wc_quick_view_after_single_product' );
 						price: parseFloat($card.data('product-price')),
 						image: imageUrl
 					};
+
+					// Load toppings for the right half
+					if (crossSells && Array.isArray(crossSells) && crossSells.length > 0) {
+						loadRightHalfToppings(crossSells);
+					} else {
+						$('#right-toppings').html('<div class="right-toppings-placeholder"><p>No toppings available for this pizza.</p></div>');
+					}
+
 					$('#right-pizza').trigger('click');
 				} else {
 					// Reset to default placeholder
@@ -992,6 +1052,9 @@ do_action( 'wc_quick_view_after_single_product' );
 
 					// Clear right half selection
 					selectedRightHalf = null;
+
+					// Reset right toppings to placeholder
+					$('#right-toppings').html('<div class="right-toppings-placeholder"><p><?php esc_html_e( "Please select a pizza from the options below to see available toppings.", "flatsome" ); ?></p></div>');
 				}
 
 				updateSubtotal();
