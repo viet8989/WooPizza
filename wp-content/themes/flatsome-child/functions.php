@@ -238,39 +238,37 @@ function display_pizza_products_page() {
 		</a>
 		<hr class="wp-header-end">
 		<?php
-		// Get pizza category term
-		$pizza_cat = get_term_by( 'slug', 'pizza', 'product_cat' );
-		if ( ! $pizza_cat ) {
-			// Try to find by name
-			$pizza_terms = get_terms( array(
-				'taxonomy' => 'product_cat',
-				'name' => 'Pizza',
-				'hide_empty' => false,
-			) );
-			if ( ! empty( $pizza_terms ) && ! is_wp_error( $pizza_terms ) ) {
-				$pizza_cat = $pizza_terms[0];
-			}
+		// Get category 15 (topping) and all its children to exclude
+		$topping_parent_id = 15;
+		$excluded_cats = array( $topping_parent_id );
+
+		// Get all child categories of category 15
+		$child_categories = get_terms( array(
+			'taxonomy' => 'product_cat',
+			'parent' => $topping_parent_id,
+			'hide_empty' => false,
+			'fields' => 'ids',
+		) );
+
+		if ( ! empty( $child_categories ) && ! is_wp_error( $child_categories ) ) {
+			$excluded_cats = array_merge( $excluded_cats, $child_categories );
 		}
 
-		// Query pizza products
+		// Query pizza products (exclude topping products)
 		$args = array(
 			'post_type' => 'product',
 			'posts_per_page' => -1,
 			'orderby' => 'title',
 			'order' => 'ASC',
-		);
-
-		// Add category filter if pizza category exists
-		if ( $pizza_cat ) {
-			$args['tax_query'] = array(
+			'tax_query' => array(
 				array(
 					'taxonomy' => 'product_cat',
 					'field' => 'term_id',
-					'terms' => $pizza_cat->term_id,
-					'operator' => 'IN',
+					'terms' => $excluded_cats,
+					'operator' => 'NOT IN',
 				),
-			);
-		}
+			),
+		);
 
 		$products = new WP_Query( $args );
 
