@@ -546,6 +546,10 @@ do_action( 'wc_quick_view_after_single_product' );
 	align-items: center;
 }
 
+.half-pizza-container img:hover {
+	cursor: pointer;
+}
+
 .left-pizza-img {
 	width: 200%;
 	height: 100%;
@@ -923,6 +927,20 @@ do_action( 'wc_quick_view_after_single_product' );
 				};
 
 				updateSubtotal();
+			});
+
+			$('#left-pizza').on('click', function() {
+				$('.topping-tab').removeClass('active');
+				$('.topping-tab[data-tab="left-toppings"]').addClass('active');
+				$('.tab-content').removeClass('active');
+				$('#left-toppings').addClass('active');
+			});
+
+			$('#right-pizza').on('click', function() {
+				$('.topping-tab').removeClass('active');
+				$('.topping-tab[data-tab="right-toppings"]').addClass('active');
+				$('.tab-content').removeClass('active');
+				$('#right-toppings').addClass('active');
 			});
 
 			// Wait for DOM to be ready and modal to be visible
