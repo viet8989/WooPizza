@@ -118,23 +118,18 @@ do_action( 'wc_quick_view_before_single_product' );
 						<div class="pizza-grid-wrapper">
 							<div class="pizza-grid">
 								<?php
-								// Get paired products from the same brand
-								$brands = wp_get_post_terms( $product_id, 'product_brand' );
+								// Get paired products from upsells
+								$upsell_ids = $product->get_upsell_ids();
 								
-								if ( ! is_wp_error( $brands ) && ! empty( $brands ) ) {
-									$first_brand_id = $brands[0]->term_id;
+								if ( ! empty( $upsell_ids ) ) {
+									$args = array(
+										'include' => $upsell_ids,
+										'limit'   => -1,
+										'orderby' => 'rand',
+										'status'  => 'publish'
+									);
 									
-									$paired_products = wc_get_products( array(
-										'status'    => 'publish',
-										'limit'     => -1,
-										'tax_query' => array(
-											array(
-												'taxonomy' => 'product_brand',
-												'field'    => 'term_id',
-												'terms'    => $first_brand_id,
-											),
-										),
-									) );
+									$paired_products = wc_get_products( $args );
 
 									if ( ! empty( $paired_products ) ) {
 										foreach ( $paired_products as $paired_prod ) {
