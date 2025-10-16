@@ -1082,37 +1082,18 @@ function hide_categories_css_js() {
 
 				// Hook into AJAX requests to add field parameter
 				$(document).ajaxSend(function(event, jqxhr, settings) {
-					console.log('AJAX Send - URL:', settings.url);
-					console.log('AJAX Send - Data type:', typeof settings.data);
-					if (settings.data) {
-						console.log('AJAX Send - Data:', settings.data);
-					}
+					// Check if this is a product search AJAX request (URL contains the action parameter)
+					if (settings.url && settings.url.indexOf('admin-ajax.php') > -1 &&
+					    settings.url.indexOf('woocommerce_json_search_products') > -1) {
 
-					// Check if this is a product search AJAX request
-					var isProductSearch = false;
-
-					if (settings.url && settings.url.indexOf('admin-ajax.php') > -1) {
-						if (typeof settings.data === 'string' && settings.data.indexOf('woocommerce_json_search_products') > -1) {
-							isProductSearch = true;
-						} else if (typeof settings.data === 'object' && settings.data.action &&
-						           (settings.data.action === 'woocommerce_json_search_products' ||
-						            settings.data.action === 'woocommerce_json_search_products_and_variations')) {
-							isProductSearch = true;
-						}
-					}
-
-					if (isProductSearch) {
 						console.log('Product search AJAX detected');
 						console.log('isCrosssellActive:', isCrosssellActive);
+						console.log('Original URL:', settings.url);
 
-						// Add field=crosssell if crosssell is active
+						// Add field=crosssell to URL if crosssell is active
 						if (isCrosssellActive) {
-							if (typeof settings.data === 'string') {
-								settings.data += '&field=crosssell';
-							} else if (typeof settings.data === 'object') {
-								settings.data.field = 'crosssell';
-							}
-							console.log('Added field=crosssell. New data:', settings.data);
+							settings.url += '&field=crosssell';
+							console.log('Added field=crosssell to URL:', settings.url);
 						}
 					}
 				});
