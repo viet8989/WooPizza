@@ -997,3 +997,49 @@ function custom_sticky_mini_cart_widget() {
 	</script>
 	<?php
 }
+
+// Remove "Most Used" tab from Product Categories metabox
+add_filter( 'wp_terms_checklist_args', 'remove_most_used_tab_product_categories', 10, 2 );
+function remove_most_used_tab_product_categories( $args, $post_id ) {
+	// Only apply to product category taxonomy
+	if ( isset( $args['taxonomy'] ) && $args['taxonomy'] === 'product_cat' ) {
+		$args['popular_cats'] = array(); // This removes the "Most Used" tab
+	}
+	return $args;
+}
+
+// Hide category 15 (topping) and its subcategories from Product Categories metabox
+add_filter( 'wp_terms_checklist_args', 'exclude_topping_categories_from_product_metabox', 10, 2 );
+function exclude_topping_categories_from_product_metabox( $args, $post_id ) {
+	// Only apply to product category taxonomy
+	if ( ! isset( $args['taxonomy'] ) || $args['taxonomy'] !== 'product_cat' ) {
+		return $args;
+	}
+
+	// Get category 15 and all its children
+	$topping_parent_id = 15;
+	$excluded_cats = array( $topping_parent_id );
+
+	// Get all child categories of category 15
+	$child_categories = get_terms( array(
+		'taxonomy' => 'product_cat',
+		'parent' => $topping_parent_id,
+		'hide_empty' => false,
+		'fields' => 'ids',
+	) );
+
+	if ( ! empty( $child_categories ) && ! is_wp_error( $child_categories ) ) {
+		$excluded_cats = array_merge( $excluded_cats, $child_categories );
+	}
+
+	// Add to exclude array
+	if ( ! empty( $excluded_cats ) ) {
+		if ( isset( $args['exclude'] ) && is_array( $args['exclude'] ) ) {
+			$args['exclude'] = array_merge( $args['exclude'], $excluded_cats );
+		} else {
+			$args['exclude'] = $excluded_cats;
+		}
+	}
+
+	return $args;
+}
