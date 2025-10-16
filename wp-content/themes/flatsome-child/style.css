@@ -36,6 +36,16 @@ body.hidden-show {
 	border-bottom: 1px solid #abb8c3
 }
 
+/* Remove sticky header behavior */
+.header-wrapper, .header {
+	position: relative !important;
+	top: auto !important;
+}
+
+.stuck .header-main {
+	position: relative !important;
+}
+
 .header-main .header-nav {
 	justify-content: center
 }
