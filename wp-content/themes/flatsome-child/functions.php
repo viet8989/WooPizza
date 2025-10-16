@@ -14,6 +14,25 @@ add_filter('woocommerce_currency_symbol', function ($currency_symbol, $currency)
     return $currency_symbol;
 }, 10, 2);
 
+// Disable sticky header
+add_filter('flatsome_header_sticky', '__return_false');
+
+// Remove sticky header classes via JavaScript
+function remove_sticky_header_script() {
+    ?>
+    <script type="text/javascript">
+    jQuery(document).ready(function($) {
+        // Remove sticky-related classes from header
+        $('#header, .header, .header-wrapper').removeClass('has-sticky stuck');
+
+        // Disable sticky header JavaScript
+        $(window).off('scroll.stickyHeader');
+    });
+    </script>
+    <?php
+}
+add_action('wp_footer', 'remove_sticky_header_script', 999);
+
 // Viet add custom functions below this line
 
 // Split Products menu into Pizza and Topping menus in WordPress admin
