@@ -1070,6 +1070,17 @@ function hide_categories_css_js() {
 				</script>
 			<?php
 		}else if ( $_GET['product_type'] === 'topping' ) {
+			// Get all child categories of category 15
+			$child_categories = get_terms( array(
+				'taxonomy' => 'product_cat',
+				'parent' => $topping_parent_id,
+				'hide_empty' => false,
+				'fields' => 'ids',
+			) );
+
+			if ( empty( $child_categories ) || is_wp_error( $child_categories ) ) {
+				return;
+			}
 			?>
 				<script type="text/javascript">
 					jQuery(document).ready(function($) {
@@ -1078,7 +1089,12 @@ function hide_categories_css_js() {
 							var $checkbox = $(this).find('input[type="checkbox"]');
 							if ($checkbox.length) {
 								var catId = parseInt($checkbox.val());
-								if (catId === 15 || !$checkbox.closest('li').hasClass('children')) {
+								// Hide if not in the list of child categories of category 15
+								// Also hide category 15 itself
+								// Category 15 is hidden if it does not have 'children' class
+								// to avoid hiding parent categories of category 15
+								var childCatIds = <?php echo json_encode( $child_categories ); ?>;
+								if (catId === 15 || childCatIds.indexOf(catId) === -1) {
 									$(this).hide();
 								}
 							}

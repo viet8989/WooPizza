@@ -88,10 +88,6 @@ do_action( 'wc_quick_view_before_single_product' );
 								<?php esc_html_e( 'Read more', 'flatsome' ); ?>
 							</a>
 						</div>
-						
-						<p class="pizza-size-info">
-							<strong><?php esc_html_e( 'Pizza size: 18 Inch (8 slides)', 'flatsome' ); ?></strong>
-						</p>
 					</div>
 
 					<!-- Paired Pizza Display -->
