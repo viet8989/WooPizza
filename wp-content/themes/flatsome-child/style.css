@@ -37,13 +37,14 @@ body.hidden-show {
 }
 
 /* Remove sticky header behavior */
-.header-wrapper, .header {
+.header-wrapper, .header, #header {
 	position: relative !important;
 	top: auto !important;
 }
 
-.stuck .header-main {
+.header-wrapper.stuck {
 	position: relative !important;
+	top: auto !important;
 }
 
 .header-main .header-nav {
