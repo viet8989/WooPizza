@@ -43,7 +43,7 @@ function remove_sticky_header_script() {
                 'right': 'auto !important',
                 'transform': 'none !important'
             }).attr('style', function(i, style) {
-                return style.replace(/position\s*:\s*fixed/gi, 'position: relative');
+                return style ? style.replace(/position\s*:\s*fixed/gi, 'position: relative') : style;
             });
         }
 
