@@ -1058,25 +1058,37 @@ function hide_categories_css_js() {
 		<script type="text/javascript">
 			jQuery(document).ready(function($) {
 				$('#uxbuilder-enable-disable').hide();
+				$('.woocommerce-help-tip').hide();
 				$('#woocommerce-product-data .product_data_tabs li.advanced_options').hide();
 				$('#woocommerce-product-data .product_data_tabs li.ux_product_layout_tab').hide();
 				$('#woocommerce-product-data .product_data_tabs li.ux_extra_tab').hide();
 
 				// Add custom parameter to cross-sell search to filter only topping products
-				$('#crosssell_ids').on('select2:opening', function() {
-					// Modify the AJAX data to include field=crosssell parameter
-					var $select = $(this);
-					if (!$select.data('ajax-modified')) {
-						var originalAjax = $select.data('select2').options.options.ajax;
-						if (originalAjax && originalAjax.data) {
-							var originalData = originalAjax.data;
-							originalAjax.data = function(params) {
-								var data = originalData.call(this, params);
-								data.field = 'crosssell';
-								return data;
-							};
+				var isCrosssellActive = false;
+
+				// Track when crosssell field is opened
+				$(document).on('select2:opening', '#crosssell_ids', function(e) {
+					isCrosssellActive = true;
+				});
+
+				// Track when crosssell field is closed
+				$(document).on('select2:closing', '#crosssell_ids', function(e) {
+					setTimeout(function() {
+						isCrosssellActive = false;
+					}, 500);
+				});
+
+				// Hook into AJAX requests to add field parameter
+				$(document).ajaxSend(function(event, jqxhr, settings) {
+					// Check if this is a product search AJAX request
+					if (settings.url && settings.url.indexOf('admin-ajax.php') > -1 &&
+					    settings.data && typeof settings.data === 'string' &&
+					    settings.data.indexOf('woocommerce_json_search_products') > -1) {
+
+						// Add field=crosssell if crosssell is active
+						if (isCrosssellActive) {
+							settings.data += '&field=crosssell';
 						}
-						$select.data('ajax-modified', true);
 					}
 				});
 			});
