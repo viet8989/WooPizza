@@ -296,7 +296,7 @@ function display_pizza_products_page() {
 						?>
 						<tr>
 							<td><?php echo esc_html( get_the_ID() ); ?></td>
-							<td><?php echo $product->get_image( 'thumbnail' ); ?></td>
+							<td class="thumb column-thumb"><?php echo $product->get_image( 'thumbnail' ); ?></td>
 							<td>
 								<strong>
 									<a href="<?php echo esc_url( get_edit_post_link( get_the_ID() ) ); ?>">
@@ -308,7 +308,7 @@ function display_pizza_products_page() {
 							<td><?php echo wc_get_product_category_list( get_the_ID(), ', ' ); ?></td>
 							<td><?php echo esc_html( $product->get_stock_status() ); ?></td>
 							<td>
-								<a href="<?php echo esc_url( get_edit_post_link( get_the_ID() ) ); ?>" class="button button-small">
+								<a href="<?php echo esc_url( add_query_arg( 'product_type', 'pizza', get_edit_post_link( get_the_ID() ) ) ); ?>" class="button button-small">
 									<?php esc_html_e( 'Edit', 'flatsome' ); ?>
 								</a>
 							</td>
@@ -396,7 +396,7 @@ function display_topping_products_page() {
 						?>
 						<tr>
 							<td><?php echo esc_html( get_the_ID() ); ?></td>
-							<td><?php echo $product->get_image( 'thumbnail' ); ?></td>
+							<td class="thumb column-thumb"><?php echo $product->get_image( 'thumbnail' ); ?></td>
 							<td>
 								<strong>
 									<a href="<?php echo esc_url( get_edit_post_link( get_the_ID() ) ); ?>">
@@ -408,7 +408,7 @@ function display_topping_products_page() {
 							<td><?php echo wc_get_product_category_list( get_the_ID(), ', ' ); ?></td>
 							<td><?php echo esc_html( $product->get_stock_status() ); ?></td>
 							<td>
-								<a href="<?php echo esc_url( get_edit_post_link( get_the_ID() ) ); ?>" class="button button-small">
+								<a href="<?php echo esc_url( add_query_arg( 'product_type', 'topping', get_edit_post_link( get_the_ID() ) ) ); ?>" class="button button-small">
 									<?php esc_html_e( 'Edit', 'flatsome' ); ?>
 								</a>
 							</td>
