@@ -921,6 +921,12 @@ function custom_sticky_mini_cart_widget() {
 
 		// Function to update and show mini cart
 		function showStickyMiniCart() {
+			// Check if WooCommerce params are available
+			if (typeof wc_add_to_cart_params === 'undefined' || typeof wc_add_to_cart_params.wc_ajax_url === 'undefined') {
+				console.warn('WooCommerce AJAX params not available');
+				return;
+			}
+
 			// Update mini cart content via AJAX
 			$.ajax({
 				url: wc_add_to_cart_params.wc_ajax_url.toString().replace('%%endpoint%%', 'get_refreshed_fragments'),
