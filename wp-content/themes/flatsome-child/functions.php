@@ -1095,7 +1095,7 @@ function hide_categories_css_js() {
 								// to avoid hiding parent categories of category 15
 								var childCatIds = <?php echo json_encode( $child_categories ); ?>;
 								console.log(catId, childCatIds);
-								if (catId !== 15 || childCatIds.indexOf(catId) === -1) {
+								if (catId !== 15 && childCatIds.indexOf(catId) === -1) {
 									$(this).hide();
 								}
 							}
