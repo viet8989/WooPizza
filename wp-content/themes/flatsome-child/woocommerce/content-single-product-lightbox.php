@@ -946,7 +946,7 @@ do_action( 'wc_quick_view_after_single_product' );
 				// Show appropriate view based on stored value
 				if (viewType === 'paired') {
 					$('#btn-paired').trigger('click');
-					$('#right-pizza').trigger('click');					
+					$('#left-pizza').trigger('click');					
 				} else {
 					$('#btn-whole').trigger('click');
 				}
