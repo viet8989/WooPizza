@@ -1044,41 +1044,69 @@ function exclude_topping_categories_from_product_metabox( $args, $post_id ) {
 	return $args;
 }
 
-// Add CSS to hide category 15 and its children in the product categories metabox
-add_action( 'admin_head', 'hide_topping_categories_css' );
-function hide_topping_categories_css() {
-	global $pagenow, $typenow;
+// Add CSS and JS to hide category 15 and its children in the product categories metabox
+add_action( 'admin_head', 'hide_topping_categories_css_js' );
+function hide_topping_categories_css_js() {
+	$current_screen = get_current_screen();
 
 	// Only apply on product add/edit screens
-	if ( ( $pagenow === 'post.php' || $pagenow === 'post-new.php' ) && $typenow === 'product' ) {
-		// Get category 15 and all its children
-		$topping_parent_id = 15;
-		$excluded_cats = array( $topping_parent_id );
-
-		// Get all child categories of category 15
-		$child_categories = get_terms( array(
-			'taxonomy' => 'product_cat',
-			'parent' => $topping_parent_id,
-			'hide_empty' => false,
-			'fields' => 'ids',
-		) );
-
-		if ( ! empty( $child_categories ) && ! is_wp_error( $child_categories ) ) {
-			$excluded_cats = array_merge( $excluded_cats, $child_categories );
-		}
-
-		if ( ! empty( $excluded_cats ) ) {
-			echo '<style type="text/css">';
-			// Hide "Most Used" tab
-			echo '#product_cat-tabs .tabs li.hide-if-no-js { display: none !important; }';
-			echo '#product_cat-pop { display: none !important; }';
-
-			// Hide specific category items
-			foreach ( $excluded_cats as $cat_id ) {
-				echo '#product_cat-' . $cat_id . ' { display: none !important; }';
-				echo 'li.cat-item-' . $cat_id . ' { display: none !important; }';
-			}
-			echo '</style>';
-		}
+	if ( ! $current_screen || $current_screen->post_type !== 'product' ) {
+		return;
 	}
+
+	// Get category 15 and all its children
+	$topping_parent_id = 15;
+	$excluded_cats = array( $topping_parent_id );
+
+	// Get all child categories of category 15
+	$child_categories = get_terms( array(
+		'taxonomy' => 'product_cat',
+		'parent' => $topping_parent_id,
+		'hide_empty' => false,
+		'fields' => 'ids',
+	) );
+
+	if ( ! empty( $child_categories ) && ! is_wp_error( $child_categories ) ) {
+		$excluded_cats = array_merge( $excluded_cats, $child_categories );
+	}
+
+	if ( empty( $excluded_cats ) ) {
+		return;
+	}
+	?>
+	<style type="text/css">
+		/* Hide "Most Used" tab */
+		#product_cat-tabs li.tabs a[href="#product_cat-pop"],
+		#product_cat-pop,
+		.categorydiv .tabs-panel#product_cat-pop,
+		ul.category-tabs li.hide-if-no-js {
+			display: none !important;
+		}
+
+		/* Hide specific topping categories */
+		<?php foreach ( $excluded_cats as $cat_id ) : ?>
+		#product_cat-<?php echo $cat_id; ?>,
+		.product_cat-checklist li#category-<?php echo $cat_id; ?>,
+		#product_catchecklist li#category-<?php echo $cat_id; ?>,
+		#product_catchecklist-pop li#category-<?php echo $cat_id; ?> {
+			display: none !important;
+		}
+		<?php endforeach; ?>
+	</style>
+	<script type="text/javascript">
+	jQuery(document).ready(function($) {
+		// Hide topping categories by class
+		<?php foreach ( $excluded_cats as $cat_id ) : ?>
+		$('.product_cat-checklist .cat-item-<?php echo $cat_id; ?>').hide();
+		$('#product_catchecklist .cat-item-<?php echo $cat_id; ?>').hide();
+		$('#product_catchecklist-pop .cat-item-<?php echo $cat_id; ?>').hide();
+		<?php endforeach; ?>
+
+		// Remove "Most Used" tab
+		$('#product_cat-tabs li.hide-if-no-js').remove();
+		$('.category-tabs li.hide-if-no-js').remove();
+		$('#product_cat-pop').remove();
+	});
+	</script>
+	<?php
 }
