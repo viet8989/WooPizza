@@ -225,6 +225,20 @@ function add_pizza_and_topping_admin_menus() {
 		'edit_products',
 		'post-new.php?post_type=product&product_type=topping'
 	);
+
+	// Hide the default WooCommerce Products menu
+	remove_menu_page( 'edit.php?post_type=product' );
+
+	// Add Product Categories as a standalone top-level menu
+	add_menu_page(
+		__( 'Product Categories', 'woocommerce' ),
+		__( 'Categories', 'woocommerce' ),
+		'manage_product_terms',
+		'edit-tags.php?taxonomy=product_cat&post_type=product',
+		'',
+		'dashicons-category',
+		58
+	);
 }
 
 // Display Pizza products page
