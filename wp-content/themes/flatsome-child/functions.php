@@ -1069,7 +1069,28 @@ function hide_categories_css_js() {
 					});
 				</script>
 			<?php
+		}else if ( $_GET['product_type'] === 'topping' ) {
+			?>
+				<script type="text/javascript">
+					jQuery(document).ready(function($) {
+						// Hide all categories except category 15 (topping) and its children
+						$('#product_catchecklist li').each(function() {
+							var $checkbox = $(this).find('input[type="checkbox"]');
+							if ($checkbox.length) {
+								var catId = parseInt($checkbox.val());
+								if (catId !== 15 && !$checkbox.closest('li').hasClass('children')) {
+									$(this).hide();
+								}
+							}
+						});
+						$('#product_cat-tabs li.tabs a').text('Topping categories');
+						// Remove "Most Used" tab
+						$('#product_cat-tabs li.hide-if-no-js').remove();
+						$('#product_cat-pop').remove();
+					});
+				</script>
+			<?php
 		}	
-	}
+	} 
 	
 }
