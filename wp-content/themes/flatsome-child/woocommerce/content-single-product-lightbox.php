@@ -897,12 +897,6 @@ do_action( 'wc_quick_view_after_single_product' );
 				$('#whole-pizza-toppings').hide();
 				$('#paired-pizza-toppings').show();
 
-				// Active tab right-toppings
-				$('.topping-tab').removeClass('active');
-				$('.topping-tab[data-tab="right-toppings"]').addClass('active');
-				$('.tab-content').removeClass('active');
-				$('#right-toppings').addClass('active');
-
 				// Clear all topping selections
 				$('.topping-checkbox').prop('checked', false);
 
@@ -951,7 +945,8 @@ do_action( 'wc_quick_view_after_single_product' );
 				
 				// Show appropriate view based on stored value
 				if (viewType === 'paired') {
-					$('#btn-paired').trigger('click');					
+					$('#btn-paired').trigger('click');
+					$('#right-pizza').trigger('click');					
 				} else {
 					$('#btn-whole').trigger('click');
 				}
@@ -1169,22 +1164,6 @@ do_action( 'wc_quick_view_after_single_product' );
 				console.log('Form submission proceeding...');
 			});
 		}
-
-		// // Topping Tabs Handler
-		// function initToppingTabs() {
-		// 	$(document).on('click', '.topping-tab', function() {
-		// 		const $tab = $(this);
-		// 		const tabId = $tab.data('tab');
-
-		// 		// Remove active class from all tabs and contents
-		// 		$('.topping-tab').removeClass('active');
-		// 		$('.tab-content').removeClass('active');
-
-		// 		// Add active class to clicked tab and corresponding content
-		// 		$tab.addClass('active');
-		// 		$('#' + tabId).addClass('active');
-		// 	});
-		// }
 
 		// Special Request Character Counter
 		function initSpecialRequestCounter() {
