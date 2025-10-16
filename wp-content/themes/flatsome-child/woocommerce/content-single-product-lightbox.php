@@ -315,7 +315,7 @@ function get_topping_categories() {
 		'hide_empty' => false,
 	) );
 	
-	console_log('Child Categories:', <?php echo json_encode($child_categories); ?>);
+	echo '<script>console.log("Child Categories:", ' . json_encode($child_categories) . ');</script>';
 	
 	if ( ! empty( $child_categories ) && ! is_wp_error( $child_categories ) ) {
 		foreach ( $child_categories as $category ) {
@@ -345,8 +345,8 @@ function get_toppings_from_cross_sells( $cross_sell_ids ) {
 
 	// Get all topping categories
 	$topping_categories = get_topping_categories();
-
-	console_log('Topping Categories:', <?php echo json_encode($topping_categories); ?>);
+	
+	echo '<script>console.log("Topping Categories:", ' . json_encode($topping_categories) . ');</script>';
 
 	// Get all products from cross-sell IDs
 	$products = wc_get_products( array(
