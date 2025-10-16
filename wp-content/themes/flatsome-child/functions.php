@@ -14,8 +14,8 @@ add_filter('woocommerce_currency_symbol', function ($currency_symbol, $currency)
     return $currency_symbol;
 }, 10, 2);
 
-// Disable sticky header
-add_filter('flatsome_header_sticky', '__return_false');
+// Disable sticky header by overriding theme mod
+add_filter('theme_mod_header_sticky', '__return_zero');
 
 // Remove sticky header classes via JavaScript
 function remove_sticky_header_script() {
@@ -23,10 +23,18 @@ function remove_sticky_header_script() {
     <script type="text/javascript">
     jQuery(document).ready(function($) {
         // Remove sticky-related classes from header
-        $('#header, .header, .header-wrapper').removeClass('has-sticky stuck');
+        $('#header, .header, .header-wrapper').removeClass('has-sticky stuck sticky-jump sticky-fade sticky-hide-on-scroll');
 
-        // Disable sticky header JavaScript
-        $(window).off('scroll.stickyHeader');
+        // Remove position fixed inline styles if added
+        $('#header, .header, .header-wrapper').css({
+            'position': 'relative',
+            'top': 'auto',
+            'left': 'auto',
+            'right': 'auto'
+        });
+
+        // Disable sticky header JavaScript on scroll
+        $(window).off('scroll.stickyHeader scroll');
     });
     </script>
     <?php
