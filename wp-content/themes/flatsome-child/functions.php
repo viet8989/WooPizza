@@ -1060,6 +1060,8 @@ function hide_categories_css_js() {
 			?>
 				<script type="text/javascript">
 					jQuery(document).ready(function($) {
+						$('#woocommerce-product-data .postbox-header h2').first().text('Topping data');
+						$('#woocommerce-product-data .product_data_tabs li.linked_product_options').hide();
 						// Hide category 15 (topping) and all its children
 						$('#in-product_cat-15-1').hide();
 						$('#product_cat-tabs li.tabs a').text('Pizza categories');
@@ -1089,12 +1091,7 @@ function hide_categories_css_js() {
 							var $checkbox = $(this).find('input[type="checkbox"]');
 							if ($checkbox.length) {
 								var catId = parseInt($checkbox.val());
-								// Hide if not in the list of child categories of category 15
-								// Also hide category 15 itself
-								// Category 15 is hidden if it does not have 'children' class
-								// to avoid hiding parent categories of category 15
 								var childCatIds = <?php echo json_encode( $child_categories ); ?>;
-								console.log(catId, childCatIds);
 								if (catId !== 15 && childCatIds.indexOf(catId) === -1) {
 									$(this).hide();
 								}
