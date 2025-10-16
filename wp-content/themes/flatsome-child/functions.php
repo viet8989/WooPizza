@@ -1044,30 +1044,32 @@ function exclude_topping_categories_from_product_metabox( $args, $post_id ) {
 	return $args;
 }
 
-// Hide category 15 (topping) and its children in the product categories metabox
-add_action( 'admin_head', 'hide_topping_categories_css_js' );
-function hide_topping_categories_css_js() {
+// Hide categories and its children in the product categories metabox
+add_action( 'admin_head', 'hide_categories_css_js' );
+function hide_categories_css_js() {
 	$current_screen = get_current_screen();
 
 	// Only apply on product add/edit screens
 	if ( ! $current_screen || $current_screen->post_type !== 'product' ) {
 		return;
 	}
-
-	// Only apply when product_type=pizza parameter is in the URL
-	if ( ! isset( $_GET['product_type'] ) || $_GET['product_type'] !== 'pizza' ) {
-		return;
+	
+	if ( isset( $_GET['product_type'] ) ) {
+		// Only apply when product_type=pizza parameter is in the URL
+		if ( $_GET['product_type'] === 'pizza' ) {
+			?>
+				<script type="text/javascript">
+					jQuery(document).ready(function($) {
+						// Hide category 15 (topping) and all its children
+						$('#in-product_cat-15-1').hide();
+						$('#product_cat-tabs li.tabs a').text('Pizza categories');
+						// Remove "Most Used" tab
+						$('#product_cat-tabs li.hide-if-no-js').remove();
+						$('#product_cat-pop').remove();
+					});
+				</script>
+			<?php
+		}	
 	}
-	?>
-	<script type="text/javascript">
-	jQuery(document).ready(function($) {
-		// Hide category 15 (topping) and all its children
-		$('#in-product_cat-15-1').hide();
-		$('#product_cat-tabs li.tabs a').text('Pizza categories');
-		// Remove "Most Used" tab
-		$('#product_cat-tabs li.hide-if-no-js').remove();
-		$('#product_cat-pop').remove();
-	});
-	</script>
-	<?php
+	
 }
