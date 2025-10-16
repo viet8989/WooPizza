@@ -1061,6 +1061,24 @@ function hide_categories_css_js() {
 				$('#woocommerce-product-data .product_data_tabs li.advanced_options').hide();
 				$('#woocommerce-product-data .product_data_tabs li.ux_product_layout_tab').hide();
 				$('#woocommerce-product-data .product_data_tabs li.ux_extra_tab').hide();
+
+				// Add custom parameter to cross-sell search to filter only topping products
+				$('#crosssell_ids').on('select2:opening', function() {
+					// Modify the AJAX data to include field=crosssell parameter
+					var $select = $(this);
+					if (!$select.data('ajax-modified')) {
+						var originalAjax = $select.data('select2').options.options.ajax;
+						if (originalAjax && originalAjax.data) {
+							var originalData = originalAjax.data;
+							originalAjax.data = function(params) {
+								var data = originalData.call(this, params);
+								data.field = 'crosssell';
+								return data;
+							};
+						}
+						$select.data('ajax-modified', true);
+					}
+				});
 			});
 		</script>
 	<?php
@@ -1071,6 +1089,9 @@ function hide_categories_css_js() {
 			?>
 				<script type="text/javascript">
 					jQuery(document).ready(function($) {
+						$('.wp-heading-inline').text('Add New Pizza');
+						$('#woocommerce-product-data .product_data_tabs li.linked_product_options').show();
+						$('#woocommerce-product-data .product_data_tabs li.attribute_options').show();
 						$('#woocommerce-product-data .postbox-header h2').first().text('Pizza data');
 						$('#linked_product_data .form-field label').eq(1).text('Paired with');
 						$('#linked_product_data .form-field label').eq(2).text('Toppings');
@@ -1109,6 +1130,7 @@ function hide_categories_css_js() {
 								}
 							}
 						});
+						$('.wp-heading-inline').text('Add New Topping');
 						$('#woocommerce-product-data .postbox-header h2').first().text('Topping data');
 						$('#woocommerce-product-data .product_data_tabs li.linked_product_options').hide();
 						$('#woocommerce-product-data .product_data_tabs li.attribute_options').hide();
@@ -1120,7 +1142,80 @@ function hide_categories_css_js() {
 					});
 				</script>
 			<?php
-		}	
-	} 
-	
+		}
+	}
+
+}
+
+// Filter product search: exclude toppings from upsells, include ONLY toppings for cross-sells
+add_filter( 'woocommerce_json_search_found_products', 'filter_products_by_field_type' );
+function filter_products_by_field_type( $products ) {
+	// Check if this is a WooCommerce AJAX product search request
+	if ( ! isset( $_REQUEST['action'] ) ||
+	     ( $_REQUEST['action'] !== 'woocommerce_json_search_products' &&
+	       $_REQUEST['action'] !== 'woocommerce_json_search_products_and_variations' ) ) {
+		return $products;
+	}
+
+	// Get all products in category 15 (topping) and its children
+	$topping_parent_id = 15;
+
+	// Get all child categories of category 15
+	$child_categories = get_terms( array(
+		'taxonomy' => 'product_cat',
+		'parent' => $topping_parent_id,
+		'hide_empty' => false,
+		'fields' => 'ids',
+	) );
+
+	$topping_cat_ids = array( $topping_parent_id );
+	if ( ! empty( $child_categories ) && ! is_wp_error( $child_categories ) ) {
+		$topping_cat_ids = array_merge( $topping_cat_ids, $child_categories );
+	}
+
+	// Get all product IDs in topping categories
+	$topping_product_ids = get_posts( array(
+		'post_type' => 'product',
+		'posts_per_page' => -1,
+		'fields' => 'ids',
+		'tax_query' => array(
+			array(
+				'taxonomy' => 'product_cat',
+				'field' => 'term_id',
+				'terms' => $topping_cat_ids,
+				'operator' => 'IN',
+			),
+		),
+	) );
+
+	// Detect which field is being searched by checking HTTP_REFERER or a custom parameter
+	$is_crosssell_search = false;
+
+	// Check if there's a custom parameter indicating this is cross-sell search
+	if ( isset( $_REQUEST['field'] ) && $_REQUEST['field'] === 'crosssell' ) {
+		$is_crosssell_search = true;
+	}
+
+	if ( $is_crosssell_search ) {
+		// For cross-sells: ONLY show topping products
+		$filtered_products = array();
+		if ( ! empty( $topping_product_ids ) ) {
+			foreach ( $products as $product_id => $product_name ) {
+				if ( in_array( $product_id, $topping_product_ids ) ) {
+					$filtered_products[ $product_id ] = $product_name;
+				}
+			}
+		}
+		return $filtered_products;
+	} else {
+		// For upsells and other fields: EXCLUDE topping products
+		if ( ! empty( $topping_product_ids ) ) {
+			foreach ( $topping_product_ids as $topping_id ) {
+				if ( isset( $products[ $topping_id ] ) ) {
+					unset( $products[ $topping_id ] );
+				}
+			}
+		}
+		return $products;
+	}
 }
