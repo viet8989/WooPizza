@@ -931,6 +931,10 @@ do_action( 'wc_quick_view_after_single_product' );
 			});
 
 			$('#right-pizza').on('click', function() {
+				if (!selectedRightHalf) {
+					alert('Please select a pizza from the options below for the right half.');
+					return;
+				}
 				$('.topping-tab').removeClass('active');
 				$('.topping-tab[data-tab="right-toppings"]').addClass('active');
 				$('.tab-content').removeClass('active');
@@ -983,6 +987,7 @@ do_action( 'wc_quick_view_after_single_product' );
 						price: parseFloat($card.data('product-price')),
 						image: imageUrl
 					};
+					$('#right-pizza').trigger('click');
 				} else {
 					// Reset to default placeholder
 					$('#right-pizza')
