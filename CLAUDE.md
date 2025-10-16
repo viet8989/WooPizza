@@ -24,9 +24,9 @@ The core functionality revolves around a sophisticated pizza customization syste
 **1. Product Display & Customization (Frontend)**
 - Custom quick-view template: `wp-content/themes/flatsome-child/woocommerce/content-single-product-lightbox.php`
 - Two ordering modes:
-  - **Whole Pizza Mode**: Single pizza with optional extra toppings (cheese & cold cuts from categories 25 & 26)
+  - **Whole Pizza Mode**: Single pizza with optional extra toppings (toppings from sub categories have parent category 15 and based on WooCommerce `product_cross_sells`)
   - **Paired Pizza Mode**: Two different half pizzas, each with independent topping selections
-- Product pairing based on WooCommerce `product_brand` taxonomy
+- Product pairing based on WooCommerce `product_upsells`
 - Half pizzas are priced at 50% of full product price
 - JavaScript handles real-time price calculation and option management
 

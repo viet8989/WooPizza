@@ -340,21 +340,19 @@ function display_topping_products_page() {
 		</a>
 		<hr class="wp-header-end">
 		<?php
-		// Get topping categories (categories 25 and 26 based on CLAUDE.md)
-		$topping_cats = array( 25, 26 );
+		// Get topping categories (have parent category 15 based on CLAUDE.md)
+		$topping_cats = array();
 
-		// Try to find by slug as well
-		$extra_cats = get_terms( array(
+		// Get all child categories of parent category 15
+		$child_categories = get_terms( array(
 			'taxonomy' => 'product_cat',
-			'slug' => array( 'topping', 'extra-cheese', 'extra-cold-cuts' ),
+			'parent' => 15,
 			'hide_empty' => false,
 		) );
 
-		if ( ! empty( $extra_cats ) && ! is_wp_error( $extra_cats ) ) {
-			foreach ( $extra_cats as $cat ) {
-				if ( ! in_array( $cat->term_id, $topping_cats ) ) {
-					$topping_cats[] = $cat->term_id;
-				}
+		if ( ! empty( $child_categories ) && ! is_wp_error( $child_categories ) ) {
+			foreach ( $child_categories as $cat ) {
+				$topping_cats[] = $cat->term_id;
 			}
 		}
 
