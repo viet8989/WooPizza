@@ -1073,7 +1073,7 @@ function hide_categories_css_js() {
 			// Get all child categories of category 15
 			$child_categories = get_terms( array(
 				'taxonomy' => 'product_cat',
-				'parent' => $topping_parent_id,
+				'parent' => 15,
 				'hide_empty' => false,
 				'fields' => 'ids',
 			) );
