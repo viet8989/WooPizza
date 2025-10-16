@@ -1094,6 +1094,7 @@ function hide_categories_css_js() {
 								// Category 15 is hidden if it does not have 'children' class
 								// to avoid hiding parent categories of category 15
 								var childCatIds = <?php echo json_encode( $child_categories ); ?>;
+								console.log(catId, childCatIds);
 								if (catId === 15 || childCatIds.indexOf(catId) === -1) {
 									$(this).hide();
 								}
