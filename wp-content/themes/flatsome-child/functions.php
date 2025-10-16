@@ -1057,7 +1057,7 @@ function hide_topping_categories_css_js() {
 	<script type="text/javascript">
 	jQuery(document).ready(function($) {
 		// Hide category 15 (topping) and all its children
-		$('#in-product_cat-15').hide();
+		$('#in-product_cat-15-1').hide();
 
 		// Remove "Most Used" tab
 		$('#product_cat-tabs li.hide-if-no-js').remove();
