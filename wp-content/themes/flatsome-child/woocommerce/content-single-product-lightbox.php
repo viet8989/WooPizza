@@ -100,7 +100,7 @@ do_action( 'wc_quick_view_before_single_product' );
 							<div class="half-pizza-container">
 								<img id="left-pizza" 
 									 class="left-pizza-img" 
-									 src="<?php echo esc_url( get_site_url() . '/wp-content/uploads/images/pizza2.png' ); ?>"
+									 src="<?php echo esc_url( wp_get_attachment_url( $product->get_image_id() ) ); ?>"
 									 alt="<?php esc_attr_e( 'Left Pizza Upgrade', 'flatsome' ); ?>">
 							</div>
 							<div class="half-pizza-container">
