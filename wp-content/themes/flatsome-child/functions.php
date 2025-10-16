@@ -1053,12 +1053,17 @@ function hide_topping_categories_css_js() {
 	if ( ! $current_screen || $current_screen->post_type !== 'product' ) {
 		return;
 	}
+
+	// Only apply when product_type=pizza parameter is in the URL
+	if ( ! isset( $_GET['product_type'] ) || $_GET['product_type'] !== 'pizza' ) {
+		return;
+	}
 	?>
 	<script type="text/javascript">
 	jQuery(document).ready(function($) {
 		// Hide category 15 (topping) and all its children
 		$('#in-product_cat-15-1').hide();
-		$('#product_cat-tabs li.tabs a').text('Pizza categories'); // Hide "Most Used" tab
+		$('#product_cat-tabs li.tabs a').text('Pizza categories');
 		// Remove "Most Used" tab
 		$('#product_cat-tabs li.hide-if-no-js').remove();
 		$('#product_cat-pop').remove();
