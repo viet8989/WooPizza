@@ -1053,6 +1053,17 @@ function hide_categories_css_js() {
 	if ( ! $current_screen || $current_screen->post_type !== 'product' ) {
 		return;
 	}
+	// Always apply on product edit screen
+	?>
+		<script type="text/javascript">
+			jQuery(document).ready(function($) {
+				$('#uxbuilder-enable-disable').hide();
+				$('#woocommerce-product-data .product_data_tabs li.advanced_options').hide();
+				$('#woocommerce-product-data .product_data_tabs li.ux_product_layout_tab').hide();
+				$('#woocommerce-product-data .product_data_tabs li.ux_extra_tab').hide();
+			});
+		</script>
+	<?php
 	
 	if ( isset( $_GET['product_type'] ) ) {
 		// Only apply when product_type=pizza parameter is in the URL
@@ -1063,9 +1074,6 @@ function hide_categories_css_js() {
 						$('#woocommerce-product-data .postbox-header h2').first().text('Pizza data');
 						$('#linked_product_data .form-field label').eq(1).text('Paired with');
 						$('#linked_product_data .form-field label').eq(2).text('Toppings');
-						$('#woocommerce-product-data .product_data_tabs li.advanced_options').hide();
-						$('#woocommerce-product-data .product_data_tabs li.ux_product_layout_tab').hide();
-						$('#woocommerce-product-data .product_data_tabs li.ux_extra_tab').hide();
 						// Hide category 15 (topping) and all its children
 						$('#in-product_cat-15-1').hide();
 						$('#product_cat-tabs li.tabs a').text('Pizza categories');
@@ -1104,9 +1112,6 @@ function hide_categories_css_js() {
 						$('#woocommerce-product-data .postbox-header h2').first().text('Topping data');
 						$('#woocommerce-product-data .product_data_tabs li.linked_product_options').hide();
 						$('#woocommerce-product-data .product_data_tabs li.attribute_options').hide();
-						$('#woocommerce-product-data .product_data_tabs li.advanced_options').hide();
-						$('#woocommerce-product-data .product_data_tabs li.ux_product_layout_tab').hide();
-						$('#woocommerce-product-data .product_data_tabs li.ux_extra_tab').hide();
 						$('#in-product_cat-15-1 label').first().hide();
 						$('#product_cat-tabs li.tabs a').text('Topping categories');
 						// Remove "Most Used" tab
