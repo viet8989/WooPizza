@@ -1100,6 +1100,7 @@ function hide_categories_css_js() {
 								}
 							}
 						});
+						$('#in-product_cat-15-1 label').first().hide();
 						$('#product_cat-tabs li.tabs a').text('Topping categories');
 						// Remove "Most Used" tab
 						$('#product_cat-tabs li.hide-if-no-js').remove();
