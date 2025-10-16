@@ -16,30 +16,73 @@ add_filter('woocommerce_currency_symbol', function ($currency_symbol, $currency)
 
 // Disable sticky header by overriding theme mod
 add_filter('theme_mod_header_sticky', '__return_zero');
+add_filter('get_theme_mod_header_sticky', '__return_zero');
 
-// Remove sticky header classes via JavaScript
+// Force disable sticky header in header classes
+add_filter('flatsome_header_class', function($classes) {
+    // Remove any sticky-related classes
+    $classes = array_diff($classes, ['has-sticky', 'sticky-jump', 'sticky-fade', 'sticky-hide-on-scroll']);
+    return $classes;
+}, 999);
+
+// Aggressively remove sticky header with JavaScript
 function remove_sticky_header_script() {
     ?>
     <script type="text/javascript">
-    jQuery(document).ready(function($) {
-        // Remove sticky-related classes from header
-        $('#header, .header, .header-wrapper').removeClass('has-sticky stuck sticky-jump sticky-fade sticky-hide-on-scroll');
+    (function($) {
+        // Function to disable sticky
+        function disableSticky() {
+            // Remove all sticky classes
+            $('#header, .header, .header-wrapper').removeClass('has-sticky stuck sticky-jump sticky-fade sticky-hide-on-scroll');
 
-        // Remove position fixed inline styles if added
-        $('#header, .header, .header-wrapper').css({
-            'position': 'relative',
-            'top': 'auto',
-            'left': 'auto',
-            'right': 'auto'
+            // Force position relative
+            $('#header, .header-wrapper').css({
+                'position': 'relative !important',
+                'top': 'auto !important',
+                'left': 'auto !important',
+                'right': 'auto !important',
+                'transform': 'none !important'
+            }).attr('style', function(i, style) {
+                return style.replace(/position\s*:\s*fixed/gi, 'position: relative');
+            });
+        }
+
+        // Run on page load
+        $(document).ready(disableSticky);
+
+        // Run after a delay to catch late scripts
+        setTimeout(disableSticky, 100);
+        setTimeout(disableSticky, 500);
+        setTimeout(disableSticky, 1000);
+
+        // Prevent scroll events from making header sticky
+        $(window).on('scroll.disableSticky', function() {
+            disableSticky();
         });
 
-        // Disable sticky header JavaScript on scroll
-        $(window).off('scroll.stickyHeader scroll');
-    });
+        // Use MutationObserver to watch for class changes
+        if (window.MutationObserver) {
+            var observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.attributeName === 'class') {
+                        var target = $(mutation.target);
+                        if (target.hasClass('stuck') || target.hasClass('has-sticky')) {
+                            disableSticky();
+                        }
+                    }
+                });
+            });
+
+            var header = document.getElementById('header');
+            if (header) {
+                observer.observe(header, { attributes: true, attributeFilter: ['class'] });
+            }
+        }
+    })(jQuery);
     </script>
     <?php
 }
-add_action('wp_footer', 'remove_sticky_header_script', 999);
+add_action('wp_head', 'remove_sticky_header_script', 999);
 
 // Viet add custom functions below this line
 
