@@ -1037,7 +1037,10 @@ do_action( 'wc_quick_view_after_single_product' );
 						$('#right-toppings').html('<div class="right-toppings-placeholder"><p>No toppings available for this pizza.</p></div>');
 					}
 
-					$('#right-pizza').trigger('click');
+					$('.topping-tab').removeClass('active');
+					$('.topping-tab[data-tab="right-toppings"]').addClass('active');
+					$('.tab-content').removeClass('active');
+					$('#right-toppings').addClass('active');
 				} else {
 					// Reset to default placeholder
 					$('#right-pizza')
