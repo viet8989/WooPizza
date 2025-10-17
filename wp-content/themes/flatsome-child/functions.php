@@ -204,7 +204,7 @@ function add_pizza_and_topping_admin_menus() {
 		'edit-topping-products',              // Menu slug
 		'display_topping_products_page',      // Function to display the page
 		'dashicons-carrot',                   // Icon
-		57                                    // Position (after Pizza)
+		56                                    // Position (after Pizza)
 	);
 
 	// Add submenu for All Toppings
@@ -237,7 +237,7 @@ function add_pizza_and_topping_admin_menus() {
 		'edit-tags.php?taxonomy=product_cat&post_type=product',
 		'',
 		'dashicons-category',
-		58
+		57
 	);
 }
 
