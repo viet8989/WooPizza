@@ -47,11 +47,6 @@ do_action( 'wc_quick_view_before_single_product' );
 								 class="size-icon">
 							<span><?php esc_html_e( 'Paired pizza', 'flatsome' ); ?></span>
 						</button>
-						
-						<button class="size-nav-next" type="button">
-							<img src="<?php echo esc_url( get_site_url() . '/wp-content/uploads/images/arrow.png' ); ?>" 
-								 alt="<?php esc_attr_e( 'Next', 'flatsome' ); ?>">
-						</button>
 					</div>
 
 					<!-- Whole Pizza Display -->
