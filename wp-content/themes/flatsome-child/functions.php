@@ -174,7 +174,7 @@ function add_pizza_and_topping_admin_menus() {
 		'edit-pizza-products',                // Menu slug
 		'display_pizza_products_page',        // Function to display the page
 		'dashicons-food',                     // Icon
-		56                                    // Position (after WooCommerce Products)
+		55                                    // Position (after WooCommerce Products)
 	);
 
 	// Add submenu for All Pizzas
