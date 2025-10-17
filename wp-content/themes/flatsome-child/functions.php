@@ -174,7 +174,7 @@ function add_pizza_and_topping_admin_menus() {
 		'edit-pizza-products',                // Menu slug
 		'display_pizza_products_page',        // Function to display the page
 		'dashicons-food',                     // Icon
-		54                                    // Position (after WooCommerce Products)
+		53                                    // Position (after WooCommerce Products)
 	);
 
 	// Add submenu for All Pizzas
@@ -204,7 +204,7 @@ function add_pizza_and_topping_admin_menus() {
 		'edit-topping-products',              // Menu slug
 		'display_topping_products_page',      // Function to display the page
 		'dashicons-carrot',                   // Icon
-		55                                    // Position (after Pizza)
+		54                                    // Position (after Pizza)
 	);
 
 	// Add submenu for All Toppings
@@ -237,7 +237,7 @@ function add_pizza_and_topping_admin_menus() {
 		'edit-tags.php?taxonomy=product_cat&post_type=product',
 		'',
 		'dashicons-category',
-		56
+		55
 	);
 }
 
