@@ -191,7 +191,7 @@ function add_pizza_and_topping_admin_menus() {
 	add_submenu_page(
 		'edit-pizza-products',
 		__( 'Add New Pizza', 'flatsome' ),
-		__( 'Add New', 'flatsome' ),
+		__( 'Add New Pizza', 'flatsome' ),
 		'edit_products',
 		'post-new.php?post_type=product&product_type=pizza'
 	);
@@ -221,7 +221,7 @@ function add_pizza_and_topping_admin_menus() {
 	add_submenu_page(
 		'edit-topping-products',
 		__( 'Add New Topping', 'flatsome' ),
-		__( 'Add New', 'flatsome' ),
+		__( 'Add New Topping', 'flatsome' ),
 		'edit_products',
 		'post-new.php?post_type=product&product_type=topping'
 	);
