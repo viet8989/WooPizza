@@ -1003,12 +1003,15 @@ do_action( 'wc_quick_view_after_single_product' );
 
 		// Pizza Card Selection (for right half)
 		function initPizzaCardSelection() {
-			$(document).on('click', '.pizza-card', function() {
+			// Ensure we don't bind multiple handlers when the lightbox opens/closes
+			// Remove any plain or namespaced handlers first
+			$(document).off('click', '.pizza-card').off('click.pizzaCard', '.pizza-card')
+				.on('click.pizzaCard', '.pizza-card', function() {
 				const $card = $(this);
 				const imageUrl = $card.data('product-image');
 				const isCurrentlySelected = $card.hasClass('selected');
-				console.log('Clicked pizza card for right half:', $card.data('product-name'));
-				console.log('isCurrentlySelected:', isCurrentlySelected);
+				console.log('Clicked pizza card for product ID:', $card.data('product-id'));
+				console.log('Is currently selected:', isCurrentlySelected);
 				const crossSells = $card.data('cross-sells');				
 
 				// Remove selection from all cards
@@ -1114,12 +1117,16 @@ do_action( 'wc_quick_view_after_single_product' );
 
 		// Topping Checkbox Handler
 		function initToppingCheckboxes() {
-			$(document).on('change', '.topping-checkbox', updateSubtotal);
+			// Ensure single binding for topping checkboxes: remove any plain and namespaced handlers first
+			$(document).off('change', '.topping-checkbox').off('change.toppingCheckbox', '.topping-checkbox')
+				.on('change.toppingCheckbox', '.topping-checkbox', updateSubtotal);
 		}
 
 		// Add to Cart Handler
 		function initAddToCart() {
-			$(document).on('click', 'form.cart button[type="submit"], .single_add_to_cart_button', function(e) {
+			// Ensure single binding for add-to-cart submission handler: remove plain and namespaced handlers first
+			$(document).off('click', 'form.cart button[type="submit"], .single_add_to_cart_button').off('click.addToCart', 'form.cart button[type="submit"], .single_add_to_cart_button')
+				.on('click.addToCart', 'form.cart button[type="submit"], .single_add_to_cart_button', function(e) {
 				// Check if paired mode is active
 				const isPairedMode = $('#btn-paired').hasClass('active');
 				let pizzaHalves = null;
@@ -1230,7 +1237,9 @@ do_action( 'wc_quick_view_after_single_product' );
 
 		// Special Request Character Counter
 		function initSpecialRequestCounter() {
-			$(document).on('input', '#special-request', function() {
+			// Ensure single binding for special request counter: remove plain and namespaced handlers first
+			$(document).off('input', '#special-request').off('input.specialRequest', '#special-request')
+				.on('input.specialRequest', '#special-request', function() {
 				const length = $(this).val().length;
 				const maxLength = $(this).attr('maxlength');
 				$('.special-request-counter').text(length + '/' + maxLength);
