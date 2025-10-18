@@ -1263,8 +1263,11 @@ add_filter( 'woocommerce_product_data_tabs', 'customize_pizza_product_tabs', 10,
 function customize_pizza_product_tabs( $tabs ) {
 	global $post;
 
-	// Check if we're adding/editing a pizza product
-	if ( is_pizza_product( $post ? $post->ID : null ) ) {
+	// Only show custom tabs if product_type=pizza parameter is present
+	// This ensures the default Linked Products tab shows when editing without the parameter
+	$is_pizza_edit_mode = isset( $_GET['product_type'] ) && $_GET['product_type'] === 'pizza';
+
+	if ( $is_pizza_edit_mode && is_pizza_product( $post ? $post->ID : null ) ) {
 		// Remove the default linked products tab completely for pizza products
 		unset( $tabs['linked_product'] );
 
@@ -1299,6 +1302,12 @@ function add_paired_with_tab_content() {
 	static $rendered = false;
 	if ( $rendered ) {
 		echo '<!-- Paired With tab already rendered, skipping -->';
+		return;
+	}
+
+	// Only show if product_type=pizza parameter is present
+	$is_pizza_edit_mode = isset( $_GET['product_type'] ) && $_GET['product_type'] === 'pizza';
+	if ( ! $is_pizza_edit_mode ) {
 		return;
 	}
 
@@ -1431,6 +1440,12 @@ function add_toppings_tab_content() {
 
 	if ( $render_count > 1 ) {
 		echo '<!-- Toppings tab render attempt #' . $render_count . ' - BLOCKED -->';
+		return;
+	}
+
+	// Only show if product_type=pizza parameter is present
+	$is_pizza_edit_mode = isset( $_GET['product_type'] ) && $_GET['product_type'] === 'pizza';
+	if ( ! $is_pizza_edit_mode ) {
 		return;
 	}
 
