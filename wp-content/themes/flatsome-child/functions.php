@@ -1900,6 +1900,30 @@ function customize_pizza_tabs_styles_scripts() {
 					'| Data-is-checked:', $cb.data('is-checked'),
 					'| HTML checked attr:', $cb.attr('checked'));
 			});
+
+			// FIX: Prevent duplicate submissions by disabling unchecked checkboxes before submit
+			$('#post').on('submit', function(e) {
+				console.log('=== Form Submit - Cleaning Checkboxes ===');
+
+				// Disable all unchecked paired checkboxes so they don't submit
+				$('.paired-product-checkbox:not(:checked)').prop('disabled', true);
+
+				// Disable all unchecked topping checkboxes so they don't submit
+				$('.topping-product-checkbox:not(:checked)').prop('disabled', true);
+
+				// Log what will be submitted
+				var pairedIds = [];
+				$('.paired-product-checkbox:checked').each(function() {
+					pairedIds.push($(this).val());
+				});
+				var toppingIds = [];
+				$('.topping-product-checkbox:checked').each(function() {
+					toppingIds.push($(this).val());
+				});
+
+				console.log('Paired IDs to submit:', pairedIds);
+				console.log('Topping IDs to submit:', toppingIds);
+			});
 		});
 	</script>
 	<?php
