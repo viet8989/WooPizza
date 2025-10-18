@@ -1293,6 +1293,13 @@ add_action( 'woocommerce_product_data_panels', 'add_paired_with_tab_content' );
 function add_paired_with_tab_content() {
 	global $post;
 
+	// Prevent multiple renders
+	static $rendered = false;
+	if ( $rendered ) {
+		echo '<!-- Paired With tab already rendered, skipping -->';
+		return;
+	}
+
 	// Get the actual product ID being edited
 	$product_id = isset( $_GET['post'] ) ? intval( $_GET['post'] ) : ( $post ? $post->ID : 0 );
 
@@ -1300,6 +1307,8 @@ function add_paired_with_tab_content() {
 	if ( ! is_pizza_product( $product_id ) ) {
 		return;
 	}
+
+	$rendered = true;
 
 	?>
 	<div id="paired_with_product_data" class="panel woocommerce_options_panel hidden">
@@ -1412,6 +1421,13 @@ add_action( 'woocommerce_product_data_panels', 'add_toppings_tab_content' );
 function add_toppings_tab_content() {
 	global $post;
 
+	// Prevent multiple renders
+	static $rendered = false;
+	if ( $rendered ) {
+		echo '<!-- Toppings tab already rendered, skipping -->';
+		return;
+	}
+
 	// Get the actual product ID being edited
 	$product_id = isset( $_GET['post'] ) ? intval( $_GET['post'] ) : ( $post ? $post->ID : 0 );
 
@@ -1419,6 +1435,8 @@ function add_toppings_tab_content() {
 	if ( ! is_pizza_product( $product_id ) ) {
 		return;
 	}
+
+	$rendered = true;
 
 	?>
 	<div id="toppings_product_data" class="panel woocommerce_options_panel hidden">
@@ -1564,7 +1582,16 @@ function save_custom_paired_and_toppings_data( $post_id ) {
 	$log .= "Product ID: " . $post_id . "\n";
 	$log .= "Is Pizza Product: " . ( is_pizza_product( $post_id ) ? 'YES' : 'NO' ) . "\n";
 	$log .= "POST upsell_ids: " . ( isset( $_POST['upsell_ids'] ) ? print_r( $_POST['upsell_ids'], true ) : 'NOT SET' ) . "\n";
+	$log .= "POST upsell_ids COUNT: " . ( isset( $_POST['upsell_ids'] ) ? count( $_POST['upsell_ids'] ) : 0 ) . "\n";
 	$log .= "POST crosssell_ids: " . ( isset( $_POST['crosssell_ids'] ) ? print_r( $_POST['crosssell_ids'], true ) : 'NOT SET' ) . "\n";
+	$log .= "POST crosssell_ids COUNT: " . ( isset( $_POST['crosssell_ids'] ) ? count( $_POST['crosssell_ids'] ) : 0 ) . "\n";
+
+	// Log unique counts
+	if ( isset( $_POST['crosssell_ids'] ) && is_array( $_POST['crosssell_ids'] ) ) {
+		$unique_crosssells = array_unique( array_map( 'intval', $_POST['crosssell_ids'] ) );
+		$log .= "POST crosssell_ids UNIQUE COUNT: " . count( $unique_crosssells ) . "\n";
+		$log .= "DUPLICATES FOUND: " . ( count( $_POST['crosssell_ids'] ) - count( $unique_crosssells ) ) . "\n";
+	}
 
 	error_log( '=== Save Custom Data for Product ID: ' . $post_id . ' ===' );
 	error_log( 'Is Pizza Product: ' . ( is_pizza_product( $post_id ) ? 'YES' : 'NO' ) );
