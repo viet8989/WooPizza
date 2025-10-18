@@ -1204,6 +1204,448 @@ function hide_categories_css_js() {
 
 }
 
+// Customize WooCommerce product data tab labels for pizza products
+add_filter( 'woocommerce_product_data_tabs', 'customize_pizza_product_tabs', 10, 1 );
+function customize_pizza_product_tabs( $tabs ) {
+	global $post;
+
+	// Check if we're adding/editing a pizza product
+	if ( isset( $_GET['product_type'] ) && $_GET['product_type'] === 'pizza' ) {
+		// Hide the default linked products tab
+		if ( isset( $tabs['linked_product'] ) ) {
+			$tabs['linked_product']['class'][] = 'hide_if_simple';
+		}
+
+		// Add custom "Paired With" tab
+		$tabs['paired_with_tab'] = array(
+			'label'    => __( 'Paired With', 'flatsome' ),
+			'target'   => 'paired_with_product_data',
+			'class'    => array( 'show_if_simple', 'show_if_variable' ),
+			'priority' => 15,
+		);
+
+		// Add custom "Toppings" tab
+		$tabs['toppings_tab'] = array(
+			'label'    => __( 'Toppings', 'flatsome' ),
+			'target'   => 'toppings_product_data',
+			'class'    => array( 'show_if_simple', 'show_if_variable' ),
+			'priority' => 16,
+		);
+	}
+
+	return $tabs;
+}
+
+// Add content for "Paired With" tab
+add_action( 'woocommerce_product_data_panels', 'add_paired_with_tab_content' );
+function add_paired_with_tab_content() {
+	global $post;
+
+	// Only show for pizza products
+	if ( ! isset( $_GET['product_type'] ) || $_GET['product_type'] !== 'pizza' ) {
+		return;
+	}
+
+	?>
+	<div id="paired_with_product_data" class="panel woocommerce_options_panel hidden">
+		<div class="options_group">
+			<p class="form-field">
+				<label><strong><?php _e( 'Select Pizzas for Pairing', 'flatsome' ); ?></strong></label>
+				<span class="description"><?php _e( 'Choose pizzas that customers can pair with this pizza for half-and-half combinations.', 'flatsome' ); ?></span>
+			</p>
+
+			<?php
+			// Get current upsell IDs
+			$product = wc_get_product( $post->ID );
+			$current_upsells = $product ? $product->get_upsell_ids() : array();
+
+			// Get all pizza products (exclude toppings from category 15)
+			$topping_parent_id = 15;
+			$excluded_cats = array( $topping_parent_id );
+
+			$child_categories = get_terms( array(
+				'taxonomy' => 'product_cat',
+				'parent' => $topping_parent_id,
+				'hide_empty' => false,
+				'fields' => 'ids',
+			) );
+
+			if ( ! empty( $child_categories ) && ! is_wp_error( $child_categories ) ) {
+				$excluded_cats = array_merge( $excluded_cats, $child_categories );
+			}
+
+			$args = array(
+				'post_type' => 'product',
+				'posts_per_page' => -1,
+				'orderby' => 'title',
+				'order' => 'ASC',
+				'post__not_in' => array( $post->ID ), // Exclude current product
+				'tax_query' => array(
+					array(
+						'taxonomy' => 'product_cat',
+						'field' => 'term_id',
+						'terms' => $excluded_cats,
+						'operator' => 'NOT IN',
+					),
+				),
+			);
+
+			$pizza_products = new WP_Query( $args );
+			?>
+
+			<div class="paired-products-grid">
+				<table class="widefat" style="margin-top: 10px;">
+					<thead>
+						<tr>
+							<th style="width: 40px; text-align: center;">
+								<input type="checkbox" id="select_all_paired" />
+							</th>
+							<th style="width: 100px;"><?php _e( 'SKU', 'flatsome' ); ?></th>
+							<th><?php _e( 'Name', 'flatsome' ); ?></th>
+							<th style="width: 120px;"><?php _e( 'Price', 'flatsome' ); ?></th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php
+						if ( $pizza_products->have_posts() ) :
+							while ( $pizza_products->have_posts() ) : $pizza_products->the_post();
+								$product_obj = wc_get_product( get_the_ID() );
+								$is_checked = in_array( get_the_ID(), $current_upsells );
+								?>
+								<tr>
+									<td style="text-align: center;">
+										<input type="checkbox"
+											name="upsell_ids[]"
+											value="<?php echo esc_attr( get_the_ID() ); ?>"
+											<?php checked( $is_checked, true ); ?>
+											class="paired-product-checkbox" />
+									</td>
+									<td><?php echo esc_html( $product_obj->get_sku() ? $product_obj->get_sku() : '-' ); ?></td>
+									<td><strong><?php echo esc_html( get_the_title() ); ?></strong></td>
+									<td><?php echo $product_obj->get_price_html(); ?></td>
+								</tr>
+								<?php
+							endwhile;
+							wp_reset_postdata();
+						else :
+							?>
+							<tr>
+								<td colspan="4" style="text-align: center; padding: 20px;">
+									<?php _e( 'No pizza products found.', 'flatsome' ); ?>
+								</td>
+							</tr>
+							<?php
+						endif;
+						?>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<?php
+}
+
+// Add content for "Toppings" tab
+add_action( 'woocommerce_product_data_panels', 'add_toppings_tab_content' );
+function add_toppings_tab_content() {
+	global $post;
+
+	// Only show for pizza products
+	if ( ! isset( $_GET['product_type'] ) || $_GET['product_type'] !== 'pizza' ) {
+		return;
+	}
+
+	?>
+	<div id="toppings_product_data" class="panel woocommerce_options_panel hidden">
+		<div class="options_group">
+			<p class="form-field">
+				<label><strong><?php _e( 'Select Available Toppings', 'flatsome' ); ?></strong></label>
+				<span class="description"><?php _e( 'Choose topping products that customers can add to this pizza.', 'flatsome' ); ?></span>
+			</p>
+
+			<?php
+			// Get current cross-sell IDs
+			$product = wc_get_product( $post->ID );
+			$current_crosssells = $product ? $product->get_cross_sell_ids() : array();
+
+			// Get topping categories (children of category 15)
+			$topping_cats = array();
+			$child_categories = get_terms( array(
+				'taxonomy' => 'product_cat',
+				'parent' => 15,
+				'hide_empty' => false,
+			) );
+
+			if ( ! empty( $child_categories ) && ! is_wp_error( $child_categories ) ) {
+				foreach ( $child_categories as $cat ) {
+					$topping_cats[] = $cat->term_id;
+				}
+			}
+
+			// Get all topping products
+			$args = array(
+				'post_type' => 'product',
+				'posts_per_page' => -1,
+				'orderby' => 'title',
+				'order' => 'ASC',
+				'tax_query' => array(
+					array(
+						'taxonomy' => 'product_cat',
+						'field' => 'term_id',
+						'terms' => $topping_cats,
+						'operator' => 'IN',
+					),
+				),
+			);
+
+			$topping_products = new WP_Query( $args );
+			?>
+
+			<div class="topping-products-grid">
+				<table class="widefat" style="margin-top: 10px;">
+					<thead>
+						<tr>
+							<th style="width: 40px; text-align: center;">
+								<input type="checkbox" id="select_all_toppings" />
+							</th>
+							<th style="width: 100px;"><?php _e( 'SKU', 'flatsome' ); ?></th>
+							<th><?php _e( 'Name', 'flatsome' ); ?></th>
+							<th style="width: 120px;"><?php _e( 'Price', 'flatsome' ); ?></th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php
+						if ( $topping_products->have_posts() ) :
+							while ( $topping_products->have_posts() ) : $topping_products->the_post();
+								$product_obj = wc_get_product( get_the_ID() );
+								$is_checked = in_array( get_the_ID(), $current_crosssells );
+								?>
+								<tr>
+									<td style="text-align: center;">
+										<input type="checkbox"
+											name="crosssell_ids[]"
+											value="<?php echo esc_attr( get_the_ID() ); ?>"
+											<?php checked( $is_checked, true ); ?>
+											class="topping-product-checkbox" />
+									</td>
+									<td><?php echo esc_html( $product_obj->get_sku() ? $product_obj->get_sku() : '-' ); ?></td>
+									<td><strong><?php echo esc_html( get_the_title() ); ?></strong></td>
+									<td><?php echo $product_obj->get_price_html(); ?></td>
+								</tr>
+								<?php
+							endwhile;
+							wp_reset_postdata();
+						else :
+							?>
+							<tr>
+								<td colspan="4" style="text-align: center; padding: 20px;">
+									<?php _e( 'No topping products found.', 'flatsome' ); ?>
+								</td>
+							</tr>
+							<?php
+						endif;
+						?>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<?php
+}
+
+// Save the custom tab data
+add_action( 'woocommerce_process_product_meta', 'save_custom_paired_and_toppings_data' );
+function save_custom_paired_and_toppings_data( $post_id ) {
+	// Save upsell IDs (Paired With)
+	$upsell_ids = isset( $_POST['upsell_ids'] ) ? array_map( 'intval', $_POST['upsell_ids'] ) : array();
+	update_post_meta( $post_id, '_upsell_ids', $upsell_ids );
+
+	// Save cross-sell IDs (Toppings)
+	$crosssell_ids = isset( $_POST['crosssell_ids'] ) ? array_map( 'intval', $_POST['crosssell_ids'] ) : array();
+	update_post_meta( $post_id, '_crosssell_ids', $crosssell_ids );
+}
+
+// Add styles and JavaScript for custom tabs
+add_action( 'admin_head', 'customize_pizza_tabs_styles_scripts' );
+function customize_pizza_tabs_styles_scripts() {
+	$current_screen = get_current_screen();
+
+	// Only apply on product add/edit screens
+	if ( ! $current_screen || $current_screen->post_type !== 'product' ) {
+		return;
+	}
+
+	// Only for pizza products
+	if ( ! isset( $_GET['product_type'] ) || $_GET['product_type'] !== 'pizza' ) {
+		return;
+	}
+
+	?>
+	<style>
+		/* Style for custom product grid tables */
+		.paired-products-grid table,
+		.topping-products-grid table {
+			border: 1px solid #ddd;
+		}
+
+		.paired-products-grid table thead th,
+		.topping-products-grid table thead th {
+			background-color: #f9f9f9;
+			font-weight: 600;
+			padding: 10px;
+			border-bottom: 2px solid #ddd;
+		}
+
+		.paired-products-grid table tbody td,
+		.topping-products-grid table tbody td {
+			padding: 8px 10px;
+			vertical-align: middle;
+		}
+
+		.paired-products-grid table tbody tr:hover,
+		.topping-products-grid table tbody tr:hover {
+			background-color: #f5f5f5;
+		}
+
+		/* Checkbox styling */
+		.paired-product-checkbox,
+		.topping-product-checkbox,
+		#select_all_paired,
+		#select_all_toppings {
+			cursor: pointer;
+			width: 16px;
+			height: 16px;
+		}
+
+		/* Description text styling */
+		#paired_with_product_data .description,
+		#toppings_product_data .description {
+			color: #666;
+			font-style: italic;
+			display: block;
+			margin-top: 5px;
+		}
+
+		/* Tab label styling */
+		#woocommerce-product-data ul.wc-tabs li.paired_with_tab_options a:before {
+			content: "\f500"; /* dashicons-food */
+			font-family: dashicons;
+		}
+
+		#woocommerce-product-data ul.wc-tabs li.toppings_tab_options a:before {
+			content: "\f336"; /* dashicons-carrot */
+			font-family: dashicons;
+		}
+
+		/* Search/filter box styling */
+		.product-filter-box {
+			margin: 10px 0;
+			padding: 10px;
+			background: #f9f9f9;
+			border: 1px solid #ddd;
+			border-radius: 3px;
+		}
+
+		.product-filter-box input[type="text"] {
+			width: 100%;
+			max-width: 300px;
+			padding: 5px 10px;
+		}
+
+		/* Counter styling */
+		.selected-count {
+			display: inline-block;
+			margin-left: 10px;
+			padding: 3px 8px;
+			background: #0073aa;
+			color: #fff;
+			border-radius: 3px;
+			font-size: 12px;
+			font-weight: 600;
+		}
+	</style>
+
+	<script type="text/javascript">
+		jQuery(document).ready(function($) {
+			// Handle "Select All" for Paired With tab
+			$('#select_all_paired').on('change', function() {
+				var isChecked = $(this).is(':checked');
+				$('.paired-product-checkbox:visible').prop('checked', isChecked);
+				updatePairedCount();
+			});
+
+			// Handle individual checkboxes for Paired With tab
+			$('.paired-product-checkbox').on('change', function() {
+				var total = $('.paired-product-checkbox').length;
+				var checked = $('.paired-product-checkbox:checked').length;
+				$('#select_all_paired').prop('checked', total === checked);
+				updatePairedCount();
+			});
+
+			// Handle "Select All" for Toppings tab
+			$('#select_all_toppings').on('change', function() {
+				var isChecked = $(this).is(':checked');
+				$('.topping-product-checkbox:visible').prop('checked', isChecked);
+				updateToppingCount();
+			});
+
+			// Handle individual checkboxes for Toppings tab
+			$('.topping-product-checkbox').on('change', function() {
+				var total = $('.topping-product-checkbox').length;
+				var checked = $('.topping-product-checkbox:checked').length;
+				$('#select_all_toppings').prop('checked', total === checked);
+				updateToppingCount();
+			});
+
+			// Update selected count for Paired With
+			function updatePairedCount() {
+				var count = $('.paired-product-checkbox:checked').length;
+				var $label = $('#paired_with_product_data .form-field label strong');
+
+				// Remove existing count badge
+				$label.find('.selected-count').remove();
+
+				// Add new count badge
+				if (count > 0) {
+					$label.append(' <span class="selected-count">' + count + ' selected</span>');
+				}
+			}
+
+			// Update selected count for Toppings
+			function updateToppingCount() {
+				var count = $('.topping-product-checkbox:checked').length;
+				var $label = $('#toppings_product_data .form-field label strong');
+
+				// Remove existing count badge
+				$label.find('.selected-count').remove();
+
+				// Add new count badge
+				if (count > 0) {
+					$label.append(' <span class="selected-count">' + count + ' selected</span>');
+				}
+			}
+
+			// Initialize counts on page load
+			updatePairedCount();
+			updateToppingCount();
+
+			// Check "Select All" state on page load
+			var totalPaired = $('.paired-product-checkbox').length;
+			var checkedPaired = $('.paired-product-checkbox:checked').length;
+			if (totalPaired > 0 && totalPaired === checkedPaired) {
+				$('#select_all_paired').prop('checked', true);
+			}
+
+			var totalToppings = $('.topping-product-checkbox').length;
+			var checkedToppings = $('.topping-product-checkbox:checked').length;
+			if (totalToppings > 0 && totalToppings === checkedToppings) {
+				$('#select_all_toppings').prop('checked', true);
+			}
+		});
+	</script>
+	<?php
+}
+
 // Filter product search: exclude toppings from upsells, include ONLY toppings for cross-sells
 add_filter( 'woocommerce_json_search_found_products', 'filter_products_by_field_type' );
 function filter_products_by_field_type( $products ) {
