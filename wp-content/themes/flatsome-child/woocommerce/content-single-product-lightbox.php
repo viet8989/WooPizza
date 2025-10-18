@@ -19,7 +19,6 @@ $product_price = $product->get_price();
 $product_id    = $product->get_id();
 $upsell_ids    = $product->get_upsell_ids();
 $has_upsells   = ! empty( $upsell_ids );
-echo '<script>console.log("Quick View loaded for main product ID:", ' . esc_js( $product_id ) . ');</script>';
 do_action( 'wc_quick_view_before_single_product' );
 ?>
 
@@ -306,8 +305,6 @@ function get_topping_categories() {
 		'hide_empty' => false,
 	) );
 	
-	echo '<script>console.log("Child Categories:", ' . json_encode($child_categories) . ');</script>';
-	
 	if ( ! empty( $child_categories ) && ! is_wp_error( $child_categories ) ) {
 		foreach ( $child_categories as $category ) {
 			$categories[] = array(
@@ -336,8 +333,6 @@ function get_toppings_from_cross_sells( $cross_sell_ids ) {
 
 	// Get all topping categories
 	$topping_categories = get_topping_categories();
-	
-	echo '<script>console.log("Topping Categories:", ' . json_encode($topping_categories) . ');</script>';
 
 	// Get all products from cross-sell IDs
 	$products = wc_get_products( array(
@@ -901,17 +896,13 @@ do_action( 'wc_quick_view_after_single_product' );
 
 		// Check if upsells exist and hide paired button if not
 		const hasUpsells = <?php echo $has_upsells ? 'true' : 'false'; ?>;
-		console.log('Has upsells:', hasUpsells);
-		console.log('Paired button found:', $('#btn-paired').length);
 
 		if (!hasUpsells) {
 			// Try multiple methods to ensure it's hidden
 			const $pairedBtn = $('#btn-paired');
-			console.log('Hiding paired button, found:', $pairedBtn.length);
 			$pairedBtn.hide();
 			$pairedBtn.css('display', 'none');
 			$pairedBtn.addClass('hidden-no-upsells');
-			console.log('After hide - visible:', $pairedBtn.is(':visible'));
 		}
 
 		// Configuration
@@ -957,6 +948,14 @@ do_action( 'wc_quick_view_after_single_product' );
 				setTimeout(function() {
 					console.log('SWITCHED TO WHOLE MODE:');
 					logImageDimensions();
+					// Also log the visible whole pizza display
+					const $pizzaDisplay = $('#pizza-whole');
+					if ($pizzaDisplay.is(':visible')) {
+						const displayRect = $pizzaDisplay[0].getBoundingClientRect();
+						console.log('Pizza Display Container:');
+						console.log('  width:', displayRect.width);
+						console.log('  height:', displayRect.height);
+					}
 				}, 100);
 			});
 
@@ -1030,7 +1029,6 @@ do_action( 'wc_quick_view_after_single_product' );
 			setTimeout(function() {
 				// Get the view type from sessionStorage
 				const viewType = sessionStorage.getItem('pizza_view') || 'whole';
-				console.log('pizza_view type saved sessionStorage:', viewType);
 
 				// Show appropriate view based on stored value
 				// Only allow paired view if upsells exist and button is visible
@@ -1348,7 +1346,6 @@ do_action( 'wc_quick_view_after_single_product' );
 		}
 
 		function resetAllParams() {
-			console.log('Resetting all parameters to default state.');
 			// Remove any hidden inputs added for submission
 			$('input[name="extra_topping_options"]').remove();
 			$('input[name="pizza_halves"]').remove();
