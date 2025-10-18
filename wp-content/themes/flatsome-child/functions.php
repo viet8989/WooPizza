@@ -1552,8 +1552,8 @@ function add_toppings_tab_content() {
 	<?php
 }
 
-// Save the custom tab data
-add_action( 'woocommerce_process_product_meta', 'save_custom_paired_and_toppings_data', 10, 1 );
+// Save the custom tab data (priority 99 to run after WooCommerce defaults)
+add_action( 'woocommerce_process_product_meta', 'save_custom_paired_and_toppings_data', 99, 1 );
 function save_custom_paired_and_toppings_data( $post_id ) {
 	// Debug: Log POST data
 	error_log( '=== Save Custom Data for Product ID: ' . $post_id . ' ===' );
@@ -1577,13 +1577,36 @@ function save_custom_paired_and_toppings_data( $post_id ) {
 	error_log( 'Saved upsells: ' . print_r( $upsell_ids, true ) );
 
 	// Save cross-sell IDs (Toppings) - remove duplicates
-	$crosssell_ids = isset( $_POST['crosssell_ids'] ) && is_array( $_POST['crosssell_ids'] )
+	$crosssell_ids_from_post = isset( $_POST['crosssell_ids'] ) && is_array( $_POST['crosssell_ids'] )
 		? array_unique( array_map( 'intval', $_POST['crosssell_ids'] ) )
 		: array();
 	// Re-index array to avoid gaps
-	$crosssell_ids = array_values( $crosssell_ids );
+	$crosssell_ids = array_values( $crosssell_ids_from_post );
+
+	// Force update to ensure it's saved
+	delete_post_meta( $post_id, '_crosssell_ids' );
 	update_post_meta( $post_id, '_crosssell_ids', $crosssell_ids );
+
 	error_log( 'Saved cross-sells: ' . print_r( $crosssell_ids, true ) );
+
+	// Verify what was actually saved
+	$verify = get_post_meta( $post_id, '_crosssell_ids', true );
+	error_log( 'Verified cross-sells in DB: ' . print_r( $verify, true ) );
+
+	// Clear WooCommerce product cache to force reload
+	wc_delete_product_transients( $post_id );
+
+	// Add admin notice with debug info
+	add_action( 'admin_notices', function() use ( $post_id, $crosssell_ids, $verify ) {
+		?>
+		<script>
+		console.log('=== SAVE DEBUG for Product #<?php echo $post_id; ?> ===');
+		console.log('POST crosssell_ids:', <?php echo json_encode( isset( $_POST['crosssell_ids'] ) ? $_POST['crosssell_ids'] : 'NOT SET' ); ?>);
+		console.log('Processed crosssell_ids:', <?php echo json_encode( $crosssell_ids ); ?>);
+		console.log('Verified from DB:', <?php echo json_encode( $verify ); ?>);
+		</script>
+		<?php
+	});
 }
 
 // Redirect to add product_type parameter after saving pizza or topping products
