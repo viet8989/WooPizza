@@ -829,6 +829,7 @@ do_action( 'wc_quick_view_after_single_product' );
 	$(document).ready(function() {
 		// Check if upsells exist and hide paired button if not
 		const hasUpsells = <?php echo $has_upsells ? 'true' : 'false'; ?>;
+		console.log('Has upsells:', hasUpsells);
 		if (!hasUpsells) {
 			$('#btn-paired').hide();
 		}
