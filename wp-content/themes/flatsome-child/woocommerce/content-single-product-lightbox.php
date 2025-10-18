@@ -531,8 +531,8 @@ do_action( 'wc_quick_view_after_single_product' );
 	width: 200%;
 	height: 100%;
 	object-fit: cover;
-	object-position: right center;
-	transform: translateX(50%);
+	object-position: left center;
+	transform: translateX(0);
 	display: block;
 }
 
