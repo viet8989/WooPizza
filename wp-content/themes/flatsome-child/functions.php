@@ -308,7 +308,7 @@ function display_pizza_products_page() {
 						?>
 						<tr>
 							<td><?php echo esc_html( get_the_ID() ); ?></td>
-							<td class="thumb column-thumb"><?php echo $product->get_image( 'thumbnail' ); ?></td>
+							<td class="column-thumb"><?php echo $product->get_image( 'thumbnail' ); ?></td>
 							<td>
 								<strong>
 									<a href="<?php echo esc_url( get_edit_post_link( get_the_ID() ) ); ?>">
