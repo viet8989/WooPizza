@@ -345,7 +345,7 @@ function display_pizza_products_page() {
 							<td class="column-thumb"><?php echo $product->get_image( 'thumbnail' ); ?></td>
 							<td>
 								<strong>
-									<a href="<?php echo esc_url( get_edit_post_link( get_the_ID() ) ); ?>">
+									<a href="<?php echo esc_url( add_query_arg( 'product_type', 'pizza', get_edit_post_link( get_the_ID() ) ) ); ?>">
 										<?php echo esc_html( get_the_title() ); ?>
 									</a>
 								</strong>
@@ -445,7 +445,7 @@ function display_topping_products_page() {
 							<td class="thumb column-thumb"><?php echo $product->get_image( 'thumbnail' ); ?></td>
 							<td>
 								<strong>
-									<a href="<?php echo esc_url( get_edit_post_link( get_the_ID() ) ); ?>">
+									<a href="<?php echo esc_url( add_query_arg( 'product_type', 'topping', get_edit_post_link( get_the_ID() ) ) ); ?>">
 										<?php echo esc_html( get_the_title() ); ?>
 									</a>
 								</strong>
@@ -1054,13 +1054,6 @@ function remove_most_used_tab_product_categories( $args, $post_id ) {
 	return $args;
 }
 
-// Hide custom pizza tabs from Product Categories metabox
-add_filter( 'product_cat_row_actions', 'hide_custom_tabs_from_category_metabox', 10, 2 );
-function hide_custom_tabs_from_category_metabox( $actions, $term ) {
-	// This filter doesn't affect our tabs, but we'll add CSS to hide them
-	return $actions;
-}
-
 // Hide category 15 (topping) and its subcategories from Product Categories metabox
 add_filter( 'wp_terms_checklist_args', 'exclude_topping_categories_from_product_metabox', 10, 2 );
 function exclude_topping_categories_from_product_metabox( $args, $post_id ) {
@@ -1173,11 +1166,8 @@ function hide_categories_css_js() {
 				<script type="text/javascript">
 					jQuery(document).ready(function($) {
 						$('.wp-heading-inline').text('Add New Pizza');
-						$('#woocommerce-product-data .product_data_tabs li.linked_product_options').show();
 						$('#woocommerce-product-data .product_data_tabs li.attribute_options').show();
 						$('#woocommerce-product-data .postbox-header h2').first().text('Pizza data');
-						$('#linked_product_data .form-field label').eq(1).text('Paired with');
-						$('#linked_product_data .form-field label').eq(2).text('Toppings');
 						// Hide category 15 (topping) and all its children
 						$('#in-product_cat-15-1').hide();
 						$('#product_cat-tabs li.tabs a').text('Pizza categories');
@@ -1230,17 +1220,53 @@ function hide_categories_css_js() {
 
 }
 
+// Helper function to check if current product is a pizza (not a topping)
+function is_pizza_product( $post_id = null ) {
+	if ( ! $post_id ) {
+		global $post;
+		$post_id = $post ? $post->ID : 0;
+	}
+
+	if ( ! $post_id ) {
+		// New product - check URL parameter
+		return isset( $_GET['product_type'] ) && $_GET['product_type'] === 'pizza';
+	}
+
+	// Existing product - check if it's NOT in topping categories
+	$topping_parent_id = 15;
+	$product_categories = wp_get_post_terms( $post_id, 'product_cat', array( 'fields' => 'ids' ) );
+
+	if ( is_wp_error( $product_categories ) || empty( $product_categories ) ) {
+		return isset( $_GET['product_type'] ) && $_GET['product_type'] === 'pizza';
+	}
+
+	// Get all topping category IDs (parent 15 and its children)
+	$topping_cat_ids = array( $topping_parent_id );
+	$child_categories = get_terms( array(
+		'taxonomy' => 'product_cat',
+		'parent' => $topping_parent_id,
+		'hide_empty' => false,
+		'fields' => 'ids',
+	) );
+
+	if ( ! empty( $child_categories ) && ! is_wp_error( $child_categories ) ) {
+		$topping_cat_ids = array_merge( $topping_cat_ids, $child_categories );
+	}
+
+	// If product is in any topping category, it's NOT a pizza
+	$is_topping = ! empty( array_intersect( $product_categories, $topping_cat_ids ) );
+	return ! $is_topping;
+}
+
 // Customize WooCommerce product data tab labels for pizza products
 add_filter( 'woocommerce_product_data_tabs', 'customize_pizza_product_tabs', 10, 1 );
 function customize_pizza_product_tabs( $tabs ) {
 	global $post;
 
 	// Check if we're adding/editing a pizza product
-	if ( isset( $_GET['product_type'] ) && $_GET['product_type'] === 'pizza' ) {
-		// Hide the default linked products tab
-		if ( isset( $tabs['linked_product'] ) ) {
-			$tabs['linked_product']['class'][] = 'hide_if_simple';
-		}
+	if ( is_pizza_product( $post ? $post->ID : null ) ) {
+		// Remove the default linked products tab completely for pizza products
+		unset( $tabs['linked_product'] );
 
 		// Add custom "Paired With" tab
 		$tabs['paired_with_tab'] = array(
@@ -1268,7 +1294,7 @@ function add_paired_with_tab_content() {
 	global $post;
 
 	// Only show for pizza products
-	if ( ! isset( $_GET['product_type'] ) || $_GET['product_type'] !== 'pizza' ) {
+	if ( ! is_pizza_product( $post ? $post->ID : null ) ) {
 		return;
 	}
 
@@ -1281,9 +1307,13 @@ function add_paired_with_tab_content() {
 			</p>
 
 			<?php
-			// Get current upsell IDs
-			$product = wc_get_product( $post->ID );
-			$current_upsells = $product ? $product->get_upsell_ids() : array();
+			// Get current upsell IDs - use direct meta query for more reliability
+			$current_upsells = get_post_meta( $post->ID, '_upsell_ids', true );
+			if ( ! is_array( $current_upsells ) ) {
+				$current_upsells = array();
+			}
+			// Ensure all IDs are integers for proper comparison
+			$current_upsells = array_map( 'intval', $current_upsells );
 
 			// Get all pizza products (exclude toppings from category 15)
 			$topping_parent_id = 15;
@@ -1377,7 +1407,7 @@ function add_toppings_tab_content() {
 	global $post;
 
 	// Only show for pizza products
-	if ( ! isset( $_GET['product_type'] ) || $_GET['product_type'] !== 'pizza' ) {
+	if ( ! is_pizza_product( $post ? $post->ID : null ) ) {
 		return;
 	}
 
@@ -1390,9 +1420,13 @@ function add_toppings_tab_content() {
 			</p>
 
 			<?php
-			// Get current cross-sell IDs
-			$product = wc_get_product( $post->ID );
-			$current_crosssells = $product ? $product->get_cross_sell_ids() : array();
+			// Get current cross-sell IDs - use direct meta query for more reliability
+			$current_crosssells = get_post_meta( $post->ID, '_crosssell_ids', true );
+			if ( ! is_array( $current_crosssells ) ) {
+				$current_crosssells = array();
+			}
+			// Ensure all IDs are integers for proper comparison
+			$current_crosssells = array_map( 'intval', $current_crosssells );
 
 			// Get topping categories (children of category 15)
 			$topping_cats = array();
@@ -1491,9 +1525,58 @@ function save_custom_paired_and_toppings_data( $post_id ) {
 	update_post_meta( $post_id, '_crosssell_ids', $crosssell_ids );
 }
 
+// Redirect to add product_type parameter after saving pizza or topping products
+add_filter( 'redirect_post_location', 'add_product_type_to_redirect_url', 10, 2 );
+function add_product_type_to_redirect_url( $location, $post_id ) {
+	// Only apply to product post type
+	if ( get_post_type( $post_id ) !== 'product' ) {
+		return $location;
+	}
+
+	// Check if product_type parameter is already in the URL
+	if ( strpos( $location, 'product_type=' ) !== false ) {
+		return $location;
+	}
+
+	// Determine if this is a pizza or topping product
+	$product_categories = wp_get_post_terms( $post_id, 'product_cat', array( 'fields' => 'ids' ) );
+
+	if ( is_wp_error( $product_categories ) || empty( $product_categories ) ) {
+		return $location;
+	}
+
+	// Get all topping category IDs (parent 15 and its children)
+	$topping_parent_id = 15;
+	$topping_cat_ids = array( $topping_parent_id );
+	$child_categories = get_terms( array(
+		'taxonomy' => 'product_cat',
+		'parent' => $topping_parent_id,
+		'hide_empty' => false,
+		'fields' => 'ids',
+	) );
+
+	if ( ! empty( $child_categories ) && ! is_wp_error( $child_categories ) ) {
+		$topping_cat_ids = array_merge( $topping_cat_ids, $child_categories );
+	}
+
+	// Check if product is in topping categories
+	$is_topping = ! empty( array_intersect( $product_categories, $topping_cat_ids ) );
+
+	if ( $is_topping ) {
+		// Add product_type=topping to URL
+		$location = add_query_arg( 'product_type', 'topping', $location );
+	} else {
+		// Add product_type=pizza to URL
+		$location = add_query_arg( 'product_type', 'pizza', $location );
+	}
+
+	return $location;
+}
+
 // Add styles and JavaScript for custom tabs
 add_action( 'admin_head', 'customize_pizza_tabs_styles_scripts' );
 function customize_pizza_tabs_styles_scripts() {
+	global $post;
 	$current_screen = get_current_screen();
 
 	// Only apply on product add/edit screens
@@ -1502,7 +1585,7 @@ function customize_pizza_tabs_styles_scripts() {
 	}
 
 	// Only for pizza products
-	if ( ! isset( $_GET['product_type'] ) || $_GET['product_type'] !== 'pizza' ) {
+	if ( ! is_pizza_product( $post ? $post->ID : null ) ) {
 		return;
 	}
 
