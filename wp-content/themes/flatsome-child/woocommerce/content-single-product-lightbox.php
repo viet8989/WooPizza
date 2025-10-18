@@ -1010,8 +1010,6 @@ do_action( 'wc_quick_view_after_single_product' );
 				const $card = $(this);
 				const imageUrl = $card.data('product-image');
 				const isCurrentlySelected = $card.hasClass('selected');
-				console.log('Clicked pizza card for product ID:', $card.data('product-id'));
-				console.log('Is currently selected:', isCurrentlySelected);
 				const crossSells = $card.data('cross-sells');				
 
 				// Remove selection from all cards
@@ -1165,9 +1163,6 @@ do_action( 'wc_quick_view_after_single_product' );
 							toppings: rightToppings
 						}
 					};
-
-					console.log('Paired mode - Left half:', pizzaHalves.left_half);
-					console.log('Paired mode - Right half:', pizzaHalves.right_half);
 				} else {
 					// Whole pizza mode: gather whole pizza toppings
 					$('.whole-topping:checked').each(function() {
@@ -1178,9 +1173,6 @@ do_action( 'wc_quick_view_after_single_product' );
 							product_id: parseInt($checkbox.data('product-id'))
 						});
 					});
-
-					console.log('Whole pizza mode');
-					console.log('Whole pizza toppings:', wholeToppings);
 				}
 
 				// Get special request text
@@ -1229,9 +1221,6 @@ do_action( 'wc_quick_view_after_single_product' );
 
 					console.log('Added special request:', specialRequest);
 				}
-
-				// Allow form submission to proceed
-				console.log('Form submission proceeding...');
 			});
 		}
 
@@ -1284,7 +1273,6 @@ do_action( 'wc_quick_view_after_single_product' );
 		initPizzaCardSelection();
 		initToppingCheckboxes();
 		initAddToCart();
-		// initToppingTabs();
 		initSpecialRequestCounter();
 	});
 })(jQuery);
