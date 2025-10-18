@@ -843,65 +843,57 @@ do_action( 'wc_quick_view_after_single_product' );
 			// Whole pizza image
 			const $wholePizza = $('.pizza-main-image');
 			if ($wholePizza.length) {
-				const wholeDims = {
-					width: $wholePizza.width(),
-					height: $wholePizza.height(),
-					naturalWidth: $wholePizza[0].naturalWidth,
-					naturalHeight: $wholePizza[0].naturalHeight,
-					displayWidth: $wholePizza[0].getBoundingClientRect().width,
-					displayHeight: $wholePizza[0].getBoundingClientRect().height
-				};
+				const rect = $wholePizza[0].getBoundingClientRect();
 				console.log('Whole Pizza Image:');
-				console.table(wholeDims);
+				console.log('  width:', $wholePizza.width());
+				console.log('  height:', $wholePizza.height());
+				console.log('  naturalWidth:', $wholePizza[0].naturalWidth);
+				console.log('  naturalHeight:', $wholePizza[0].naturalHeight);
+				console.log('  displayWidth:', rect.width);
+				console.log('  displayHeight:', rect.height);
 			}
 
 			// Left half pizza image
 			const $leftPizza = $('#left-pizza');
 			if ($leftPizza.length) {
-				const leftContainer = $leftPizza.parent()[0].getBoundingClientRect();
-				const leftDims = {
-					width: $leftPizza.width(),
-					height: $leftPizza.height(),
-					naturalWidth: $leftPizza[0].naturalWidth,
-					naturalHeight: $leftPizza[0].naturalHeight,
-					displayWidth: $leftPizza[0].getBoundingClientRect().width,
-					displayHeight: $leftPizza[0].getBoundingClientRect().height,
-					containerWidth: leftContainer.width,
-					containerHeight: leftContainer.height
-				};
+				const rect = $leftPizza[0].getBoundingClientRect();
+				const containerRect = $leftPizza.parent()[0].getBoundingClientRect();
 				console.log('Left Half Pizza Image:');
-				console.table(leftDims);
+				console.log('  width:', $leftPizza.width());
+				console.log('  height:', $leftPizza.height());
+				console.log('  naturalWidth:', $leftPizza[0].naturalWidth);
+				console.log('  naturalHeight:', $leftPizza[0].naturalHeight);
+				console.log('  displayWidth:', rect.width);
+				console.log('  displayHeight:', rect.height);
+				console.log('  containerWidth:', containerRect.width);
+				console.log('  containerHeight:', containerRect.height);
 			}
 
 			// Right half pizza image
 			const $rightPizza = $('#right-pizza');
 			if ($rightPizza.length && $rightPizza.hasClass('right-pizza-img')) {
-				const rightContainer = $rightPizza.parent()[0].getBoundingClientRect();
-				const rightDims = {
-					width: $rightPizza.width(),
-					height: $rightPizza.height(),
-					naturalWidth: $rightPizza[0].naturalWidth,
-					naturalHeight: $rightPizza[0].naturalHeight,
-					displayWidth: $rightPizza[0].getBoundingClientRect().width,
-					displayHeight: $rightPizza[0].getBoundingClientRect().height,
-					containerWidth: rightContainer.width,
-					containerHeight: rightContainer.height
-				};
+				const rect = $rightPizza[0].getBoundingClientRect();
+				const containerRect = $rightPizza.parent()[0].getBoundingClientRect();
 				console.log('Right Half Pizza Image:');
-				console.table(rightDims);
+				console.log('  width:', $rightPizza.width());
+				console.log('  height:', $rightPizza.height());
+				console.log('  naturalWidth:', $rightPizza[0].naturalWidth);
+				console.log('  naturalHeight:', $rightPizza[0].naturalHeight);
+				console.log('  displayWidth:', rect.width);
+				console.log('  displayHeight:', rect.height);
+				console.log('  containerWidth:', containerRect.width);
+				console.log('  containerHeight:', containerRect.height);
 			}
 
 			// Header section (combined halves)
 			const $headerSection = $('.header-section');
 			if ($headerSection.length) {
-				const headerDims = {
-					width: $headerSection.width(),
-					height: $headerSection.height(),
-					displayWidth: $headerSection[0].getBoundingClientRect().width,
-					displayHeight: $headerSection[0].getBoundingClientRect().height
-				};
+				const rect = $headerSection[0].getBoundingClientRect();
 				console.log('Header Section (Combined Halves):');
-				console.table(headerDims);
+				console.log('  width:', $headerSection.width());
+				console.log('  height:', $headerSection.height());
+				console.log('  displayWidth:', rect.width);
+				console.log('  displayHeight:', rect.height);
 			}
 
 			console.log('========================');
