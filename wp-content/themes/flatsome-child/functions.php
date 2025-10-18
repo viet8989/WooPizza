@@ -1396,10 +1396,12 @@ function add_paired_with_tab_content() {
 								<tr>
 									<td style="text-align: center;">
 										<input type="checkbox"
+											id="paired_product_<?php echo esc_attr( get_the_ID() ); ?>"
 											name="upsell_ids[]"
 											value="<?php echo esc_attr( get_the_ID() ); ?>"
 											<?php checked( $is_checked, true ); ?>
-											class="paired-product-checkbox" />
+											class="paired-product-checkbox"
+											data-product-id="<?php echo esc_attr( get_the_ID() ); ?>" />
 									</td>
 									<td><?php echo esc_html( $product_obj->get_sku() ? $product_obj->get_sku() : '-' ); ?></td>
 									<td><strong><?php echo esc_html( get_the_title() ); ?></strong></td>
@@ -1559,6 +1561,7 @@ function add_toppings_tab_content() {
 								<tr>
 									<td style="text-align: center;">
 										<input type="checkbox"
+											id="topping_product_<?php echo esc_attr( $product_id ); ?>"
 											name="crosssell_ids[]"
 											value="<?php echo esc_attr( $product_id ); ?>"
 											<?php checked( $is_checked, true ); ?>
@@ -1863,6 +1866,10 @@ function customize_pizza_tabs_styles_scripts() {
 
 	<script type="text/javascript">
 		jQuery(document).ready(function($) {
+			// Test: Log that JavaScript is loading
+			console.log('=== Pizza Tabs JavaScript Loaded ===');
+			console.log('Product type parameter:', '<?php echo isset( $_GET["product_type"] ) ? $_GET["product_type"] : "NOT SET"; ?>');
+
 			// Handle "Select All" for Paired With tab
 			$('#select_all_paired').on('change', function() {
 				var isChecked = $(this).is(':checked');
@@ -1950,49 +1957,70 @@ function customize_pizza_tabs_styles_scripts() {
 					'| HTML checked attr:', $cb.attr('checked'));
 			});
 
-			// FIX: Disable unchecked checkboxes to prevent duplicate submissions
-			// This prevents unchecked boxes from being included in form data at all
+			// FIX: Remove ALL checkboxes and replace with hidden fields to prevent duplicates
 			function cleanupCheckboxesBeforeSubmit(e) {
 				console.log('=== Cleaning Checkboxes Before Submit ===');
 
-				// Disable all UNCHECKED paired checkboxes so they don't submit
-				var pairedTotal = 0;
-				var pairedChecked = 0;
-				$('#paired_with_product_data .paired-product-checkbox').each(function() {
-					pairedTotal++;
-					if ($(this).is(':checked')) {
-						pairedChecked++;
-						// Keep checked boxes enabled
-						$(this).prop('disabled', false);
-					} else {
-						// Disable unchecked boxes to prevent submission
-						$(this).prop('disabled', true);
+				// Collect checked paired IDs
+				var pairedIds = [];
+				$('#paired_with_product_data .paired-product-checkbox:checked').each(function() {
+					var id = $(this).val();
+					if (id && pairedIds.indexOf(id) === -1) {  // Avoid duplicates
+						pairedIds.push(id);
 					}
 				});
 
-				// Disable all UNCHECKED topping checkboxes so they don't submit
-				var toppingTotal = 0;
-				var toppingChecked = 0;
-				$('#toppings_product_data .topping-product-checkbox').each(function() {
-					toppingTotal++;
-					if ($(this).is(':checked')) {
-						toppingChecked++;
-						// Keep checked boxes enabled
-						$(this).prop('disabled', false);
-					} else {
-						// Disable unchecked boxes to prevent submission
-						$(this).prop('disabled', true);
+				// Collect checked topping IDs
+				var toppingIds = [];
+				$('#toppings_product_data .topping-product-checkbox:checked').each(function() {
+					var id = $(this).val();
+					if (id && toppingIds.indexOf(id) === -1) {  // Avoid duplicates
+						toppingIds.push(id);
 					}
 				});
 
-				console.log('Paired checkboxes - Total:', pairedTotal, 'Checked:', pairedChecked, 'Disabled:', (pairedTotal - pairedChecked));
-				console.log('Topping checkboxes - Total:', toppingTotal, 'Checked:', toppingChecked, 'Disabled:', (toppingTotal - toppingChecked));
+				console.log('Paired IDs collected:', pairedIds.length, pairedIds);
+				console.log('Topping IDs collected:', toppingIds.length, toppingIds);
+
+				// REMOVE ALL checkboxes from the form to prevent duplicate submission
+				$('.paired-product-checkbox').remove();
+				$('.topping-product-checkbox').remove();
+
+				console.log('All checkboxes removed from DOM');
+
+				// Add hidden fields for paired products
+				if (pairedIds.length > 0) {
+					var $container = $('#paired_with_product_data');
+					pairedIds.forEach(function(id) {
+						$('<input>').attr({
+							type: 'hidden',
+							name: 'upsell_ids[]',
+							value: id
+						}).appendTo($container);
+					});
+					console.log('Added', pairedIds.length, 'hidden fields for paired products');
+				}
+
+				// Add hidden fields for toppings
+				if (toppingIds.length > 0) {
+					var $container = $('#toppings_product_data');
+					toppingIds.forEach(function(id) {
+						$('<input>').attr({
+							type: 'hidden',
+							name: 'crosssell_ids[]',
+							value: id
+						}).appendTo($container);
+					});
+					console.log('Added', toppingIds.length, 'hidden fields for toppings');
+				}
+
+				console.log('=== Cleanup Complete ===');
 			}
 
-			// Attach to form submit event - must run synchronously
+			// Attach to form submit event - must run synchronously BEFORE form serialization
 			$('#post').on('submit', function(e) {
 				cleanupCheckboxesBeforeSubmit(e);
-				// Don't prevent default - let form submit continue
+				// Don't prevent default - let form submit continue with hidden fields
 			});
 		});
 	</script>

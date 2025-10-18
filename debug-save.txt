@@ -1,25 +1,22 @@
 
 
 ============================================================
-Save triggered at: 2025-10-18 10:07:50
+Save triggered at: 2025-10-18 10:19:00
 Product ID: 523
 Is Pizza Product: YES
 POST upsell_ids: Array
 (
-    [0] => 573
-    [1] => 521
-    [2] => 134
-    [3] => 522
-    [4] => 520
-    [5] => 506
-    [6] => 134
-    [7] => 506
-    [8] => 520
-    [9] => 573
-    [10] => 521
+    [0] => 134
+    [1] => 522
+    [2] => 520
+    [3] => 573
+    [4] => 521
+    [5] => 134
+    [6] => 522
+    [7] => 521
 )
 
-POST upsell_ids COUNT: 11
+POST upsell_ids COUNT: 8
 POST crosssell_ids: Array
 (
     [0] => 539
@@ -30,29 +27,27 @@ POST crosssell_ids: Array
     [5] => 529
     [6] => 538
     [7] => 531
-    [8] => 530
-    [9] => 539
-    [10] => 528
-    [11] => 533
-    [12] => 534
-    [13] => 532
-    [14] => 529
-    [15] => 538
-    [16] => 531
-    [17] => 530
+    [8] => 539
+    [9] => 528
+    [10] => 533
+    [11] => 534
+    [12] => 532
+    [13] => 529
+    [14] => 538
+    [15] => 531
 )
 
-POST crosssell_ids COUNT: 18
-POST crosssell_ids UNIQUE COUNT: 9
-DUPLICATES FOUND: 9
+POST crosssell_ids COUNT: 16
+POST crosssell_ids UNIQUE COUNT: 8
+DUPLICATES FOUND: 8
+Deleted existing upsells and cross-sells
 Saved upsells: Array
 (
-    [0] => 573
-    [1] => 521
-    [2] => 134
-    [3] => 522
-    [4] => 520
-    [5] => 506
+    [0] => 134
+    [1] => 522
+    [2] => 520
+    [3] => 573
+    [4] => 521
 )
 
 Saved cross-sells: Array
@@ -65,7 +60,15 @@ Saved cross-sells: Array
     [5] => 529
     [6] => 538
     [7] => 531
-    [8] => 530
+)
+
+Verified upsells in DB: Array
+(
+    [0] => 134
+    [1] => 522
+    [2] => 520
+    [3] => 573
+    [4] => 521
 )
 
 Verified cross-sells in DB: Array
@@ -78,7 +81,6 @@ Verified cross-sells in DB: Array
     [5] => 529
     [6] => 538
     [7] => 531
-    [8] => 530
 )
 
 
