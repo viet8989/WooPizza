@@ -17,6 +17,8 @@ if ( ! $product instanceof WC_Product ) {
 
 $product_price = $product->get_price();
 $product_id    = $product->get_id();
+$upsell_ids    = $product->get_upsell_ids();
+$has_upsells   = ! empty( $upsell_ids );
 echo '<script>console.log("Quick View loaded for product ID:", ' . esc_js( $product_id ) . ');</script>';
 do_action( 'wc_quick_view_before_single_product' );
 ?>
@@ -109,10 +111,8 @@ do_action( 'wc_quick_view_before_single_product' );
 						<div class="pizza-grid-wrapper">
 							<div class="pizza-grid">
 								<?php
-								// Get paired products from upsells
-								$upsell_ids = $product->get_upsell_ids();
-								
-								if ( ! empty( $upsell_ids ) ) {
+								// Use upsell_ids already fetched at top of file
+								if ( $has_upsells ) {
 									$args = array(
 										'include' => $upsell_ids,
 										'limit'   => -1,
@@ -827,6 +827,12 @@ do_action( 'wc_quick_view_after_single_product' );
 	'use strict';
 
 	$(document).ready(function() {
+		// Check if upsells exist and hide paired button if not
+		const hasUpsells = <?php echo $has_upsells ? 'true' : 'false'; ?>;
+		if (!hasUpsells) {
+			$('#btn-paired').hide();
+		}
+
 		// Configuration
 		const config = {
 			basePrice: parseFloat($('#sub_total').data('base-price')) || 0,
