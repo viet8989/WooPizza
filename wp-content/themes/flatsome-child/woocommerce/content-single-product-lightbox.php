@@ -19,7 +19,7 @@ $product_price = $product->get_price();
 $product_id    = $product->get_id();
 $upsell_ids    = $product->get_upsell_ids();
 $has_upsells   = ! empty( $upsell_ids );
-echo '<script>console.log("Quick View loaded for product ID:", ' . esc_js( $product_id ) . ');</script>';
+echo '<script>console.log("Quick View loaded for main product ID:", ' . esc_js( $product_id ) . ');</script>';
 do_action( 'wc_quick_view_before_single_product' );
 ?>
 
