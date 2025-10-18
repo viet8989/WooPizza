@@ -1425,10 +1425,12 @@ if ( ! has_action( 'woocommerce_product_data_panels', 'add_toppings_tab_content'
 function add_toppings_tab_content() {
 	global $post;
 
-	// Prevent multiple renders
-	static $rendered = false;
-	if ( $rendered ) {
-		echo '<!-- Toppings tab already rendered, skipping -->';
+	// Prevent multiple renders with a counter
+	static $render_count = 0;
+	$render_count++;
+
+	if ( $render_count > 1 ) {
+		echo '<!-- Toppings tab render attempt #' . $render_count . ' - BLOCKED -->';
 		return;
 	}
 
@@ -1437,13 +1439,14 @@ function add_toppings_tab_content() {
 
 	// Only show for pizza products
 	if ( ! is_pizza_product( $product_id ) ) {
+		echo '<!-- Toppings tab - not a pizza product (ID: ' . $product_id . ') -->';
 		return;
 	}
 
-	$rendered = true;
+	echo '<!-- Toppings tab rendering #' . $render_count . ' for product ' . $product_id . ' -->';
 
 	?>
-	<div id="toppings_product_data" class="panel woocommerce_options_panel hidden">
+	<div id="toppings_product_data" class="panel woocommerce_options_panel hidden" data-render-count="<?php echo $render_count; ?>">
 		<div class="options_group">
 			<p class="form-field">
 				<label><strong><?php _e( 'Select Available Toppings', 'flatsome' ); ?></strong></label>
