@@ -1488,12 +1488,17 @@ function add_toppings_tab_content() {
 						if ( $topping_products->have_posts() ) :
 							while ( $topping_products->have_posts() ) : $topping_products->the_post();
 								$product_obj = wc_get_product( get_the_ID() );
-								$product_id = get_the_ID();
+								$product_id = intval( get_the_ID() );
 								$is_checked = in_array( $product_id, $current_crosssells, true );
 								$categories = wc_get_product_category_list( get_the_ID(), ', ', '', '' );
 
-								// Debug for each product
-								echo '<!-- Topping ID: ' . $product_id . ' | Is Checked: ' . var_export( $is_checked, true ) . ' -->';
+								// Debug for each product - more detailed
+								echo '<!-- Topping Product ID: ' . $product_id . ' (' . get_the_title() . ')';
+								echo ' | Type: ' . gettype( $product_id );
+								echo ' | In Array: ' . ( in_array( $product_id, $current_crosssells, true ) ? 'YES' : 'NO' );
+								echo ' | In Array (loose): ' . ( in_array( $product_id, $current_crosssells, false ) ? 'YES' : 'NO' );
+								echo ' | Is Checked: ' . var_export( $is_checked, true );
+								echo ' -->';
 								?>
 								<tr>
 									<td style="text-align: center;">
@@ -1501,7 +1506,9 @@ function add_toppings_tab_content() {
 											name="crosssell_ids[]"
 											value="<?php echo esc_attr( $product_id ); ?>"
 											<?php checked( $is_checked, true ); ?>
-											class="topping-product-checkbox" />
+											class="topping-product-checkbox"
+											data-product-id="<?php echo esc_attr( $product_id ); ?>"
+											data-is-checked="<?php echo $is_checked ? 'true' : 'false'; ?>" />
 									</td>
 									<td><?php echo esc_html( $product_obj->get_sku() ? $product_obj->get_sku() : '-' ); ?></td>
 									<td><strong><?php echo esc_html( get_the_title() ); ?></strong></td>
@@ -1802,6 +1809,18 @@ function customize_pizza_tabs_styles_scripts() {
 			if (totalToppings > 0 && totalToppings === checkedToppings) {
 				$('#select_all_toppings').prop('checked', true);
 			}
+
+			// Debug: Log topping checkbox states
+			console.log('=== Topping Checkboxes Debug ===');
+			console.log('Total topping checkboxes:', totalToppings);
+			console.log('Checked topping checkboxes:', checkedToppings);
+			$('.topping-product-checkbox').each(function() {
+				var $cb = $(this);
+				console.log('Checkbox ID:', $cb.val(),
+					'| Checked:', $cb.is(':checked'),
+					'| Data-is-checked:', $cb.data('is-checked'),
+					'| HTML checked attr:', $cb.attr('checked'));
+			});
 		});
 	</script>
 	<?php
