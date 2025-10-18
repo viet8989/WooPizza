@@ -1873,15 +1873,32 @@ function customize_pizza_tabs_styles_scripts() {
 			// CRITICAL FIX: Remove the 'name' attribute from ALL checkboxes immediately
 			// This prevents them from being submitted with the form
 			// We'll add hidden fields with the correct values on submit
+			var pairedCount = 0;
 			$('.paired-product-checkbox').each(function() {
-				$(this).attr('data-original-name', $(this).attr('name'));  // Save for reference
+				var originalName = $(this).attr('name');
+				$(this).attr('data-original-name', originalName);  // Save for reference
 				$(this).removeAttr('name');  // Remove name so it won't submit
+				pairedCount++;
 			});
+
+			var toppingCount = 0;
 			$('.topping-product-checkbox').each(function() {
-				$(this).attr('data-original-name', $(this).attr('name'));  // Save for reference
+				var originalName = $(this).attr('name');
+				$(this).attr('data-original-name', originalName);  // Save for reference
 				$(this).removeAttr('name');  // Remove name so it won't submit
+				toppingCount++;
 			});
-			console.log('Removed name attributes from all checkboxes to prevent duplicate submission');
+
+			console.log('Removed name attributes from checkboxes:');
+			console.log('  - Paired checkboxes:', pairedCount);
+			console.log('  - Topping checkboxes:', toppingCount);
+
+			// Verify they were actually removed
+			var stillHaveName = $('.paired-product-checkbox[name], .topping-product-checkbox[name]').length;
+			console.log('  - Checkboxes still with name attribute:', stillHaveName);
+			if (stillHaveName > 0) {
+				console.error('WARNING: Some checkboxes still have name attribute!');
+			}
 
 			// Handle "Select All" for Paired With tab
 			$('#select_all_paired').on('change', function() {
