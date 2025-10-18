@@ -836,6 +836,69 @@ do_action( 'wc_quick_view_after_single_product' );
 	'use strict';
 
 	$(document).ready(function() {
+		// Function to log image dimensions
+		function logImageDimensions() {
+			console.log('=== IMAGE DIMENSIONS ===');
+
+			// Whole pizza image
+			const $wholePizza = $('.pizza-main-image');
+			if ($wholePizza.length) {
+				console.log('Whole Pizza Image:', {
+					width: $wholePizza.width(),
+					height: $wholePizza.height(),
+					naturalWidth: $wholePizza[0].naturalWidth,
+					naturalHeight: $wholePizza[0].naturalHeight,
+					displayWidth: $wholePizza[0].getBoundingClientRect().width,
+					displayHeight: $wholePizza[0].getBoundingClientRect().height
+				});
+			}
+
+			// Left half pizza image
+			const $leftPizza = $('#left-pizza');
+			if ($leftPizza.length) {
+				const leftContainer = $leftPizza.parent()[0].getBoundingClientRect();
+				console.log('Left Half Pizza Image:', {
+					width: $leftPizza.width(),
+					height: $leftPizza.height(),
+					naturalWidth: $leftPizza[0].naturalWidth,
+					naturalHeight: $leftPizza[0].naturalHeight,
+					displayWidth: $leftPizza[0].getBoundingClientRect().width,
+					displayHeight: $leftPizza[0].getBoundingClientRect().height,
+					containerWidth: leftContainer.width,
+					containerHeight: leftContainer.height
+				});
+			}
+
+			// Right half pizza image
+			const $rightPizza = $('#right-pizza');
+			if ($rightPizza.length && $rightPizza.hasClass('right-pizza-img')) {
+				const rightContainer = $rightPizza.parent()[0].getBoundingClientRect();
+				console.log('Right Half Pizza Image:', {
+					width: $rightPizza.width(),
+					height: $rightPizza.height(),
+					naturalWidth: $rightPizza[0].naturalWidth,
+					naturalHeight: $rightPizza[0].naturalHeight,
+					displayWidth: $rightPizza[0].getBoundingClientRect().width,
+					displayHeight: $rightPizza[0].getBoundingClientRect().height,
+					containerWidth: rightContainer.width,
+					containerHeight: rightContainer.height
+				});
+			}
+
+			// Header section (combined halves)
+			const $headerSection = $('.header-section');
+			if ($headerSection.length) {
+				console.log('Header Section (Combined Halves):', {
+					width: $headerSection.width(),
+					height: $headerSection.height(),
+					displayWidth: $headerSection[0].getBoundingClientRect().width,
+					displayHeight: $headerSection[0].getBoundingClientRect().height
+				});
+			}
+
+			console.log('========================');
+		}
+
 		// Check if upsells exist and hide paired button if not
 		const hasUpsells = <?php echo $has_upsells ? 'true' : 'false'; ?>;
 		console.log('Has upsells:', hasUpsells);
@@ -889,6 +952,12 @@ do_action( 'wc_quick_view_after_single_product' );
 					.addClass('icon-row');
 
 				updateSubtotal();
+
+				// Log dimensions when switching to whole mode
+				setTimeout(function() {
+					console.log('SWITCHED TO WHOLE MODE:');
+					logImageDimensions();
+				}, 100);
 			});
 
 			$('#btn-paired').on('click', function() {
@@ -931,6 +1000,12 @@ do_action( 'wc_quick_view_after_single_product' );
 				};
 
 				updateSubtotal();
+
+				// Log dimensions when switching to paired mode
+				setTimeout(function() {
+					console.log('SWITCHED TO PAIRED MODE:');
+					logImageDimensions();
+				}, 100);
 			});
 
 			$('#left-pizza').on('click', function() {
@@ -1075,6 +1150,12 @@ do_action( 'wc_quick_view_after_single_product' );
 					$('.topping-tab[data-tab="right-toppings"]').addClass('active');
 					$('.tab-content').removeClass('active');
 					$('#right-toppings').addClass('active');
+
+					// Log dimensions when right pizza is selected
+					setTimeout(function() {
+						console.log('RIGHT PIZZA SELECTED:');
+						logImageDimensions();
+					}, 100);
 				} else {
 					// Reset to default placeholder
 					$('#right-pizza')
@@ -1305,6 +1386,12 @@ do_action( 'wc_quick_view_after_single_product' );
 		initToppingCheckboxes();
 		initAddToCart();
 		initSpecialRequestCounter();
+
+		// Log initial dimensions after everything is loaded
+		setTimeout(function() {
+			console.log('INITIAL PAGE LOAD:');
+			logImageDimensions();
+		}, 500);
 	});
 })(jQuery);
 </script>
