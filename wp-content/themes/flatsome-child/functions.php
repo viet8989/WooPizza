@@ -1293,8 +1293,11 @@ add_action( 'woocommerce_product_data_panels', 'add_paired_with_tab_content' );
 function add_paired_with_tab_content() {
 	global $post;
 
+	// Get the actual product ID being edited
+	$product_id = isset( $_GET['post'] ) ? intval( $_GET['post'] ) : ( $post ? $post->ID : 0 );
+
 	// Only show for pizza products
-	if ( ! is_pizza_product( $post ? $post->ID : null ) ) {
+	if ( ! is_pizza_product( $product_id ) ) {
 		return;
 	}
 
@@ -1307,8 +1310,8 @@ function add_paired_with_tab_content() {
 			</p>
 
 			<?php
-			// Get current upsell IDs - use direct meta query for more reliability
-			$current_upsells = get_post_meta( $post->ID, '_upsell_ids', true );
+			// Get current upsell IDs - use the correct product ID
+			$current_upsells = get_post_meta( $product_id, '_upsell_ids', true );
 			if ( ! is_array( $current_upsells ) ) {
 				$current_upsells = array();
 			}
@@ -1335,7 +1338,7 @@ function add_paired_with_tab_content() {
 				'posts_per_page' => -1,
 				'orderby' => 'title',
 				'order' => 'ASC',
-				'post__not_in' => array( $post->ID ), // Exclude current product
+				'post__not_in' => array( $product_id ), // Exclude current product
 				'tax_query' => array(
 					array(
 						'taxonomy' => 'product_cat',
@@ -1409,8 +1412,11 @@ add_action( 'woocommerce_product_data_panels', 'add_toppings_tab_content' );
 function add_toppings_tab_content() {
 	global $post;
 
+	// Get the actual product ID being edited
+	$product_id = isset( $_GET['post'] ) ? intval( $_GET['post'] ) : ( $post ? $post->ID : 0 );
+
 	// Only show for pizza products
-	if ( ! is_pizza_product( $post ? $post->ID : null ) ) {
+	if ( ! is_pizza_product( $product_id ) ) {
 		return;
 	}
 
@@ -1423,8 +1429,16 @@ function add_toppings_tab_content() {
 			</p>
 
 			<?php
-			// Get current cross-sell IDs - use direct meta query for more reliability
-			$current_crosssells = get_post_meta( $post->ID, '_crosssell_ids', true );
+			// Get current cross-sell IDs - use the correct product ID
+
+			// Try multiple methods to get cross-sells
+			$current_crosssells_meta = get_post_meta( $product_id, '_crosssell_ids', true );
+			$product_obj = wc_get_product( $product_id );
+			$current_crosssells_wc = $product_obj ? $product_obj->get_cross_sell_ids() : array();
+
+			// Use WC method if meta is empty
+			$current_crosssells = ! empty( $current_crosssells_meta ) ? $current_crosssells_meta : $current_crosssells_wc;
+
 			if ( ! is_array( $current_crosssells ) ) {
 				$current_crosssells = array();
 			}
@@ -1433,8 +1447,10 @@ function add_toppings_tab_content() {
 
 			// Debug output (visible in HTML comments)
 			echo '<!-- Toppings Debug: ';
-			echo 'Post ID: ' . $post->ID . ' | ';
-			echo 'Current Cross-sells: ' . print_r( $current_crosssells, true );
+			echo 'Post ID: ' . $product_id . ' | ';
+			echo 'Meta Cross-sells: ' . print_r( $current_crosssells_meta, true ) . ' | ';
+			echo 'WC Cross-sells: ' . print_r( $current_crosssells_wc, true ) . ' | ';
+			echo 'Final Cross-sells: ' . print_r( $current_crosssells, true );
 			echo '-->';
 
 			// Get topping categories (children of category 15)
