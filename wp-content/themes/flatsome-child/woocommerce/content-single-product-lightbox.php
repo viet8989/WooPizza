@@ -43,7 +43,7 @@ do_action( 'wc_quick_view_before_single_product' );
 							<span><?php esc_html_e( 'Whole pizza', 'flatsome' ); ?></span>
 						</button>
 						
-						<button id="btn-paired" class="size-option" data-size="paired" type="button">
+						<button id="btn-paired" class="size-option" data-size="paired" type="button" <?php echo ! $has_upsells ? 'style="display: none !important;"' : ''; ?>>
 							<img src="<?php echo esc_url( get_site_url() . '/wp-content/uploads/images/pizza-icon-black.png' ); ?>" 
 								 alt="<?php esc_attr_e( 'Paired pizza', 'flatsome' ); ?>" 
 								 class="size-icon">
@@ -820,6 +820,13 @@ do_action( 'wc_quick_view_after_single_product' );
 		width: 100%;
 	}
 }
+
+/* Hide paired button when no upsells (failsafe) */
+<?php if ( ! $has_upsells ) : ?>
+#btn-paired {
+	display: none !important;
+}
+<?php endif; ?>
 </style>
 
 <script>
@@ -830,8 +837,16 @@ do_action( 'wc_quick_view_after_single_product' );
 		// Check if upsells exist and hide paired button if not
 		const hasUpsells = <?php echo $has_upsells ? 'true' : 'false'; ?>;
 		console.log('Has upsells:', hasUpsells);
+		console.log('Paired button found:', $('#btn-paired').length);
+
 		if (!hasUpsells) {
-			$('#btn-paired').hide();
+			// Try multiple methods to ensure it's hidden
+			const $pairedBtn = $('#btn-paired');
+			console.log('Hiding paired button, found:', $pairedBtn.length);
+			$pairedBtn.hide();
+			$pairedBtn.css('display', 'none');
+			$pairedBtn.addClass('hidden-no-upsells');
+			console.log('After hide - visible:', $pairedBtn.is(':visible'));
 		}
 
 		// Configuration
