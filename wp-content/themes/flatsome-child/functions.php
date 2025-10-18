@@ -1902,8 +1902,9 @@ function customize_pizza_tabs_styles_scripts() {
 			});
 
 			// FIX: Replace checkbox submission with hidden fields to avoid duplicates
-			$('#post').on('submit', function(e) {
-				console.log('=== Form Submit - Replacing Checkboxes with Hidden Fields ===');
+			// Hook into publish/update button click AND form submit
+			function cleanupCheckboxesBeforeSubmit() {
+				console.log('=== Cleaning Checkboxes Before Submit ===');
 
 				// Debug: check if checkboxes exist
 				console.log('Total paired checkboxes found:', $('.paired-product-checkbox').length);
@@ -1952,6 +1953,21 @@ function customize_pizza_tabs_styles_scripts() {
 				} else {
 					console.log('No checkboxes found - keeping original checkbox submission');
 				}
+			}
+
+			// Attach to form submit
+			$('#post').on('submit', cleanupCheckboxesBeforeSubmit);
+
+			// Also attach to publish/update button clicks
+			$('#publish, #save-post').on('click', function() {
+				console.log('Publish/Update button clicked');
+				setTimeout(cleanupCheckboxesBeforeSubmit, 100);
+			});
+
+			// Also try hooking into WooCommerce's save action
+			$(document).on('click', '#publish', function() {
+				console.log('Publish button clicked (delegated)');
+				setTimeout(cleanupCheckboxesBeforeSubmit, 50);
 			});
 		});
 	</script>
