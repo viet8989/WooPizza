@@ -1,7 +1,7 @@
 
 
 ============================================================
-Save triggered at: 2025-10-18 08:59:40
+Save triggered at: 2025-10-18 10:07:50
 Product ID: 523
 Is Pizza Product: YES
 POST upsell_ids: Array
@@ -12,9 +12,14 @@ POST upsell_ids: Array
     [3] => 522
     [4] => 520
     [5] => 506
+    [6] => 134
+    [7] => 506
+    [8] => 520
+    [9] => 573
+    [10] => 521
 )
 
-POST upsell_ids COUNT: 6
+POST upsell_ids COUNT: 11
 POST crosssell_ids: Array
 (
     [0] => 539
@@ -26,12 +31,20 @@ POST crosssell_ids: Array
     [6] => 538
     [7] => 531
     [8] => 530
-    [9] => 634
+    [9] => 539
+    [10] => 528
+    [11] => 533
+    [12] => 534
+    [13] => 532
+    [14] => 529
+    [15] => 538
+    [16] => 531
+    [17] => 530
 )
 
-POST crosssell_ids COUNT: 10
-POST crosssell_ids UNIQUE COUNT: 10
-DUPLICATES FOUND: 0
+POST crosssell_ids COUNT: 18
+POST crosssell_ids UNIQUE COUNT: 9
+DUPLICATES FOUND: 9
 Saved upsells: Array
 (
     [0] => 573
@@ -53,7 +66,6 @@ Saved cross-sells: Array
     [6] => 538
     [7] => 531
     [8] => 530
-    [9] => 634
 )
 
 Verified cross-sells in DB: Array
@@ -67,6 +79,12 @@ Verified cross-sells in DB: Array
     [6] => 538
     [7] => 531
     [8] => 530
-    [9] => 634
 )
 
+
+--- Redirect Filter Called ---
+Post ID: 523
+Post Type: product
+Original Location: https://terravivapizza.com/wp-admin/post.php?post=523&action=edit&message=1
+Is Topping: NO (Pizza)
+New Location: https://terravivapizza.com/wp-admin/post.php?post=523&action=edit&message=1&product_type=pizza

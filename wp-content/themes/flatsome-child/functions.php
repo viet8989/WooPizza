@@ -1628,15 +1628,27 @@ function save_custom_paired_and_toppings_data( $post_id ) {
 		return;
 	}
 
+	// IMPORTANT: Delete existing data FIRST to avoid duplicates
+	delete_post_meta( $post_id, '_upsell_ids' );
+	delete_post_meta( $post_id, '_crosssell_ids' );
+	$log .= "Deleted existing upsells and cross-sells\n";
+
 	// Save upsell IDs (Paired With) - remove duplicates
 	$upsell_ids = isset( $_POST['upsell_ids'] ) && is_array( $_POST['upsell_ids'] )
 		? array_unique( array_map( 'intval', $_POST['upsell_ids'] ) )
 		: array();
 	// Re-index array to avoid gaps
 	$upsell_ids = array_values( $upsell_ids );
-	update_post_meta( $post_id, '_upsell_ids', $upsell_ids );
-	$log .= "Saved upsells: " . print_r( $upsell_ids, true ) . "\n";
-	error_log( 'Saved upsells: ' . print_r( $upsell_ids, true ) );
+
+	// Only save if there are IDs to save
+	if ( ! empty( $upsell_ids ) ) {
+		update_post_meta( $post_id, '_upsell_ids', $upsell_ids );
+		$log .= "Saved upsells: " . print_r( $upsell_ids, true ) . "\n";
+		error_log( 'Saved upsells: ' . print_r( $upsell_ids, true ) );
+	} else {
+		$log .= "No upsells to save\n";
+		error_log( 'No upsells to save' );
+	}
 
 	// Save cross-sell IDs (Toppings) - remove duplicates
 	$crosssell_ids_from_post = isset( $_POST['crosssell_ids'] ) && is_array( $_POST['crosssell_ids'] )
@@ -1645,17 +1657,23 @@ function save_custom_paired_and_toppings_data( $post_id ) {
 	// Re-index array to avoid gaps
 	$crosssell_ids = array_values( $crosssell_ids_from_post );
 
-	// Force update to ensure it's saved
-	delete_post_meta( $post_id, '_crosssell_ids' );
-	update_post_meta( $post_id, '_crosssell_ids', $crosssell_ids );
-
-	$log .= "Saved cross-sells: " . print_r( $crosssell_ids, true ) . "\n";
-	error_log( 'Saved cross-sells: ' . print_r( $crosssell_ids, true ) );
+	// Only save if there are IDs to save
+	if ( ! empty( $crosssell_ids ) ) {
+		update_post_meta( $post_id, '_crosssell_ids', $crosssell_ids );
+		$log .= "Saved cross-sells: " . print_r( $crosssell_ids, true ) . "\n";
+		error_log( 'Saved cross-sells: ' . print_r( $crosssell_ids, true ) );
+	} else {
+		$log .= "No cross-sells to save\n";
+		error_log( 'No cross-sells to save' );
+	}
 
 	// Verify what was actually saved
-	$verify = get_post_meta( $post_id, '_crosssell_ids', true );
-	$log .= "Verified cross-sells in DB: " . print_r( $verify, true ) . "\n";
-	error_log( 'Verified cross-sells in DB: ' . print_r( $verify, true ) );
+	$verify_upsells = get_post_meta( $post_id, '_upsell_ids', true );
+	$verify_crosssells = get_post_meta( $post_id, '_crosssell_ids', true );
+	$log .= "Verified upsells in DB: " . print_r( $verify_upsells, true ) . "\n";
+	$log .= "Verified cross-sells in DB: " . print_r( $verify_crosssells, true ) . "\n";
+	error_log( 'Verified upsells in DB: ' . print_r( $verify_upsells, true ) );
+	error_log( 'Verified cross-sells in DB: ' . print_r( $verify_crosssells, true ) );
 
 	// Write to debug file
 	file_put_contents( $debug_file, $log, FILE_APPEND );
@@ -1738,8 +1756,9 @@ function customize_pizza_tabs_styles_scripts() {
 		return;
 	}
 
-	// Only for pizza products
-	if ( ! is_pizza_product( $post ? $post->ID : null ) ) {
+	// Only load when product_type=pizza parameter is present (matches tab visibility logic)
+	$is_pizza_edit_mode = isset( $_GET['product_type'] ) && $_GET['product_type'] === 'pizza';
+	if ( ! $is_pizza_edit_mode ) {
 		return;
 	}
 
@@ -1931,73 +1950,49 @@ function customize_pizza_tabs_styles_scripts() {
 					'| HTML checked attr:', $cb.attr('checked'));
 			});
 
-			// FIX: Replace checkbox submission with hidden fields to avoid duplicates
-			// Hook into publish/update button click AND form submit
-			function cleanupCheckboxesBeforeSubmit() {
+			// FIX: Disable unchecked checkboxes to prevent duplicate submissions
+			// This prevents unchecked boxes from being included in form data at all
+			function cleanupCheckboxesBeforeSubmit(e) {
 				console.log('=== Cleaning Checkboxes Before Submit ===');
 
-				// Debug: check if checkboxes exist
-				console.log('Total paired checkboxes found:', $('.paired-product-checkbox').length);
-				console.log('Total topping checkboxes found:', $('.topping-product-checkbox').length);
-
-				// Collect checked paired IDs (search in all tabs)
-				var pairedIds = [];
-				$('#paired_with_product_data .paired-product-checkbox:checked').each(function() {
-					pairedIds.push($(this).val());
+				// Disable all UNCHECKED paired checkboxes so they don't submit
+				var pairedTotal = 0;
+				var pairedChecked = 0;
+				$('#paired_with_product_data .paired-product-checkbox').each(function() {
+					pairedTotal++;
+					if ($(this).is(':checked')) {
+						pairedChecked++;
+						// Keep checked boxes enabled
+						$(this).prop('disabled', false);
+					} else {
+						// Disable unchecked boxes to prevent submission
+						$(this).prop('disabled', true);
+					}
 				});
 
-				// Collect checked topping IDs (search in all tabs)
-				var toppingIds = [];
-				$('#toppings_product_data .topping-product-checkbox:checked').each(function() {
-					toppingIds.push($(this).val());
+				// Disable all UNCHECKED topping checkboxes so they don't submit
+				var toppingTotal = 0;
+				var toppingChecked = 0;
+				$('#toppings_product_data .topping-product-checkbox').each(function() {
+					toppingTotal++;
+					if ($(this).is(':checked')) {
+						toppingChecked++;
+						// Keep checked boxes enabled
+						$(this).prop('disabled', false);
+					} else {
+						// Disable unchecked boxes to prevent submission
+						$(this).prop('disabled', true);
+					}
 				});
 
-				console.log('Paired IDs to submit:', pairedIds);
-				console.log('Topping IDs to submit:', toppingIds);
-
-				// Only proceed if we found checkboxes
-				if (pairedIds.length > 0 || toppingIds.length > 0) {
-					// Remove ALL existing inputs with these names
-					$('input[name="upsell_ids[]"]').remove();
-					$('input[name="crosssell_ids[]"]').remove();
-
-					// Add hidden fields for paired products
-					pairedIds.forEach(function(id) {
-						$('<input>').attr({
-							type: 'hidden',
-							name: 'upsell_ids[]',
-							value: id
-						}).appendTo('#post');
-					});
-
-					// Add hidden fields for toppings
-					toppingIds.forEach(function(id) {
-						$('<input>').attr({
-							type: 'hidden',
-							name: 'crosssell_ids[]',
-							value: id
-						}).appendTo('#post');
-					});
-
-					console.log('Hidden fields added - Paired:', pairedIds.length, 'Toppings:', toppingIds.length);
-				} else {
-					console.log('No checkboxes found - keeping original checkbox submission');
-				}
+				console.log('Paired checkboxes - Total:', pairedTotal, 'Checked:', pairedChecked, 'Disabled:', (pairedTotal - pairedChecked));
+				console.log('Topping checkboxes - Total:', toppingTotal, 'Checked:', toppingChecked, 'Disabled:', (toppingTotal - toppingChecked));
 			}
 
-			// Attach to form submit
-			$('#post').on('submit', cleanupCheckboxesBeforeSubmit);
-
-			// Also attach to publish/update button clicks
-			$('#publish, #save-post').on('click', function() {
-				console.log('Publish/Update button clicked');
-				setTimeout(cleanupCheckboxesBeforeSubmit, 100);
-			});
-
-			// Also try hooking into WooCommerce's save action
-			$(document).on('click', '#publish', function() {
-				console.log('Publish button clicked (delegated)');
-				setTimeout(cleanupCheckboxesBeforeSubmit, 50);
+			// Attach to form submit event - must run synchronously
+			$('#post').on('submit', function(e) {
+				cleanupCheckboxesBeforeSubmit(e);
+				// Don't prevent default - let form submit continue
 			});
 		});
 	</script>
