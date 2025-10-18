@@ -1901,21 +1901,21 @@ function customize_pizza_tabs_styles_scripts() {
 					'| HTML checked attr:', $cb.attr('checked'));
 			});
 
-			// FIX: Prevent duplicate submissions by disabling unchecked checkboxes before submit
+			// FIX: Replace checkbox submission with hidden fields to avoid duplicates
 			$('#post').on('submit', function(e) {
-				console.log('=== Form Submit - Cleaning Checkboxes ===');
+				console.log('=== Form Submit - Replacing Checkboxes with Hidden Fields ===');
 
-				// Disable all unchecked paired checkboxes so they don't submit
-				$('.paired-product-checkbox:not(:checked)').prop('disabled', true);
+				// Remove ALL existing checkbox inputs with these names to prevent duplicates
+				$('input[name="upsell_ids[]"]').remove();
+				$('input[name="crosssell_ids[]"]').remove();
 
-				// Disable all unchecked topping checkboxes so they don't submit
-				$('.topping-product-checkbox:not(:checked)').prop('disabled', true);
-
-				// Log what will be submitted
+				// Collect checked paired IDs
 				var pairedIds = [];
 				$('.paired-product-checkbox:checked').each(function() {
 					pairedIds.push($(this).val());
 				});
+
+				// Collect checked topping IDs
 				var toppingIds = [];
 				$('.topping-product-checkbox:checked').each(function() {
 					toppingIds.push($(this).val());
@@ -1923,6 +1923,26 @@ function customize_pizza_tabs_styles_scripts() {
 
 				console.log('Paired IDs to submit:', pairedIds);
 				console.log('Topping IDs to submit:', toppingIds);
+
+				// Add hidden fields for paired products
+				pairedIds.forEach(function(id) {
+					$('<input>').attr({
+						type: 'hidden',
+						name: 'upsell_ids[]',
+						value: id
+					}).appendTo('#post');
+				});
+
+				// Add hidden fields for toppings
+				toppingIds.forEach(function(id) {
+					$('<input>').attr({
+						type: 'hidden',
+						name: 'crosssell_ids[]',
+						value: id
+					}).appendTo('#post');
+				});
+
+				console.log('Hidden fields added - Paired:', pairedIds.length, 'Toppings:', toppingIds.length);
 			});
 		});
 	</script>
