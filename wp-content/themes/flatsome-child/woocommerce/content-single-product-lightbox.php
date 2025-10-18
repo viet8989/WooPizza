@@ -1007,7 +1007,8 @@ do_action( 'wc_quick_view_after_single_product' );
 				const $card = $(this);
 				const imageUrl = $card.data('product-image');
 				const isCurrentlySelected = $card.hasClass('selected');
-				const crossSells = $card.data('cross-sells');
+				console.log('isCurrentlySelected:', isCurrentlySelected);
+				const crossSells = $card.data('cross-sells');				
 
 				// Remove selection from all cards
 				$('.pizza-card').removeClass('selected');
