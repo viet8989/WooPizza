@@ -843,21 +843,23 @@ do_action( 'wc_quick_view_after_single_product' );
 			// Whole pizza image
 			const $wholePizza = $('.pizza-main-image');
 			if ($wholePizza.length) {
-				console.log('Whole Pizza Image:', {
+				const wholeDims = {
 					width: $wholePizza.width(),
 					height: $wholePizza.height(),
 					naturalWidth: $wholePizza[0].naturalWidth,
 					naturalHeight: $wholePizza[0].naturalHeight,
 					displayWidth: $wholePizza[0].getBoundingClientRect().width,
 					displayHeight: $wholePizza[0].getBoundingClientRect().height
-				});
+				};
+				console.log('Whole Pizza Image:');
+				console.table(wholeDims);
 			}
 
 			// Left half pizza image
 			const $leftPizza = $('#left-pizza');
 			if ($leftPizza.length) {
 				const leftContainer = $leftPizza.parent()[0].getBoundingClientRect();
-				console.log('Left Half Pizza Image:', {
+				const leftDims = {
 					width: $leftPizza.width(),
 					height: $leftPizza.height(),
 					naturalWidth: $leftPizza[0].naturalWidth,
@@ -866,14 +868,16 @@ do_action( 'wc_quick_view_after_single_product' );
 					displayHeight: $leftPizza[0].getBoundingClientRect().height,
 					containerWidth: leftContainer.width,
 					containerHeight: leftContainer.height
-				});
+				};
+				console.log('Left Half Pizza Image:');
+				console.table(leftDims);
 			}
 
 			// Right half pizza image
 			const $rightPizza = $('#right-pizza');
 			if ($rightPizza.length && $rightPizza.hasClass('right-pizza-img')) {
 				const rightContainer = $rightPizza.parent()[0].getBoundingClientRect();
-				console.log('Right Half Pizza Image:', {
+				const rightDims = {
 					width: $rightPizza.width(),
 					height: $rightPizza.height(),
 					naturalWidth: $rightPizza[0].naturalWidth,
@@ -882,18 +886,22 @@ do_action( 'wc_quick_view_after_single_product' );
 					displayHeight: $rightPizza[0].getBoundingClientRect().height,
 					containerWidth: rightContainer.width,
 					containerHeight: rightContainer.height
-				});
+				};
+				console.log('Right Half Pizza Image:');
+				console.table(rightDims);
 			}
 
 			// Header section (combined halves)
 			const $headerSection = $('.header-section');
 			if ($headerSection.length) {
-				console.log('Header Section (Combined Halves):', {
+				const headerDims = {
 					width: $headerSection.width(),
 					height: $headerSection.height(),
 					displayWidth: $headerSection[0].getBoundingClientRect().width,
 					displayHeight: $headerSection[0].getBoundingClientRect().height
-				});
+				};
+				console.log('Header Section (Combined Halves):');
+				console.table(headerDims);
 			}
 
 			console.log('========================');
