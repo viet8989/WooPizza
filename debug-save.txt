@@ -1,0 +1,4 @@
+Debug log file for pizza save operations
+Created at: <?php echo date('Y-m-d H:i:s'); ?>
+
+Waiting for save operations...

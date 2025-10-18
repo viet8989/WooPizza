@@ -1555,7 +1555,17 @@ function add_toppings_tab_content() {
 // Save the custom tab data (priority 99 to run after WooCommerce defaults)
 add_action( 'woocommerce_process_product_meta', 'save_custom_paired_and_toppings_data', 99, 1 );
 function save_custom_paired_and_toppings_data( $post_id ) {
+	// Debug file path
+	$debug_file = ABSPATH . 'debug-save.txt';
+
 	// Debug: Log POST data
+	$log = "\n\n" . str_repeat('=', 60) . "\n";
+	$log .= "Save triggered at: " . date('Y-m-d H:i:s') . "\n";
+	$log .= "Product ID: " . $post_id . "\n";
+	$log .= "Is Pizza Product: " . ( is_pizza_product( $post_id ) ? 'YES' : 'NO' ) . "\n";
+	$log .= "POST upsell_ids: " . ( isset( $_POST['upsell_ids'] ) ? print_r( $_POST['upsell_ids'], true ) : 'NOT SET' ) . "\n";
+	$log .= "POST crosssell_ids: " . ( isset( $_POST['crosssell_ids'] ) ? print_r( $_POST['crosssell_ids'], true ) : 'NOT SET' ) . "\n";
+
 	error_log( '=== Save Custom Data for Product ID: ' . $post_id . ' ===' );
 	error_log( 'Is Pizza Product: ' . ( is_pizza_product( $post_id ) ? 'YES' : 'NO' ) );
 	error_log( 'POST upsell_ids: ' . ( isset( $_POST['upsell_ids'] ) ? print_r( $_POST['upsell_ids'], true ) : 'NOT SET' ) );
@@ -1563,6 +1573,8 @@ function save_custom_paired_and_toppings_data( $post_id ) {
 
 	// Only save if this is a pizza product (not a topping)
 	if ( ! is_pizza_product( $post_id ) ) {
+		$log .= "Skipping save - not a pizza product\n";
+		file_put_contents( $debug_file, $log, FILE_APPEND );
 		error_log( 'Skipping save - not a pizza product' );
 		return;
 	}
@@ -1574,6 +1586,7 @@ function save_custom_paired_and_toppings_data( $post_id ) {
 	// Re-index array to avoid gaps
 	$upsell_ids = array_values( $upsell_ids );
 	update_post_meta( $post_id, '_upsell_ids', $upsell_ids );
+	$log .= "Saved upsells: " . print_r( $upsell_ids, true ) . "\n";
 	error_log( 'Saved upsells: ' . print_r( $upsell_ids, true ) );
 
 	// Save cross-sell IDs (Toppings) - remove duplicates
@@ -1587,26 +1600,19 @@ function save_custom_paired_and_toppings_data( $post_id ) {
 	delete_post_meta( $post_id, '_crosssell_ids' );
 	update_post_meta( $post_id, '_crosssell_ids', $crosssell_ids );
 
+	$log .= "Saved cross-sells: " . print_r( $crosssell_ids, true ) . "\n";
 	error_log( 'Saved cross-sells: ' . print_r( $crosssell_ids, true ) );
 
 	// Verify what was actually saved
 	$verify = get_post_meta( $post_id, '_crosssell_ids', true );
+	$log .= "Verified cross-sells in DB: " . print_r( $verify, true ) . "\n";
 	error_log( 'Verified cross-sells in DB: ' . print_r( $verify, true ) );
+
+	// Write to debug file
+	file_put_contents( $debug_file, $log, FILE_APPEND );
 
 	// Clear WooCommerce product cache to force reload
 	wc_delete_product_transients( $post_id );
-
-	// Add admin notice with debug info
-	add_action( 'admin_notices', function() use ( $post_id, $crosssell_ids, $verify ) {
-		?>
-		<script>
-		console.log('=== SAVE DEBUG for Product #<?php echo $post_id; ?> ===');
-		console.log('POST crosssell_ids:', <?php echo json_encode( isset( $_POST['crosssell_ids'] ) ? $_POST['crosssell_ids'] : 'NOT SET' ); ?>);
-		console.log('Processed crosssell_ids:', <?php echo json_encode( $crosssell_ids ); ?>);
-		console.log('Verified from DB:', <?php echo json_encode( $verify ); ?>);
-		</script>
-		<?php
-	});
 }
 
 // Redirect to add product_type parameter after saving pizza or topping products
