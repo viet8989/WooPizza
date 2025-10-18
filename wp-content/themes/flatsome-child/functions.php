@@ -241,6 +241,40 @@ function add_pizza_and_topping_admin_menus() {
 	);
 }
 
+// Enqueue WooCommerce admin styles and scripts for custom product pages
+add_action( 'admin_enqueue_scripts', 'enqueue_woocommerce_admin_assets_for_custom_pages' );
+function enqueue_woocommerce_admin_assets_for_custom_pages( $hook ) {
+	// Only load on our custom pizza and topping product pages
+	if ( $hook !== 'toplevel_page_edit-pizza-products' && $hook !== 'toplevel_page_edit-topping-products' ) {
+		return;
+	}
+
+	// Enqueue WooCommerce admin styles
+	wp_enqueue_style( 'woocommerce_admin_styles' );
+
+	// Enqueue additional WooCommerce styles if available
+	if ( wp_style_is( 'woocommerce-layout', 'registered' ) ) {
+		wp_enqueue_style( 'woocommerce-layout' );
+	}
+	if ( wp_style_is( 'woocommerce-smallscreen', 'registered' ) ) {
+		wp_enqueue_style( 'woocommerce-smallscreen' );
+	}
+	if ( wp_style_is( 'woocommerce-general', 'registered' ) ) {
+		wp_enqueue_style( 'woocommerce-general' );
+	}
+
+	// Enqueue WooCommerce admin scripts
+	wp_enqueue_script( 'woocommerce_admin' );
+
+	// Load WordPress list table scripts for better table styling
+	wp_enqueue_script( 'list-table' );
+
+	// Enqueue common WordPress admin styles
+	wp_enqueue_style( 'common' );
+	wp_enqueue_style( 'wp-admin' );
+	wp_enqueue_style( 'forms' );
+}
+
 // Display Pizza products page
 function display_pizza_products_page() {
 	// Redirect to WooCommerce products page with pizza filter
