@@ -1870,6 +1870,19 @@ function customize_pizza_tabs_styles_scripts() {
 			console.log('=== Pizza Tabs JavaScript Loaded ===');
 			console.log('Product type parameter:', '<?php echo isset( $_GET["product_type"] ) ? $_GET["product_type"] : "NOT SET"; ?>');
 
+			// CRITICAL FIX: Remove the 'name' attribute from ALL checkboxes immediately
+			// This prevents them from being submitted with the form
+			// We'll add hidden fields with the correct values on submit
+			$('.paired-product-checkbox').each(function() {
+				$(this).attr('data-original-name', $(this).attr('name'));  // Save for reference
+				$(this).removeAttr('name');  // Remove name so it won't submit
+			});
+			$('.topping-product-checkbox').each(function() {
+				$(this).attr('data-original-name', $(this).attr('name'));  // Save for reference
+				$(this).removeAttr('name');  // Remove name so it won't submit
+			});
+			console.log('Removed name attributes from all checkboxes to prevent duplicate submission');
+
 			// Handle "Select All" for Paired With tab
 			$('#select_all_paired').on('change', function() {
 				var isChecked = $(this).is(':checked');
@@ -1957,9 +1970,13 @@ function customize_pizza_tabs_styles_scripts() {
 					'| HTML checked attr:', $cb.attr('checked'));
 			});
 
-			// FIX: Remove ALL checkboxes and replace with hidden fields to prevent duplicates
-			function cleanupCheckboxesBeforeSubmit(e) {
-				console.log('=== Cleaning Checkboxes Before Submit ===');
+			// FIX: Add hidden fields for checked items only (checkboxes have no 'name' so won't submit)
+			function addHiddenFieldsForSubmit() {
+				console.log('=== Adding Hidden Fields For Submit ===');
+
+				// Remove any previously added hidden fields (in case function runs multiple times)
+				$('input[name="upsell_ids[]"]').remove();
+				$('input[name="crosssell_ids[]"]').remove();
 
 				// Collect checked paired IDs
 				var pairedIds = [];
@@ -1982,45 +1999,33 @@ function customize_pizza_tabs_styles_scripts() {
 				console.log('Paired IDs collected:', pairedIds.length, pairedIds);
 				console.log('Topping IDs collected:', toppingIds.length, toppingIds);
 
-				// REMOVE ALL checkboxes from the form to prevent duplicate submission
-				$('.paired-product-checkbox').remove();
-				$('.topping-product-checkbox').remove();
-
-				console.log('All checkboxes removed from DOM');
-
 				// Add hidden fields for paired products
-				if (pairedIds.length > 0) {
-					var $container = $('#paired_with_product_data');
-					pairedIds.forEach(function(id) {
-						$('<input>').attr({
-							type: 'hidden',
-							name: 'upsell_ids[]',
-							value: id
-						}).appendTo($container);
-					});
-					console.log('Added', pairedIds.length, 'hidden fields for paired products');
-				}
+				var $form = $('#post');
+				pairedIds.forEach(function(id) {
+					$('<input>').attr({
+						type: 'hidden',
+						name: 'upsell_ids[]',
+						value: id
+					}).appendTo($form);
+				});
 
 				// Add hidden fields for toppings
-				if (toppingIds.length > 0) {
-					var $container = $('#toppings_product_data');
-					toppingIds.forEach(function(id) {
-						$('<input>').attr({
-							type: 'hidden',
-							name: 'crosssell_ids[]',
-							value: id
-						}).appendTo($container);
-					});
-					console.log('Added', toppingIds.length, 'hidden fields for toppings');
-				}
+				toppingIds.forEach(function(id) {
+					$('<input>').attr({
+						type: 'hidden',
+						name: 'crosssell_ids[]',
+						value: id
+					}).appendTo($form);
+				});
 
-				console.log('=== Cleanup Complete ===');
+				console.log('Added hidden fields - Paired:', pairedIds.length, 'Toppings:', toppingIds.length);
+				console.log('=== Hidden Fields Ready ===');
 			}
 
-			// Attach to form submit event - must run synchronously BEFORE form serialization
+			// Add hidden fields on form submit (checkboxes won't submit because they have no 'name')
 			$('#post').on('submit', function(e) {
-				cleanupCheckboxesBeforeSubmit(e);
-				// Don't prevent default - let form submit continue with hidden fields
+				console.log('Form submit - adding hidden fields');
+				addHiddenFieldsForSubmit();
 			});
 		});
 	</script>
