@@ -1667,13 +1667,23 @@ function save_custom_paired_and_toppings_data( $post_id ) {
 // Redirect to add product_type parameter after saving pizza or topping products
 add_filter( 'redirect_post_location', 'add_product_type_to_redirect_url', 10, 2 );
 function add_product_type_to_redirect_url( $location, $post_id ) {
+	$debug_file = ABSPATH . 'debug-save.txt';
+	$log = "\n--- Redirect Filter Called ---\n";
+	$log .= "Post ID: " . $post_id . "\n";
+	$log .= "Post Type: " . get_post_type( $post_id ) . "\n";
+	$log .= "Original Location: " . $location . "\n";
+
 	// Only apply to product post type
 	if ( get_post_type( $post_id ) !== 'product' ) {
+		$log .= "Skipping: Not a product\n";
+		file_put_contents( $debug_file, $log, FILE_APPEND );
 		return $location;
 	}
 
 	// Check if product_type parameter is already in the URL
 	if ( strpos( $location, 'product_type=' ) !== false ) {
+		$log .= "Skipping: product_type already in URL\n";
+		file_put_contents( $debug_file, $log, FILE_APPEND );
 		return $location;
 	}
 
@@ -1704,10 +1714,15 @@ function add_product_type_to_redirect_url( $location, $post_id ) {
 	if ( $is_topping ) {
 		// Add product_type=topping to URL
 		$location = add_query_arg( 'product_type', 'topping', $location );
+		$log .= "Is Topping: YES\n";
 	} else {
 		// Add product_type=pizza to URL
 		$location = add_query_arg( 'product_type', 'pizza', $location );
+		$log .= "Is Topping: NO (Pizza)\n";
 	}
+
+	$log .= "New Location: " . $location . "\n";
+	file_put_contents( $debug_file, $log, FILE_APPEND );
 
 	return $location;
 }
