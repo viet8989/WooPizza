@@ -1054,6 +1054,13 @@ function remove_most_used_tab_product_categories( $args, $post_id ) {
 	return $args;
 }
 
+// Hide custom pizza tabs from Product Categories metabox
+add_filter( 'product_cat_row_actions', 'hide_custom_tabs_from_category_metabox', 10, 2 );
+function hide_custom_tabs_from_category_metabox( $actions, $term ) {
+	// This filter doesn't affect our tabs, but we'll add CSS to hide them
+	return $actions;
+}
+
 // Hide category 15 (topping) and its subcategories from Product Categories metabox
 add_filter( 'wp_terms_checklist_args', 'exclude_topping_categories_from_product_metabox', 10, 2 );
 function exclude_topping_categories_from_product_metabox( $args, $post_id ) {
@@ -1108,6 +1115,25 @@ function hide_categories_css_js() {
 				$('#woocommerce-product-data .product_data_tabs li.advanced_options').hide();
 				$('#woocommerce-product-data .product_data_tabs li.ux_product_layout_tab').hide();
 				$('#woocommerce-product-data .product_data_tabs li.ux_extra_tab').hide();
+
+				// Hide "Paired With" and "Toppings" tabs from Product Categories metabox
+				// These tabs should only appear in WooCommerce Product Data panel
+				$('#product_cat-tabs li, #product_cattabs li').each(function() {
+					var $link = $(this).find('a');
+					var tabText = $link.text().trim();
+					var tabHref = $link.attr('href');
+
+					// Remove if text matches OR if href targets our custom panels
+					if (tabText === 'Paired With' ||
+					    tabText === 'Toppings' ||
+					    tabHref === '#paired_with_product_data' ||
+					    tabHref === '#toppings_product_data') {
+						$(this).remove();
+					}
+				});
+
+				// Also hide the content panels if they appear in Product Categories
+				$('#product_catdiv').find('#paired_with_product_data, #toppings_product_data').remove();
 
 				// Add custom parameter to cross-sell search to filter only topping products
 				var isCrosssellActive = false;
@@ -1482,6 +1508,20 @@ function customize_pizza_tabs_styles_scripts() {
 
 	?>
 	<style>
+		/* Hide custom tabs from Product Categories metabox */
+		#product_cat-tabs li a[href="#paired_with_product_data"],
+		#product_cat-tabs li a[href="#toppings_product_data"],
+		#product_cattabs li a[href="#paired_with_product_data"],
+		#product_cattabs li a[href="#toppings_product_data"] {
+			display: none !important;
+		}
+
+		/* Ensure custom tab panels only appear in WooCommerce product data */
+		#product_catdiv #paired_with_product_data,
+		#product_catdiv #toppings_product_data {
+			display: none !important;
+		}
+
 		/* Style for custom product grid tables */
 		.paired-products-grid table,
 		.topping-products-grid table {
