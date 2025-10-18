@@ -1236,6 +1236,7 @@ do_action( 'wc_quick_view_after_single_product' );
 		}
 
 		function resetAllParams() {
+			console.log('Resetting all parameters to default state.');
 			// Remove any hidden inputs added for submission
 			$('input[name="extra_topping_options"]').remove();
 			$('input[name="pizza_halves"]').remove();
