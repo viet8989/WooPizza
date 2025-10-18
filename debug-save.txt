@@ -1,4 +1,76 @@
-Debug log file for pizza save operations
-Created at: <?php echo date('Y-m-d H:i:s'); ?>
 
-Waiting for save operations...
+
+============================================================
+Save triggered at: 2025-10-18 08:41:11
+Product ID: 523
+Is Pizza Product: YES
+POST upsell_ids: Array
+(
+    [0] => 573
+    [1] => 521
+    [2] => 134
+    [3] => 522
+    [4] => 134
+    [5] => 520
+    [6] => 521
+)
+
+POST upsell_ids COUNT: 7
+POST crosssell_ids: Array
+(
+    [0] => 539
+    [1] => 528
+    [2] => 533
+    [3] => 534
+    [4] => 532
+    [5] => 529
+    [6] => 538
+    [7] => 531
+    [8] => 530
+    [9] => 634
+    [10] => 539
+    [11] => 533
+    [12] => 532
+    [13] => 634
+)
+
+POST crosssell_ids COUNT: 14
+POST crosssell_ids UNIQUE COUNT: 10
+DUPLICATES FOUND: 4
+Saved upsells: Array
+(
+    [0] => 573
+    [1] => 521
+    [2] => 134
+    [3] => 522
+    [4] => 520
+)
+
+Saved cross-sells: Array
+(
+    [0] => 539
+    [1] => 528
+    [2] => 533
+    [3] => 534
+    [4] => 532
+    [5] => 529
+    [6] => 538
+    [7] => 531
+    [8] => 530
+    [9] => 634
+)
+
+Verified cross-sells in DB: Array
+(
+    [0] => 539
+    [1] => 528
+    [2] => 533
+    [3] => 534
+    [4] => 532
+    [5] => 529
+    [6] => 538
+    [7] => 531
+    [8] => 530
+    [9] => 634
+)
+

@@ -1289,7 +1289,9 @@ function customize_pizza_product_tabs( $tabs ) {
 }
 
 // Add content for "Paired With" tab
-add_action( 'woocommerce_product_data_panels', 'add_paired_with_tab_content' );
+if ( ! has_action( 'woocommerce_product_data_panels', 'add_paired_with_tab_content' ) ) {
+	add_action( 'woocommerce_product_data_panels', 'add_paired_with_tab_content', 10 );
+}
 function add_paired_with_tab_content() {
 	global $post;
 
@@ -1417,7 +1419,9 @@ function add_paired_with_tab_content() {
 }
 
 // Add content for "Toppings" tab
-add_action( 'woocommerce_product_data_panels', 'add_toppings_tab_content' );
+if ( ! has_action( 'woocommerce_product_data_panels', 'add_toppings_tab_content' ) ) {
+	add_action( 'woocommerce_product_data_panels', 'add_toppings_tab_content', 11 );
+}
 function add_toppings_tab_content() {
 	global $post;
 
