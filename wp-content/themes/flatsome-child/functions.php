@@ -1905,44 +1905,53 @@ function customize_pizza_tabs_styles_scripts() {
 			$('#post').on('submit', function(e) {
 				console.log('=== Form Submit - Replacing Checkboxes with Hidden Fields ===');
 
-				// Remove ALL existing checkbox inputs with these names to prevent duplicates
-				$('input[name="upsell_ids[]"]').remove();
-				$('input[name="crosssell_ids[]"]').remove();
+				// Debug: check if checkboxes exist
+				console.log('Total paired checkboxes found:', $('.paired-product-checkbox').length);
+				console.log('Total topping checkboxes found:', $('.topping-product-checkbox').length);
 
-				// Collect checked paired IDs
+				// Collect checked paired IDs (search in all tabs)
 				var pairedIds = [];
-				$('.paired-product-checkbox:checked').each(function() {
+				$('#paired_with_product_data .paired-product-checkbox:checked').each(function() {
 					pairedIds.push($(this).val());
 				});
 
-				// Collect checked topping IDs
+				// Collect checked topping IDs (search in all tabs)
 				var toppingIds = [];
-				$('.topping-product-checkbox:checked').each(function() {
+				$('#toppings_product_data .topping-product-checkbox:checked').each(function() {
 					toppingIds.push($(this).val());
 				});
 
 				console.log('Paired IDs to submit:', pairedIds);
 				console.log('Topping IDs to submit:', toppingIds);
 
-				// Add hidden fields for paired products
-				pairedIds.forEach(function(id) {
-					$('<input>').attr({
-						type: 'hidden',
-						name: 'upsell_ids[]',
-						value: id
-					}).appendTo('#post');
-				});
+				// Only proceed if we found checkboxes
+				if (pairedIds.length > 0 || toppingIds.length > 0) {
+					// Remove ALL existing inputs with these names
+					$('input[name="upsell_ids[]"]').remove();
+					$('input[name="crosssell_ids[]"]').remove();
 
-				// Add hidden fields for toppings
-				toppingIds.forEach(function(id) {
-					$('<input>').attr({
-						type: 'hidden',
-						name: 'crosssell_ids[]',
-						value: id
-					}).appendTo('#post');
-				});
+					// Add hidden fields for paired products
+					pairedIds.forEach(function(id) {
+						$('<input>').attr({
+							type: 'hidden',
+							name: 'upsell_ids[]',
+							value: id
+						}).appendTo('#post');
+					});
 
-				console.log('Hidden fields added - Paired:', pairedIds.length, 'Toppings:', toppingIds.length);
+					// Add hidden fields for toppings
+					toppingIds.forEach(function(id) {
+						$('<input>').attr({
+							type: 'hidden',
+							name: 'crosssell_ids[]',
+							value: id
+						}).appendTo('#post');
+					});
+
+					console.log('Hidden fields added - Paired:', pairedIds.length, 'Toppings:', toppingIds.length);
+				} else {
+					console.log('No checkboxes found - keeping original checkbox submission');
+				}
 			});
 		});
 	</script>

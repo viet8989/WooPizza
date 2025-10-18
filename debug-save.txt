@@ -1,6 +1,7 @@
 
+
 ============================================================
-Save triggered at: 2025-10-18 08:55:42
+Save triggered at: 2025-10-18 08:59:40
 Product ID: 523
 Is Pizza Product: YES
 POST upsell_ids: Array
@@ -11,15 +12,9 @@ POST upsell_ids: Array
     [3] => 522
     [4] => 520
     [5] => 506
-    [6] => 134
-    [7] => 522
-    [8] => 506
-    [9] => 520
-    [10] => 573
-    [11] => 521
 )
 
-POST upsell_ids COUNT: 12
+POST upsell_ids COUNT: 6
 POST crosssell_ids: Array
 (
     [0] => 539
@@ -32,18 +27,11 @@ POST crosssell_ids: Array
     [7] => 531
     [8] => 530
     [9] => 634
-    [10] => 539
-    [11] => 528
-    [12] => 533
-    [13] => 538
-    [14] => 531
-    [15] => 530
-    [16] => 634
 )
 
-POST crosssell_ids COUNT: 17
+POST crosssell_ids COUNT: 10
 POST crosssell_ids UNIQUE COUNT: 10
-DUPLICATES FOUND: 7
+DUPLICATES FOUND: 0
 Saved upsells: Array
 (
     [0] => 573
