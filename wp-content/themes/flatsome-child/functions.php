@@ -1312,8 +1312,8 @@ function add_paired_with_tab_content() {
 			if ( ! is_array( $current_upsells ) ) {
 				$current_upsells = array();
 			}
-			// Ensure all IDs are integers for proper comparison
-			$current_upsells = array_map( 'intval', $current_upsells );
+			// Ensure all IDs are integers and remove duplicates
+			$current_upsells = array_values( array_unique( array_map( 'intval', $current_upsells ) ) );
 
 			// Get all pizza products (exclude toppings from category 15)
 			$topping_parent_id = 15;
@@ -1358,6 +1358,7 @@ function add_paired_with_tab_content() {
 							</th>
 							<th style="width: 100px;"><?php _e( 'SKU', 'flatsome' ); ?></th>
 							<th><?php _e( 'Name', 'flatsome' ); ?></th>
+							<th style="width: 150px;"><?php _e( 'Category', 'flatsome' ); ?></th>
 							<th style="width: 120px;"><?php _e( 'Price', 'flatsome' ); ?></th>
 						</tr>
 					</thead>
@@ -1367,6 +1368,7 @@ function add_paired_with_tab_content() {
 							while ( $pizza_products->have_posts() ) : $pizza_products->the_post();
 								$product_obj = wc_get_product( get_the_ID() );
 								$is_checked = in_array( get_the_ID(), $current_upsells );
+								$categories = wc_get_product_category_list( get_the_ID(), ', ', '', '' );
 								?>
 								<tr>
 									<td style="text-align: center;">
@@ -1378,6 +1380,7 @@ function add_paired_with_tab_content() {
 									</td>
 									<td><?php echo esc_html( $product_obj->get_sku() ? $product_obj->get_sku() : '-' ); ?></td>
 									<td><strong><?php echo esc_html( get_the_title() ); ?></strong></td>
+									<td><?php echo $categories ? $categories : '-'; ?></td>
 									<td><?php echo $product_obj->get_price_html(); ?></td>
 								</tr>
 								<?php
@@ -1386,7 +1389,7 @@ function add_paired_with_tab_content() {
 						else :
 							?>
 							<tr>
-								<td colspan="4" style="text-align: center; padding: 20px;">
+								<td colspan="5" style="text-align: center; padding: 20px;">
 									<?php _e( 'No pizza products found.', 'flatsome' ); ?>
 								</td>
 							</tr>
@@ -1425,8 +1428,14 @@ function add_toppings_tab_content() {
 			if ( ! is_array( $current_crosssells ) ) {
 				$current_crosssells = array();
 			}
-			// Ensure all IDs are integers for proper comparison
-			$current_crosssells = array_map( 'intval', $current_crosssells );
+			// Ensure all IDs are integers and remove duplicates
+			$current_crosssells = array_values( array_unique( array_map( 'intval', $current_crosssells ) ) );
+
+			// Debug output (visible in HTML comments)
+			echo '<!-- Toppings Debug: ';
+			echo 'Post ID: ' . $post->ID . ' | ';
+			echo 'Current Cross-sells: ' . print_r( $current_crosssells, true );
+			echo '-->';
 
 			// Get topping categories (children of category 15)
 			$topping_cats = array();
@@ -1470,6 +1479,7 @@ function add_toppings_tab_content() {
 							</th>
 							<th style="width: 100px;"><?php _e( 'SKU', 'flatsome' ); ?></th>
 							<th><?php _e( 'Name', 'flatsome' ); ?></th>
+							<th style="width: 150px;"><?php _e( 'Category', 'flatsome' ); ?></th>
 							<th style="width: 120px;"><?php _e( 'Price', 'flatsome' ); ?></th>
 						</tr>
 					</thead>
@@ -1478,18 +1488,24 @@ function add_toppings_tab_content() {
 						if ( $topping_products->have_posts() ) :
 							while ( $topping_products->have_posts() ) : $topping_products->the_post();
 								$product_obj = wc_get_product( get_the_ID() );
-								$is_checked = in_array( get_the_ID(), $current_crosssells );
+								$product_id = get_the_ID();
+								$is_checked = in_array( $product_id, $current_crosssells, true );
+								$categories = wc_get_product_category_list( get_the_ID(), ', ', '', '' );
+
+								// Debug for each product
+								echo '<!-- Topping ID: ' . $product_id . ' | Is Checked: ' . var_export( $is_checked, true ) . ' -->';
 								?>
 								<tr>
 									<td style="text-align: center;">
 										<input type="checkbox"
 											name="crosssell_ids[]"
-											value="<?php echo esc_attr( get_the_ID() ); ?>"
+											value="<?php echo esc_attr( $product_id ); ?>"
 											<?php checked( $is_checked, true ); ?>
 											class="topping-product-checkbox" />
 									</td>
 									<td><?php echo esc_html( $product_obj->get_sku() ? $product_obj->get_sku() : '-' ); ?></td>
 									<td><strong><?php echo esc_html( get_the_title() ); ?></strong></td>
+									<td><?php echo $categories ? $categories : '-'; ?></td>
 									<td><?php echo $product_obj->get_price_html(); ?></td>
 								</tr>
 								<?php
@@ -1498,7 +1514,7 @@ function add_toppings_tab_content() {
 						else :
 							?>
 							<tr>
-								<td colspan="4" style="text-align: center; padding: 20px;">
+								<td colspan="5" style="text-align: center; padding: 20px;">
 									<?php _e( 'No topping products found.', 'flatsome' ); ?>
 								</td>
 							</tr>
@@ -1514,15 +1530,37 @@ function add_toppings_tab_content() {
 }
 
 // Save the custom tab data
-add_action( 'woocommerce_process_product_meta', 'save_custom_paired_and_toppings_data' );
+add_action( 'woocommerce_process_product_meta', 'save_custom_paired_and_toppings_data', 10, 1 );
 function save_custom_paired_and_toppings_data( $post_id ) {
-	// Save upsell IDs (Paired With)
-	$upsell_ids = isset( $_POST['upsell_ids'] ) ? array_map( 'intval', $_POST['upsell_ids'] ) : array();
-	update_post_meta( $post_id, '_upsell_ids', $upsell_ids );
+	// Debug: Log POST data
+	error_log( '=== Save Custom Data for Product ID: ' . $post_id . ' ===' );
+	error_log( 'Is Pizza Product: ' . ( is_pizza_product( $post_id ) ? 'YES' : 'NO' ) );
+	error_log( 'POST upsell_ids: ' . ( isset( $_POST['upsell_ids'] ) ? print_r( $_POST['upsell_ids'], true ) : 'NOT SET' ) );
+	error_log( 'POST crosssell_ids: ' . ( isset( $_POST['crosssell_ids'] ) ? print_r( $_POST['crosssell_ids'], true ) : 'NOT SET' ) );
 
-	// Save cross-sell IDs (Toppings)
-	$crosssell_ids = isset( $_POST['crosssell_ids'] ) ? array_map( 'intval', $_POST['crosssell_ids'] ) : array();
+	// Only save if this is a pizza product (not a topping)
+	if ( ! is_pizza_product( $post_id ) ) {
+		error_log( 'Skipping save - not a pizza product' );
+		return;
+	}
+
+	// Save upsell IDs (Paired With) - remove duplicates
+	$upsell_ids = isset( $_POST['upsell_ids'] ) && is_array( $_POST['upsell_ids'] )
+		? array_unique( array_map( 'intval', $_POST['upsell_ids'] ) )
+		: array();
+	// Re-index array to avoid gaps
+	$upsell_ids = array_values( $upsell_ids );
+	update_post_meta( $post_id, '_upsell_ids', $upsell_ids );
+	error_log( 'Saved upsells: ' . print_r( $upsell_ids, true ) );
+
+	// Save cross-sell IDs (Toppings) - remove duplicates
+	$crosssell_ids = isset( $_POST['crosssell_ids'] ) && is_array( $_POST['crosssell_ids'] )
+		? array_unique( array_map( 'intval', $_POST['crosssell_ids'] ) )
+		: array();
+	// Re-index array to avoid gaps
+	$crosssell_ids = array_values( $crosssell_ids );
 	update_post_meta( $post_id, '_crosssell_ids', $crosssell_ids );
+	error_log( 'Saved cross-sells: ' . print_r( $crosssell_ids, true ) );
 }
 
 // Redirect to add product_type parameter after saving pizza or topping products
