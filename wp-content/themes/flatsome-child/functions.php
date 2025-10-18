@@ -1900,6 +1900,18 @@ function customize_pizza_tabs_styles_scripts() {
 				console.error('WARNING: Some checkboxes still have name attribute!');
 			}
 
+			// CRITICAL: Remove WooCommerce's default linked product fields from the DOM
+			// These might be hidden but still submitting
+			var removedFields = 0;
+			$('select[name="upsell_ids[]"], select[name="crosssell_ids[]"]').each(function() {
+				console.log('Removing WooCommerce default field:', $(this).attr('name'));
+				$(this).remove();
+				removedFields++;
+			});
+			// Also remove any hidden inputs that might have been added
+			$('#linked_product_data input[name="upsell_ids[]"], #linked_product_data input[name="crosssell_ids[]"]').remove();
+			console.log('Removed', removedFields, 'default WooCommerce linked product fields');
+
 			// Handle "Select All" for Paired With tab
 			$('#select_all_paired').on('change', function() {
 				var isChecked = $(this).is(':checked');
@@ -1990,6 +2002,38 @@ function customize_pizza_tabs_styles_scripts() {
 			// FIX: Add hidden fields for checked items only (checkboxes have no 'name' so won't submit)
 			function addHiddenFieldsForSubmit() {
 				console.log('=== Adding Hidden Fields For Submit ===');
+
+				// CRITICAL: Remove name attribute from ALL checkboxes again (in case they were re-rendered)
+				var pairedRemoved = 0;
+				$('.paired-product-checkbox[name]').each(function() {
+					$(this).removeAttr('name');
+					pairedRemoved++;
+				});
+				var toppingRemoved = 0;
+				$('.topping-product-checkbox[name]').each(function() {
+					$(this).removeAttr('name');
+					toppingRemoved++;
+				});
+				if (pairedRemoved > 0 || toppingRemoved > 0) {
+					console.warn('Found checkboxes with name attribute at submit time!');
+					console.warn('  - Paired:', pairedRemoved, '| Topping:', toppingRemoved);
+				}
+
+				// CRITICAL: Remove WooCommerce default fields again (in case they were re-added)
+				var wcFieldsRemoved = 0;
+				$('select[name="upsell_ids[]"], select[name="crosssell_ids[]"]').each(function() {
+					console.warn('Removing WooCommerce default field at submit:', $(this).attr('name'), '| Values:', $(this).val());
+					$(this).remove();
+					wcFieldsRemoved++;
+				});
+				$('#linked_product_data input[name="upsell_ids[]"], #linked_product_data input[name="crosssell_ids[]"]').each(function() {
+					console.warn('Removing linked_product_data input:', $(this).attr('name'), '| Value:', $(this).val());
+					$(this).remove();
+					wcFieldsRemoved++;
+				});
+				if (wcFieldsRemoved > 0) {
+					console.warn('Removed', wcFieldsRemoved, 'WooCommerce default fields at submit time!');
+				}
 
 				// Remove any previously added hidden fields (in case function runs multiple times)
 				$('input[name="upsell_ids[]"]').remove();
