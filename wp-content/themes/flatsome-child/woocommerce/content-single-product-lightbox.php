@@ -922,22 +922,33 @@ do_action( 'wc_quick_view_after_single_product' );
 		function syncPairedPizzaHeight() {
 			const $leftPizza = $('#left-pizza');
 			const $headerSection = $('.header-section');
+			const $wholePizza = $('.pizza-main-image');
 
-			if ($leftPizza.length && $leftPizza[0].naturalWidth && $leftPizza[0].naturalHeight) {
+			// Use whole pizza natural dimensions for perfect match
+			let naturalWidth = $leftPizza[0].naturalWidth;
+			let naturalHeight = $leftPizza[0].naturalHeight;
+
+			// If whole pizza is available, use its dimensions for exact match
+			if ($wholePizza.length && $wholePizza[0].naturalWidth && $wholePizza[0].naturalHeight) {
+				naturalWidth = $wholePizza[0].naturalWidth;
+				naturalHeight = $wholePizza[0].naturalHeight;
+			}
+
+			if (naturalWidth && naturalHeight) {
 				// Get the natural aspect ratio
-				const aspectRatio = $leftPizza[0].naturalHeight / $leftPizza[0].naturalWidth;
+				const aspectRatio = naturalHeight / naturalWidth;
 
 				// Get the current width of the header section
 				const headerWidth = $headerSection.width();
 
-				// Calculate the height based on aspect ratio
-				const targetHeight = headerWidth * aspectRatio;
+				// Calculate the height based on aspect ratio and round to match whole pizza exactly
+				const targetHeight = Math.round(headerWidth * aspectRatio);
 
 				// Set the height on the header section
 				$headerSection.css('height', targetHeight + 'px');
 
 				console.log('Synced paired pizza height:', {
-					aspectRatio: aspectRatio,
+					aspectRatio: aspectRatio.toFixed(4),
 					headerWidth: headerWidth,
 					targetHeight: targetHeight
 				});
