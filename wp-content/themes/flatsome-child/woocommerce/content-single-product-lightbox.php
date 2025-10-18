@@ -512,6 +512,7 @@ do_action( 'wc_quick_view_after_single_product' );
 	display: flex;
 	height: auto;
 	max-width: 100%;
+	position: relative;
 }
 
 .half-pizza-container {
@@ -520,7 +521,6 @@ do_action( 'wc_quick_view_after_single_product' );
 	background: #f0f0f0;
 	display: flex;
 	align-items: center;
-	aspect-ratio: 1;
 }
 
 .half-pizza-container img:hover {
@@ -529,7 +529,7 @@ do_action( 'wc_quick_view_after_single_product' );
 
 .left-pizza-img {
 	width: 200%;
-	height: auto;
+	height: 100%;
 	object-fit: cover;
 	object-position: right center;
 	transform: translateX(50%);
@@ -538,7 +538,7 @@ do_action( 'wc_quick_view_after_single_product' );
 
 .right-pizza-img {
 	width: 200%;
-	height: auto;
+	height: 100%;
 	object-fit: cover;
 	object-position: left center;
 	transform: translateX(-50%);
@@ -918,6 +918,32 @@ do_action( 'wc_quick_view_after_single_product' );
 		let selectedLeftHalf = null;
 		let selectedRightHalf = null;
 
+		// Function to sync paired pizza header height with whole pizza image
+		function syncPairedPizzaHeight() {
+			const $leftPizza = $('#left-pizza');
+			const $headerSection = $('.header-section');
+
+			if ($leftPizza.length && $leftPizza[0].naturalWidth && $leftPizza[0].naturalHeight) {
+				// Get the natural aspect ratio
+				const aspectRatio = $leftPizza[0].naturalHeight / $leftPizza[0].naturalWidth;
+
+				// Get the current width of the header section
+				const headerWidth = $headerSection.width();
+
+				// Calculate the height based on aspect ratio
+				const targetHeight = headerWidth * aspectRatio;
+
+				// Set the height on the header section
+				$headerSection.css('height', targetHeight + 'px');
+
+				console.log('Synced paired pizza height:', {
+					aspectRatio: aspectRatio,
+					headerWidth: headerWidth,
+					targetHeight: targetHeight
+				});
+			}
+		}
+
 		// Size Toggle
 		function initSizeToggle() {
 			$('#btn-whole').on('click', function() {
@@ -999,6 +1025,11 @@ do_action( 'wc_quick_view_after_single_product' );
 				};
 
 				updateSubtotal();
+
+				// Sync header height to match whole pizza aspect ratio
+				setTimeout(function() {
+					syncPairedPizzaHeight();
+				}, 50);
 
 				// Log dimensions when switching to paired mode
 				setTimeout(function() {
@@ -1383,6 +1414,20 @@ do_action( 'wc_quick_view_after_single_product' );
 		initToppingCheckboxes();
 		initAddToCart();
 		initSpecialRequestCounter();
+
+		// Ensure left pizza image sync on load
+		$('#left-pizza').on('load', function() {
+			if ($('#btn-paired').hasClass('active')) {
+				syncPairedPizzaHeight();
+			}
+		});
+
+		// Initial sync if paired mode is visible
+		setTimeout(function() {
+			if ($('#pizza-paired').is(':visible')) {
+				syncPairedPizzaHeight();
+			}
+		}, 200);
 
 		// Log initial dimensions after everything is loaded
 		setTimeout(function() {
