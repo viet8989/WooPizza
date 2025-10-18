@@ -1235,6 +1235,38 @@ do_action( 'wc_quick_view_after_single_product' );
 			});
 		}
 
+		function resetAllParams() {
+			// Remove any hidden inputs added for submission
+			$('input[name="extra_topping_options"]').remove();
+			$('input[name="pizza_halves"]').remove();
+			$('input[name="paired_products"]').remove();
+			$('input[name="special_request"]').remove();
+
+			// Uncheck all topping checkboxes
+			$('.topping-checkbox').prop('checked', false);
+
+			// Reset selected halves and UI selection
+			selectedLeftHalf = null;
+			selectedRightHalf = null;
+			$('.pizza-card').removeClass('selected');
+
+			// Reset special request textarea
+			$('#special-request').val('');
+			$('.special-request-counter').text('0/' + $('#special-request').attr('maxlength'));
+
+			// Reset size toggle to whole
+			$('#btn-paired').removeClass('active');
+			$('#btn-whole').addClass('active');
+			$('#pizza-whole').show();
+			$('#pizza-paired').hide();
+
+			// Reset subtotal display to base price
+			const base = parseFloat($('#sub_total').data('base-price')) || 0;
+			const formatted = new Intl.NumberFormat('vi-VN', { style: 'decimal' }).format(base);
+			$('#sub_total').text(formatted + ' ₫');
+		}
+
+		resetAllParams();
 		// Initialize all handlers
 		initSizeToggle();
 		initPizzaCardSelection();
