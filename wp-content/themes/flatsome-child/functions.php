@@ -967,7 +967,6 @@ function custom_sticky_mini_cart_widget() {
 		function showStickyMiniCart() {
 			// Check if WooCommerce params are available
 			if (typeof wc_add_to_cart_params === 'undefined' || typeof wc_add_to_cart_params.wc_ajax_url === 'undefined') {
-				console.warn('WooCommerce AJAX params not available');
 				return;
 			}
 
@@ -1301,7 +1300,7 @@ function add_paired_with_tab_content() {
 	// Prevent multiple renders
 	static $rendered = false;
 	if ( $rendered ) {
-		echo '<!-- Paired With tab already rendered, skipping -->';
+		// echo '<!-- Paired With tab already rendered, skipping -->';
 		return;
 	}
 
@@ -1441,7 +1440,7 @@ function add_toppings_tab_content() {
 	$render_count++;
 
 	if ( $render_count > 1 ) {
-		echo '<!-- Toppings tab render attempt #' . $render_count . ' - BLOCKED -->';
+		// echo '<!-- Toppings tab render attempt #' . $render_count . ' - BLOCKED -->';
 		return;
 	}
 
@@ -1456,11 +1455,11 @@ function add_toppings_tab_content() {
 
 	// Only show for pizza products
 	if ( ! is_pizza_product( $product_id ) ) {
-		echo '<!-- Toppings tab - not a pizza product (ID: ' . $product_id . ') -->';
+		// echo '<!-- Toppings tab - not a pizza product (ID: ' . $product_id . ') -->';
 		return;
 	}
 
-	echo '<!-- Toppings tab rendering #' . $render_count . ' for product ' . $product_id . ' -->';
+	// echo '<!-- Toppings tab rendering #' . $render_count . ' for product ' . $product_id . ' -->';
 
 	?>
 	<div id="toppings_product_data" class="panel woocommerce_options_panel hidden" data-render-count="<?php echo $render_count; ?>">
@@ -1487,13 +1486,13 @@ function add_toppings_tab_content() {
 			// Ensure all IDs are integers and remove duplicates
 			$current_crosssells = array_values( array_unique( array_map( 'intval', $current_crosssells ) ) );
 
-			// Debug output (visible in HTML comments)
-			echo '<!-- Toppings Debug: ';
-			echo 'Post ID: ' . $product_id . ' | ';
-			echo 'Meta Cross-sells: ' . print_r( $current_crosssells_meta, true ) . ' | ';
-			echo 'WC Cross-sells: ' . print_r( $current_crosssells_wc, true ) . ' | ';
-			echo 'Final Cross-sells: ' . print_r( $current_crosssells, true );
-			echo '-->';
+			// // Debug output (visible in HTML comments)
+			// echo '<!-- Toppings Debug: ';
+			// echo 'Post ID: ' . $product_id . ' | ';
+			// echo 'Meta Cross-sells: ' . print_r( $current_crosssells_meta, true ) . ' | ';
+			// echo 'WC Cross-sells: ' . print_r( $current_crosssells_wc, true ) . ' | ';
+			// echo 'Final Cross-sells: ' . print_r( $current_crosssells, true );
+			// echo '-->';
 
 			// Get topping categories (children of category 15)
 			$topping_cats = array();
@@ -1550,13 +1549,13 @@ function add_toppings_tab_content() {
 								$is_checked = in_array( $product_id, $current_crosssells, true );
 								$categories = wc_get_product_category_list( get_the_ID(), ', ', '', '' );
 
-								// Debug for each product - more detailed
-								echo '<!-- Topping Product ID: ' . $product_id . ' (' . get_the_title() . ')';
-								echo ' | Type: ' . gettype( $product_id );
-								echo ' | In Array: ' . ( in_array( $product_id, $current_crosssells, true ) ? 'YES' : 'NO' );
-								echo ' | In Array (loose): ' . ( in_array( $product_id, $current_crosssells, false ) ? 'YES' : 'NO' );
-								echo ' | Is Checked: ' . var_export( $is_checked, true );
-								echo ' -->';
+								// // Debug for each product - more detailed
+								// echo '<!-- Topping Product ID: ' . $product_id . ' (' . get_the_title() . ')';
+								// echo ' | Type: ' . gettype( $product_id );
+								// echo ' | In Array: ' . ( in_array( $product_id, $current_crosssells, true ) ? 'YES' : 'NO' );
+								// echo ' | In Array (loose): ' . ( in_array( $product_id, $current_crosssells, false ) ? 'YES' : 'NO' );
+								// echo ' | Is Checked: ' . var_export( $is_checked, true );
+								// echo ' -->';
 								?>
 								<tr>
 									<td style="text-align: center;">
@@ -1598,43 +1597,43 @@ function add_toppings_tab_content() {
 // Save the custom tab data (priority 99 to run after WooCommerce defaults)
 add_action( 'woocommerce_process_product_meta', 'save_custom_paired_and_toppings_data', 99, 1 );
 function save_custom_paired_and_toppings_data( $post_id ) {
-	// Debug file path
-	$debug_file = ABSPATH . 'debug-save.txt';
+	// // Debug file path
+	// $debug_file = ABSPATH . 'debug-save.txt';
 
-	// Debug: Log POST data
-	$log = "\n\n" . str_repeat('=', 60) . "\n";
-	$log .= "Save triggered at: " . date('Y-m-d H:i:s') . "\n";
-	$log .= "Product ID: " . $post_id . "\n";
-	$log .= "Is Pizza Product: " . ( is_pizza_product( $post_id ) ? 'YES' : 'NO' ) . "\n";
-	$log .= "POST upsell_ids: " . ( isset( $_POST['upsell_ids'] ) ? print_r( $_POST['upsell_ids'], true ) : 'NOT SET' ) . "\n";
-	$log .= "POST upsell_ids COUNT: " . ( isset( $_POST['upsell_ids'] ) ? count( $_POST['upsell_ids'] ) : 0 ) . "\n";
-	$log .= "POST crosssell_ids: " . ( isset( $_POST['crosssell_ids'] ) ? print_r( $_POST['crosssell_ids'], true ) : 'NOT SET' ) . "\n";
-	$log .= "POST crosssell_ids COUNT: " . ( isset( $_POST['crosssell_ids'] ) ? count( $_POST['crosssell_ids'] ) : 0 ) . "\n";
+	// // Debug: Log POST data
+	// $log = "\n\n" . str_repeat('=', 60) . "\n";
+	// $log .= "Save triggered at: " . date('Y-m-d H:i:s') . "\n";
+	// $log .= "Product ID: " . $post_id . "\n";
+	// $log .= "Is Pizza Product: " . ( is_pizza_product( $post_id ) ? 'YES' : 'NO' ) . "\n";
+	// $log .= "POST upsell_ids: " . ( isset( $_POST['upsell_ids'] ) ? print_r( $_POST['upsell_ids'], true ) : 'NOT SET' ) . "\n";
+	// $log .= "POST upsell_ids COUNT: " . ( isset( $_POST['upsell_ids'] ) ? count( $_POST['upsell_ids'] ) : 0 ) . "\n";
+	// $log .= "POST crosssell_ids: " . ( isset( $_POST['crosssell_ids'] ) ? print_r( $_POST['crosssell_ids'], true ) : 'NOT SET' ) . "\n";
+	// $log .= "POST crosssell_ids COUNT: " . ( isset( $_POST['crosssell_ids'] ) ? count( $_POST['crosssell_ids'] ) : 0 ) . "\n";
 
-	// Log unique counts
-	if ( isset( $_POST['crosssell_ids'] ) && is_array( $_POST['crosssell_ids'] ) ) {
-		$unique_crosssells = array_unique( array_map( 'intval', $_POST['crosssell_ids'] ) );
-		$log .= "POST crosssell_ids UNIQUE COUNT: " . count( $unique_crosssells ) . "\n";
-		$log .= "DUPLICATES FOUND: " . ( count( $_POST['crosssell_ids'] ) - count( $unique_crosssells ) ) . "\n";
-	}
+	// // Log unique counts
+	// if ( isset( $_POST['crosssell_ids'] ) && is_array( $_POST['crosssell_ids'] ) ) {
+	// 	$unique_crosssells = array_unique( array_map( 'intval', $_POST['crosssell_ids'] ) );
+	// 	$log .= "POST crosssell_ids UNIQUE COUNT: " . count( $unique_crosssells ) . "\n";
+	// 	$log .= "DUPLICATES FOUND: " . ( count( $_POST['crosssell_ids'] ) - count( $unique_crosssells ) ) . "\n";
+	// }
 
-	error_log( '=== Save Custom Data for Product ID: ' . $post_id . ' ===' );
-	error_log( 'Is Pizza Product: ' . ( is_pizza_product( $post_id ) ? 'YES' : 'NO' ) );
-	error_log( 'POST upsell_ids: ' . ( isset( $_POST['upsell_ids'] ) ? print_r( $_POST['upsell_ids'], true ) : 'NOT SET' ) );
-	error_log( 'POST crosssell_ids: ' . ( isset( $_POST['crosssell_ids'] ) ? print_r( $_POST['crosssell_ids'], true ) : 'NOT SET' ) );
+	// error_log( '=== Save Custom Data for Product ID: ' . $post_id . ' ===' );
+	// error_log( 'Is Pizza Product: ' . ( is_pizza_product( $post_id ) ? 'YES' : 'NO' ) );
+	// error_log( 'POST upsell_ids: ' . ( isset( $_POST['upsell_ids'] ) ? print_r( $_POST['upsell_ids'], true ) : 'NOT SET' ) );
+	// error_log( 'POST crosssell_ids: ' . ( isset( $_POST['crosssell_ids'] ) ? print_r( $_POST['crosssell_ids'], true ) : 'NOT SET' ) );
 
-	// Only save if this is a pizza product (not a topping)
-	if ( ! is_pizza_product( $post_id ) ) {
-		$log .= "Skipping save - not a pizza product\n";
-		file_put_contents( $debug_file, $log, FILE_APPEND );
-		error_log( 'Skipping save - not a pizza product' );
-		return;
-	}
+	// // Only save if this is a pizza product (not a topping)
+	// if ( ! is_pizza_product( $post_id ) ) {
+	// 	$log .= "Skipping save - not a pizza product\n";
+	// 	file_put_contents( $debug_file, $log, FILE_APPEND );
+	// 	error_log( 'Skipping save - not a pizza product' );
+	// 	return;
+	// }
 
 	// IMPORTANT: Delete existing data FIRST to avoid duplicates
 	delete_post_meta( $post_id, '_upsell_ids' );
 	delete_post_meta( $post_id, '_crosssell_ids' );
-	$log .= "Deleted existing upsells and cross-sells\n";
+	// $log .= "Deleted existing upsells and cross-sells\n";
 
 	// Save upsell IDs (Paired With) - remove duplicates
 	$upsell_ids = isset( $_POST['upsell_ids'] ) && is_array( $_POST['upsell_ids'] )
@@ -1646,11 +1645,11 @@ function save_custom_paired_and_toppings_data( $post_id ) {
 	// Only save if there are IDs to save
 	if ( ! empty( $upsell_ids ) ) {
 		update_post_meta( $post_id, '_upsell_ids', $upsell_ids );
-		$log .= "Saved upsells: " . print_r( $upsell_ids, true ) . "\n";
-		error_log( 'Saved upsells: ' . print_r( $upsell_ids, true ) );
+		// $log .= "Saved upsells: " . print_r( $upsell_ids, true ) . "\n";
+		// error_log( 'Saved upsells: ' . print_r( $upsell_ids, true ) );
 	} else {
-		$log .= "No upsells to save\n";
-		error_log( 'No upsells to save' );
+		// $log .= "No upsells to save\n";
+		// error_log( 'No upsells to save' );
 	}
 
 	// Save cross-sell IDs (Toppings) - remove duplicates
@@ -1663,23 +1662,24 @@ function save_custom_paired_and_toppings_data( $post_id ) {
 	// Only save if there are IDs to save
 	if ( ! empty( $crosssell_ids ) ) {
 		update_post_meta( $post_id, '_crosssell_ids', $crosssell_ids );
-		$log .= "Saved cross-sells: " . print_r( $crosssell_ids, true ) . "\n";
-		error_log( 'Saved cross-sells: ' . print_r( $crosssell_ids, true ) );
-	} else {
-		$log .= "No cross-sells to save\n";
-		error_log( 'No cross-sells to save' );
-	}
+		// $log .= "Saved cross-sells: " . print_r( $crosssell_ids, true ) . "\n";
+		// error_log( 'Saved cross-sells: ' . print_r( $crosssell_ids, true ) );
+	} 
+	// else {
+	// 	$log .= "No cross-sells to save\n";
+	// 	error_log( 'No cross-sells to save' );
+	// }
 
 	// Verify what was actually saved
 	$verify_upsells = get_post_meta( $post_id, '_upsell_ids', true );
 	$verify_crosssells = get_post_meta( $post_id, '_crosssell_ids', true );
-	$log .= "Verified upsells in DB: " . print_r( $verify_upsells, true ) . "\n";
-	$log .= "Verified cross-sells in DB: " . print_r( $verify_crosssells, true ) . "\n";
-	error_log( 'Verified upsells in DB: ' . print_r( $verify_upsells, true ) );
-	error_log( 'Verified cross-sells in DB: ' . print_r( $verify_crosssells, true ) );
+	// $log .= "Verified upsells in DB: " . print_r( $verify_upsells, true ) . "\n";
+	// $log .= "Verified cross-sells in DB: " . print_r( $verify_crosssells, true ) . "\n";
+	// error_log( 'Verified upsells in DB: ' . print_r( $verify_upsells, true ) );
+	// error_log( 'Verified cross-sells in DB: ' . print_r( $verify_crosssells, true ) );
 
-	// Write to debug file
-	file_put_contents( $debug_file, $log, FILE_APPEND );
+	// // Write to debug file
+	// file_put_contents( $debug_file, $log, FILE_APPEND );
 
 	// Clear WooCommerce product cache to force reload
 	wc_delete_product_transients( $post_id );
@@ -1688,23 +1688,23 @@ function save_custom_paired_and_toppings_data( $post_id ) {
 // Redirect to add product_type parameter after saving pizza or topping products
 add_filter( 'redirect_post_location', 'add_product_type_to_redirect_url', 10, 2 );
 function add_product_type_to_redirect_url( $location, $post_id ) {
-	$debug_file = ABSPATH . 'debug-save.txt';
-	$log = "\n--- Redirect Filter Called ---\n";
-	$log .= "Post ID: " . $post_id . "\n";
-	$log .= "Post Type: " . get_post_type( $post_id ) . "\n";
-	$log .= "Original Location: " . $location . "\n";
+	// $debug_file = ABSPATH . 'debug-save.txt';
+	// $log = "\n--- Redirect Filter Called ---\n";
+	// $log .= "Post ID: " . $post_id . "\n";
+	// $log .= "Post Type: " . get_post_type( $post_id ) . "\n";
+	// $log .= "Original Location: " . $location . "\n";
 
 	// Only apply to product post type
 	if ( get_post_type( $post_id ) !== 'product' ) {
-		$log .= "Skipping: Not a product\n";
-		file_put_contents( $debug_file, $log, FILE_APPEND );
+		// $log .= "Skipping: Not a product\n";
+		// file_put_contents( $debug_file, $log, FILE_APPEND );
 		return $location;
 	}
 
 	// Check if product_type parameter is already in the URL
 	if ( strpos( $location, 'product_type=' ) !== false ) {
-		$log .= "Skipping: product_type already in URL\n";
-		file_put_contents( $debug_file, $log, FILE_APPEND );
+		// $log .= "Skipping: product_type already in URL\n";
+		// file_put_contents( $debug_file, $log, FILE_APPEND );
 		return $location;
 	}
 
@@ -1735,15 +1735,15 @@ function add_product_type_to_redirect_url( $location, $post_id ) {
 	if ( $is_topping ) {
 		// Add product_type=topping to URL
 		$location = add_query_arg( 'product_type', 'topping', $location );
-		$log .= "Is Topping: YES\n";
+		// $log .= "Is Topping: YES\n";
 	} else {
 		// Add product_type=pizza to URL
 		$location = add_query_arg( 'product_type', 'pizza', $location );
-		$log .= "Is Topping: NO (Pizza)\n";
+		// $log .= "Is Topping: NO (Pizza)\n";
 	}
 
-	$log .= "New Location: " . $location . "\n";
-	file_put_contents( $debug_file, $log, FILE_APPEND );
+	// $log .= "New Location: " . $location . "\n";
+	// file_put_contents( $debug_file, $log, FILE_APPEND );
 
 	return $location;
 }
@@ -1866,9 +1866,6 @@ function customize_pizza_tabs_styles_scripts() {
 
 	<script type="text/javascript">
 		jQuery(document).ready(function($) {
-			// Test: Log that JavaScript is loading
-			console.log('=== Pizza Tabs JavaScript Loaded ===');
-			console.log('Product type parameter:', '<?php echo isset( $_GET["product_type"] ) ? $_GET["product_type"] : "NOT SET"; ?>');
 
 			// CRITICAL FIX: Remove the 'name' attribute from ALL checkboxes immediately
 			// This prevents them from being submitted with the form
@@ -1889,28 +1886,15 @@ function customize_pizza_tabs_styles_scripts() {
 				toppingCount++;
 			});
 
-			console.log('Removed name attributes from checkboxes:');
-			console.log('  - Paired checkboxes:', pairedCount);
-			console.log('  - Topping checkboxes:', toppingCount);
-
-			// Verify they were actually removed
-			var stillHaveName = $('.paired-product-checkbox[name], .topping-product-checkbox[name]').length;
-			console.log('  - Checkboxes still with name attribute:', stillHaveName);
-			if (stillHaveName > 0) {
-				console.error('WARNING: Some checkboxes still have name attribute!');
-			}
-
 			// CRITICAL: Remove WooCommerce's default linked product fields from the DOM
 			// These might be hidden but still submitting
 			var removedFields = 0;
 			$('select[name="upsell_ids[]"], select[name="crosssell_ids[]"]').each(function() {
-				console.log('Removing WooCommerce default field:', $(this).attr('name'));
 				$(this).remove();
 				removedFields++;
 			});
 			// Also remove any hidden inputs that might have been added
 			$('#linked_product_data input[name="upsell_ids[]"], #linked_product_data input[name="crosssell_ids[]"]').remove();
-			console.log('Removed', removedFields, 'default WooCommerce linked product fields');
 
 			// Handle "Select All" for Paired With tab
 			$('#select_all_paired').on('change', function() {
@@ -1987,22 +1971,8 @@ function customize_pizza_tabs_styles_scripts() {
 				$('#select_all_toppings').prop('checked', true);
 			}
 
-			// Debug: Log topping checkbox states
-			console.log('=== Topping Checkboxes Debug ===');
-			console.log('Total topping checkboxes:', totalToppings);
-			console.log('Checked topping checkboxes:', checkedToppings);
-			$('.topping-product-checkbox').each(function() {
-				var $cb = $(this);
-				console.log('Checkbox ID:', $cb.val(),
-					'| Checked:', $cb.is(':checked'),
-					'| Data-is-checked:', $cb.data('is-checked'),
-					'| HTML checked attr:', $cb.attr('checked'));
-			});
-
 			// FIX: Add hidden fields for checked items only (checkboxes have no 'name' so won't submit)
 			function addHiddenFieldsForSubmit() {
-				console.log('=== Adding Hidden Fields For Submit ===');
-
 				// CRITICAL: Remove name attribute from ALL checkboxes again (in case they were re-rendered)
 				var pairedRemoved = 0;
 				$('.paired-product-checkbox[name]').each(function() {
@@ -2014,26 +1984,17 @@ function customize_pizza_tabs_styles_scripts() {
 					$(this).removeAttr('name');
 					toppingRemoved++;
 				});
-				if (pairedRemoved > 0 || toppingRemoved > 0) {
-					console.warn('Found checkboxes with name attribute at submit time!');
-					console.warn('  - Paired:', pairedRemoved, '| Topping:', toppingRemoved);
-				}
 
 				// CRITICAL: Remove WooCommerce default fields again (in case they were re-added)
 				var wcFieldsRemoved = 0;
 				$('select[name="upsell_ids[]"], select[name="crosssell_ids[]"]').each(function() {
-					console.warn('Removing WooCommerce default field at submit:', $(this).attr('name'), '| Values:', $(this).val());
 					$(this).remove();
 					wcFieldsRemoved++;
 				});
 				$('#linked_product_data input[name="upsell_ids[]"], #linked_product_data input[name="crosssell_ids[]"]').each(function() {
-					console.warn('Removing linked_product_data input:', $(this).attr('name'), '| Value:', $(this).val());
 					$(this).remove();
 					wcFieldsRemoved++;
 				});
-				if (wcFieldsRemoved > 0) {
-					console.warn('Removed', wcFieldsRemoved, 'WooCommerce default fields at submit time!');
-				}
 
 				// Remove any previously added hidden fields (in case function runs multiple times)
 				$('input[name="upsell_ids[]"]').remove();
@@ -2057,9 +2018,6 @@ function customize_pizza_tabs_styles_scripts() {
 					}
 				});
 
-				console.log('Paired IDs collected:', pairedIds.length, pairedIds);
-				console.log('Topping IDs collected:', toppingIds.length, toppingIds);
-
 				// Add hidden fields for paired products
 				var $form = $('#post');
 				pairedIds.forEach(function(id) {
@@ -2078,14 +2036,10 @@ function customize_pizza_tabs_styles_scripts() {
 						value: id
 					}).appendTo($form);
 				});
-
-				console.log('Added hidden fields - Paired:', pairedIds.length, 'Toppings:', toppingIds.length);
-				console.log('=== Hidden Fields Ready ===');
 			}
 
 			// Add hidden fields on form submit (checkboxes won't submit because they have no 'name')
 			$('#post').on('submit', function(e) {
-				console.log('Form submit - adding hidden fields');
 				addHiddenFieldsForSubmit();
 			});
 		});
