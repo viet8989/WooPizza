@@ -890,6 +890,12 @@ do_action( 'wc_quick_view_after_single_product' );
 			});
 
 			$('#btn-paired').on('click', function() {
+				// Prevent clicking if no upsells available
+				if (!hasUpsells) {
+					console.log('Cannot select paired mode - no upsells available');
+					return false;
+				}
+
 				$('.size-option').removeClass('active');
 				$(this).addClass('active');
 				$('#pizza-whole').hide();
@@ -948,15 +954,16 @@ do_action( 'wc_quick_view_after_single_product' );
 				// Get the view type from sessionStorage
 				const viewType = sessionStorage.getItem('pizza_view') || 'whole';
 				console.log('pizza_view type saved sessionStorage:', viewType);
-				
+
 				// Show appropriate view based on stored value
-				if (viewType === 'paired') {
+				// Only allow paired view if upsells exist and button is visible
+				if (viewType === 'paired' && hasUpsells && $('#btn-paired').is(':visible')) {
 					$('#btn-paired').trigger('click');
-					$('#left-pizza').trigger('click');					
+					$('#left-pizza').trigger('click');
 				} else {
 					$('#btn-whole').trigger('click');
 				}
-				
+
 				// Clear the storage after using it
 				sessionStorage.removeItem('pizza_view');
 			}, 100);
