@@ -515,7 +515,8 @@ do_action( 'wc_quick_view_after_single_product' );
 /* Header Section */
 .header-section {
 	display: flex;
-	height: 200px;
+	height: auto;
+	max-width: 100%;
 }
 
 .half-pizza-container {
@@ -524,6 +525,7 @@ do_action( 'wc_quick_view_after_single_product' );
 	background: #f0f0f0;
 	display: flex;
 	align-items: center;
+	aspect-ratio: 1;
 }
 
 .half-pizza-container img:hover {
@@ -532,7 +534,7 @@ do_action( 'wc_quick_view_after_single_product' );
 
 .left-pizza-img {
 	width: 200%;
-	height: 100%;
+	height: auto;
 	object-fit: cover;
 	object-position: right center;
 	transform: translateX(50%);
@@ -541,7 +543,7 @@ do_action( 'wc_quick_view_after_single_product' );
 
 .right-pizza-img {
 	width: 200%;
-	height: 100%;
+	height: auto;
 	object-fit: cover;
 	object-position: left center;
 	transform: translateX(-50%);
