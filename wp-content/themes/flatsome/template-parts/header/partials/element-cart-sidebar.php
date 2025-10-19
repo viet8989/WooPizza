@@ -37,7 +37,7 @@ if ( is_woocommerce_activated() && flatsome_is_wc_cart_available() ) {
 			<div id="cart-popup" class="widget_shopping_cart">
 				<div class="cart-popup-inner inner-padding">
 						<div class="cart-popup-title text-center">
-								<h4 class="uppercase"><?php _e('Cart', 'woocommerce'); ?></h4>
+								<h4 class="uppercase"><?php _e('Cart Debug', 'woocommerce'); ?></h4>
 								<div class="is-divider"></div>
 						</div>
 						<div class="widget_shopping_cart_content">
