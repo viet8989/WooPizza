@@ -2050,11 +2050,6 @@ function customize_pizza_tabs_styles_scripts() {
 // Change "VAT" label to include tax rate on order received page
 add_filter( 'woocommerce_get_order_item_totals', 'customize_vat_label_with_rate', 10, 3 );
 function customize_vat_label_with_rate( $total_rows, $order, $tax_display ) {
-	$debug_file = ABSPATH . 'debug_save.txt';
-	$log = "\n\n" . str_repeat('=', 60) . "\n";
-	$log .= "VAT Label Filter triggered at: " . date('Y-m-d H:i:s') . "\n";
-	$log .= "Order ID: " . ( $order ? $order->get_id() : 'N/A' ) . "\n";
-
 	// Find any tax-related keys (they can be dynamic like 'vn-vat-1', 'tax', etc.)
 	$found_tax_keys = array();
 	foreach ( $total_rows as $key => $row ) {
@@ -2063,7 +2058,6 @@ function customize_vat_label_with_rate( $total_rows, $order, $tax_display ) {
 		     ( stripos( $row['label'], 'VAT' ) !== false ||
 		       stripos( $row['label'], 'Tax' ) !== false ) ) {
 			$found_tax_keys[] = $key;
-			$log .= "Found tax row - Key: " . $key . " | Current Label: " . $row['label'] . "\n";
 		}
 	}
 
@@ -2071,13 +2065,11 @@ function customize_vat_label_with_rate( $total_rows, $order, $tax_display ) {
 		// Get tax rate from order
 		$tax_rate = '';
 		$taxes = $order->get_taxes();
-		$log .= "Number of taxes in order: " . count( $taxes ) . "\n";
 
 		if ( ! empty( $taxes ) ) {
 			foreach ( $taxes as $tax ) {
 				$rate_id = $tax->get_rate_id();
 				$rate_percent = WC_Tax::get_rate_percent( $rate_id );
-				$log .= "Tax Rate ID: " . $rate_id . " | Rate percent: " . $rate_percent . "\n";
 
 				if ( $rate_percent ) {
 					$tax_rate = ' (' . $rate_percent . ')';
@@ -2088,30 +2080,22 @@ function customize_vat_label_with_rate( $total_rows, $order, $tax_display ) {
 
 		// If no rate found, try to get from tax rate settings
 		if ( empty( $tax_rate ) ) {
-			$log .= "No tax rate from order, trying default rates\n";
 			$tax_rates = WC_Tax::get_rates();
-			$log .= "Number of default tax rates: " . count( $tax_rates ) . "\n";
 
 			if ( ! empty( $tax_rates ) ) {
 				$first_rate = reset( $tax_rates );
 				if ( isset( $first_rate['rate'] ) ) {
 					$tax_rate = ' (' . floatval( $first_rate['rate'] ) . '%)';
-					$log .= "Using default rate: " . $tax_rate . "\n";
 				}
 			}
 		}
 
 		// Update all tax-related labels
 		foreach ( $found_tax_keys as $tax_key ) {
-			$old_label = $total_rows[ $tax_key ]['label'];
 			$total_rows[ $tax_key ]['label'] = 'VAT' . $tax_rate . ':';
-			$log .= "Changed label from: '" . $old_label . "' to: '" . $total_rows[ $tax_key ]['label'] . "'\n";
 		}
-	} else {
-		$log .= "ERROR: No tax key found in total_rows!\n";
 	}
 
-	file_put_contents( $debug_file, $log, FILE_APPEND );
 	return $total_rows;
 }
 
