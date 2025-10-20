@@ -80,7 +80,7 @@ defined( 'ABSPATH' ) || exit;
 						// Try to get the percent for this tax rate id if available
 						$rate_suffix = 'VAT';
 						if ( ! empty( $tax->tax_rate_id ) ) {
-							$rate_suffix = ' (' . esc_html( WC_Tax::get_rate_percent( $tax->tax_rate_id ) ) . ')';
+							$rate_suffix . = ' (' . esc_html( WC_Tax::get_rate_percent( $tax->tax_rate_id ) ) . ')';
 						}
 						?>
 						<th><?php echo esc_html( $rate_suffix ) . $estimated_text; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></th>
@@ -98,7 +98,7 @@ defined( 'ABSPATH' ) || exit;
 					if ( ! empty( $tax_totals ) ) {
 						$first = reset( $tax_totals );
 						if ( ! empty( $first->tax_rate_id ) ) {
-							$rate_suffix = ' (' . esc_html( WC_Tax::get_rate_percent( $first->tax_rate_id ) ) . ')';
+							$rate_suffix . = ' (' . esc_html( WC_Tax::get_rate_percent( $first->tax_rate_id ) ) . ')';
 						}
 					}
 					?>
