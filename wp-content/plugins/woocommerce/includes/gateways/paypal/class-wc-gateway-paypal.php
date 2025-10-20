@@ -134,7 +134,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		if ( 'yes' === $this->enabled ) {
-			add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'order_received_text' ), 10, 2 );
+			add_filter( 'woocommerce_thankyou_order_received_text', array( $this, 'woocommerce_thankyou_order_received_text''woocommerce_thankyou_order_received_text' ), 10, 2 );
 		}
 	}
 
