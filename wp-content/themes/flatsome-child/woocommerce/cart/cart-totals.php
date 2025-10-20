@@ -78,12 +78,12 @@ defined( 'ABSPATH' ) || exit;
 					<tr class="tax-rate tax-rate-<?php echo esc_attr( sanitize_title( $code ) ); ?>">
 						<?php
 						// Try to get the percent for this tax rate id if available
-						$rate_suffix = 'VAT';
+						$rate_suffix = '';
 						if ( ! empty( $tax->tax_rate_id ) ) {
-							$rate_suffix . = ' (' . esc_html( WC_Tax::get_rate_percent( $tax->tax_rate_id ) ) . ')';
+							$rate_suffix = ' (' . esc_html( WC_Tax::get_rate_percent( $tax->tax_rate_id ) ) . ')';
 						}
 						?>
-						<th><?php echo esc_html( $rate_suffix ) . $estimated_text; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></th>
+						<th><?php echo esc_html( $tax->label . $rate_suffix ) . $estimated_text; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></th>
 						<td data-title="<?php echo esc_attr( $tax->label ); ?>"><?php echo wp_kses_post( $tax->formatted_amount ); ?></td>
 					</tr>
 					<?php
@@ -93,16 +93,16 @@ defined( 'ABSPATH' ) || exit;
 				<tr class="tax-total">
 					<?php
 					// For non-itemized display, try to append the first tax rate percent if available
-					$rate_suffix = 'VAT';
+					$rate_suffix = '';
 					$tax_totals = WC()->cart->get_tax_totals();
 					if ( ! empty( $tax_totals ) ) {
 						$first = reset( $tax_totals );
 						if ( ! empty( $first->tax_rate_id ) ) {
-							$rate_suffix . = ' (' . esc_html( WC_Tax::get_rate_percent( $first->tax_rate_id ) ) . ')';
+							$rate_suffix = ' (' . esc_html( WC_Tax::get_rate_percent( $first->tax_rate_id ) ) . ')';
 						}
 					}
 					?>
-					<th><?php echo esc_html( $rate_suffix ) . $estimated_text; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></th>
+					<th><?php echo esc_html( WC()->countries->tax_or_vat() . $rate_suffix ) . $estimated_text; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></th>
 					<td data-title="<?php echo esc_attr( WC()->countries->tax_or_vat() ); ?>"><?php wc_cart_totals_taxes_total_html(); ?></td>
 				</tr>
 				<?php
