@@ -189,6 +189,33 @@ do_action( 'woocommerce_before_cart' ); ?>
 </div>
 
 <?php do_action( 'woocommerce_before_cart_collaterals' ); ?>
+
+<div class="cart-collaterals large-5 col pb-0">
+	<?php flatsome_sticky_column_open( 'cart_sticky_sidebar' ); ?>
+
+	<div class="cart-sidebar col-inner <?php echo $sidebar_classes; ?>">
+		<?php
+			/**
+			 * Cart collaterals hook.
+			 *
+			 * @hooked woocommerce_cross_sell_display
+			 * @hooked woocommerce_cart_totals - 10
+			 */
+			do_action( 'woocommerce_cart_collaterals' );
+		?>
+		<?php if ( wc_coupons_enabled() ) { ?>
+		<form class="checkout_coupon mb-0" method="post">
+			<div class="coupon">
+				<h3 class="widget-title"><?php echo get_flatsome_icon( 'icon-tag' ); ?> <?php esc_html_e( 'Coupon', 'woocommerce' ); ?></h3><label for="coupon_code" class="screen-reader-text"><?php esc_html_e( 'Coupon:', 'woocommerce' ); ?></label><input type="text" name="coupon_code" class="input-text" id="coupon_code" value="" placeholder="<?php esc_attr_e( 'Coupon code', 'woocommerce' ); ?>" /> <button type="submit" class="is-form expand button<?php if ( fl_woocommerce_version_check( '7.0.1' ) ) { echo esc_attr( wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '' ); } ?>" name="apply_coupon" value="<?php esc_attr_e( 'Apply coupon', 'woocommerce' ); ?>"><?php esc_attr_e( 'Apply coupon', 'woocommerce' ); ?></button>
+				<?php do_action( 'woocommerce_cart_coupon' ); ?>
+			</div>
+		</form>
+		<?php } ?>
+		<?php do_action( 'flatsome_cart_sidebar' ); ?>
+	</div>
+
+	<?php flatsome_sticky_column_close( 'cart_sticky_sidebar' ); ?>
+</div>
 </div>
 
 <?php do_action( 'woocommerce_after_cart' ); ?>
