@@ -1,0 +1,18 @@
+
+
+============================================================
+VAT Label Filter triggered at: 2025-10-20 13:27:26
+Order ID: 643
+Total rows keys: Array
+(
+    [0] => cart_subtotal
+    [1] => vn-vat-1
+    [2] => order_total
+    [3] => payment_method
+)
+
+Row key: cart_subtotal | Label: Subtotal:
+Row key: vn-vat-1 | Label: VAT:
+Row key: order_total | Label: Total:
+Row key: payment_method | Label: Payment method:
+ERROR: No tax key found in total_rows!

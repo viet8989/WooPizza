@@ -2054,26 +2054,20 @@ function customize_vat_label_with_rate( $total_rows, $order, $tax_display ) {
 	$log = "\n\n" . str_repeat('=', 60) . "\n";
 	$log .= "VAT Label Filter triggered at: " . date('Y-m-d H:i:s') . "\n";
 	$log .= "Order ID: " . ( $order ? $order->get_id() : 'N/A' ) . "\n";
-	$log .= "Total rows keys: " . print_r( array_keys( $total_rows ), true ) . "\n";
 
-	// Loop through all total rows to find tax-related keys
+	// Find any tax-related keys (they can be dynamic like 'vn-vat-1', 'tax', etc.)
+	$found_tax_keys = array();
 	foreach ( $total_rows as $key => $row ) {
-		$log .= "Row key: " . $key . " | Label: " . ( isset( $row['label'] ) ? $row['label'] : 'N/A' ) . "\n";
-	}
-
-	// Try different possible tax keys
-	$tax_keys = array( 'tax', 'taxes', 'order_tax', 'cart_tax' );
-	$found_tax_key = false;
-
-	foreach ( $tax_keys as $possible_key ) {
-		if ( isset( $total_rows[ $possible_key ] ) ) {
-			$found_tax_key = $possible_key;
-			$log .= "Found tax key: " . $possible_key . "\n";
-			break;
+		// Check if this row contains "VAT" or "Tax" in the label
+		if ( isset( $row['label'] ) &&
+		     ( stripos( $row['label'], 'VAT' ) !== false ||
+		       stripos( $row['label'], 'Tax' ) !== false ) ) {
+			$found_tax_keys[] = $key;
+			$log .= "Found tax row - Key: " . $key . " | Current Label: " . $row['label'] . "\n";
 		}
 	}
 
-	if ( $found_tax_key ) {
+	if ( ! empty( $found_tax_keys ) ) {
 		// Get tax rate from order
 		$tax_rate = '';
 		$taxes = $order->get_taxes();
@@ -2096,20 +2090,23 @@ function customize_vat_label_with_rate( $total_rows, $order, $tax_display ) {
 		if ( empty( $tax_rate ) ) {
 			$log .= "No tax rate from order, trying default rates\n";
 			$tax_rates = WC_Tax::get_rates();
-			$log .= "Default tax rates: " . print_r( $tax_rates, true ) . "\n";
+			$log .= "Number of default tax rates: " . count( $tax_rates ) . "\n";
 
 			if ( ! empty( $tax_rates ) ) {
 				$first_rate = reset( $tax_rates );
 				if ( isset( $first_rate['rate'] ) ) {
 					$tax_rate = ' (' . floatval( $first_rate['rate'] ) . '%)';
+					$log .= "Using default rate: " . $tax_rate . "\n";
 				}
 			}
 		}
 
-		$log .= "Final tax rate string: " . $tax_rate . "\n";
-		$old_label = $total_rows[ $found_tax_key ]['label'];
-		$total_rows[ $found_tax_key ]['label'] = __( 'VAT', 'flatsome' ) . $tax_rate . ':';
-		$log .= "Changed label from: " . $old_label . " to: " . $total_rows[ $found_tax_key ]['label'] . "\n";
+		// Update all tax-related labels
+		foreach ( $found_tax_keys as $tax_key ) {
+			$old_label = $total_rows[ $tax_key ]['label'];
+			$total_rows[ $tax_key ]['label'] = 'VAT' . $tax_rate . ':';
+			$log .= "Changed label from: '" . $old_label . "' to: '" . $total_rows[ $tax_key ]['label'] . "'\n";
+		}
 	} else {
 		$log .= "ERROR: No tax key found in total_rows!\n";
 	}
