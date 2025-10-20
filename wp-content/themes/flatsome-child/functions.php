@@ -1831,7 +1831,7 @@ function customize_pizza_tabs_styles_scripts() {
 			font-family: dashicons;
 		}
 
-		#woocommerce-product_data ul.wc-tabs li.toppings_tab_options a:before {
+		#woocommerce-product-data ul.wc-tabs li.toppings_tab_options a:before {
 			content: "\f336"; /* dashicons-carrot */
 			font-family: dashicons;
 		}
@@ -2044,7 +2044,6 @@ function customize_pizza_tabs_styles_scripts() {
 			});
 		});
 	</script>
-
 	<?php
 }
 
@@ -2119,56 +2118,4 @@ function filter_products_by_field_type( $products ) {
 		}
 		return $products;
 	}
-}
-
-// Append tax percent to Tax/VAT label on the order-received page
-add_filter( 'gettext', 'wc_append_tax_percent_on_order_received', 20, 3 );
-function wc_append_tax_percent_on_order_received( $translated_text, $text, $domain ) {
-    // Only target WooCommerce text
-    if ( 'woocommerce' !== $domain ) {
-        return $translated_text;
-    }
-
-    // Only when original string is Tax/VAT (adjust if your strings differ)
-    if ( ! in_array( $text, array( 'Tax', 'VAT' ), true ) ) {
-        return $translated_text;
-    }
-
-    // Only on checkout/order-received pages
-    if ( ! function_exists( 'is_checkout' ) || ! is_checkout() ) {
-        return $translated_text;
-    }
-
-    // Get order id from query var (URL: /checkout/order-received/{order-id})
-    $order_id = get_query_var( 'order-received' );
-    if ( ! $order_id ) {
-        return $translated_text;
-    }
-
-    $order = wc_get_order( intval( $order_id ) );
-    if ( ! $order ) {
-        return $translated_text;
-    }
-
-    // Get tax totals for the order
-    $tax_totals = $order->get_tax_totals();
-    if ( empty( $tax_totals ) ) {
-        return $translated_text;
-    }
-
-    // Pick the first tax total (if you want different behaviour, modify here)
-    $first = reset( $tax_totals );
-
-    if ( empty( $first->tax_rate_id ) ) {
-        return $translated_text;
-    }
-
-    // Get percent string like "8%"
-    $percent = WC_Tax::get_rate_percent( $first->tax_rate_id );
-    if ( ! $percent ) {
-        return $translated_text;
-    }
-
-    // Append percent to the translated label e.g. "Tax (8%)"
-    return $translated_text . ' (' . $percent . ')';
 }
