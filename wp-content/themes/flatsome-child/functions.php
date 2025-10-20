@@ -2047,6 +2047,42 @@ function customize_pizza_tabs_styles_scripts() {
 	<?php
 }
 
+// Change "VAT" label to include tax rate on order received page
+add_filter( 'woocommerce_get_order_item_totals', 'customize_vat_label_with_rate', 10, 3 );
+function customize_vat_label_with_rate( $total_rows, $order, $tax_display ) {
+	// Customize the Tax label to show rate
+	if ( isset( $total_rows['tax'] ) ) {
+		// Get tax rate from order
+		$tax_rate = '';
+		$taxes = $order->get_taxes();
+
+		if ( ! empty( $taxes ) ) {
+			foreach ( $taxes as $tax ) {
+				$rate_percent = WC_Tax::get_rate_percent( $tax->get_rate_id() );
+				if ( $rate_percent ) {
+					$tax_rate = ' (' . $rate_percent . ')';
+					break; // Use first tax rate found
+				}
+			}
+		}
+
+		// If no rate found, try to get from tax rate settings
+		if ( empty( $tax_rate ) ) {
+			$tax_rates = WC_Tax::get_rates();
+			if ( ! empty( $tax_rates ) ) {
+				$first_rate = reset( $tax_rates );
+				if ( isset( $first_rate['rate'] ) ) {
+					$tax_rate = ' (' . floatval( $first_rate['rate'] ) . '%)';
+				}
+			}
+		}
+
+		$total_rows['tax']['label'] = __( 'VAT', 'flatsome' ) . $tax_rate . ':';
+	}
+
+	return $total_rows;
+}
+
 // Filter product search: exclude toppings from upsells, include ONLY toppings for cross-sells
 add_filter( 'woocommerce_json_search_found_products', 'filter_products_by_field_type' );
 function filter_products_by_field_type( $products ) {
