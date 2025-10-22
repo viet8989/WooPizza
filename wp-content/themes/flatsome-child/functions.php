@@ -2238,3 +2238,112 @@ function customize_checkout_labels_and_requirements( $fields ) {
 
 	return $fields;
 }
+
+// ====================================================================================
+// PICKUP/DELIVERY METHOD HANDLING
+// ====================================================================================
+
+/**
+ * Save the selected delivery method to the order
+ */
+function save_delivery_method_to_order( $order_id ) {
+	if ( isset( $_POST['selected_delivery_method'] ) ) {
+		$delivery_method = sanitize_text_field( $_POST['selected_delivery_method'] );
+		update_post_meta( $order_id, '_delivery_method', $delivery_method );
+
+		// Also save as display meta
+		if ( $delivery_method === 'pickup' ) {
+			update_post_meta( $order_id, 'Delivery Method', 'PICKUP - Đến lấy tại cửa hàng' );
+		} else {
+			update_post_meta( $order_id, 'Delivery Method', 'DELIVERY - Giao hàng tận nơi' );
+		}
+	}
+}
+add_action( 'woocommerce_checkout_update_order_meta', 'save_delivery_method_to_order' );
+
+/**
+ * Display delivery method in order details
+ */
+function display_delivery_method_in_order( $order ) {
+	$delivery_method = get_post_meta( $order->get_id(), '_delivery_method', true );
+	if ( $delivery_method ) {
+		$label = ( $delivery_method === 'pickup' ) ? 'PICKUP - Đến lấy tại cửa hàng' : 'DELIVERY - Giao hàng tận nơi';
+		echo '<p><strong>Phương thức nhận hàng:</strong> ' . esc_html( $label ) . '</p>';
+	}
+}
+add_action( 'woocommerce_order_details_after_order_table', 'display_delivery_method_in_order' );
+
+/**
+ * Modify shipping method label based on delivery method selection
+ */
+function customize_shipping_method_label( $label, $method ) {
+	// Check if pickup is selected
+	if ( isset( $_POST['selected_delivery_method'] ) && $_POST['selected_delivery_method'] === 'pickup' ) {
+		return 'Shipping (PICKUP)';
+	}
+
+	// Check from session for cart/checkout pages
+	if ( WC()->session ) {
+		$delivery_method = WC()->session->get( 'selected_delivery_method' );
+		if ( $delivery_method === 'pickup' ) {
+			return 'Shipping (PICKUP)';
+		}
+	}
+
+	return $label;
+}
+add_filter( 'woocommerce_cart_shipping_method_full_label', 'customize_shipping_method_label', 10, 2 );
+
+/**
+ * Set shipping cost to 0 for PICKUP method
+ */
+function adjust_shipping_cost_for_pickup( $rates, $package ) {
+	// Check if pickup is selected
+	$delivery_method = '';
+
+	if ( isset( $_POST['selected_delivery_method'] ) ) {
+		$delivery_method = sanitize_text_field( $_POST['selected_delivery_method'] );
+	} elseif ( WC()->session ) {
+		$delivery_method = WC()->session->get( 'selected_delivery_method' );
+	}
+
+	if ( $delivery_method === 'pickup' ) {
+		// Set all shipping rates to 0
+		foreach ( $rates as $rate_key => $rate ) {
+			$rates[ $rate_key ]->cost = 0;
+			$rates[ $rate_key ]->taxes = array();
+
+			// Update the label to show it's pickup
+			$rates[ $rate_key ]->label = 'Shipping (PICKUP)';
+		}
+	}
+
+	return $rates;
+}
+add_filter( 'woocommerce_package_rates', 'adjust_shipping_cost_for_pickup', 10, 2 );
+
+/**
+ * Save delivery method to session when posted
+ */
+function save_delivery_method_to_session() {
+	if ( isset( $_POST['selected_delivery_method'] ) ) {
+		$delivery_method = sanitize_text_field( $_POST['selected_delivery_method'] );
+		WC()->session->set( 'selected_delivery_method', $delivery_method );
+	}
+}
+add_action( 'woocommerce_checkout_update_order_review', 'save_delivery_method_to_session' );
+
+/**
+ * Add delivery method to order item meta for admin
+ */
+function add_delivery_method_to_admin_order_meta( $order ) {
+	$delivery_method = get_post_meta( $order->get_id(), '_delivery_method', true );
+	if ( $delivery_method ) {
+		echo '<div class="order_data_column">';
+		echo '<h3>Delivery Method</h3>';
+		$label = ( $delivery_method === 'pickup' ) ? 'PICKUP - Đến lấy tại cửa hàng' : 'DELIVERY - Giao hàng tận nơi';
+		echo '<p><strong>' . esc_html( $label ) . '</strong></p>';
+		echo '</div>';
+	}
+}
+add_action( 'woocommerce_admin_order_data_after_billing_address', 'add_delivery_method_to_admin_order_meta' );
