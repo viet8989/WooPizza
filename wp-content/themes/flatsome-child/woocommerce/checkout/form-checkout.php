@@ -58,9 +58,9 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 	</div>
 </div>
 
-<!-- Store Locator (only shown for DELIVERY) -->
+<!-- Store Locator (custom checkout layout) -->
 <div id="wpsl-container" style="margin-bottom: 30px;">
-	<?php echo do_shortcode('[wpsl template="default" map_type="roadmap" auto_locate="false" start_marker="red" store_marker="blue" category="DELIVERY" category_selection=""]'); ?>
+	<?php echo do_shortcode('[wpsl template="checkout" map_type="roadmap" auto_locate="false" start_marker="red" store_marker="blue" category="DELIVERY" category_selection=""]'); ?>
 </div>
 
 <form name="checkout" method="post" class="checkout woocommerce-checkout" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" enctype="multipart/form-data" aria-label="<?php echo esc_attr__( 'Checkout', 'woocommerce' ); ?>">
@@ -201,31 +201,84 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
+	// Function to update WPSL category filter
+	function updateWPSLCategory(category) {
+		// Update hidden category filter field
+		$('#wpsl-category-filter').val(category);
+
+		// Trigger WPSL search with new category
+		if (typeof wpslMap !== 'undefined' && wpslMap.length > 0) {
+			// Clear existing markers and results
+			wpslMap[0].storeData = [];
+
+			// Update the category filter in wpslSettings
+			if (typeof wpslSettings !== 'undefined') {
+				wpslSettings.categoryIds = category;
+			}
+
+			// If autoload is enabled, trigger a new search
+			if ($('#wpsl-search-input').length) {
+				// Trigger the store search
+				$('#wpsl-search-btn').trigger('click');
+			}
+		}
+	}
+
 	// Handle delivery method change
 	$('input[name="delivery_method"]').on('change', function() {
 		var method = $(this).val();
 		$('#selected_delivery_method').val(method);
 
-		if (method === 'pickup') {
-			// Hide store locator
-			$('#wpsl-container').hide();
+		// Update category based on method
+		var category = (method === 'pickup') ? 'PICKUP' : 'DELIVERY';
 
-			// Update shipping method to free
-			$(document.body).trigger('update_checkout');
-		} else {
-			// Show store locator
-			$('#wpsl-container').show();
+		console.log('Delivery method changed to:', method, 'Category:', category);
 
-			// Update checkout
-			$(document.body).trigger('update_checkout');
-		}
+		// Update WPSL category filter
+		updateWPSLCategory(category);
+
+		// Update shipping method
+		$(document.body).trigger('update_checkout');
 	});
 
 	// Set initial state
 	var initialMethod = $('input[name="delivery_method"]:checked').val();
-	if (initialMethod === 'pickup') {
-		$('#wpsl-container').hide();
+	var initialCategory = (initialMethod === 'pickup') ? 'PICKUP' : 'DELIVERY';
+
+	console.log('Initial method:', initialMethod, 'Initial category:', initialCategory);
+
+	// Set initial category
+	if ($('#wpsl-category-filter').length) {
+		$('#wpsl-category-filter').val(initialCategory);
 	}
+
+	// Override WPSL category filter when search is triggered
+	$(document).on('click', '#wpsl-search-btn', function(e) {
+		var selectedMethod = $('input[name="delivery_method"]:checked').val();
+		var category = (selectedMethod === 'pickup') ? 'PICKUP' : 'DELIVERY';
+
+		// Update wpslSettings before search
+		if (typeof wpslSettings !== 'undefined') {
+			wpslSettings.categoryIds = category;
+		}
+
+		console.log('Search triggered with category:', category);
+	});
+
+	// Intercept WPSL AJAX request to add category filter
+	$(document).ajaxSend(function(event, jqxhr, settings) {
+		if (settings.url && settings.url.indexOf('store_search') !== -1) {
+			var selectedMethod = $('input[name="delivery_method"]:checked').val();
+			var category = (selectedMethod === 'pickup') ? 'PICKUP' : 'DELIVERY';
+
+			// Add filter parameter to AJAX data
+			if (settings.data) {
+				settings.data += '&filter=' + category;
+			}
+
+			console.log('AJAX store_search intercepted, adding category:', category);
+		}
+	});
 });
 </script>
 

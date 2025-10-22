@@ -2240,6 +2240,56 @@ function customize_checkout_labels_and_requirements( $fields ) {
 }
 
 // ====================================================================================
+// WPSL CUSTOM TEMPLATE REGISTRATION
+// ====================================================================================
+
+/**
+ * Register custom WPSL template for checkout
+ */
+function register_custom_wpsl_template( $templates ) {
+	$templates[] = array(
+		'id'   => 'checkout',
+		'name' => 'Checkout Layout',
+		'path' => get_stylesheet_directory() . '/wpsl-templates/checkout.php'
+	);
+	return $templates;
+}
+add_filter( 'wpsl_templates', 'register_custom_wpsl_template' );
+
+/**
+ * Filter WPSL stores by category dynamically
+ */
+function wpsl_filter_stores_by_category( $store_data ) {
+	// Check if filter parameter is set
+	if ( isset( $_GET['filter'] ) || isset( $_POST['filter'] ) ) {
+		$filter_category = isset( $_GET['filter'] ) ? sanitize_text_field( $_GET['filter'] ) : sanitize_text_field( $_POST['filter'] );
+
+		// Filter stores by category
+		if ( ! empty( $store_data ) ) {
+			$filtered_stores = array();
+
+			foreach ( $store_data as $store ) {
+				// Get store categories
+				$store_id = isset( $store['id'] ) ? $store['id'] : 0;
+				if ( $store_id ) {
+					$categories = wp_get_post_terms( $store_id, 'wpsl_store_category', array( 'fields' => 'names' ) );
+
+					// Check if store has the filter category
+					if ( in_array( $filter_category, $categories ) ) {
+						$filtered_stores[] = $store;
+					}
+				}
+			}
+
+			return $filtered_stores;
+		}
+	}
+
+	return $store_data;
+}
+add_filter( 'wpsl_store_data', 'wpsl_filter_stores_by_category', 10, 1 );
+
+// ====================================================================================
 // PICKUP/DELIVERY METHOD HANDLING
 // ====================================================================================
 
