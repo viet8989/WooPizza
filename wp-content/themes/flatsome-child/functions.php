@@ -86,6 +86,17 @@ add_action('wp_head', 'remove_sticky_header_script', 999);
 
 // Viet add custom functions below this line
 
+/**
+ * Hide the shipping totals row on the cart page via inline CSS.
+ * This only affects display; it does not change shipping calculations.
+ */
+function wp_child_hide_cart_shipping_row() {
+	if ( function_exists( 'is_cart' ) && is_cart() ) {
+		echo "<style>.woocommerce-cart .woocommerce-shipping-totals.shipping { display: none !important; }</style>";
+	}
+}
+add_action( 'wp_head', 'wp_child_hide_cart_shipping_row', 1000 );
+
 // AJAX handler to get toppings for a product based on cross-sell IDs
 add_action( 'wp_ajax_get_product_toppings', 'ajax_get_product_toppings' );
 add_action( 'wp_ajax_nopriv_get_product_toppings', 'ajax_get_product_toppings' );
