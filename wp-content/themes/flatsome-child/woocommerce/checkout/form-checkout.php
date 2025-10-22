@@ -68,35 +68,50 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 	<!-- Hidden field to store delivery method -->
 	<input type="hidden" name="selected_delivery_method" id="selected_delivery_method" value="delivery">
 
-	<?php if ( $checkout->get_checkout_fields() ) : ?>
+	<div class="row pt-0">
+		<div class="large-7 col">
+			<?php if ( $checkout->get_checkout_fields() ) : ?>
 
-		<?php do_action( 'woocommerce_checkout_before_customer_details' ); ?>
+				<?php do_action( 'woocommerce_checkout_before_customer_details' ); ?>
 
-		<div class="col2-set" id="customer_details">
-			<div class="col-1">
-				<?php do_action( 'woocommerce_checkout_billing' ); ?>
-			</div>
+				<div id="customer_details">
+					<div class="clear">
+						<?php do_action( 'woocommerce_checkout_billing' ); ?>
+					</div>
 
-			<div class="col-2">
-				<?php do_action( 'woocommerce_checkout_shipping' ); ?>
-			</div>
+					<div class="clear">
+						<?php do_action( 'woocommerce_checkout_shipping' ); ?>
+					</div>
+				</div>
+
+				<?php do_action( 'woocommerce_checkout_after_customer_details' ); ?>
+
+			<?php endif; ?>
 		</div>
 
-		<?php do_action( 'woocommerce_checkout_after_customer_details' ); ?>
+		<div class="large-5 col">
+			<?php if ( function_exists( 'flatsome_sticky_column_open' ) ) { flatsome_sticky_column_open( 'checkout_sticky_sidebar' ); } ?>
 
-	<?php endif; ?>
+				<div class="col-inner">
+					<div class="checkout-sidebar sm-touch-scroll">
 
-	<?php do_action( 'woocommerce_checkout_before_order_review_heading' ); ?>
+						<?php do_action( 'woocommerce_checkout_before_order_review_heading' ); ?>
 
-	<h3 id="order_review_heading"><?php esc_html_e( 'Your order', 'woocommerce' ); ?></h3>
+						<h3 id="order_review_heading"><?php esc_html_e( 'Your order', 'woocommerce' ); ?></h3>
 
-	<?php do_action( 'woocommerce_checkout_before_order_review' ); ?>
+						<?php do_action( 'woocommerce_checkout_before_order_review' ); ?>
 
-	<div id="order_review" class="woocommerce-checkout-review-order">
-		<?php do_action( 'woocommerce_checkout_order_review' ); ?>
+						<div id="order_review" class="woocommerce-checkout-review-order">
+							<?php do_action( 'woocommerce_checkout_order_review' ); ?>
+						</div>
+
+						<?php do_action( 'woocommerce_checkout_after_order_review' ); ?>
+					</div>
+				</div>
+
+			<?php if ( function_exists( 'flatsome_sticky_column_close' ) ) { flatsome_sticky_column_close( 'checkout_sticky_sidebar' ); } ?>
+		</div>
 	</div>
-
-	<?php do_action( 'woocommerce_checkout_after_order_review' ); ?>
 
 </form>
 
