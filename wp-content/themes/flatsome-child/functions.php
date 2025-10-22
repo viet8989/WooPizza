@@ -2258,11 +2258,18 @@ add_filter( 'wpsl_templates', 'register_custom_wpsl_template' );
 
 /**
  * Filter WPSL stores by category dynamically
+ *
+ * Expected behavior:
+ * - PICKUP: Shows Terraviva Ben Thanh (649) + Terraviva An Phu (648)
+ * - DELIVERY: Shows Terraviva An Phu (648) only
  */
 function wpsl_filter_stores_by_category( $store_data ) {
 	// Check if filter parameter is set
 	if ( isset( $_GET['filter'] ) || isset( $_POST['filter'] ) ) {
 		$filter_category = isset( $_GET['filter'] ) ? sanitize_text_field( $_GET['filter'] ) : sanitize_text_field( $_POST['filter'] );
+
+		// Log for debugging (remove in production)
+		error_log( 'WPSL Filter: Filtering stores by category: ' . $filter_category );
 
 		// Filter stores by category
 		if ( ! empty( $store_data ) ) {
@@ -2274,13 +2281,20 @@ function wpsl_filter_stores_by_category( $store_data ) {
 				if ( $store_id ) {
 					$categories = wp_get_post_terms( $store_id, 'wpsl_store_category', array( 'fields' => 'names' ) );
 
+					// Log store categories for debugging
+					error_log( 'WPSL Filter: Store ID ' . $store_id . ' (' . $store['store'] . ') has categories: ' . implode( ', ', $categories ) );
+
 					// Check if store has the filter category
 					if ( in_array( $filter_category, $categories ) ) {
 						$filtered_stores[] = $store;
+						error_log( 'WPSL Filter: Store ID ' . $store_id . ' INCLUDED in results' );
+					} else {
+						error_log( 'WPSL Filter: Store ID ' . $store_id . ' EXCLUDED from results' );
 					}
 				}
 			}
 
+			error_log( 'WPSL Filter: Returning ' . count( $filtered_stores ) . ' out of ' . count( $store_data ) . ' stores' );
 			return $filtered_stores;
 		}
 	}
