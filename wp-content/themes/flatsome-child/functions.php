@@ -2206,3 +2206,24 @@ add_filter( 'woocommerce_checkout_fields', function( $fields ) {
 	return $fields;
 } );
 */
+
+// Customize checkout labels and requirements
+add_filter( 'woocommerce_checkout_fields', 'customize_checkout_labels_and_requirements' );
+function customize_checkout_labels_and_requirements( $fields ) {
+	// Change 'First name' to 'Full name'
+	if ( isset( $fields['billing']['billing_first_name'] ) ) {
+		$fields['billing']['billing_first_name']['label'] = __( 'Full name', 'flatsome' );
+		// Update placeholder as well if present
+		$fields['billing']['billing_first_name']['placeholder'] = __( 'Full name', 'flatsome' );
+	}
+
+	// Make phone required and change label from 'Phone (optional)' to 'Phone'
+	if ( isset( $fields['billing']['billing_phone'] ) ) {
+		$fields['billing']['billing_phone']['label']    = __( 'Phone', 'flatsome' );
+		$fields['billing']['billing_phone']['required'] = true;
+		// Ensure placeholder matches label
+		$fields['billing']['billing_phone']['placeholder'] = __( 'Phone', 'flatsome' );
+	}
+
+	return $fields;
+}
