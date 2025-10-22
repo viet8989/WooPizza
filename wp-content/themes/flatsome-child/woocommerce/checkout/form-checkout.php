@@ -34,12 +34,26 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 	<h3>Chọn phương thức nhận hàng</h3>
 	<div class="delivery-options" style="display: flex; gap: 20px; margin-top: 15px;">
 		<label class="delivery-option" style="flex: 1; cursor: pointer;">
-			<input type="radio" name="delivery_method" value="pickup" id="delivery_pickup" style="margin-right: 8px;">
-			<span style="font-weight: 600;">PICKUP - Đến lấy tại cửa hàng</span>
+			<input type="radio" name="delivery_method" value="pickup" id="delivery_pickup">
+			<span class="delivery-icon">
+				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+					<path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+				</svg>
+			</span>
+			<span class="delivery-text" style="font-weight: 600;">PICKUP - Đến lấy tại cửa hàng</span>
 		</label>
 		<label class="delivery-option" style="flex: 1; cursor: pointer;">
-			<input type="radio" name="delivery_method" value="delivery" id="delivery_delivery" checked style="margin-right: 8px;">
-			<span style="font-weight: 600;">DELIVERY - Giao hàng tận nơi</span>
+			<input type="radio" name="delivery_method" value="delivery" id="delivery_delivery" checked>
+			<span class="delivery-icon">
+				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<path d="M16 3H1V16H16V3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+					<path d="M16 8H20L23 11V16H16V8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+					<circle cx="5.5" cy="19.5" r="2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+					<circle cx="18.5" cy="19.5" r="2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+				</svg>
+			</span>
+			<span class="delivery-text" style="font-weight: 600;">DELIVERY - Giao hàng tận nơi</span>
 		</label>
 	</div>
 </div>
@@ -93,27 +107,95 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 	border-radius: 5px;
 }
 
+.delivery-options {
+	display: flex;
+	gap: 20px;
+	margin-top: 15px;
+}
+
 .delivery-options label {
 	background: white;
-	padding: 15px;
+	padding: 20px;
 	border: 2px solid #ddd;
-	border-radius: 5px;
+	border-radius: 8px;
 	transition: all 0.3s ease;
 	display: flex;
 	align-items: center;
+	gap: 12px;
+	position: relative;
+	flex: 1;
 }
 
+/* Hide the radio button */
+.delivery-options input[type="radio"] {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+/* Icon styling */
+.delivery-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 48px;
+	height: 48px;
+	border-radius: 50%;
+	background: #f0f0f0;
+	color: #666;
+	transition: all 0.3s ease;
+	flex-shrink: 0;
+}
+
+.delivery-icon svg {
+	width: 24px;
+	height: 24px;
+}
+
+/* Hover state */
 .delivery-options label:hover {
 	border-color: #999;
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.delivery-options input[type="radio"]:checked + span {
+.delivery-options label:hover .delivery-icon {
+	background: #e0e0e0;
+}
+
+/* Active/Selected state */
+.delivery-options input[type="radio"]:checked ~ .delivery-icon {
+	background: #c44569;
+	color: white;
+}
+
+.delivery-options input[type="radio"]:checked ~ .delivery-text {
 	color: #c44569;
 }
 
 .delivery-options label:has(input:checked) {
 	border-color: #c44569;
 	background: #fff5f7;
+	box-shadow: 0 4px 16px rgba(196, 69, 105, 0.2);
+}
+
+/* Text styling */
+.delivery-text {
+	font-weight: 600;
+	font-size: 15px;
+	color: #333;
+	transition: color 0.3s ease;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+	.delivery-options {
+		flex-direction: column;
+	}
+
+	.delivery-options label {
+		width: 100%;
+	}
 }
 </style>
 
