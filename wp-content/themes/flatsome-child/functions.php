@@ -2180,3 +2180,29 @@ function my_hide_billing_postcode( $fields ) {
     }
     return $fields;
 }
+
+// Remove Last Name fields from checkout (billing and shipping)
+add_filter( 'woocommerce_checkout_fields', 'my_hide_last_name_fields' );
+function my_hide_last_name_fields( $fields ) {
+	// Remove billing last name
+	if ( isset( $fields['billing']['billing_last_name'] ) ) {
+		unset( $fields['billing']['billing_last_name'] );
+	}
+
+	// Remove shipping last name
+	if ( isset( $fields['shipping']['shipping_last_name'] ) ) {
+		unset( $fields['shipping']['shipping_last_name'] );
+	}
+
+	return $fields;
+}
+
+// Alternative: make billing_last_name optional instead of removing
+/*
+add_filter( 'woocommerce_checkout_fields', function( $fields ) {
+	if ( isset( $fields['billing']['billing_last_name'] ) ) {
+		$fields['billing']['billing_last_name']['required'] = false;
+	}
+	return $fields;
+} );
+*/
