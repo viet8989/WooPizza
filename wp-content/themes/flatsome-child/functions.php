@@ -2267,12 +2267,12 @@ function wpsl_debug_log( $message ) {
 }
 
 /**
- * Force skip autoload when filter parameter is present
+ * Force skip autoload when custom filter parameter is present
  * This prevents WPSL from using cached data
  */
 function wpsl_disable_autoload_for_filter( $settings ) {
-	if ( isset( $_REQUEST['filter'] ) ) {
-		wpsl_debug_log( 'Filter detected - disabling autoload to force fresh query' );
+	if ( isset( $_REQUEST['wpsl_custom_filter'] ) ) {
+		wpsl_debug_log( 'Custom filter detected - disabling autoload to force fresh query' );
 		$settings['autoload'] = 0;
 	}
 	return $settings;
@@ -2287,13 +2287,16 @@ add_filter( 'wpsl_settings', 'wpsl_disable_autoload_for_filter' );
  * - DELIVERY: Shows Terraviva An Phu (648) only
  */
 function wpsl_filter_stores_by_category( $store_data ) {
+	// Force log every time function is called, even with empty data
 	wpsl_debug_log( '==================== FILTER FUNCTION CALLED ====================' );
+	wpsl_debug_log( 'Function definitely called! Store data type: ' . gettype( $store_data ) );
+	wpsl_debug_log( 'Store data count: ' . ( is_array( $store_data ) ? count( $store_data ) : 'NOT AN ARRAY' ) );
 	wpsl_debug_log( 'GET params: ' . print_r( $_GET, true ) );
 	wpsl_debug_log( 'POST params: ' . print_r( $_POST, true ) );
 
-	// Check if filter parameter is set
-	if ( isset( $_GET['filter'] ) || isset( $_POST['filter'] ) ) {
-		$filter_value = isset( $_GET['filter'] ) ? sanitize_text_field( $_GET['filter'] ) : sanitize_text_field( $_POST['filter'] );
+	// Check if custom filter parameter is set
+	if ( isset( $_GET['wpsl_custom_filter'] ) || isset( $_POST['wpsl_custom_filter'] ) ) {
+		$filter_value = isset( $_GET['wpsl_custom_filter'] ) ? sanitize_text_field( $_GET['wpsl_custom_filter'] ) : sanitize_text_field( $_POST['wpsl_custom_filter'] );
 
 		wpsl_debug_log( 'FILTER ACTIVE: Filter value = ' . $filter_value );
 
@@ -2357,6 +2360,16 @@ function wpsl_filter_stores_by_category( $store_data ) {
 }
 add_filter( 'wpsl_store_data', 'wpsl_filter_stores_by_category', 10, 1 );
 
+// Test that filter is registered
+add_action( 'init', function() {
+	global $wp_filter;
+	if ( isset( $wp_filter['wpsl_store_data'] ) ) {
+		wpsl_debug_log( '✓ wpsl_store_data filter IS registered with ' . count( $wp_filter['wpsl_store_data']->callbacks[10] ) . ' callbacks at priority 10' );
+	} else {
+		wpsl_debug_log( '✗ wpsl_store_data filter NOT registered!' );
+	}
+}, 999 );
+
 /**
  * Debug AJAX store search requests
  */
@@ -2365,21 +2378,23 @@ function wpsl_debug_ajax_request() {
 	wpsl_debug_log( 'Action: ' . ( isset( $_REQUEST['action'] ) ? $_REQUEST['action'] : 'none' ) );
 	wpsl_debug_log( 'All REQUEST params: ' . print_r( $_REQUEST, true ) );
 
-	// If filter is present, log category info
-	if ( isset( $_REQUEST['filter'] ) ) {
-		$filter_value = sanitize_text_field( $_REQUEST['filter'] );
-		wpsl_debug_log( 'Filter value: ' . $filter_value );
+	// If custom filter is present, log category info
+	if ( isset( $_REQUEST['wpsl_custom_filter'] ) ) {
+		$filter_value = sanitize_text_field( $_REQUEST['wpsl_custom_filter'] );
+		wpsl_debug_log( 'Custom filter value: ' . $filter_value );
 
 		if ( is_numeric( $filter_value ) ) {
 			$term = get_term( (int) $filter_value, 'wpsl_store_category' );
 			if ( $term && ! is_wp_error( $term ) ) {
 				wpsl_debug_log( 'Category ID ' . $filter_value . ' = ' . $term->name . ' (slug: ' . $term->slug . ')' );
 			}
+		} else {
+			wpsl_debug_log( 'Category name: ' . $filter_value );
 		}
 	}
 
 	// Clear WPSL autoload transient to force fresh query
-	if ( isset( $_REQUEST['filter'] ) ) {
+	if ( isset( $_REQUEST['wpsl_custom_filter'] ) ) {
 		global $wpdb;
 		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_wpsl_autoload_%'" );
 		wpsl_debug_log( 'Cleared WPSL autoload transients to force fresh query' );
