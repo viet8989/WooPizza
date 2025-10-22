@@ -201,84 +201,187 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
+	console.log('═══════════════════════════════════════════════════════');
+	console.log('🚀 WPSL CHECKOUT DEBUG - Page Ready');
+	console.log('═══════════════════════════════════════════════════════');
+
+	// Check if WPSL is loaded
+	console.log('📋 WPSL Objects Available:');
+	console.log('  - wpslMap:', typeof wpslMap !== 'undefined' ? 'YES ✓' : 'NO ✗');
+	console.log('  - wpslSettings:', typeof wpslSettings !== 'undefined' ? 'YES ✓' : 'NO ✗');
+	console.log('  - google:', typeof google !== 'undefined' ? 'YES ✓' : 'NO ✗ (Google Maps not loaded)');
+
+	// Check DOM elements
+	console.log('📋 DOM Elements:');
+	console.log('  - #wpsl-container:', $('#wpsl-container').length ? 'YES ✓' : 'NO ✗');
+	console.log('  - #wpsl-search-btn:', $('#wpsl-search-btn').length ? 'YES ✓' : 'NO ✗');
+	console.log('  - #wpsl-category-filter:', $('#wpsl-category-filter').length ? 'YES ✓' : 'NO ✗');
+	console.log('  - delivery method radios:', $('input[name="delivery_method"]').length);
+
+	// Google Maps error handling
+	if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
+		console.warn('⚠️ WARNING: Google Maps API not loaded!');
+		console.log('   This is expected if API key is not configured yet.');
+		console.log('   Store list filtering will still work, only map will be affected.');
+	}
+
 	// Function to update WPSL category filter
 	function updateWPSLCategory(category) {
-		// Update hidden category filter field
-		$('#wpsl-category-filter').val(category);
+		console.log('───────────────────────────────────────────────────────');
+		console.log('🔄 updateWPSLCategory() called with:', category);
 
-		// Trigger WPSL search with new category
+		// Update hidden category filter field
+		var filterInput = $('#wpsl-category-filter');
+		if (filterInput.length) {
+			filterInput.val(category);
+			console.log('✓ Updated #wpsl-category-filter value to:', category);
+		} else {
+			console.error('✗ #wpsl-category-filter not found!');
+		}
+
+		// Check wpslMap
 		if (typeof wpslMap !== 'undefined' && wpslMap.length > 0) {
-			// Clear existing markers and results
+			console.log('✓ wpslMap exists, clearing store data');
 			wpslMap[0].storeData = [];
 
 			// Update the category filter in wpslSettings
 			if (typeof wpslSettings !== 'undefined') {
 				wpslSettings.categoryIds = category;
+				console.log('✓ Updated wpslSettings.categoryIds to:', category);
 			}
 
-			// If autoload is enabled, trigger a new search
-			if ($('#wpsl-search-input').length) {
-				// Trigger the store search
+			// Trigger search
+			if ($('#wpsl-search-btn').length) {
+				console.log('✓ Triggering search button click...');
+				$('#wpsl-search-btn').trigger('click');
+			} else {
+				console.error('✗ Search button not found!');
+			}
+		} else {
+			console.warn('⚠️ wpslMap not available, attempting manual search trigger');
+			// Try to trigger search anyway
+			if ($('#wpsl-search-btn').length) {
+				console.log('✓ Triggering search button click (fallback)...');
 				$('#wpsl-search-btn').trigger('click');
 			}
 		}
+		console.log('───────────────────────────────────────────────────────');
 	}
 
 	// Handle delivery method change
 	$('input[name="delivery_method"]').on('change', function() {
-		var method = $(this).val();
-		$('#selected_delivery_method').val(method);
+		console.log('═══════════════════════════════════════════════════════');
+		console.log('🔄 DELIVERY METHOD CHANGED EVENT');
 
-		// Update category based on method
+		var method = $(this).val();
 		var category = (method === 'pickup') ? 'PICKUP' : 'DELIVERY';
 
-		console.log('Delivery method changed to:', method, 'Category:', category);
+		console.log('  Selected method:', method);
+		console.log('  Category to filter:', category);
+
+		// Update hidden field
+		$('#selected_delivery_method').val(method);
+		console.log('  Updated #selected_delivery_method to:', method);
 
 		// Update WPSL category filter
 		updateWPSLCategory(category);
 
 		// Update shipping method
+		console.log('  Triggering WooCommerce checkout update...');
 		$(document.body).trigger('update_checkout');
+
+		console.log('═══════════════════════════════════════════════════════');
 	});
 
 	// Set initial state
 	var initialMethod = $('input[name="delivery_method"]:checked').val();
 	var initialCategory = (initialMethod === 'pickup') ? 'PICKUP' : 'DELIVERY';
 
-	console.log('Initial method:', initialMethod, 'Initial category:', initialCategory);
+	console.log('📌 Initial State:');
+	console.log('  - Method:', initialMethod);
+	console.log('  - Category:', initialCategory);
 
 	// Set initial category
 	if ($('#wpsl-category-filter').length) {
 		$('#wpsl-category-filter').val(initialCategory);
+		console.log('  ✓ Set initial category filter to:', initialCategory);
 	}
 
 	// Override WPSL category filter when search is triggered
 	$(document).on('click', '#wpsl-search-btn', function(e) {
+		console.log('───────────────────────────────────────────────────────');
+		console.log('🔍 SEARCH BUTTON CLICKED');
+
 		var selectedMethod = $('input[name="delivery_method"]:checked').val();
 		var category = (selectedMethod === 'pickup') ? 'PICKUP' : 'DELIVERY';
+
+		console.log('  Selected method:', selectedMethod);
+		console.log('  Category:', category);
 
 		// Update wpslSettings before search
 		if (typeof wpslSettings !== 'undefined') {
 			wpslSettings.categoryIds = category;
+			console.log('  ✓ Updated wpslSettings.categoryIds to:', category);
+		} else {
+			console.warn('  ⚠️ wpslSettings not available');
 		}
 
-		console.log('Search triggered with category:', category);
+		console.log('───────────────────────────────────────────────────────');
 	});
 
 	// Intercept WPSL AJAX request to add category filter
 	$(document).ajaxSend(function(event, jqxhr, settings) {
 		if (settings.url && settings.url.indexOf('store_search') !== -1) {
+			console.log('═══════════════════════════════════════════════════════');
+			console.log('📡 AJAX REQUEST INTERCEPTED (store_search)');
+
 			var selectedMethod = $('input[name="delivery_method"]:checked').val();
 			var category = (selectedMethod === 'pickup') ? 'PICKUP' : 'DELIVERY';
+
+			console.log('  Method:', selectedMethod);
+			console.log('  Category:', category);
+			console.log('  Original URL:', settings.url);
+			console.log('  Original Data:', settings.data);
 
 			// Add filter parameter to AJAX data
 			if (settings.data) {
 				settings.data += '&filter=' + category;
+				console.log('  ✓ Modified Data:', settings.data);
+			} else {
+				console.warn('  ⚠️ No data property in AJAX settings');
 			}
 
-			console.log('AJAX store_search intercepted, adding category:', category);
+			console.log('═══════════════════════════════════════════════════════');
 		}
 	});
+
+	// Monitor AJAX responses
+	$(document).ajaxComplete(function(event, xhr, settings) {
+		if (settings.url && settings.url.indexOf('store_search') !== -1) {
+			console.log('═══════════════════════════════════════════════════════');
+			console.log('📨 AJAX RESPONSE RECEIVED (store_search)');
+			console.log('  Status:', xhr.status);
+			console.log('  Response:', xhr.responseText.substring(0, 200) + '...');
+
+			try {
+				var response = JSON.parse(xhr.responseText);
+				console.log('  Stores returned:', response.length || 0);
+				if (response.length) {
+					response.forEach(function(store, index) {
+						console.log('    Store ' + (index + 1) + ':', store.store || store.title);
+					});
+				} else {
+					console.warn('  ⚠️ No stores returned!');
+				}
+			} catch(e) {
+				console.error('  ✗ Error parsing response:', e);
+			}
+
+			console.log('═══════════════════════════════════════════════════════');
+		}
+	});
+
+	console.log('✅ Debug script loaded successfully');
 });
 </script>
 

@@ -73,7 +73,12 @@ $output .= '</div>' . "\r\n"; // End left panel
 
 // RIGHT PANEL - Google Map (8 columns width)
 $output .= '<div class="wpsl-checkout-right" style="flex: 1; min-width: 400px;">' . "\r\n";
-$output .= '<div id="wpsl-gmap" class="wpsl-gmap-canvas" style="height: 600px; width: 100%;"></div>' . "\r\n";
+$output .= '<div id="wpsl-gmap" class="wpsl-gmap-canvas" style="height: 600px; width: 100%; position: relative;">' . "\r\n";
+$output .= '<div id="wpsl-map-error" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; background: #f8f8f8; padding: 30px; border-radius: 8px; border: 2px dashed #ccc; max-width: 80%;">' . "\r\n";
+$output .= '<h3 style="margin: 0 0 10px 0; color: #666;">🗺️ Bản đồ tạm thời không khả dụng</h3>' . "\r\n";
+$output .= '<p style="margin: 0; color: #999;">Google Maps API chưa được cấu hình.<br>Danh sách cửa hàng vẫn hoạt động bình thường.</p>' . "\r\n";
+$output .= '</div>' . "\r\n";
+$output .= '</div>' . "\r\n";
 $output .= '</div>' . "\r\n"; // End right panel
 
 $output .= '</div>' . "\r\n"; // End container
@@ -83,6 +88,26 @@ if ( $wpsl_settings['show_credits'] ) {
 }
 
 $output .= '</div>' . "\r\n"; // End wrap
+
+// JavaScript to handle Google Maps errors
+$output .= '<script type="text/javascript">
+jQuery(document).ready(function($) {
+	// Check for Google Maps after a short delay
+	setTimeout(function() {
+		if (typeof google === "undefined" || typeof google.maps === "undefined") {
+			console.warn("Google Maps API not loaded - showing error message");
+			$("#wpsl-map-error").show();
+			$("#wpsl-gmap").css("background", "#f0f0f0");
+		}
+	}, 2000);
+
+	// Listen for WPSL map initialization errors
+	$(document).on("wpsl_map_error", function(e, error) {
+		console.error("WPSL Map Error:", error);
+		$("#wpsl-map-error").show();
+	});
+});
+</script>' . "\r\n";
 
 // Custom CSS for checkout layout
 $output .= '<style>

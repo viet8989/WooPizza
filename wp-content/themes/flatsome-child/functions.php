@@ -2257,6 +2257,16 @@ function register_custom_wpsl_template( $templates ) {
 add_filter( 'wpsl_templates', 'register_custom_wpsl_template' );
 
 /**
+ * Helper function to write debug logs to file
+ */
+function wpsl_debug_log( $message ) {
+	$debug_file = get_stylesheet_directory() . '/debug_save.txt';
+	$timestamp = date( 'Y-m-d H:i:s' );
+	$log_message = "[{$timestamp}] {$message}\n";
+	file_put_contents( $debug_file, $log_message, FILE_APPEND );
+}
+
+/**
  * Filter WPSL stores by category dynamically
  *
  * Expected behavior:
@@ -2264,12 +2274,16 @@ add_filter( 'wpsl_templates', 'register_custom_wpsl_template' );
  * - DELIVERY: Shows Terraviva An Phu (648) only
  */
 function wpsl_filter_stores_by_category( $store_data ) {
+	wpsl_debug_log( '==================== FILTER FUNCTION CALLED ====================' );
+	wpsl_debug_log( 'GET params: ' . print_r( $_GET, true ) );
+	wpsl_debug_log( 'POST params: ' . print_r( $_POST, true ) );
+
 	// Check if filter parameter is set
 	if ( isset( $_GET['filter'] ) || isset( $_POST['filter'] ) ) {
 		$filter_category = isset( $_GET['filter'] ) ? sanitize_text_field( $_GET['filter'] ) : sanitize_text_field( $_POST['filter'] );
 
-		// Log for debugging (remove in production)
-		error_log( 'WPSL Filter: Filtering stores by category: ' . $filter_category );
+		wpsl_debug_log( 'FILTER ACTIVE: Category = ' . $filter_category );
+		wpsl_debug_log( 'Store data count BEFORE filter: ' . count( $store_data ) );
 
 		// Filter stores by category
 		if ( ! empty( $store_data ) ) {
@@ -2278,30 +2292,50 @@ function wpsl_filter_stores_by_category( $store_data ) {
 			foreach ( $store_data as $store ) {
 				// Get store categories
 				$store_id = isset( $store['id'] ) ? $store['id'] : 0;
+				$store_name = isset( $store['store'] ) ? $store['store'] : 'Unknown';
+
 				if ( $store_id ) {
 					$categories = wp_get_post_terms( $store_id, 'wpsl_store_category', array( 'fields' => 'names' ) );
 
-					// Log store categories for debugging
-					error_log( 'WPSL Filter: Store ID ' . $store_id . ' (' . $store['store'] . ') has categories: ' . implode( ', ', $categories ) );
+					wpsl_debug_log( "Store ID {$store_id} ({$store_name}): Categories = " . implode( ', ', $categories ) );
 
 					// Check if store has the filter category
 					if ( in_array( $filter_category, $categories ) ) {
 						$filtered_stores[] = $store;
-						error_log( 'WPSL Filter: Store ID ' . $store_id . ' INCLUDED in results' );
+						wpsl_debug_log( "  ✓ INCLUDED - Store {$store_id} has category {$filter_category}" );
 					} else {
-						error_log( 'WPSL Filter: Store ID ' . $store_id . ' EXCLUDED from results' );
+						wpsl_debug_log( "  ✗ EXCLUDED - Store {$store_id} does NOT have category {$filter_category}" );
 					}
+				} else {
+					wpsl_debug_log( "  ⚠ WARNING - Store has no ID: " . print_r( $store, true ) );
 				}
 			}
 
-			error_log( 'WPSL Filter: Returning ' . count( $filtered_stores ) . ' out of ' . count( $store_data ) . ' stores' );
+			wpsl_debug_log( 'Store data count AFTER filter: ' . count( $filtered_stores ) );
+			wpsl_debug_log( 'RESULT: Returning ' . count( $filtered_stores ) . ' out of ' . count( $store_data ) . ' stores' );
+			wpsl_debug_log( '================================================================' );
+
 			return $filtered_stores;
 		}
+	} else {
+		wpsl_debug_log( 'NO FILTER PARAMETER - Returning all ' . count( $store_data ) . ' stores' );
+		wpsl_debug_log( '================================================================' );
 	}
 
 	return $store_data;
 }
 add_filter( 'wpsl_store_data', 'wpsl_filter_stores_by_category', 10, 1 );
+
+/**
+ * Debug AJAX store search requests
+ */
+function wpsl_debug_ajax_request() {
+	wpsl_debug_log( '==================== AJAX STORE SEARCH CALLED ====================' );
+	wpsl_debug_log( 'Action: ' . ( isset( $_REQUEST['action'] ) ? $_REQUEST['action'] : 'none' ) );
+	wpsl_debug_log( 'All REQUEST params: ' . print_r( $_REQUEST, true ) );
+}
+add_action( 'wp_ajax_store_search', 'wpsl_debug_ajax_request', 1 );
+add_action( 'wp_ajax_nopriv_store_search', 'wpsl_debug_ajax_request', 1 );
 
 // ====================================================================================
 // PICKUP/DELIVERY METHOD HANDLING
