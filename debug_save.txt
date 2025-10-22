@@ -14,3 +14,21 @@
     [woocommerce-reset-password-nonce] => 
 )
 
+[2025-10-22 15:35:58] ==================== AJAX STORE SEARCH CALLED ====================
+[2025-10-22 15:35:58] Action: store_search
+[2025-10-22 15:35:58] All REQUEST params: Array
+(
+    [action] => store_search
+    [lat] => 0
+    [lng] => 0
+    [max_results] => 25
+    [search_radius] => 50
+    [filter] => 32
+    [autoload] => 1
+    [woocommerce-login-nonce] => 
+    [_wpnonce] => 
+    [woocommerce-reset-password-nonce] => 
+)
+
+[2025-10-22 15:35:58] Filter value: 32
+[2025-10-22 15:35:58] Category ID 32 = DELIVERY (slug: delivery)

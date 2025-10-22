@@ -2364,6 +2364,13 @@ function wpsl_debug_ajax_request() {
 			}
 		}
 	}
+
+	// Clear WPSL autoload transient to force fresh query
+	if ( isset( $_REQUEST['filter'] ) ) {
+		global $wpdb;
+		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_wpsl_autoload_%'" );
+		wpsl_debug_log( 'Cleared WPSL autoload transients to force fresh query' );
+	}
 }
 add_action( 'wp_ajax_store_search', 'wpsl_debug_ajax_request', 1 );
 add_action( 'wp_ajax_nopriv_store_search', 'wpsl_debug_ajax_request', 1 );

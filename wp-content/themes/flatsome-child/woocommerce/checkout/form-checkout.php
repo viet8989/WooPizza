@@ -225,6 +225,12 @@ jQuery(document).ready(function($) {
 		console.log('   Store list filtering will still work, only map will be affected.');
 	}
 
+	// Force initialize wpslMap if it doesn't exist (fallback for when Google Maps fails)
+	if (typeof wpslMap === 'undefined') {
+		console.warn('⚠️ wpslMap not initialized, creating fallback...');
+		window.wpslMap = [{ storeData: [] }];
+	}
+
 	// Function to update WPSL category filter
 	function updateWPSLCategory(category) {
 		console.log('───────────────────────────────────────────────────────');
@@ -355,7 +361,7 @@ jQuery(document).ready(function($) {
 		}
 	});
 
-	// Monitor AJAX responses
+	// Monitor AJAX responses and manually render store list
 	$(document).ajaxComplete(function(event, xhr, settings) {
 		if (settings.url && settings.url.indexOf('store_search') !== -1) {
 			console.log('═══════════════════════════════════════════════════════');
@@ -366,11 +372,31 @@ jQuery(document).ready(function($) {
 			try {
 				var response = JSON.parse(xhr.responseText);
 				console.log('  Stores returned:', response.length || 0);
+
 				if (response.length) {
+					// Manually render store list
+					var storeListHtml = '';
 					response.forEach(function(store, index) {
 						console.log('    Store ' + (index + 1) + ':', store.store || store.title);
+
+						storeListHtml += '<li data-store-id="' + store.id + '">';
+						storeListHtml += '<div class="wpsl-store-location">';
+						storeListHtml += '<p><strong>' + store.store + '</strong></p>';
+						if (store.address) storeListHtml += '<p>' + store.address + '</p>';
+						if (store.city) storeListHtml += '<p>' + store.city + ', ' + (store.zip || '') + '</p>';
+						if (store.phone) storeListHtml += '<p>Phone: ' + store.phone + '</p>';
+						if (store.distance) storeListHtml += '<p><small>Distance: ' + parseFloat(store.distance).toFixed(1) + ' km</small></p>';
+						storeListHtml += '</div>';
+						storeListHtml += '</li>';
 					});
+
+					// Update store list
+					$('#wpsl-stores ul').html(storeListHtml);
+					$('#wpsl-stores').removeClass('wpsl-not-loaded');
+
+					console.log('  ✓ Store list manually rendered with ' + response.length + ' stores');
 				} else {
+					$('#wpsl-stores ul').html('<li><p>Không tìm thấy cửa hàng nào.</p></li>');
 					console.warn('  ⚠️ No stores returned!');
 				}
 			} catch(e) {
