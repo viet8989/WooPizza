@@ -349,9 +349,18 @@ jQuery(document).ready(function($) {
 			console.log('  Original URL:', settings.url);
 			console.log('  Original Data:', settings.data);
 
-			// Add filter parameter to AJAX data
+			// Modify URL to add filter parameter and skip cache
+			if (settings.url.indexOf('?') !== -1) {
+				settings.url += '&filter=' + category + '&skip_cache=1';
+			} else {
+				settings.url += '?filter=' + category + '&skip_cache=1';
+			}
+
+			console.log('  ✓ Modified URL:', settings.url);
+
+			// Also add filter parameter to data if it exists
 			if (settings.data) {
-				settings.data += '&filter=' + category;
+				settings.data += '&filter=' + category + '&skip_cache=1';
 				console.log('  ✓ Modified Data:', settings.data);
 			} else {
 				console.warn('  ⚠️ No data property in AJAX settings');

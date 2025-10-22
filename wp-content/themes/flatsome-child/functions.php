@@ -2267,6 +2267,19 @@ function wpsl_debug_log( $message ) {
 }
 
 /**
+ * Force skip autoload when filter parameter is present
+ * This prevents WPSL from using cached data
+ */
+function wpsl_disable_autoload_for_filter( $settings ) {
+	if ( isset( $_REQUEST['filter'] ) ) {
+		wpsl_debug_log( 'Filter detected - disabling autoload to force fresh query' );
+		$settings['autoload'] = 0;
+	}
+	return $settings;
+}
+add_filter( 'wpsl_settings', 'wpsl_disable_autoload_for_filter' );
+
+/**
  * Filter WPSL stores by category dynamically
  *
  * Expected behavior:

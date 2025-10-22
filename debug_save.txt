@@ -32,3 +32,58 @@
 
 [2025-10-22 15:35:58] Filter value: 32
 [2025-10-22 15:35:58] Category ID 32 = DELIVERY (slug: delivery)
+[2025-10-22 15:37:30] ==================== AJAX STORE SEARCH CALLED ====================
+[2025-10-22 15:37:30] Action: store_search
+[2025-10-22 15:37:30] All REQUEST params: Array
+(
+    [action] => store_search
+    [lat] => 0
+    [lng] => 0
+    [max_results] => 25
+    [search_radius] => 50
+    [filter] => 32
+    [autoload] => 1
+    [woocommerce-login-nonce] => 
+    [_wpnonce] => 
+    [woocommerce-reset-password-nonce] => 
+)
+
+[2025-10-22 15:37:30] Filter value: 32
+[2025-10-22 15:37:30] Category ID 32 = DELIVERY (slug: delivery)
+[2025-10-22 15:37:44] ==================== AJAX STORE SEARCH CALLED ====================
+[2025-10-22 15:37:44] Action: store_search
+[2025-10-22 15:37:44] All REQUEST params: Array
+(
+    [action] => store_search
+    [lat] => 0
+    [lng] => 0
+    [max_results] => 25
+    [search_radius] => 50
+    [filter] => 32
+    [autoload] => 1
+    [woocommerce-login-nonce] => 
+    [_wpnonce] => 
+    [woocommerce-reset-password-nonce] => 
+)
+
+[2025-10-22 15:37:44] Filter value: 32
+[2025-10-22 15:37:44] Category ID 32 = DELIVERY (slug: delivery)
+[2025-10-22 15:42:10] ==================== AJAX STORE SEARCH CALLED ====================
+[2025-10-22 15:42:10] Action: store_search
+[2025-10-22 15:42:10] All REQUEST params: Array
+(
+    [action] => store_search
+    [lat] => 0
+    [lng] => 0
+    [max_results] => 25
+    [search_radius] => 50
+    [filter] => 32
+    [autoload] => 1
+    [woocommerce-login-nonce] => 
+    [_wpnonce] => 
+    [woocommerce-reset-password-nonce] => 
+)
+
+[2025-10-22 15:42:10] Filter value: 32
+[2025-10-22 15:42:10] Category ID 32 = DELIVERY (slug: delivery)
+[2025-10-22 15:42:10] Cleared WPSL autoload transients to force fresh query
