@@ -2280,13 +2280,31 @@ function wpsl_filter_stores_by_category( $store_data ) {
 
 	// Check if filter parameter is set
 	if ( isset( $_GET['filter'] ) || isset( $_POST['filter'] ) ) {
-		$filter_category = isset( $_GET['filter'] ) ? sanitize_text_field( $_GET['filter'] ) : sanitize_text_field( $_POST['filter'] );
+		$filter_value = isset( $_GET['filter'] ) ? sanitize_text_field( $_GET['filter'] ) : sanitize_text_field( $_POST['filter'] );
 
-		wpsl_debug_log( 'FILTER ACTIVE: Category = ' . $filter_category );
+		wpsl_debug_log( 'FILTER ACTIVE: Filter value = ' . $filter_value );
+
+		// Check if filter is a category name or ID
+		$filter_category_name = '';
+		if ( is_numeric( $filter_value ) ) {
+			// It's a category ID, get the name
+			$term = get_term( (int) $filter_value, 'wpsl_store_category' );
+			if ( $term && ! is_wp_error( $term ) ) {
+				$filter_category_name = $term->name;
+				wpsl_debug_log( 'Filter is category ID ' . $filter_value . ' → name: ' . $filter_category_name );
+			} else {
+				wpsl_debug_log( 'ERROR: Could not find category with ID ' . $filter_value );
+			}
+		} else {
+			// It's already a category name
+			$filter_category_name = $filter_value;
+			wpsl_debug_log( 'Filter is category name: ' . $filter_category_name );
+		}
+
 		wpsl_debug_log( 'Store data count BEFORE filter: ' . count( $store_data ) );
 
 		// Filter stores by category
-		if ( ! empty( $store_data ) ) {
+		if ( ! empty( $store_data ) && ! empty( $filter_category_name ) ) {
 			$filtered_stores = array();
 
 			foreach ( $store_data as $store ) {
@@ -2300,11 +2318,11 @@ function wpsl_filter_stores_by_category( $store_data ) {
 					wpsl_debug_log( "Store ID {$store_id} ({$store_name}): Categories = " . implode( ', ', $categories ) );
 
 					// Check if store has the filter category
-					if ( in_array( $filter_category, $categories ) ) {
+					if ( in_array( $filter_category_name, $categories ) ) {
 						$filtered_stores[] = $store;
-						wpsl_debug_log( "  ✓ INCLUDED - Store {$store_id} has category {$filter_category}" );
+						wpsl_debug_log( "  ✓ INCLUDED - Store {$store_id} has category {$filter_category_name}" );
 					} else {
-						wpsl_debug_log( "  ✗ EXCLUDED - Store {$store_id} does NOT have category {$filter_category}" );
+						wpsl_debug_log( "  ✗ EXCLUDED - Store {$store_id} does NOT have category {$filter_category_name}" );
 					}
 				} else {
 					wpsl_debug_log( "  ⚠ WARNING - Store has no ID: " . print_r( $store, true ) );
@@ -2333,9 +2351,53 @@ function wpsl_debug_ajax_request() {
 	wpsl_debug_log( '==================== AJAX STORE SEARCH CALLED ====================' );
 	wpsl_debug_log( 'Action: ' . ( isset( $_REQUEST['action'] ) ? $_REQUEST['action'] : 'none' ) );
 	wpsl_debug_log( 'All REQUEST params: ' . print_r( $_REQUEST, true ) );
+
+	// If filter is present, log category info
+	if ( isset( $_REQUEST['filter'] ) ) {
+		$filter_value = sanitize_text_field( $_REQUEST['filter'] );
+		wpsl_debug_log( 'Filter value: ' . $filter_value );
+
+		if ( is_numeric( $filter_value ) ) {
+			$term = get_term( (int) $filter_value, 'wpsl_store_category' );
+			if ( $term && ! is_wp_error( $term ) ) {
+				wpsl_debug_log( 'Category ID ' . $filter_value . ' = ' . $term->name . ' (slug: ' . $term->slug . ')' );
+			}
+		}
+	}
 }
 add_action( 'wp_ajax_store_search', 'wpsl_debug_ajax_request', 1 );
 add_action( 'wp_ajax_nopriv_store_search', 'wpsl_debug_ajax_request', 1 );
+
+/**
+ * Helper to list all WPSL store categories (for debugging)
+ * Add ?wpsl_debug_cats=1 to any page URL to see all categories
+ */
+function wpsl_debug_list_categories() {
+	if ( isset( $_GET['wpsl_debug_cats'] ) && current_user_can( 'manage_options' ) ) {
+		echo '<pre>';
+		echo "=== WPSL Store Categories ===\n\n";
+
+		$terms = get_terms( array(
+			'taxonomy' => 'wpsl_store_category',
+			'hide_empty' => false,
+		) );
+
+		if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+			foreach ( $terms as $term ) {
+				echo "ID: {$term->term_id}\n";
+				echo "Name: {$term->name}\n";
+				echo "Slug: {$term->slug}\n";
+				echo "Count: {$term->count} stores\n";
+				echo "---\n";
+			}
+		} else {
+			echo "No categories found!\n";
+		}
+		echo '</pre>';
+		exit;
+	}
+}
+add_action( 'init', 'wpsl_debug_list_categories' );
 
 // ====================================================================================
 // PICKUP/DELIVERY METHOD HANDLING

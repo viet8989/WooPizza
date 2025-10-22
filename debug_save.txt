@@ -1,18 +1,16 @@
-
-
-============================================================
-VAT Label Filter triggered at: 2025-10-20 13:27:26
-Order ID: 643
-Total rows keys: Array
+[2025-10-22 15:25:10] ==================== AJAX STORE SEARCH CALLED ====================
+[2025-10-22 15:25:10] Action: store_search
+[2025-10-22 15:25:10] All REQUEST params: Array
 (
-    [0] => cart_subtotal
-    [1] => vn-vat-1
-    [2] => order_total
-    [3] => payment_method
+    [action] => store_search
+    [lat] => 0
+    [lng] => 0
+    [max_results] => 25
+    [search_radius] => 50
+    [filter] => 32
+    [autoload] => 1
+    [woocommerce-login-nonce] => 
+    [_wpnonce] => 
+    [woocommerce-reset-password-nonce] => 
 )
 
-Row key: cart_subtotal | Label: Subtotal:
-Row key: vn-vat-1 | Label: VAT:
-Row key: order_total | Label: Total:
-Row key: payment_method | Label: Payment method:
-ERROR: No tax key found in total_rows!
