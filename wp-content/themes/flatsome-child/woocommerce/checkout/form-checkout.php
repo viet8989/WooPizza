@@ -259,11 +259,23 @@ jQuery(document).ready(function($) {
 			// Trigger WPSL search directly via AJAX
 			console.log('✓ Triggering WPSL search via AJAX...');
 
-			// Get current search parameters
+			// Get current search parameters safely
+			var lat = 0;
+			var lng = 0;
+
+			try {
+				if (wpslMap[0] && wpslMap[0].settings && wpslMap[0].settings.startLatLng) {
+					lat = wpslMap[0].settings.startLatLng.lat || 0;
+					lng = wpslMap[0].settings.startLatLng.lng || 0;
+				}
+			} catch(e) {
+				console.warn('Could not get coordinates from wpslMap, using 0,0');
+			}
+
 			var searchData = {
 				action: 'store_search',
-				lat: wpslMap[0].settings.startLatLng ? wpslMap[0].settings.startLatLng.lat : 0,
-				lng: wpslMap[0].settings.startLatLng ? wpslMap[0].settings.startLatLng.lng : 0,
+				lat: lat,
+				lng: lng,
 				max_results: wpslSettings.maxResults || 25,
 				search_radius: wpslSettings.searchRadius || 50,
 				autoload: 1,
@@ -271,11 +283,14 @@ jQuery(document).ready(function($) {
 				skip_cache: 1
 			};
 
+			console.log('Search data:', searchData);
+
 			// Perform the search
 			$.get(wpslSettings.ajaxurl, searchData, function(response) {
 				console.log('✓ Manual AJAX search completed, response:', response);
-				// Trigger custom event to update store list
-				$(document).trigger('wpsl_search_complete', [response]);
+				// The ajaxComplete handler will render the stores automatically
+			}).fail(function(xhr, status, error) {
+				console.error('✗ AJAX search failed:', status, error);
 			});
 		} else {
 			console.warn('⚠️ wpslMap not available, attempting manual search trigger');
