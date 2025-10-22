@@ -1831,7 +1831,7 @@ function customize_pizza_tabs_styles_scripts() {
 			font-family: dashicons;
 		}
 
-		#woocommerce-product-data ul.wc-tabs li.toppings_tab_options a:before {
+		#woocommerce-product_data ul.wc-tabs li.toppings_tab_options a:before {
 			content: "\f336"; /* dashicons-carrot */
 			font-family: dashicons;
 		}
@@ -2170,4 +2170,13 @@ function filter_products_by_field_type( $products ) {
 		}
 		return $products;
 	}
+}
+
+// Remove billing_postcode from checkout fields
+add_filter( 'woocommerce_checkout_fields', 'my_hide_billing_postcode' );
+function my_hide_billing_postcode( $fields ) {
+    if ( isset( $fields['billing']['billing_postcode'] ) ) {
+        unset( $fields['billing']['billing_postcode'] );
+    }
+    return $fields;
 }
