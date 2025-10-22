@@ -256,13 +256,27 @@ jQuery(document).ready(function($) {
 				console.log('✓ Updated wpslSettings.categoryIds to:', category);
 			}
 
-			// Trigger search
-			if ($('#wpsl-search-btn').length) {
-				console.log('✓ Triggering search button click...');
-				$('#wpsl-search-btn').trigger('click');
-			} else {
-				console.error('✗ Search button not found!');
-			}
+			// Trigger WPSL search directly via AJAX
+			console.log('✓ Triggering WPSL search via AJAX...');
+
+			// Get current search parameters
+			var searchData = {
+				action: 'store_search',
+				lat: wpslMap[0].settings.startLatLng ? wpslMap[0].settings.startLatLng.lat : 0,
+				lng: wpslMap[0].settings.startLatLng ? wpslMap[0].settings.startLatLng.lng : 0,
+				max_results: wpslSettings.maxResults || 25,
+				search_radius: wpslSettings.searchRadius || 50,
+				autoload: 1,
+				wpsl_custom_filter: category,
+				skip_cache: 1
+			};
+
+			// Perform the search
+			$.get(wpslSettings.ajaxurl, searchData, function(response) {
+				console.log('✓ Manual AJAX search completed, response:', response);
+				// Trigger custom event to update store list
+				$(document).trigger('wpsl_search_complete', [response]);
+			});
 		} else {
 			console.warn('⚠️ wpslMap not available, attempting manual search trigger');
 			// Try to trigger search anyway

@@ -1,0 +1,1 @@
+[2025-10-22 16:04:00] ✓ wpsl_store_data filter IS registered with 1 callbacks at priority 10
