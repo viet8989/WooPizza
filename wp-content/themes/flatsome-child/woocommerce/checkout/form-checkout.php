@@ -116,6 +116,11 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 </form>
 
 <style>
+#wpsl-wrap #wpsl-result-list ul li {
+    list-style: none !important;
+    width: 99%;
+}
+
 .delivery-method-selection {
 	background: #f8f8f8;
 	padding: 20px;
