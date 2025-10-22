@@ -2257,22 +2257,11 @@ function register_custom_wpsl_template( $templates ) {
 add_filter( 'wpsl_templates', 'register_custom_wpsl_template' );
 
 /**
- * Helper function to write debug logs to file
- */
-function wpsl_debug_log( $message ) {
-	$debug_file = get_stylesheet_directory() . '/debug_save.txt';
-	$timestamp = date( 'Y-m-d H:i:s' );
-	$log_message = "[{$timestamp}] {$message}\n";
-	file_put_contents( $debug_file, $log_message, FILE_APPEND );
-}
-
-/**
  * Force skip autoload when custom filter parameter is present
  * This prevents WPSL from using cached data
  */
 function wpsl_disable_autoload_for_filter( $settings ) {
 	if ( isset( $_REQUEST['wpsl_custom_filter'] ) ) {
-		wpsl_debug_log( 'Custom filter detected - disabling autoload to force fresh query' );
 		$settings['autoload'] = 0;
 	}
 	return $settings;
@@ -2287,18 +2276,9 @@ add_filter( 'wpsl_settings', 'wpsl_disable_autoload_for_filter' );
  * - DELIVERY: Shows Terraviva An Phu (648) only
  */
 function wpsl_filter_stores_by_category( $store_data ) {
-	// Force log every time function is called, even with empty data
-	wpsl_debug_log( '==================== FILTER FUNCTION CALLED ====================' );
-	wpsl_debug_log( 'Function definitely called! Store data type: ' . gettype( $store_data ) );
-	wpsl_debug_log( 'Store data count: ' . ( is_array( $store_data ) ? count( $store_data ) : 'NOT AN ARRAY' ) );
-	wpsl_debug_log( 'GET params: ' . print_r( $_GET, true ) );
-	wpsl_debug_log( 'POST params: ' . print_r( $_POST, true ) );
-
 	// Check if custom filter parameter is set
 	if ( isset( $_GET['wpsl_custom_filter'] ) || isset( $_POST['wpsl_custom_filter'] ) ) {
 		$filter_value = isset( $_GET['wpsl_custom_filter'] ) ? sanitize_text_field( $_GET['wpsl_custom_filter'] ) : sanitize_text_field( $_POST['wpsl_custom_filter'] );
-
-		wpsl_debug_log( 'FILTER ACTIVE: Filter value = ' . $filter_value );
 
 		// Check if filter is a category name or ID
 		$filter_category_name = '';
@@ -2307,17 +2287,11 @@ function wpsl_filter_stores_by_category( $store_data ) {
 			$term = get_term( (int) $filter_value, 'wpsl_store_category' );
 			if ( $term && ! is_wp_error( $term ) ) {
 				$filter_category_name = $term->name;
-				wpsl_debug_log( 'Filter is category ID ' . $filter_value . ' → name: ' . $filter_category_name );
-			} else {
-				wpsl_debug_log( 'ERROR: Could not find category with ID ' . $filter_value );
 			}
 		} else {
 			// It's already a category name
 			$filter_category_name = $filter_value;
-			wpsl_debug_log( 'Filter is category name: ' . $filter_category_name );
 		}
-
-		wpsl_debug_log( 'Store data count BEFORE filter: ' . count( $store_data ) );
 
 		// Filter stores by category
 		if ( ! empty( $store_data ) && ! empty( $filter_category_name ) ) {
@@ -2326,113 +2300,37 @@ function wpsl_filter_stores_by_category( $store_data ) {
 			foreach ( $store_data as $store ) {
 				// Get store categories
 				$store_id = isset( $store['id'] ) ? $store['id'] : 0;
-				$store_name = isset( $store['store'] ) ? $store['store'] : 'Unknown';
 
 				if ( $store_id ) {
 					$categories = wp_get_post_terms( $store_id, 'wpsl_store_category', array( 'fields' => 'names' ) );
 
-					wpsl_debug_log( "Store ID {$store_id} ({$store_name}): Categories = " . implode( ', ', $categories ) );
-
 					// Check if store has the filter category
 					if ( in_array( $filter_category_name, $categories ) ) {
 						$filtered_stores[] = $store;
-						wpsl_debug_log( "  ✓ INCLUDED - Store {$store_id} has category {$filter_category_name}" );
-					} else {
-						wpsl_debug_log( "  ✗ EXCLUDED - Store {$store_id} does NOT have category {$filter_category_name}" );
 					}
-				} else {
-					wpsl_debug_log( "  ⚠ WARNING - Store has no ID: " . print_r( $store, true ) );
 				}
 			}
 
-			wpsl_debug_log( 'Store data count AFTER filter: ' . count( $filtered_stores ) );
-			wpsl_debug_log( 'RESULT: Returning ' . count( $filtered_stores ) . ' out of ' . count( $store_data ) . ' stores' );
-			wpsl_debug_log( '================================================================' );
-
 			return $filtered_stores;
 		}
-	} else {
-		wpsl_debug_log( 'NO FILTER PARAMETER - Returning all ' . count( $store_data ) . ' stores' );
-		wpsl_debug_log( '================================================================' );
 	}
 
 	return $store_data;
 }
 add_filter( 'wpsl_store_data', 'wpsl_filter_stores_by_category', 10, 1 );
 
-// Test that filter is registered
-add_action( 'init', function() {
-	global $wp_filter;
-	if ( isset( $wp_filter['wpsl_store_data'] ) ) {
-		wpsl_debug_log( '✓ wpsl_store_data filter IS registered with ' . count( $wp_filter['wpsl_store_data']->callbacks[10] ) . ' callbacks at priority 10' );
-	} else {
-		wpsl_debug_log( '✗ wpsl_store_data filter NOT registered!' );
-	}
-}, 999 );
-
 /**
- * Debug AJAX store search requests
+ * Clear WPSL autoload transients when custom filter is used
+ * This ensures fresh data is fetched for each filter change
  */
-function wpsl_debug_ajax_request() {
-	wpsl_debug_log( '==================== AJAX STORE SEARCH CALLED ====================' );
-	wpsl_debug_log( 'Action: ' . ( isset( $_REQUEST['action'] ) ? $_REQUEST['action'] : 'none' ) );
-	wpsl_debug_log( 'All REQUEST params: ' . print_r( $_REQUEST, true ) );
-
-	// If custom filter is present, log category info
-	if ( isset( $_REQUEST['wpsl_custom_filter'] ) ) {
-		$filter_value = sanitize_text_field( $_REQUEST['wpsl_custom_filter'] );
-		wpsl_debug_log( 'Custom filter value: ' . $filter_value );
-
-		if ( is_numeric( $filter_value ) ) {
-			$term = get_term( (int) $filter_value, 'wpsl_store_category' );
-			if ( $term && ! is_wp_error( $term ) ) {
-				wpsl_debug_log( 'Category ID ' . $filter_value . ' = ' . $term->name . ' (slug: ' . $term->slug . ')' );
-			}
-		} else {
-			wpsl_debug_log( 'Category name: ' . $filter_value );
-		}
-	}
-
-	// Clear WPSL autoload transient to force fresh query
-	if ( isset( $_REQUEST['wpsl_custom_filter'] ) ) {
+function wpsl_clear_transients_for_filter() {
+	if ( isset( $_REQUEST['wpsl_custom_filter'] ) && isset( $_REQUEST['action'] ) && $_REQUEST['action'] === 'store_search' ) {
 		global $wpdb;
 		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '_transient_wpsl_autoload_%'" );
-		wpsl_debug_log( 'Cleared WPSL autoload transients to force fresh query' );
 	}
 }
-add_action( 'wp_ajax_store_search', 'wpsl_debug_ajax_request', 1 );
-add_action( 'wp_ajax_nopriv_store_search', 'wpsl_debug_ajax_request', 1 );
-
-/**
- * Helper to list all WPSL store categories (for debugging)
- * Add ?wpsl_debug_cats=1 to any page URL to see all categories
- */
-function wpsl_debug_list_categories() {
-	if ( isset( $_GET['wpsl_debug_cats'] ) && current_user_can( 'manage_options' ) ) {
-		echo '<pre>';
-		echo "=== WPSL Store Categories ===\n\n";
-
-		$terms = get_terms( array(
-			'taxonomy' => 'wpsl_store_category',
-			'hide_empty' => false,
-		) );
-
-		if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
-			foreach ( $terms as $term ) {
-				echo "ID: {$term->term_id}\n";
-				echo "Name: {$term->name}\n";
-				echo "Slug: {$term->slug}\n";
-				echo "Count: {$term->count} stores\n";
-				echo "---\n";
-			}
-		} else {
-			echo "No categories found!\n";
-		}
-		echo '</pre>';
-		exit;
-	}
-}
-add_action( 'init', 'wpsl_debug_list_categories' );
+add_action( 'wp_ajax_store_search', 'wpsl_clear_transients_for_filter', 1 );
+add_action( 'wp_ajax_nopriv_store_search', 'wpsl_clear_transients_for_filter', 1 );
 
 // ====================================================================================
 // PICKUP/DELIVERY METHOD HANDLING
