@@ -1,0 +1,108 @@
+[2025-10-22 16:16:21] ✓ wpsl_store_data filter IS registered with 1 callbacks at priority 10
+[2025-10-22 16:16:23] ✓ wpsl_store_data filter IS registered with 1 callbacks at priority 10
+[2025-10-22 16:17:33] ✓ wpsl_store_data filter IS registered with 1 callbacks at priority 10
+[2025-10-22 16:18:22] ✓ wpsl_store_data filter IS registered with 1 callbacks at priority 10
+[2025-10-22 16:18:24] ✓ wpsl_store_data filter IS registered with 1 callbacks at priority 10
+[2025-10-22 16:18:29] ✓ wpsl_store_data filter IS registered with 1 callbacks at priority 10
+[2025-10-22 16:18:31] ✓ wpsl_store_data filter IS registered with 1 callbacks at priority 10
+[2025-10-22 16:18:31] ==================== AJAX STORE SEARCH CALLED ====================
+[2025-10-22 16:18:31] Action: store_search
+[2025-10-22 16:18:31] All REQUEST params: Array
+(
+    [action] => store_search
+    [lat] => 0
+    [lng] => 0
+    [max_results] => 25
+    [search_radius] => 50
+    [filter] => 32
+    [autoload] => 1
+    [wpsl_custom_filter] => DELIVERY
+    [skip_cache] => 1
+    [woocommerce-login-nonce] => 
+    [_wpnonce] => 
+    [woocommerce-reset-password-nonce] => 
+)
+
+[2025-10-22 16:18:31] Custom filter value: DELIVERY
+[2025-10-22 16:18:31] Category name: DELIVERY
+[2025-10-22 16:18:31] Cleared WPSL autoload transients to force fresh query
+[2025-10-22 16:18:31] ==================== FILTER FUNCTION CALLED ====================
+[2025-10-22 16:18:31] Function definitely called! Store data type: array
+[2025-10-22 16:18:31] Store data count: 1
+[2025-10-22 16:18:31] GET params: Array
+(
+    [action] => store_search
+    [lat] => 0
+    [lng] => 0
+    [max_results] => 25
+    [search_radius] => 50
+    [filter] => 32
+    [autoload] => 1
+    [wpsl_custom_filter] => DELIVERY
+    [skip_cache] => 1
+)
+
+[2025-10-22 16:18:31] POST params: Array
+(
+)
+
+[2025-10-22 16:18:31] FILTER ACTIVE: Filter value = DELIVERY
+[2025-10-22 16:18:31] Filter is category name: DELIVERY
+[2025-10-22 16:18:31] Store data count BEFORE filter: 1
+[2025-10-22 16:18:31] Store ID 648 (Terraviva An Phu): Categories = DELIVERY, DINE-IN, PICKUP
+[2025-10-22 16:18:31]   ✓ INCLUDED - Store 648 has category DELIVERY
+[2025-10-22 16:18:31] Store data count AFTER filter: 1
+[2025-10-22 16:18:31] RESULT: Returning 1 out of 1 stores
+[2025-10-22 16:18:31] ================================================================
+[2025-10-22 16:18:32] ✓ wpsl_store_data filter IS registered with 1 callbacks at priority 10
+[2025-10-22 16:19:16] ✓ wpsl_store_data filter IS registered with 1 callbacks at priority 10
+[2025-10-22 16:19:16] ✓ wpsl_store_data filter IS registered with 1 callbacks at priority 10
+[2025-10-22 16:19:16] ==================== AJAX STORE SEARCH CALLED ====================
+[2025-10-22 16:19:16] Action: store_search
+[2025-10-22 16:19:16] All REQUEST params: Array
+(
+    [action] => store_search
+    [lat] => 0
+    [lng] => 0
+    [max_results] => 25
+    [search_radius] => 50
+    [autoload] => 1
+    [wpsl_custom_filter] => PICKUP
+    [skip_cache] => 1
+    [woocommerce-login-nonce] => 
+    [_wpnonce] => 
+    [woocommerce-reset-password-nonce] => 
+)
+
+[2025-10-22 16:19:16] Custom filter value: PICKUP
+[2025-10-22 16:19:16] Category name: PICKUP
+[2025-10-22 16:19:16] Cleared WPSL autoload transients to force fresh query
+[2025-10-22 16:19:16] ==================== FILTER FUNCTION CALLED ====================
+[2025-10-22 16:19:16] Function definitely called! Store data type: array
+[2025-10-22 16:19:16] Store data count: 2
+[2025-10-22 16:19:16] GET params: Array
+(
+    [action] => store_search
+    [lat] => 0
+    [lng] => 0
+    [max_results] => 25
+    [search_radius] => 50
+    [autoload] => 1
+    [wpsl_custom_filter] => PICKUP
+    [skip_cache] => 1
+)
+
+[2025-10-22 16:19:16] POST params: Array
+(
+)
+
+[2025-10-22 16:19:16] FILTER ACTIVE: Filter value = PICKUP
+[2025-10-22 16:19:16] Filter is category name: PICKUP
+[2025-10-22 16:19:16] Store data count BEFORE filter: 2
+[2025-10-22 16:19:16] Store ID 649 (Terraviva Ben Thanh): Categories = DINE-IN, PICKUP
+[2025-10-22 16:19:16]   ✓ INCLUDED - Store 649 has category PICKUP
+[2025-10-22 16:19:16] Store ID 648 (Terraviva An Phu): Categories = DELIVERY, DINE-IN, PICKUP
+[2025-10-22 16:19:16]   ✓ INCLUDED - Store 648 has category PICKUP
+[2025-10-22 16:19:16] Store data count AFTER filter: 2
+[2025-10-22 16:19:16] RESULT: Returning 2 out of 2 stores
+[2025-10-22 16:19:16] ================================================================

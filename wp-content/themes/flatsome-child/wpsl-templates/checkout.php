@@ -135,7 +135,7 @@ $output .= '<style>
 
 #wpsl-result-list {
     max-height: 450px;
-    overflow-y: auto;
+    width: auto !important;
 }
 
 #wpsl-result-list ul {
