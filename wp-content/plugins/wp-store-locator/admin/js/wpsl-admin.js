@@ -879,8 +879,12 @@ jQuery( document ).ready( function( $ ) {
 
     // If we have a store hours dropdown, init the event handler.
     if ( $( "#wpsl-store-hours" ).length || $( "#wpsl-reservation-hours" ).length || $( "#wpsl-pickup-hours" ).length || $( "#wpsl-delivery-hours" ).length ) {
+        console.log( "WPSL: Found hour tables - Opening:", $( "#wpsl-store-hours" ).length, "Reservation:", $( "#wpsl-reservation-hours" ).length, "Pickup:", $( "#wpsl-pickup-hours" ).length, "Delivery:", $( "#wpsl-delivery-hours" ).length );
+        console.log( "WPSL: Found", $( ".wpsl-add-period" ).length, "add period buttons" );
         initHourEvents();
         console.log( "WPSL: Initialized hour events for all tabs" );
+    } else {
+        console.log( "WPSL: No hour tables found on this page" );
     }
 
     /**
@@ -901,7 +905,9 @@ jQuery( document ).ready( function( $ ) {
     }
 
     // Add new openings period to the openings hours table.
-    $( ".wpsl-add-period" ).on( "click", function( e ) {
+    // Use event delegation to handle dynamically loaded/hidden tabs
+    $( document ).on( "click", ".wpsl-add-period", function( e ) {
+        console.log( "WPSL: Add period button clicked!" );
         var newPeriod,
             hours		= {},
             returnList  = true,
