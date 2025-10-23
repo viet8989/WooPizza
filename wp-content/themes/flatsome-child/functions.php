@@ -487,6 +487,26 @@ function display_topping_products_page() {
 	<?php
 }
 
+/**
+ * Give Shop Manager role the capability to manage WP Store Locator settings.
+ * Adds the 'manage_wpsl_settings' capability to the 'shop_manager' role if it's missing.
+ * This runs on admin_init so it only affects the admin area and is safe to run repeatedly.
+ */
+function wp_child_add_wpsl_cap_to_shop_manager() {
+	// Only run in admin
+	if ( ! is_admin() ) {
+		return;
+	}
+
+	// Get the role object
+	$role = get_role( 'shop_manager' );
+
+	if ( $role && ! $role->has_cap( 'manage_wpsl_settings' ) ) {
+		$role->add_cap( 'manage_wpsl_settings' );
+	}
+}
+add_action( 'admin_init', 'wp_child_add_wpsl_cap_to_shop_manager' );
+
 // Save custom options to cart item data
 add_filter( 'woocommerce_add_cart_item_data', 'save_custom_pizza_options_to_cart', 10, 3 );
 function save_custom_pizza_options_to_cart( $cart_item_data, $product_id, $variation_id ) {
