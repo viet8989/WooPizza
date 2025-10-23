@@ -196,12 +196,10 @@ function crp_render_reservation_form()
                 <small style="color: #666;">For bookings of 10+ guests, a deposit of 500,000₫/person is required.</small>
             </div>
 
-            <div class="form-row form-row-select">
+            <div class="form-row form-row-select" id="branch-selection-section" style="display: none;">
                 <label>Select Branch *</label>
                 <div id="branches-container">
-                    <div style="padding: 20px; text-align: center; color: #666;">
-                        <em>Please select date and time first to see available branches</em>
-                    </div>
+                    <!-- Branches will be loaded here via AJAX -->
                 </div>
                 <input type="hidden" name="store_id" id="store-id-selected" required>
             </div>
@@ -260,15 +258,31 @@ function crp_render_reservation_form()
                 const reservationDate = $('#reservation_date').val();
                 const startTime = $('#start_time').val();
 
+                // Only load branches when BOTH date AND time are selected
                 if (!reservationDate || !startTime) {
-                    console.log('Date or time not selected yet');
+                    console.log('Waiting for both date and time to be selected...');
+                    console.log('  Date:', reservationDate || '(not selected)');
+                    console.log('  Time:', startTime || '(not selected)');
+
+                    // Hide branch selection section
+                    $('#branch-selection-section').hide();
+                    $('#store-id-selected').val('');
                     return;
                 }
 
-                console.log('Loading available stores for:', reservationDate, startTime);
+                console.log('✅ Both date and time selected! Loading available stores...');
+                console.log('  Date:', reservationDate);
+                console.log('  Time:', startTime);
+
+                // Show branch selection section
+                $('#branch-selection-section').slideDown(300);
 
                 // Show loading message
-                $('#branches-container').html('<div style="padding: 20px; text-align: center;"><em>Loading available branches...</em></div>');
+                $('#branches-container').html(
+                    '<div style="padding: 20px; text-align: center; background: #f0f8ff; border: 1px solid #d0e8ff; border-radius: 4px;">' +
+                    '<em>⏳ Loading available branches...</em>' +
+                    '</div>'
+                );
 
                 $.ajax({
                     url: '<?= admin_url('admin-ajax.php') ?>',
@@ -342,7 +356,9 @@ function crp_render_reservation_form()
             // Auto-calculate end time (30 minutes after start) and load stores
             $('#start_time').on('change', function() {
                 const startTime = $(this).val();
-                console.log('Start time changed:', startTime);
+                const selectedDate = $('#reservation_date').val();
+
+                console.log('⏰ Time selected:', startTime);
 
                 if (startTime) {
                     const [hour, min] = startTime.split(":").map(Number);
@@ -357,16 +373,35 @@ function crp_render_reservation_form()
                     $('#end_time').val(endTime);
                     $('#end_time_display').text('- ' + endTime);
 
-                    console.log('End time calculated:', endTime);
+                    console.log('   End time calculated:', endTime);
 
-                    // Load available stores when time changes
+                    // Check if date is also selected
+                    if (selectedDate) {
+                        console.log('📅 Date already selected:', selectedDate);
+                        console.log('🚀 Loading branches now...');
+                    } else {
+                        console.log('⏳ Waiting for date selection to load branches...');
+                    }
+
+                    // Load available stores when time changes (only if date also selected)
                     loadAvailableStores();
                 }
             });
 
             // Load available stores when date changes
             $('#reservation_date').on('change', function() {
-                console.log('Reservation date changed:', $(this).val());
+                const selectedDate = $(this).val();
+                const selectedTime = $('#start_time').val();
+
+                console.log('📅 Date selected:', selectedDate);
+
+                if (selectedTime) {
+                    console.log('⏰ Time already selected:', selectedTime);
+                    console.log('🚀 Loading branches now...');
+                } else {
+                    console.log('⏳ Waiting for time selection to load branches...');
+                }
+
                 loadAvailableStores();
             });
 
@@ -620,6 +655,29 @@ function crp_render_reservation_form()
 
         small {
             font-size: 14px;
+        }
+
+        /* Branch selection section animation */
+        #branch-selection-section {
+            overflow: hidden;
+            transition: all 0.3s ease-in-out;
+        }
+
+        #branch-selection-section.slide-in {
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                max-height: 500px;
+                transform: translateY(0);
+            }
         }
 
         @media (max-width: 600px) {
