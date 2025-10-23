@@ -878,8 +878,9 @@ jQuery( document ).ready( function( $ ) {
     }
 
     // If we have a store hours dropdown, init the event handler.
-    if ( $( "#wpsl-store-hours" ).length ) {
+    if ( $( "#wpsl-store-hours" ).length || $( "#wpsl-reservation-hours" ).length || $( "#wpsl-pickup-hours" ).length || $( "#wpsl-delivery-hours" ).length ) {
         initHourEvents();
+        console.log( "WPSL: Initialized hour events for all tabs" );
     }
 
     /**
@@ -890,8 +891,11 @@ jQuery( document ).ready( function( $ ) {
      * @returns {void}
      */
     function initHourEvents() {
-        $( "#wpsl-store-hours .wpsl-icon-cancel-circled" ).off();
-        $( "#wpsl-store-hours .wpsl-icon-cancel-circled" ).on( "click", function() {
+        console.log( "WPSL: Setting up click handlers for cancel icons" );
+        // Support all hour tables: opening, reservation, pickup, and delivery hours
+        $( "#wpsl-store-hours .wpsl-icon-cancel-circled, #wpsl-reservation-hours .wpsl-icon-cancel-circled, #wpsl-pickup-hours .wpsl-icon-cancel-circled, #wpsl-delivery-hours .wpsl-icon-cancel-circled" ).off();
+        $( "#wpsl-store-hours .wpsl-icon-cancel-circled, #wpsl-reservation-hours .wpsl-icon-cancel-circled, #wpsl-pickup-hours .wpsl-icon-cancel-circled, #wpsl-delivery-hours .wpsl-icon-cancel-circled" ).on( "click", function() {
+            console.log( "WPSL: Remove period clicked" );
             removePeriod( $( this ) );
         });
     }
@@ -905,7 +909,28 @@ jQuery( document ).ready( function( $ ) {
             periodCount = currentPeriodCount( $( this ) ),
             periodCss   = ( periodCount >= 1 ) ? "wpsl-current-period wpsl-multiple-periods" : "wpsl-current-period",
             day 	    = $tr.find( ".wpsl-opening-hours" ).attr( "data-day" ),
-            selectName  = ( $( "#wpsl-settings-form" ).length ) ? "wpsl_editor[dropdown]" : "wpsl[hours]";
+            $table      = $tr.closest( "table" ),
+            tableId     = $table.attr( "id" ),
+            selectName  = "wpsl[hours]",
+            targetSelector = "#wpsl-hours-" + day;
+
+        console.log( "WPSL: Add period clicked for table:", tableId, "day:", day );
+
+        // Determine the correct input name and target selector based on which table we're in
+        if ( $( "#wpsl-settings-form" ).length ) {
+            selectName = "wpsl_editor[dropdown]";
+        } else if ( tableId == "wpsl-reservation-hours" ) {
+            selectName = "wpsl[reservation_hours]";
+            targetSelector = "#wpsl-reservation-hours-" + day;
+        } else if ( tableId == "wpsl-pickup-hours" ) {
+            selectName = "wpsl[pickup_hours]";
+            targetSelector = "#wpsl-pickup-hours-" + day;
+        } else if ( tableId == "wpsl-delivery-hours" ) {
+            selectName = "wpsl[delivery_hours]";
+            targetSelector = "#wpsl-delivery-hours-" + day;
+        }
+
+        console.log( "WPSL: Using selectName:", selectName, "targetSelector:", targetSelector );
 
         newPeriod = '<div class="' + periodCss +'">';
         newPeriod += '<select autocomplete="off" name="' + selectName + '[' + day + '_open][]" class="wpsl-open-hour">' + createHourOptionList( returnList ) + '</select>';
@@ -915,7 +940,7 @@ jQuery( document ).ready( function( $ ) {
         newPeriod += '</div>';
 
         $tr.find( ".wpsl-store-closed" ).remove();
-        $( "#wpsl-hours-" + day + "" ).append( newPeriod ).end();
+        $( targetSelector ).append( newPeriod ).end();
 
         initHourEvents();
 
@@ -947,11 +972,26 @@ jQuery( document ).ready( function( $ ) {
     function removePeriod( elem ) {
         var periodsLeft	= currentPeriodCount( elem ),
             $tr			= elem.parents( "tr" ),
-            day 	    = $tr.find( ".wpsl-opening-hours" ).attr( "data-day" );
+            day 	    = $tr.find( ".wpsl-opening-hours" ).attr( "data-day" ),
+            $table      = $tr.closest( "table" ),
+            tableId     = $table.attr( "id" ),
+            fieldName   = "wpsl[hours]";
+
+        console.log( "WPSL: Removing period from table:", tableId, "day:", day, "periodsLeft:", periodsLeft );
+
+        // Determine the correct field name based on which table we're in
+        if ( tableId == "wpsl-reservation-hours" ) {
+            fieldName = "wpsl[reservation_hours]";
+        } else if ( tableId == "wpsl-pickup-hours" ) {
+            fieldName = "wpsl[pickup_hours]";
+        } else if ( tableId == "wpsl-delivery-hours" ) {
+            fieldName = "wpsl[delivery_hours]";
+        }
 
         // If there was 1 opening hour left then we add the 'Closed' text.
         if ( periodsLeft == 1 ) {
-            $tr.find( ".wpsl-opening-hours" ).html( "<p class='wpsl-store-closed'>" + wpslL10n.closedDate + "<input type='hidden' name='wpsl[hours][" + day + "_open]' value='' /></p>" );
+            $tr.find( ".wpsl-opening-hours" ).html( "<p class='wpsl-store-closed'>" + wpslL10n.closedDate + "<input type='hidden' name='" + fieldName + "[" + day + "_open]' value='' /></p>" );
+            console.log( "WPSL: Set day to closed with field name:", fieldName );
         }
 
         // Remove the selected openings period.
@@ -1004,14 +1044,17 @@ jQuery( document ).ready( function( $ ) {
             hrFormat = wpslSettings.hourFormat;
         }
 
-        $( "#wpsl-store-hours td" ).removeAttr( "style" );
+        // Support all hour tables
+        $( "#wpsl-store-hours td, #wpsl-reservation-hours td, #wpsl-pickup-hours td, #wpsl-delivery-hours td" ).removeAttr( "style" );
 
         if ( hrFormat == 12 ) {
-            $( "#wpsl-store-hours" ).removeClass().addClass( "wpsl-twelve-format" );
+            $( "#wpsl-store-hours, #wpsl-reservation-hours, #wpsl-pickup-hours, #wpsl-delivery-hours" ).removeClass().addClass( "wpsl-twelve-format" );
             openingHours = openingHourOptions.hours.hr12;
+            console.log( "WPSL: Switched to 12-hour format" );
         } else {
-            $( "#wpsl-store-hours" ).removeClass().addClass( "wpsl-twentyfour-format" );
+            $( "#wpsl-store-hours, #wpsl-reservation-hours, #wpsl-pickup-hours, #wpsl-delivery-hours" ).removeClass().addClass( "wpsl-twentyfour-format" );
             openingHours = openingHourOptions.hours.hr24;
+            console.log( "WPSL: Switched to 24-hour format" );
         }
 
         openingHourInterval = openingHourOptions.interval;

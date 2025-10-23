@@ -427,17 +427,26 @@ div.wpsl-active {
     color:#c01313;
 }
 
-/* Opening Hours */
-#wpsl-store-hours {
+/* Opening Hours - Supporting all hour tables: store, reservation, pickup, and delivery */
+#wpsl-store-hours,
+#wpsl-reservation-hours,
+#wpsl-pickup-hours,
+#wpsl-delivery-hours {
     border-collapse: collapse;
     margin: 5px 0 20px 0;
 }
 
-#wpsl-settings-form #wpsl-store-hours {
+#wpsl-settings-form #wpsl-store-hours,
+#wpsl-settings-form #wpsl-reservation-hours,
+#wpsl-settings-form #wpsl-pickup-hours,
+#wpsl-settings-form #wpsl-delivery-hours {
     width: 100%;
 }
 
-#wpsl-store-hours div {
+#wpsl-store-hours div,
+#wpsl-reservation-hours div,
+#wpsl-pickup-hours div,
+#wpsl-delivery-hours div {
     margin: 0;
     padding: 3px;
     background: #eee;
@@ -446,7 +455,10 @@ div.wpsl-active {
     white-space: nowrap;
 }
 
-#wpsl-store-hours .wpsl-store-closed {
+#wpsl-store-hours .wpsl-store-closed,
+#wpsl-reservation-hours .wpsl-store-closed,
+#wpsl-pickup-hours .wpsl-store-closed,
+#wpsl-delivery-hours .wpsl-store-closed {
     border: none;
     background: none;
     margin-top: 9px;
@@ -458,7 +470,10 @@ div.wpsl-active {
     float: left;
 }
 
-#wpsl-store-hours .wpsl-multiple-periods {
+#wpsl-store-hours .wpsl-multiple-periods,
+#wpsl-reservation-hours .wpsl-multiple-periods,
+#wpsl-pickup-hours .wpsl-multiple-periods,
+#wpsl-delivery-hours .wpsl-multiple-periods {
     float: left;
     clear: both;
     margin-top: 8px;
@@ -474,7 +489,10 @@ div.wpsl-active {
     margin:6px 0 0 7px;
 }
 
-#wpsl-store-hours .wpsl-remove-period {
+#wpsl-store-hours .wpsl-remove-period,
+#wpsl-reservation-hours .wpsl-remove-period,
+#wpsl-pickup-hours .wpsl-remove-period,
+#wpsl-delivery-hours .wpsl-remove-period {
     background:#999;
     border-radius: 9px;
 }
@@ -491,27 +509,42 @@ div.wpsl-active {
     margin-top:25px;
 }
 
-#wpsl-store-hours select {
+#wpsl-store-hours select,
+#wpsl-reservation-hours select,
+#wpsl-pickup-hours select,
+#wpsl-delivery-hours select {
     float:left;
 }
 
-#wpsl-store-hours th {
+#wpsl-store-hours th,
+#wpsl-reservation-hours th,
+#wpsl-pickup-hours th,
+#wpsl-delivery-hours th {
     text-align:left;
     padding:8px 10px 8px 0;
     border-bottom:1px solid #eee;
 }
 
-#wpsl-settings-form #wpsl-store-hours th {
+#wpsl-settings-form #wpsl-store-hours th,
+#wpsl-settings-form #wpsl-reservation-hours th,
+#wpsl-settings-form #wpsl-pickup-hours th,
+#wpsl-settings-form #wpsl-delivery-hours th {
     text-align: left;
 }
 
-#wpsl-store-hours td {
+#wpsl-store-hours td,
+#wpsl-reservation-hours td,
+#wpsl-pickup-hours td,
+#wpsl-delivery-hours td {
     border-bottom:1px solid #eee;
     padding:7px 10px 7px 0;
     vertical-align: top;
 }
 
-#wpsl-store-hours .wpsl-opening-day {
+#wpsl-store-hours .wpsl-opening-day,
+#wpsl-reservation-hours .wpsl-opening-day,
+#wpsl-pickup-hours .wpsl-opening-day,
+#wpsl-delivery-hours .wpsl-opening-day {
     min-width:80px;
     padding:17px 17px 0 0;
     text-align:left;
@@ -526,37 +559,58 @@ div.wpsl-active {
     width: 245px;
 }
 
-#wpsl-settings-form #wpsl-store-hours .wpsl-opening-day {
+#wpsl-settings-form #wpsl-store-hours .wpsl-opening-day,
+#wpsl-settings-form #wpsl-reservation-hours .wpsl-opening-day,
+#wpsl-settings-form #wpsl-pickup-hours .wpsl-opening-day,
+#wpsl-settings-form #wpsl-delivery-hours .wpsl-opening-day {
     width: 150px;
 }
 
-#wpsl-settings-form #wpsl-store-hours td p  {
+#wpsl-settings-form #wpsl-store-hours td p,
+#wpsl-settings-form #wpsl-reservation-hours td p,
+#wpsl-settings-form #wpsl-pickup-hours td p,
+#wpsl-settings-form #wpsl-delivery-hours td p {
     padding: 10px 0 0 0;
     margin: 0;
     text-align: left;
 }
 
-#wpsl-store-hours .wpsl-add-period {
+#wpsl-store-hours .wpsl-add-period,
+#wpsl-reservation-hours .wpsl-add-period,
+#wpsl-pickup-hours .wpsl-add-period,
+#wpsl-delivery-hours .wpsl-add-period {
     height: 30px;
 }
 
 .wpsl-pre-38 .wpsl-add-period {
-    height: 27px;    
+    height: 27px;
 }
 
 #wpsl-store-hours .dashicons:hover,
+#wpsl-reservation-hours .dashicons:hover,
+#wpsl-pickup-hours .dashicons:hover,
+#wpsl-delivery-hours .dashicons:hover,
 .wpsl-add-period:hover {
     cursor:pointer;
 }
 
-#wpsl-store-hours .dashicons {
+#wpsl-store-hours .dashicons,
+#wpsl-reservation-hours .dashicons,
+#wpsl-pickup-hours .dashicons,
+#wpsl-delivery-hours .dashicons {
     color: #999;
     margin: 0 3px;
 }
 
 #wpsl-store-hours .wpsl-add-period:hover .dashicons,
-#wpsl-store-hours .dashicons:hover {
-   color: #444; 
+#wpsl-store-hours .dashicons:hover,
+#wpsl-reservation-hours .wpsl-add-period:hover .dashicons,
+#wpsl-reservation-hours .dashicons:hover,
+#wpsl-pickup-hours .wpsl-add-period:hover .dashicons,
+#wpsl-pickup-hours .dashicons:hover,
+#wpsl-delivery-hours .wpsl-add-period:hover .dashicons,
+#wpsl-delivery-hours .dashicons:hover {
+   color: #444;
 }
 
 /* Fix the bottom spacing on the submit buttons */
@@ -604,7 +658,13 @@ div.wpsl-active {
 }
 
 #wpsl-store-hours .wpsl-icon-plus-circled,
-#wpsl-store-hours .wpsl-icon-cancel-circled {
+#wpsl-store-hours .wpsl-icon-cancel-circled,
+#wpsl-reservation-hours .wpsl-icon-plus-circled,
+#wpsl-reservation-hours .wpsl-icon-cancel-circled,
+#wpsl-pickup-hours .wpsl-icon-plus-circled,
+#wpsl-pickup-hours .wpsl-icon-cancel-circled,
+#wpsl-delivery-hours .wpsl-icon-plus-circled,
+#wpsl-delivery-hours .wpsl-icon-cancel-circled {
     margin-top: 1px;
     font-size: 18px;
     display: inline-block;
@@ -612,7 +672,13 @@ div.wpsl-active {
 }
 
 #wpsl-store-hours .wpsl-icon-plus-circled:hover,
-#wpsl-store-hours .wpsl-icon-cancel-circled:hover {
+#wpsl-store-hours .wpsl-icon-cancel-circled:hover,
+#wpsl-reservation-hours .wpsl-icon-plus-circled:hover,
+#wpsl-reservation-hours .wpsl-icon-cancel-circled:hover,
+#wpsl-pickup-hours .wpsl-icon-plus-circled:hover,
+#wpsl-pickup-hours .wpsl-icon-cancel-circled:hover,
+#wpsl-delivery-hours .wpsl-icon-plus-circled:hover,
+#wpsl-delivery-hours .wpsl-icon-cancel-circled:hover {
     color: #444;
 }
 
