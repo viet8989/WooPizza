@@ -1038,11 +1038,20 @@ jQuery( document ).ready( function( $ ) {
                 "interval": [ '00', '15', '30', '45' ]
             };
 
+        // Check for hour format from any of the available selectors
         if ( $( "#wpsl-editor-hour-format" ).length ) {
             hrFormat = $( "#wpsl-editor-hour-format" ).val();
+        } else if ( $( "#wpsl-editor-reservation-hour-format" ).length ) {
+            hrFormat = $( "#wpsl-editor-reservation-hour-format" ).val();
+        } else if ( $( "#wpsl-editor-pickup-hour-format" ).length ) {
+            hrFormat = $( "#wpsl-editor-pickup-hour-format" ).val();
+        } else if ( $( "#wpsl-editor-delivery-hour-format" ).length ) {
+            hrFormat = $( "#wpsl-editor-delivery-hour-format" ).val();
         } else {
             hrFormat = wpslSettings.hourFormat;
         }
+
+        console.log( "WPSL: Using hour format:", hrFormat );
 
         // Support all hour tables
         $( "#wpsl-store-hours td, #wpsl-reservation-hours td, #wpsl-pickup-hours td, #wpsl-delivery-hours td" ).removeAttr( "style" );
@@ -1184,7 +1193,19 @@ jQuery( document ).ready( function( $ ) {
     }
 
     // Update the opening hours format if one of the dropdown values change.
-    $( "#wpsl-editor-hour-format, #wpsl-editor-hour-interval" ).on( "change", function() {
+    // Support all hour format selectors using class selector
+    $( "#wpsl-editor-hour-format, #wpsl-editor-hour-interval, .wpsl-hour-format-selector" ).on( "change", function() {
+        var changedId = $( this ).attr( "id" );
+        var newFormat = $( this ).val();
+
+        console.log( "WPSL: Hour format changed via selector:", changedId, "to:", newFormat );
+
+        // Synchronize all hour format dropdowns to the same value
+        if ( $( this ).hasClass( "wpsl-hour-format-selector" ) || changedId === "wpsl-editor-hour-format" ) {
+            $( ".wpsl-hour-format-selector, #wpsl-editor-hour-format" ).not( this ).val( newFormat );
+            console.log( "WPSL: Synchronized all hour format dropdowns to:", newFormat );
+        }
+
         createHourOptionList();
     });
 

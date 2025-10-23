@@ -590,8 +590,11 @@ if ( !class_exists( 'WPSL_Metaboxes' ) ) {
             if ( $location == 'store_page' ) {
                 ?>
                 <p class="wpsl-hours-dropdown">
-                    <label for="wpsl-editor-reservation-hour-input"><?php _e( 'Hour format', 'wpsl' ); ?>:</label>
-                    <?php echo $wpsl_admin->settings_page->show_opening_hours_format( $hour_format ); ?>
+                    <label for="wpsl-editor-reservation-hour-format"><?php _e( 'Hour format', 'wpsl' ); ?>:</label>
+                    <select id="wpsl-editor-reservation-hour-format" class="wpsl-hour-format-selector" name="wpsl_editor[reservation_hour_format]" autocomplete="off">
+                        <option value="12" <?php selected( $hour_format, 12 ); ?>><?php _e( '12 Hours', 'wpsl' ); ?></option>
+                        <option value="24" <?php selected( $hour_format, 24 ); ?>><?php _e( '24 Hours', 'wpsl' ); ?></option>
+                    </select>
                 </p>
             <?php } ?>
 
@@ -703,8 +706,11 @@ if ( !class_exists( 'WPSL_Metaboxes' ) ) {
             if ( $location == 'store_page' ) {
                 ?>
                 <p class="wpsl-hours-dropdown">
-                    <label for="wpsl-editor-pickup-hour-input"><?php _e( 'Hour format', 'wpsl' ); ?>:</label>
-                    <?php echo $wpsl_admin->settings_page->show_opening_hours_format( $hour_format ); ?>
+                    <label for="wpsl-editor-pickup-hour-format"><?php _e( 'Hour format', 'wpsl' ); ?>:</label>
+                    <select id="wpsl-editor-pickup-hour-format" class="wpsl-hour-format-selector" name="wpsl_editor[pickup_hour_format]" autocomplete="off">
+                        <option value="12" <?php selected( $hour_format, 12 ); ?>><?php _e( '12 Hours', 'wpsl' ); ?></option>
+                        <option value="24" <?php selected( $hour_format, 24 ); ?>><?php _e( '24 Hours', 'wpsl' ); ?></option>
+                    </select>
                 </p>
             <?php } ?>
 
@@ -816,8 +822,11 @@ if ( !class_exists( 'WPSL_Metaboxes' ) ) {
             if ( $location == 'store_page' ) {
                 ?>
                 <p class="wpsl-hours-dropdown">
-                    <label for="wpsl-editor-delivery-hour-input"><?php _e( 'Hour format', 'wpsl' ); ?>:</label>
-                    <?php echo $wpsl_admin->settings_page->show_opening_hours_format( $hour_format ); ?>
+                    <label for="wpsl-editor-delivery-hour-format"><?php _e( 'Hour format', 'wpsl' ); ?>:</label>
+                    <select id="wpsl-editor-delivery-hour-format" class="wpsl-hour-format-selector" name="wpsl_editor[delivery_hour_format]" autocomplete="off">
+                        <option value="12" <?php selected( $hour_format, 12 ); ?>><?php _e( '12 Hours', 'wpsl' ); ?></option>
+                        <option value="24" <?php selected( $hour_format, 24 ); ?>><?php _e( '24 Hours', 'wpsl' ); ?></option>
+                    </select>
                 </p>
             <?php } ?>
 
