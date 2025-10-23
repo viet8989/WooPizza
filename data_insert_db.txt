@@ -29,3 +29,74 @@ WHERE
 SELECT * FROM `R6vhU_posts` WHERE `post_type` = 'wpsl_stores' AND `post_status` = 'publish';
 
 SELECT P.ID, P.post_title, P.post_type, P.post_status, PM.meta_key, PM.meta_value FROM R6vhU_posts AS P LEFT JOIN R6vhU_postmeta AS PM ON P.ID = PM.post_id WHERE P.ID = 649;
+
+
+
+// === WPSL DIAGNOSTIC SCRIPT ===
+console.log("=== Starting WPSL Diagnostics ===");
+
+// 1. Check if jQuery is loaded
+console.log("1. jQuery loaded:", typeof jQuery !== 'undefined' ? "YES" : "NO");
+if (typeof jQuery !== 'undefined') {
+    console.log("   jQuery version:", jQuery.fn.jquery);
+}
+
+// 2. Check for hour tables
+console.log("\n2. Hour Tables Found:");
+console.log("   #wpsl-store-hours:", jQuery("#wpsl-store-hours").length);
+console.log("   #wpsl-reservation-hours:", jQuery("#wpsl-reservation-hours").length);
+console.log("   #wpsl-pickup-hours:", jQuery("#wpsl-pickup-hours").length);
+console.log("   #wpsl-delivery-hours:", jQuery("#wpsl-delivery-hours").length);
+
+// 3. Check for add period buttons
+console.log("\n3. Add Period Buttons:");
+console.log("   Total .wpsl-add-period:", jQuery(".wpsl-add-period").length);
+console.log("   In Opening Hours:", jQuery("#wpsl-store-hours .wpsl-add-period").length);
+console.log("   In Reservation Hours:", jQuery("#wpsl-reservation-hours .wpsl-add-period").length);
+console.log("   In Pickup Hours:", jQuery("#wpsl-pickup-hours .wpsl-add-period").length);
+console.log("   In Delivery Hours:", jQuery("#wpsl-delivery-hours .wpsl-add-period").length);
+
+// 4. Check visibility of tabs
+console.log("\n4. Tab Visibility:");
+jQuery(".wpsl-tab").each(function(i) {
+    var tabClass = jQuery(this).attr("class");
+    var isVisible = jQuery(this).is(":visible");
+    var hasActive = jQuery(this).hasClass("wpsl-active");
+    console.log("   Tab " + i + ":", tabClass, "- Visible:", isVisible, "- Active:", hasActive);
+});
+
+// 5. Check current event handlers on add period buttons
+console.log("\n5. Event Handlers Check:");
+var events = jQuery._data(jQuery(".wpsl-add-period")[0], "events");
+console.log("   Events on first .wpsl-add-period button:", events);
+
+// 6. Manually attach a test click handler
+console.log("\n6. Attaching TEST click handler to all .wpsl-add-period buttons...");
+jQuery(document).off("click.wpsltest").on("click.wpsltest", ".wpsl-add-period", function(e) {
+    console.log(">>> TEST CLICK DETECTED on .wpsl-add-period!");
+    console.log("    Clicked element:", this);
+    console.log("    Parent TR:", jQuery(this).parents("tr").length);
+    console.log("    Closest table ID:", jQuery(this).closest("table").attr("id"));
+    console.log("    Day:", jQuery(this).parents("tr").find(".wpsl-opening-hours").attr("data-day"));
+});
+console.log("   TEST handler attached. Now click a + button in any tab.");
+
+// 7. Check if wpsl-admin.js is loaded
+console.log("\n7. Checking for WPSL scripts:");
+var scripts = jQuery("script[src*='wpsl']");
+console.log("   Found", scripts.length, "WPSL script tags:");
+scripts.each(function() {
+    console.log("   -", jQuery(this).attr("src"));
+});
+
+// 8. List all visible add period buttons with their locations
+console.log("\n8. Detailed Add Period Button Info:");
+jQuery(".wpsl-add-period:visible").each(function(i) {
+    var jQuerytr = jQuery(this).parents("tr");
+    var day = jQuerytr.find(".wpsl-opening-hours").attr("data-day");
+    var tableId = jQuery(this).closest("table").attr("id");
+    console.log("   Button " + i + ":", "Table:", tableId, "Day:", day);
+});
+
+console.log("\n=== Diagnostics Complete ===");
+console.log("Now try clicking a + button in the Reservation Hours tab and watch for 'TEST CLICK DETECTED' message.");
