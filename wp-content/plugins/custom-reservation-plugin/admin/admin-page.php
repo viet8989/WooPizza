@@ -24,14 +24,7 @@ function crp_admin_menu()
         'crp_reservations_page'
     );
 
-    add_submenu_page(
-        'crp_reservations',
-        'Branches',
-        'Branches',
-        'manage_options',
-        'crp_branches',
-        'crp_branches_page'
-    );
+    // Branches submenu removed - now using WP Store Locator plugin
 }
 
 // Reservations listing page
@@ -91,8 +84,16 @@ function crp_reservations_page()
     ?>
     <div class="wrap">
         <h1 class="wp-heading-inline">Reservations</h1>
-        <a href="<?= admin_url('admin.php?page=crp_branches') ?>" class="page-title-action">Manage Branches</a>
+        <a href="<?= admin_url('edit.php?post_type=wpsl_stores') ?>" class="page-title-action">Manage Stores</a>
         <hr class="wp-header-end">
+
+        <div class="notice notice-info" style="margin-top: 20px;">
+            <p>
+                <strong>💡 Tip:</strong> To manage store locations and reservation hours, go to
+                <a href="<?= admin_url('edit.php?post_type=wpsl_stores') ?>"><strong>Store Locator → Stores</strong></a>
+                in the WordPress admin menu.
+            </p>
+        </div>
 
         <!-- Status filters -->
         <ul class="subsubsub">
@@ -281,7 +282,16 @@ function crp_reservations_page()
     <?php
 }
 
-// Branches management page
+/*
+ * DEPRECATED: Branches management page
+ *
+ * This function is no longer used as we now use WP Store Locator plugin
+ * for managing store/branch locations. Keeping this code for reference
+ * but it's not accessible from the admin menu.
+ *
+ * To manage branches, use: Store Locator menu in WordPress admin
+ */
+/*
 function crp_branches_page()
 {
     global $wpdb;
@@ -401,3 +411,4 @@ function crp_branches_page()
     </div>
     <?php
 }
+*/

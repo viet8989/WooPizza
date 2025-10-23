@@ -150,7 +150,10 @@ function crp_get_available_stores()
         }
     }
 
-    echo '<script>console.log("Available stores:", ' . json_encode($available_stores) . ');</script>';
+    // Log available stores to debug file
+    $debug_log = "Available stores count: " . count($available_stores) . "\n";
+    file_put_contents(plugin_dir_path(__FILE__) . 'debug_save.txt', $debug_log, FILE_APPEND);
+
     wp_send_json_success($available_stores);
 }
 
@@ -723,19 +726,22 @@ function crp_handle_reservation()
 
     // Validation
     if (!$start_time || !$end_time || strtotime($start_time) === false || strtotime($end_time) === false) {
-        echo '<script>console.log("Invalid time format");</script>';
+        $debug_log = "ERROR: Invalid time format\n";
+        file_put_contents(plugin_dir_path(__FILE__) . 'debug_save.txt', $debug_log, FILE_APPEND);
         wp_send_json_error(['message' => 'Invalid time format.']);
     }
 
     // Check if reservation date is in the past
     if (strtotime($date) < strtotime(date('Y-m-d'))) {
-        echo '<script>console.log("Cannot book past dates");</script>';
+        $debug_log = "ERROR: Cannot book past dates\n";
+        file_put_contents(plugin_dir_path(__FILE__) . 'debug_save.txt', $debug_log, FILE_APPEND);
         wp_send_json_error(['message' => 'Cannot make reservations for past dates.']);
     }
 
     // Verify store is available for selected date/time
     if (!crp_is_store_available($store_id, $date, $start_time)) {
-        echo '<script>console.log("Store not available for selected date/time");</script>';
+        $debug_log = "ERROR: Store $store_id not available for $date $start_time\n";
+        file_put_contents(plugin_dir_path(__FILE__) . 'debug_save.txt', $debug_log, FILE_APPEND);
         wp_send_json_error(['message' => 'This store is not available for the selected date and time. Please choose a different time.']);
     }
 
@@ -757,7 +763,8 @@ function crp_handle_reservation()
     file_put_contents(plugin_dir_path(__FILE__) . 'debug_save.txt', $debug_log, FILE_APPEND);
 
     if ($conflict > 0) {
-        echo '<script>console.log("Time slot already booked");</script>';
+        $debug_log = "ERROR: Time slot already booked\n";
+        file_put_contents(plugin_dir_path(__FILE__) . 'debug_save.txt', $debug_log, FILE_APPEND);
         wp_send_json_error(['message' => 'This time slot is already booked. Please choose a different time.']);
     }
 
@@ -778,10 +785,8 @@ function crp_handle_reservation()
     ]);
 
     if ($wpdb->last_error) {
-        $debug_log = "Database error: " . $wpdb->last_error . "\n";
+        $debug_log = "ERROR: Database error: " . $wpdb->last_error . "\n";
         file_put_contents(plugin_dir_path(__FILE__) . 'debug_save.txt', $debug_log, FILE_APPEND);
-
-        echo '<script>console.log("Database error: ' . addslashes($wpdb->last_error) . '");</script>';
         wp_send_json_error(['message' => 'Database error: ' . $wpdb->last_error]);
     }
 
@@ -819,9 +824,8 @@ function crp_handle_reservation()
     $headers = ['Content-Type: text/plain; charset=UTF-8'];
     wp_mail($email, $subject, $body, $headers);
 
-    $debug_log = "Reservation saved successfully. ID: " . $wpdb->insert_id . "\n";
+    $debug_log = "SUCCESS: Reservation saved. ID: " . $wpdb->insert_id . "\n";
     file_put_contents(plugin_dir_path(__FILE__) . 'debug_save.txt', $debug_log, FILE_APPEND);
 
-    echo '<script>console.log("Reservation successful, ID: ' . $wpdb->insert_id . '");</script>';
     wp_send_json_success(['message' => 'Reservation successful! A confirmation email has been sent to ' . $email]);
 }
