@@ -931,6 +931,7 @@ jQuery( document ).ready( function( $ ) {
         }
 
         console.log( "WPSL: Using selectName:", selectName, "targetSelector:", targetSelector );
+        console.log( "WPSL: Target element exists:", $( targetSelector ).length, "elements" );
 
         newPeriod = '<div class="' + periodCss +'">';
         newPeriod += '<select autocomplete="off" name="' + selectName + '[' + day + '_open][]" class="wpsl-open-hour">' + createHourOptionList( returnList ) + '</select>';
@@ -940,11 +941,28 @@ jQuery( document ).ready( function( $ ) {
         newPeriod += '</div>';
 
         $tr.find( ".wpsl-store-closed" ).remove();
+
+        console.log( "WPSL: About to append to:", targetSelector );
         $( targetSelector ).append( newPeriod ).end();
+        console.log( "WPSL: Successfully appended period" );
 
         initHourEvents();
 
-        if ( $( "#wpsl-editor-hour-format" ).val() == 24 ) {
+        // Detect hour format from the current tab's selector or fall back to the main one
+        var currentFormat = 12; // default
+        if ( $( "#wpsl-editor-hour-format" ).length && $( "#wpsl-editor-hour-format" ).val() ) {
+            currentFormat = parseInt( $( "#wpsl-editor-hour-format" ).val() );
+        } else if ( $( "#wpsl-editor-reservation-hour-format" ).length && $( "#wpsl-editor-reservation-hour-format" ).val() ) {
+            currentFormat = parseInt( $( "#wpsl-editor-reservation-hour-format" ).val() );
+        } else if ( $( "#wpsl-editor-pickup-hour-format" ).length && $( "#wpsl-editor-pickup-hour-format" ).val() ) {
+            currentFormat = parseInt( $( "#wpsl-editor-pickup-hour-format" ).val() );
+        } else if ( $( "#wpsl-editor-delivery-hour-format" ).length && $( "#wpsl-editor-delivery-hour-format" ).val() ) {
+            currentFormat = parseInt( $( "#wpsl-editor-delivery-hour-format" ).val() );
+        }
+
+        console.log( "WPSL: Detected hour format for new period:", currentFormat );
+
+        if ( currentFormat == 24 ) {
             hours = {
                 "open": "09:00",
                 "close": "17:00"
@@ -956,8 +974,12 @@ jQuery( document ).ready( function( $ ) {
             };
         }
 
+        console.log( "WPSL: Setting default hours:", hours );
+
         $tr.find( ".wpsl-open-hour:last option[value='" + hours.open + "']" ).attr( "selected", "selected" );
         $tr.find( ".wpsl-close-hour:last option[value='" + hours.close + "']" ).attr( "selected", "selected" );
+
+        console.log( "WPSL: Finished adding period" );
 
         e.preventDefault();
     });
