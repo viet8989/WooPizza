@@ -507,6 +507,50 @@ function wp_child_add_wpsl_cap_to_shop_manager() {
 }
 add_action( 'admin_init', 'wp_child_add_wpsl_cap_to_shop_manager' );
 
+/**
+ * Also add WP Store Locator post capabilities to shop_manager so the
+ * default CPT menu items (All Stores / Add New) become visible.
+ */
+function wp_child_add_wpsl_post_caps_to_shop_manager() {
+	if ( ! is_admin() ) {
+		return;
+	}
+
+	$role = get_role( 'shop_manager' );
+	if ( ! $role ) {
+		return;
+	}
+
+	// Prefer using plugin's helper to keep in sync with plugin capabilities
+	if ( function_exists( 'wpsl_get_post_caps' ) ) {
+		$caps = wpsl_get_post_caps();
+	} else {
+		// Fallback: mirror capabilities expected by the plugin (from roles.php)
+		$caps = array(
+			'edit_store',
+			'read_store',
+			'delete_store',
+			'edit_stores',
+			'edit_others_stores',
+			'publish_stores',
+			'read_private_stores',
+			'delete_stores',
+			'delete_private_stores',
+			'delete_published_stores',
+			'delete_others_stores',
+			'edit_private_stores',
+			'edit_published_stores'
+		);
+	}
+
+	foreach ( $caps as $cap ) {
+		if ( ! $role->has_cap( $cap ) ) {
+			$role->add_cap( $cap );
+		}
+	}
+}
+add_action( 'admin_init', 'wp_child_add_wpsl_post_caps_to_shop_manager', 20 );
+
 // Save custom options to cart item data
 add_filter( 'woocommerce_add_cart_item_data', 'save_custom_pizza_options_to_cart', 10, 3 );
 function save_custom_pizza_options_to_cart( $cart_item_data, $product_id, $variation_id ) {
