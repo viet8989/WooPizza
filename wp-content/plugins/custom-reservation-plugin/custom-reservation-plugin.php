@@ -178,12 +178,12 @@ function crp_render_reservation_form()
                         <input type="date" name="reservation_date" id="reservation_date" required min="<?= date('Y-m-d') ?>">
                     </div>
                     <div class="form-time">
-                        <input type="time" name="start_time" id="start_time" required min="17:00" max="21:45">
+                        <input type="time" name="start_time" id="start_time" required>
                         <span id="end_time_display" style="margin-left: 10px; font-weight: bold;"></span>
                         <input type="hidden" name="end_time" id="end_time">
                     </div>
                 </div>
-                <small style="color: #666;">Operating hours: 5:00 PM – 9:45 PM</small>
+                <small style="color: #666;">Operating hours vary by store - select date & time to see available branches</small>
             </div>
 
             <div class="form-row">
@@ -196,7 +196,7 @@ function crp_render_reservation_form()
                     <button type="button" class="party-btn" data-value="7+">7+</button>
                 </div>
                 <input type="hidden" name="party_size" id="party-size-selected" value="4" required>
-                <small style="color: #666;">For bookings of 10+ guests, a deposit of 500,000₫/person is required.</small>
+                <!-- <small style="color: #666;">For bookings of 10+ guests, a deposit of 500,000₫/person is required.</small> -->
             </div>
 
             <div class="form-row form-row-select" id="branch-selection-section" style="display: none;">
