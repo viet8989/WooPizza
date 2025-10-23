@@ -92,6 +92,24 @@ if ( !class_exists( 'WPSL_Metaboxes' ) ) {
                         'type'  => $wpsl_settings['editor_hour_input'] //Either set to textarea or dropdown. This is defined through the 'Opening hours input format: ' option on the settings page
                     )
                 ),
+                __( 'Reservation Hours', 'wpsl' ) => array(
+                    'reservation_hours' => array(
+                        'label' => __( 'Reservation Hours', 'wpsl' ),
+                        'type'  => $wpsl_settings['editor_hour_input']
+                    )
+                ),
+                __( 'Pick up Hours', 'wpsl' ) => array(
+                    'pickup_hours' => array(
+                        'label' => __( 'Pick up Hours', 'wpsl' ),
+                        'type'  => $wpsl_settings['editor_hour_input']
+                    )
+                ),
+                __( 'Delivery Hours', 'wpsl' ) => array(
+                    'delivery_hours' => array(
+                        'label' => __( 'Delivery Hours', 'wpsl' ),
+                        'type'  => $wpsl_settings['editor_hour_input']
+                    )
+                ),
                 __( 'Additional Information', 'wpsl' ) => array(
                     'phone' => array(
                         'label' => __( 'Tel', 'wpsl' )
@@ -318,7 +336,7 @@ if ( !class_exists( 'WPSL_Metaboxes' ) ) {
 
             $saved_value = $this->get_store_meta( $args['key'] );
 
-            if ( $args['key'] == 'hours' && gettype( $saved_value ) !== 'string' ) {
+            if ( in_array( $args['key'], array( 'hours', 'reservation_hours', 'pickup_hours', 'delivery_hours' ) ) && gettype( $saved_value ) !== 'string' ) {
                 $saved_value = '';
             }
 
@@ -392,6 +410,12 @@ if ( !class_exists( 'WPSL_Metaboxes' ) ) {
             // The hour dropdown requires a different structure with multiple dropdowns.
             if ( $args['key'] == 'hours' ) {
                 $this->opening_hours();
+            } else if ( $args['key'] == 'reservation_hours' ) {
+                $this->reservation_hours();
+            } else if ( $args['key'] == 'pickup_hours' ) {
+                $this->pickup_hours();
+            } else if ( $args['key'] == 'delivery_hours' ) {
+                $this->delivery_hours();
             } else {
                 $option_list = $args['data']['options'];
                 $saved_value = $this->get_store_meta( $args['key'] );
@@ -477,6 +501,345 @@ if ( !class_exists( 'WPSL_Metaboxes' ) ) {
                         <tr>
                             <td class="wpsl-opening-day"><?php echo esc_html( $day ); ?></td>
                             <td id="wpsl-hours-<?php echo esc_attr( $index ); ?>" class="wpsl-opening-hours" data-day="<?php echo esc_attr( $index ); ?>">
+                                <?php
+                                if ( $hour_count > 0 ) {
+                                    // Loop over the opening periods.
+                                    while ( $i < $hour_count ) {
+                                        if ( isset( $opening_hours[$index][$i] ) ) {
+                                            $hours = explode( ',', $opening_hours[$index][$i] );
+                                        } else {
+                                            $hours = '';
+                                        }
+
+                                        // If we don't have two parts or one of them is empty, then we set the store to closed.
+                                        if ( ( count( $hours ) == 2 ) && ( !empty( $hours[0] ) ) && ( !empty( $hours[1] ) ) ) {
+                                            $args = array(
+                                                'day'         => $index,
+                                                'name'        => $name,
+                                                'hour_format' => $hour_format,
+                                                'hours'       => $hours
+                                            );
+                                            ?>
+                                            <div class="wpsl-current-period <?php if ( $i > 0 ) { echo 'wpsl-multiple-periods'; } ?>">
+                                                <?php echo $this->opening_hours_dropdown( $args, 'open' ); ?>
+                                                <span> - </span>
+                                                <?php echo $this->opening_hours_dropdown( $args, 'close' ); ?>
+                                                <div class="wpsl-icon-cancel-circled"></div>
+                                            </div>
+                                            <?php
+                                        } else {
+                                            $this->show_store_closed( $name, $index );
+                                        }
+
+                                        $i++;
+                                    }
+                                } else {
+                                    $this->show_store_closed( $name, $index );
+                                }
+                                ?>
+                            </td>
+                            <td>
+                                <div class="wpsl-add-period">
+                                    <div class="wpsl-icon-plus-circled"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php
+                    }
+                    ?>
+                </table>
+            <?php
+        }
+
+        /**
+         * Create the reservation hours table with the hours as dropdowns.
+         *
+         * @since 2.0.0
+         * @param string $location The location were the reservation hours are shown.
+         * @return void
+         */
+        public function reservation_hours( $location = 'store_page' ) {
+
+            global $wpsl_settings, $wpsl_admin, $post;
+
+            $name          = ( $location == 'settings' ) ? 'wpsl_editor[reservation_dropdown]' : 'wpsl[reservation_hours]';
+            $opening_days  = wpsl_get_weekdays();
+            $opening_hours = '';
+            $hours         = '';
+
+            if ( $location == 'store_page' ) {
+                $opening_hours = get_post_meta( $post->ID, 'wpsl_reservation_hours' );
+            }
+
+            // If we don't have any reservation hours, we use the defaults.
+            if ( !isset( $opening_hours[0]['monday'] ) ) {
+                $opening_hours = $wpsl_settings['editor_hours']['dropdown'];
+            } else {
+                $opening_hours = $opening_hours[0];
+            }
+
+            // Find out whether we have a 12 or 24hr format.
+            $hour_format = $this->find_hour_format( $opening_hours );
+
+            if ( $hour_format == 24 ) {
+                $hour_class = 'wpsl-twentyfour-format';
+            } else {
+                $hour_class = 'wpsl-twelve-format';
+            }
+
+            if ( $location == 'store_page' ) {
+                ?>
+                <p class="wpsl-hours-dropdown">
+                    <label for="wpsl-editor-reservation-hour-input"><?php _e( 'Hour format', 'wpsl' ); ?>:</label>
+                    <?php echo $wpsl_admin->settings_page->show_opening_hours_format( $hour_format ); ?>
+                </p>
+            <?php } ?>
+
+                <table id="wpsl-reservation-hours" class="<?php echo $hour_class; ?>">
+                    <tr>
+                        <th><?php _e( 'Days', 'wpsl' ); ?></th>
+                        <th><?php _e( 'Reservation Periods', 'wpsl' ); ?></th>
+                        <th></th>
+                    </tr>
+                    <?php
+                    foreach ( $opening_days as $index => $day ) {
+                        $i = 0;
+
+                        if ( is_array( $opening_hours[$index] ) ) {
+                            $hour_count = count( $opening_hours[$index] );
+                        } else {
+                            $hour_count = 0;
+                        }
+                        ?>
+                        <tr>
+                            <td class="wpsl-opening-day"><?php echo esc_html( $day ); ?></td>
+                            <td id="wpsl-reservation-hours-<?php echo esc_attr( $index ); ?>" class="wpsl-opening-hours" data-day="<?php echo esc_attr( $index ); ?>">
+                                <?php
+                                if ( $hour_count > 0 ) {
+                                    // Loop over the opening periods.
+                                    while ( $i < $hour_count ) {
+                                        if ( isset( $opening_hours[$index][$i] ) ) {
+                                            $hours = explode( ',', $opening_hours[$index][$i] );
+                                        } else {
+                                            $hours = '';
+                                        }
+
+                                        // If we don't have two parts or one of them is empty, then we set the store to closed.
+                                        if ( ( count( $hours ) == 2 ) && ( !empty( $hours[0] ) ) && ( !empty( $hours[1] ) ) ) {
+                                            $args = array(
+                                                'day'         => $index,
+                                                'name'        => $name,
+                                                'hour_format' => $hour_format,
+                                                'hours'       => $hours
+                                            );
+                                            ?>
+                                            <div class="wpsl-current-period <?php if ( $i > 0 ) { echo 'wpsl-multiple-periods'; } ?>">
+                                                <?php echo $this->opening_hours_dropdown( $args, 'open' ); ?>
+                                                <span> - </span>
+                                                <?php echo $this->opening_hours_dropdown( $args, 'close' ); ?>
+                                                <div class="wpsl-icon-cancel-circled"></div>
+                                            </div>
+                                            <?php
+                                        } else {
+                                            $this->show_store_closed( $name, $index );
+                                        }
+
+                                        $i++;
+                                    }
+                                } else {
+                                    $this->show_store_closed( $name, $index );
+                                }
+                                ?>
+                            </td>
+                            <td>
+                                <div class="wpsl-add-period">
+                                    <div class="wpsl-icon-plus-circled"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php
+                    }
+                    ?>
+                </table>
+            <?php
+        }
+
+        /**
+         * Create the pickup hours table with the hours as dropdowns.
+         *
+         * @since 2.0.0
+         * @param string $location The location were the pickup hours are shown.
+         * @return void
+         */
+        public function pickup_hours( $location = 'store_page' ) {
+
+            global $wpsl_settings, $wpsl_admin, $post;
+
+            $name          = ( $location == 'settings' ) ? 'wpsl_editor[pickup_dropdown]' : 'wpsl[pickup_hours]';
+            $opening_days  = wpsl_get_weekdays();
+            $opening_hours = '';
+            $hours         = '';
+
+            if ( $location == 'store_page' ) {
+                $opening_hours = get_post_meta( $post->ID, 'wpsl_pickup_hours' );
+            }
+
+            // If we don't have any pickup hours, we use the defaults.
+            if ( !isset( $opening_hours[0]['monday'] ) ) {
+                $opening_hours = $wpsl_settings['editor_hours']['dropdown'];
+            } else {
+                $opening_hours = $opening_hours[0];
+            }
+
+            // Find out whether we have a 12 or 24hr format.
+            $hour_format = $this->find_hour_format( $opening_hours );
+
+            if ( $hour_format == 24 ) {
+                $hour_class = 'wpsl-twentyfour-format';
+            } else {
+                $hour_class = 'wpsl-twelve-format';
+            }
+
+            if ( $location == 'store_page' ) {
+                ?>
+                <p class="wpsl-hours-dropdown">
+                    <label for="wpsl-editor-pickup-hour-input"><?php _e( 'Hour format', 'wpsl' ); ?>:</label>
+                    <?php echo $wpsl_admin->settings_page->show_opening_hours_format( $hour_format ); ?>
+                </p>
+            <?php } ?>
+
+                <table id="wpsl-pickup-hours" class="<?php echo $hour_class; ?>">
+                    <tr>
+                        <th><?php _e( 'Days', 'wpsl' ); ?></th>
+                        <th><?php _e( 'Pick up Periods', 'wpsl' ); ?></th>
+                        <th></th>
+                    </tr>
+                    <?php
+                    foreach ( $opening_days as $index => $day ) {
+                        $i = 0;
+
+                        if ( is_array( $opening_hours[$index] ) ) {
+                            $hour_count = count( $opening_hours[$index] );
+                        } else {
+                            $hour_count = 0;
+                        }
+                        ?>
+                        <tr>
+                            <td class="wpsl-opening-day"><?php echo esc_html( $day ); ?></td>
+                            <td id="wpsl-pickup-hours-<?php echo esc_attr( $index ); ?>" class="wpsl-opening-hours" data-day="<?php echo esc_attr( $index ); ?>">
+                                <?php
+                                if ( $hour_count > 0 ) {
+                                    // Loop over the opening periods.
+                                    while ( $i < $hour_count ) {
+                                        if ( isset( $opening_hours[$index][$i] ) ) {
+                                            $hours = explode( ',', $opening_hours[$index][$i] );
+                                        } else {
+                                            $hours = '';
+                                        }
+
+                                        // If we don't have two parts or one of them is empty, then we set the store to closed.
+                                        if ( ( count( $hours ) == 2 ) && ( !empty( $hours[0] ) ) && ( !empty( $hours[1] ) ) ) {
+                                            $args = array(
+                                                'day'         => $index,
+                                                'name'        => $name,
+                                                'hour_format' => $hour_format,
+                                                'hours'       => $hours
+                                            );
+                                            ?>
+                                            <div class="wpsl-current-period <?php if ( $i > 0 ) { echo 'wpsl-multiple-periods'; } ?>">
+                                                <?php echo $this->opening_hours_dropdown( $args, 'open' ); ?>
+                                                <span> - </span>
+                                                <?php echo $this->opening_hours_dropdown( $args, 'close' ); ?>
+                                                <div class="wpsl-icon-cancel-circled"></div>
+                                            </div>
+                                            <?php
+                                        } else {
+                                            $this->show_store_closed( $name, $index );
+                                        }
+
+                                        $i++;
+                                    }
+                                } else {
+                                    $this->show_store_closed( $name, $index );
+                                }
+                                ?>
+                            </td>
+                            <td>
+                                <div class="wpsl-add-period">
+                                    <div class="wpsl-icon-plus-circled"></div>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php
+                    }
+                    ?>
+                </table>
+            <?php
+        }
+
+        /**
+         * Create the delivery hours table with the hours as dropdowns.
+         *
+         * @since 2.0.0
+         * @param string $location The location were the delivery hours are shown.
+         * @return void
+         */
+        public function delivery_hours( $location = 'store_page' ) {
+
+            global $wpsl_settings, $wpsl_admin, $post;
+
+            $name          = ( $location == 'settings' ) ? 'wpsl_editor[delivery_dropdown]' : 'wpsl[delivery_hours]';
+            $opening_days  = wpsl_get_weekdays();
+            $opening_hours = '';
+            $hours         = '';
+
+            if ( $location == 'store_page' ) {
+                $opening_hours = get_post_meta( $post->ID, 'wpsl_delivery_hours' );
+            }
+
+            // If we don't have any delivery hours, we use the defaults.
+            if ( !isset( $opening_hours[0]['monday'] ) ) {
+                $opening_hours = $wpsl_settings['editor_hours']['dropdown'];
+            } else {
+                $opening_hours = $opening_hours[0];
+            }
+
+            // Find out whether we have a 12 or 24hr format.
+            $hour_format = $this->find_hour_format( $opening_hours );
+
+            if ( $hour_format == 24 ) {
+                $hour_class = 'wpsl-twentyfour-format';
+            } else {
+                $hour_class = 'wpsl-twelve-format';
+            }
+
+            if ( $location == 'store_page' ) {
+                ?>
+                <p class="wpsl-hours-dropdown">
+                    <label for="wpsl-editor-delivery-hour-input"><?php _e( 'Hour format', 'wpsl' ); ?>:</label>
+                    <?php echo $wpsl_admin->settings_page->show_opening_hours_format( $hour_format ); ?>
+                </p>
+            <?php } ?>
+
+                <table id="wpsl-delivery-hours" class="<?php echo $hour_class; ?>">
+                    <tr>
+                        <th><?php _e( 'Days', 'wpsl' ); ?></th>
+                        <th><?php _e( 'Delivery Periods', 'wpsl' ); ?></th>
+                        <th></th>
+                    </tr>
+                    <?php
+                    foreach ( $opening_days as $index => $day ) {
+                        $i = 0;
+
+                        if ( is_array( $opening_hours[$index] ) ) {
+                            $hour_count = count( $opening_hours[$index] );
+                        } else {
+                            $hour_count = 0;
+                        }
+                        ?>
+                        <tr>
+                            <td class="wpsl-opening-day"><?php echo esc_html( $day ); ?></td>
+                            <td id="wpsl-delivery-hours-<?php echo esc_attr( $index ); ?>" class="wpsl-opening-hours" data-day="<?php echo esc_attr( $index ); ?>">
                                 <?php
                                 if ( $hour_count > 0 ) {
                                     // Loop over the opening periods.
@@ -661,6 +1024,21 @@ if ( !class_exists( 'WPSL_Metaboxes' ) ) {
                 $this->store_data['hours'] = $this->format_opening_hours();
             }
 
+            // Check if the reservation hours are set through dropdowns.
+            if ( isset( $this->store_data['reservation_hours'] ) && is_array( $this->store_data['reservation_hours'] ) && ( !empty( $this->store_data['reservation_hours'] ) ) ) {
+                $this->store_data['reservation_hours'] = $this->format_reservation_hours();
+            }
+
+            // Check if the pickup hours are set through dropdowns.
+            if ( isset( $this->store_data['pickup_hours'] ) && is_array( $this->store_data['pickup_hours'] ) && ( !empty( $this->store_data['pickup_hours'] ) ) ) {
+                $this->store_data['pickup_hours'] = $this->format_pickup_hours();
+            }
+
+            // Check if the delivery hours are set through dropdowns.
+            if ( isset( $this->store_data['delivery_hours'] ) && is_array( $this->store_data['delivery_hours'] ) && ( !empty( $this->store_data['delivery_hours'] ) ) ) {
+                $this->store_data['delivery_hours'] = $this->format_delivery_hours();
+            }
+
             // Loop over the meta fields defined in the meta_box_fields and update the post meta data.
             foreach ( $this->meta_box_fields() as $tab => $meta_fields ) {
                 foreach ( $meta_fields as $field_key => $field_data ) {
@@ -754,6 +1132,111 @@ if ( !class_exists( 'WPSL_Metaboxes' ) ) {
             }
 
             return $opening_hours;
+        }
+
+        /**
+         * Loop through the reservation hours and structure the data in a new array.
+         *
+         * @since 2.0.0
+         * @return array $reservation_hours The formatted reservation hours
+         */
+        public function format_reservation_hours() {
+
+            $week_days = wpsl_get_weekdays();
+
+            // Use the reservation hours from the editor page or the add/edit store page.
+            if ( isset( $_POST['wpsl_editor']['reservation_dropdown'] ) ) {
+                $store_hours = $_POST['wpsl_editor']['reservation_dropdown'];
+            } else if ( isset( $this->store_data['reservation_hours'] ) ) {
+                $store_hours = $this->store_data['reservation_hours'];
+            }
+
+            foreach ( $week_days as $day => $value ) {
+                $i       = 0;
+                $periods = array();
+
+                if ( isset( $store_hours[$day . '_open'] ) && $store_hours[$day . '_open'] ) {
+                    foreach ( $store_hours[$day . '_open'] as $opening_hour ) {
+                        $hours     = $this->validate_hour( $store_hours[$day.'_open'][$i] ) . ',' . $this->validate_hour( $store_hours[$day.'_close'][$i] );
+                        $periods[] = $hours;
+                        $i++;
+                    }
+                }
+
+                $reservation_hours[$day] = $periods;
+            }
+
+            return $reservation_hours;
+        }
+
+        /**
+         * Loop through the pickup hours and structure the data in a new array.
+         *
+         * @since 2.0.0
+         * @return array $pickup_hours The formatted pickup hours
+         */
+        public function format_pickup_hours() {
+
+            $week_days = wpsl_get_weekdays();
+
+            // Use the pickup hours from the editor page or the add/edit store page.
+            if ( isset( $_POST['wpsl_editor']['pickup_dropdown'] ) ) {
+                $store_hours = $_POST['wpsl_editor']['pickup_dropdown'];
+            } else if ( isset( $this->store_data['pickup_hours'] ) ) {
+                $store_hours = $this->store_data['pickup_hours'];
+            }
+
+            foreach ( $week_days as $day => $value ) {
+                $i       = 0;
+                $periods = array();
+
+                if ( isset( $store_hours[$day . '_open'] ) && $store_hours[$day . '_open'] ) {
+                    foreach ( $store_hours[$day . '_open'] as $opening_hour ) {
+                        $hours     = $this->validate_hour( $store_hours[$day.'_open'][$i] ) . ',' . $this->validate_hour( $store_hours[$day.'_close'][$i] );
+                        $periods[] = $hours;
+                        $i++;
+                    }
+                }
+
+                $pickup_hours[$day] = $periods;
+            }
+
+            return $pickup_hours;
+        }
+
+        /**
+         * Loop through the delivery hours and structure the data in a new array.
+         *
+         * @since 2.0.0
+         * @return array $delivery_hours The formatted delivery hours
+         */
+        public function format_delivery_hours() {
+
+            $week_days = wpsl_get_weekdays();
+
+            // Use the delivery hours from the editor page or the add/edit store page.
+            if ( isset( $_POST['wpsl_editor']['delivery_dropdown'] ) ) {
+                $store_hours = $_POST['wpsl_editor']['delivery_dropdown'];
+            } else if ( isset( $this->store_data['delivery_hours'] ) ) {
+                $store_hours = $this->store_data['delivery_hours'];
+            }
+
+            foreach ( $week_days as $day => $value ) {
+                $i       = 0;
+                $periods = array();
+
+                if ( isset( $store_hours[$day . '_open'] ) && $store_hours[$day . '_open'] ) {
+                    foreach ( $store_hours[$day . '_open'] as $opening_hour ) {
+                        $hours     = $this->validate_hour( $store_hours[$day.'_open'][$i] ) . ',' . $this->validate_hour( $store_hours[$day.'_close'][$i] );
+                        $periods[] = $hours;
+                        $i++;
+                    }
+                }
+
+                $delivery_hours[$day] = $periods;
+            }
+
+            return $delivery_hours;
         }
 
         /*
