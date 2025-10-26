@@ -37,4 +37,11 @@ document.addEventListener('DOMContentLoaded', function() {
             header.classList.remove('show-menu'); // Xóa class show nếu có
         });
     }
+
+    // Center flickity slider on delivery page
+    const flickitySlider = document.querySelector('.flickity-slider');
+    if (flickitySlider) {
+        flickitySlider.style.transform = 'translateX(0)';
+        flickitySlider.style.left = '0';
+    }
 });
