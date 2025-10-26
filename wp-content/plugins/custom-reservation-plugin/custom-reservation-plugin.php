@@ -188,15 +188,12 @@ function crp_render_reservation_form()
 
             <div class="form-row">
                 <label>Party Size (Number of Guests) *</label>
-                <div id="party-size-buttons">
-                    <?php for ($i = 1; $i <= 7; $i++): ?>
-                        <button type="button" class="party-btn <?= $i === 4 ? 'selected' : '' ?>"
-                            data-value="<?= $i ?>"><?= $i ?></button>
-                    <?php endfor; ?>
-                    <button type="button" class="party-btn" data-value="7+">7+</button>
+                <div class="party-size-input-wrapper">
+                    <button type="button" class="party-size-btn party-size-minus">-</button>
+                    <input type="number" name="party_size" id="party-size-input" value="4" min="1" max="20" required readonly>
+                    <button type="button" class="party-size-btn party-size-plus">+</button>
                 </div>
-                <input type="hidden" name="party_size" id="party-size-selected" value="4" required>
-                <!-- <small style="color: #666;">For bookings of 10+ guests, a deposit of 500,000₫/person is required.</small> -->
+                <small style="color: #666;">Minimum 1 guest, Maximum 20 guests</small>
             </div>
 
             <div class="form-row form-row-select" id="branch-selection-section" style="display: none;">
@@ -408,13 +405,44 @@ function crp_render_reservation_form()
                 loadAvailableStores();
             });
 
-            // Party size button selection
-            $('.party-btn').on('click', function() {
-                $('.party-btn').removeClass('selected');
-                $(this).addClass('selected');
-                const partySize = $(this).data('value');
-                $('#party-size-selected').val(partySize);
-                console.log('Party size selected:', partySize);
+            // Party size increment/decrement buttons
+            $('.party-size-plus').on('click', function() {
+                const input = $('#party-size-input');
+                let currentValue = parseInt(input.val()) || 4;
+                const maxValue = parseInt(input.attr('max')) || 20;
+
+                if (currentValue < maxValue) {
+                    currentValue++;
+                    input.val(currentValue);
+                    console.log('Party size increased to:', currentValue);
+                }
+            });
+
+            $('.party-size-minus').on('click', function() {
+                const input = $('#party-size-input');
+                let currentValue = parseInt(input.val()) || 4;
+                const minValue = parseInt(input.attr('min')) || 1;
+
+                if (currentValue > minValue) {
+                    currentValue--;
+                    input.val(currentValue);
+                    console.log('Party size decreased to:', currentValue);
+                }
+            });
+
+            // Allow direct input change
+            $('#party-size-input').on('change', function() {
+                const input = $(this);
+                let value = parseInt(input.val()) || 4;
+                const minValue = parseInt(input.attr('min')) || 1;
+                const maxValue = parseInt(input.attr('max')) || 20;
+
+                // Enforce min/max constraints
+                if (value < minValue) value = minValue;
+                if (value > maxValue) value = maxValue;
+
+                input.val(value);
+                console.log('Party size set to:', value);
             });
 
             // Form submission
@@ -565,33 +593,73 @@ function crp_render_reservation_form()
             cursor: pointer;
         }
 
-        #party-size-buttons {
+        .party-size-input-wrapper {
             display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+            align-items: center;
+            gap: 0;
+            max-width: 180px;
             margin-bottom: 10px;
         }
 
-        .party-btn {
-            padding: 12px 20px;
+        .party-size-btn {
+            width: 45px;
+            height: 45px;
             cursor: pointer;
-            border: 2px solid #ddd;
+            border: 2px solid #CD0000;
             background-color: #fff;
-            color: #333;
-            font-weight: 600;
-            border-radius: 4px;
-            font-size: 16px;
+            color: #CD0000;
+            font-weight: 700;
+            font-size: 24px;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
         }
 
-        .party-btn:hover {
-            border-color: #CD0000;
+        .party-size-minus {
+            border-radius: 4px 0 0 4px;
+            border-right: 1px solid #CD0000;
         }
 
-        .party-btn.selected {
+        .party-size-plus {
+            border-radius: 0 4px 4px 0;
+            border-left: 1px solid #CD0000;
+        }
+
+        .party-size-btn:hover {
             background-color: #CD0000;
             color: white;
-            border-color: #CD0000;
+        }
+
+        .party-size-btn:active {
+            transform: scale(0.95);
+        }
+
+        #party-size-input {
+            width: 90px;
+            height: 45px;
+            text-align: center;
+            border: 2px solid #CD0000;
+            border-left: none;
+            border-right: none;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            background-color: #fff;
+            -moz-appearance: textfield;
+            cursor: default;
+        }
+
+        #party-size-input::-webkit-outer-spin-button,
+        #party-size-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        #party-size-input:focus {
+            outline: none;
+            background-color: #f9f9f9;
         }
 
         .submit-btn {
