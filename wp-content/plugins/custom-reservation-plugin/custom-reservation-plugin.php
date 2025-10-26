@@ -599,7 +599,7 @@ function crp_render_reservation_form()
         }
 
         /* Custom color override for reservation form quantity buttons */
-        #crp-reservation-form .quantity .button {
+        /* #crp-reservation-form .quantity .button {
             background-color: #CD0000;
             border-color: #CD0000;
             color: white;
@@ -608,7 +608,7 @@ function crp_render_reservation_form()
         #crp-reservation-form .quantity .button:hover {
             background-color: #a00000;
             border-color: #a00000;
-        }
+        } */
 
         .submit-btn {
             width: 100%;
