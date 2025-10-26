@@ -1,0 +1,1 @@
+I want UX layout equal with '<div class="quantity buttons_added form-normal">' in link https://terravivapizza.com/product/diavola/

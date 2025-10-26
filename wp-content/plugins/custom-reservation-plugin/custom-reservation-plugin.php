@@ -188,10 +188,10 @@ function crp_render_reservation_form()
 
             <div class="form-row">
                 <label>Party Size (Number of Guests) *</label>
-                <div class="party-size-input-wrapper">
-                    <button type="button" class="party-size-btn party-size-minus">-</button>
-                    <input type="number" name="party_size" id="party-size-input" value="4" min="1" max="20" required readonly>
-                    <button type="button" class="party-size-btn party-size-plus">+</button>
+                <div class="quantity buttons_added">
+                    <button type="button" class="minus button is-form">-</button>
+                    <input type="number" name="party_size" id="party-size-input" class="input-text qty text" value="4" min="1" max="20" step="1" required>
+                    <button type="button" class="plus button is-form">+</button>
                 </div>
                 <small style="color: #666;">Minimum 1 guest, Maximum 20 guests</small>
             </div>
@@ -405,8 +405,8 @@ function crp_render_reservation_form()
                 loadAvailableStores();
             });
 
-            // Party size increment/decrement buttons
-            $('.party-size-plus').on('click', function() {
+            // Party size increment/decrement buttons (WooCommerce-style quantity selector)
+            $('.quantity .plus').on('click', function() {
                 const input = $('#party-size-input');
                 let currentValue = parseInt(input.val()) || 4;
                 const maxValue = parseInt(input.attr('max')) || 20;
@@ -418,7 +418,7 @@ function crp_render_reservation_form()
                 }
             });
 
-            $('.party-size-minus').on('click', function() {
+            $('.quantity .minus').on('click', function() {
                 const input = $('#party-size-input');
                 let currentValue = parseInt(input.val()) || 4;
                 const minValue = parseInt(input.attr('min')) || 1;
@@ -593,73 +593,21 @@ function crp_render_reservation_form()
             cursor: pointer;
         }
 
-        .party-size-input-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 0;
-            max-width: 180px;
+        /* Party Size Quantity Selector - Using Flatsome/WooCommerce styles */
+        .form-row .quantity {
             margin-bottom: 10px;
         }
 
-        .party-size-btn {
-            width: 45px;
-            height: 45px;
-            cursor: pointer;
-            border: 2px solid #CD0000;
-            background-color: #fff;
-            color: #CD0000;
-            font-weight: 700;
-            font-size: 24px;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            user-select: none;
-        }
-
-        .party-size-minus {
-            border-radius: 4px 0 0 4px;
-            border-right: 1px solid #CD0000;
-        }
-
-        .party-size-plus {
-            border-radius: 0 4px 4px 0;
-            border-left: 1px solid #CD0000;
-        }
-
-        .party-size-btn:hover {
+        /* Custom color override for reservation form quantity buttons */
+        #crp-reservation-form .quantity .button {
             background-color: #CD0000;
+            border-color: #CD0000;
             color: white;
         }
 
-        .party-size-btn:active {
-            transform: scale(0.95);
-        }
-
-        #party-size-input {
-            width: 90px;
-            height: 45px;
-            text-align: center;
-            border: 2px solid #CD0000;
-            border-left: none;
-            border-right: none;
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-            background-color: #fff;
-            -moz-appearance: textfield;
-            cursor: default;
-        }
-
-        #party-size-input::-webkit-outer-spin-button,
-        #party-size-input::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
-        #party-size-input:focus {
-            outline: none;
-            background-color: #f9f9f9;
+        #crp-reservation-form .quantity .button:hover {
+            background-color: #a00000;
+            border-color: #a00000;
         }
 
         .submit-btn {
