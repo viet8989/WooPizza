@@ -189,11 +189,11 @@ function crp_render_reservation_form()
             <div class="form-row">
                 <label>Party Size (Number of Guests) *</label>
                 <div class="quantity buttons_added">
-                    <button type="button" class="minus button is-form">-</button>
+                    <button type="button" class="minus button is-form" style="margin-right: 0">-</button>
                     <input type="number" name="party_size" id="party-size-input" class="input-text qty text" value="4" min="1" max="20" step="1" required>
                     <button type="button" class="plus button is-form">+</button>
                 </div>
-                <small style="color: #666;">Minimum 1 guest, Maximum 20 guests</small>
+                <small style="color: #666; padding-top: 10px;">Minimum 1 guest, Maximum 20 guests</small>
             </div>
 
             <div class="form-row form-row-select" id="branch-selection-section" style="display: none;">
