@@ -38,10 +38,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Center flickity slider on delivery page
-    const flickitySlider = document.querySelector('.flickity-slider');
-    if (flickitySlider) {
-        flickitySlider.style.transform = 'translateX(0)';
-        flickitySlider.style.left = '0';
+    // Center flickity slider container on delivery page
+    const rowSlider = document.querySelector('.row-slider');
+    if (rowSlider) {
+        // Center the entire carousel container
+        rowSlider.style.display = 'flex';
+        rowSlider.style.justifyContent = 'center';
+        rowSlider.style.alignItems = 'center';
+
+        // Get the flickity slider and center its content
+        const flickitySlider = rowSlider.querySelector('.flickity-slider');
+        if (flickitySlider) {
+            flickitySlider.style.transform = 'translateX(0)';
+            flickitySlider.style.left = '0';
+            flickitySlider.style.textAlign = 'center';
+        }
+
+        console.log('Carousel centered');
     }
 });
