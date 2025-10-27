@@ -162,6 +162,10 @@ body #header.stuck {
 	max-width: 70px;
 } */
 
+.page-title {
+	padding-top: 80px;
+}
+
 .icon-box-left .icon-box-img, .icon-box-right .icon-box-img {
 	width: 18px !important;
 }
