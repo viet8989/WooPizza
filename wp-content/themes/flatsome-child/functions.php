@@ -37,13 +37,14 @@ function remove_sticky_header_script() {
 
             // Force position relative
             $('#header, .header-wrapper').css({
-                'position': 'relative !important',
-                'top': 'auto !important',
-                'left': 'auto !important',
-                'right': 'auto !important',
+                'position': 'fixed !important',
+                'top': 'calc(var(--spacing) * 0) !important',
+                'left': 'calc(var(--spacing) * 0) !important',
+                'right': 'calc(var(--spacing) * 0) !important',
                 'transform': 'none !important'
             }).attr('style', function(i, style) {
-                return style ? style.replace(/position\s*:\s*fixed/gi, 'position: relative') : style;
+                // return style ? style.replace(/position\s*:\s*fixed/gi, 'position: relative') : style;
+				return style;
             });
         }
 
