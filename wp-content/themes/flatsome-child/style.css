@@ -151,6 +151,17 @@ body #header.stuck {
 	text-align: center
 }
 
+.is-selected .box-category {
+	background-color: #fff;
+	box-shadow: rgba(101, 118, 122, 0.25) 0px 0px 10px;
+	border-radius: 10px;
+}
+
+.is-selected .box-category img {
+	max-height: 70px;
+	max-width: 70px;
+}
+
 .icon-box-left .icon-box-img, .icon-box-right .icon-box-img {
 	width: 18px !important;
 }
