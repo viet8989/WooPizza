@@ -706,7 +706,6 @@ function crp_render_reservation_form()
         }
     </style>
 <?php
-    echo '<script>console.log("Reservation form rendered successfully");</script>';
     return ob_get_clean();
 }
 

@@ -105,6 +105,10 @@ body #header.stuck {
 	display: none;
 }
 
+.category-center {
+	justify-content: center;
+}
+
 /* menu open */
 
 .menu-open {
