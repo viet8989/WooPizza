@@ -105,7 +105,7 @@ body #header.stuck {
 	display: none;
 }
 
-.category-center {
+.row.category-center {
 	justify-content: center;
 }
 
