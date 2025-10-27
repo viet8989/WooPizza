@@ -14,6 +14,23 @@ add_filter('woocommerce_currency_symbol', function ($currency_symbol, $currency)
     return $currency_symbol;
 }, 10, 2);
 
+/**
+ * Override WooCommerce category link opening tag template function
+ * Original source: wc-template-functions.php line 1260-1272
+ */
+if ( ! function_exists( 'woocommerce_template_loop_category_link_open' ) ) {
+    /**
+     * Insert the opening anchor tag for categories in the loop.
+     *
+     * @param int|object|string $category Category ID, Object or String.
+     */
+    function woocommerce_template_loop_category_link_open( $category ) {
+        $category_term = get_term( $category, 'product_cat' );
+        $category_name = ( ! $category_term || is_wp_error( $category_term ) ) ? '' : $category_term->name;
+        // echo '<a href="' . esc_url( get_term_link( $category, 'product_cat' ) ) . '">';
+		echo '<a href="#">';
+    }
+}
 
 /**
  * Hide the shipping totals row on the cart page via inline CSS.
