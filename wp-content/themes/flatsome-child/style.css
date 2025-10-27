@@ -105,10 +105,6 @@ body #header.stuck {
 	display: none;
 }
 
-.row.category-center {
-	justify-content: center;
-}
-
 /* menu open */
 
 .menu-open {
@@ -141,6 +137,9 @@ body #header.stuck {
 	margin-bottom: 20px;
 }
 
+.row.category-center {
+	justify-content: center;
+}
 
 .product-category .box-category .count {
 	display: none;
