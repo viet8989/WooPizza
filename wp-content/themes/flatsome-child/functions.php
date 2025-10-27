@@ -43,6 +43,7 @@ function remove_sticky_header_script() {
                 'right': 'calc(var(--spacing) * 0) !important',
                 'transform': 'none !important'
             }).attr('style', function(i, style) {
+				console.log('Disabling sticky header', style);
                 // return style ? style.replace(/position\s*:\s*fixed/gi, 'position: relative') : style;
 				return style;
             });
