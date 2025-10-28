@@ -956,11 +956,6 @@ do_action( 'wc_quick_view_after_single_product' );
 				};
 
 				updateSubtotal();
-
-				// Sync header height to match whole pizza aspect ratio
-				setTimeout(function() {
-					syncPairedPizzaHeight();
-				}, 50);
 			});
 
 			$('#left-pizza').on('click', function() {
@@ -1327,20 +1322,6 @@ do_action( 'wc_quick_view_after_single_product' );
 		initToppingCheckboxes();
 		initAddToCart();
 		initSpecialRequestCounter();
-
-		// Ensure left pizza image sync on load
-		$('#left-pizza').on('load', function() {
-			if ($('#btn-paired').hasClass('active')) {
-				syncPairedPizzaHeight();
-			}
-		});
-
-		// Initial sync if paired mode is visible
-		setTimeout(function() {
-			if ($('#pizza-paired').is(':visible')) {
-				syncPairedPizzaHeight();
-			}
-		}, 200);
 	});
 })(jQuery);
 </script>
