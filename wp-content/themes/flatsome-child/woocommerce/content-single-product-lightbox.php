@@ -466,8 +466,8 @@ do_action( 'wc_quick_view_after_single_product' );
 }
 
 .pizza-main-image {
-	max-width: 100%;
-	height: auto;
+	max-height: 250px;
+	width: auto;
 	border-radius: 3px;
 	margin-bottom: 15px;
 }
