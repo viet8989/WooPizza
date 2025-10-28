@@ -546,7 +546,7 @@ function display_custom_pizza_options_in_cart( $item_data, $cart_item ) {
 		foreach ( $cart_item['extra_topping_options'] as $topping ) {
 			if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
 				$topping_names[] = sprintf(
-					'<br/>%s %s',
+					'%s %s',
 					esc_html( $topping['name'] ),
 					wc_price( $topping['price'] )
 				);
@@ -556,8 +556,8 @@ function display_custom_pizza_options_in_cart( $item_data, $cart_item ) {
 		if ( ! empty( $topping_names ) ) {
 			$item_data[] = array(
 				'key'     => __( 'Add', 'flatsome' ),
-				'value'   => implode( '<br/><br/>', $topping_names ),
-				'display' => '',
+				'value'   => implode( '<br/>', $topping_names ),
+				'display' => 'contents',
 			);
 		}
 	}
