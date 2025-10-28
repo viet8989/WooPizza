@@ -546,7 +546,7 @@ function display_custom_pizza_options_in_cart( $item_data, $cart_item ) {
 		foreach ( $cart_item['extra_topping_options'] as $topping ) {
 			if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
 				$topping_names[] = sprintf(
-					'%s %s',
+					'<br/>%s %s',
 					esc_html( $topping['name'] ),
 					wc_price( $topping['price'] )
 				);
