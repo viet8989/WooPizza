@@ -67,7 +67,105 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 							<?php echo $thumbnail . wp_kses_post( $product_name ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						</a>
 					<?php endif; ?>
-					<?php echo wc_get_formatted_cart_item_data( $cart_item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+
+					<?php
+					// Custom Pizza Options Display (inline logic instead of filter)
+
+					// Display extra toppings (whole pizza)
+					if ( isset( $cart_item['extra_topping_options'] ) && ! empty( $cart_item['extra_topping_options'] ) ) {
+						$topping_names = array();
+						foreach ( $cart_item['extra_topping_options'] as $topping ) {
+							if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
+								$topping_names[] = sprintf(
+									'%s %s',
+									esc_html( $topping['name'] ),
+									wc_price( $topping['price'] )
+								);
+							}
+						}
+						if ( ! empty( $topping_names ) ) {
+							echo '<dl class="variation"><dt class="variation-Add">' . __( 'Add', 'flatsome' ) . ':</dt><dd class="variation-Add"><p>' . implode( '<br/>', $topping_names ) . '</p></dd></dl>';
+						}
+					}
+
+					// Display pizza halves (new structure with per-half toppings)
+					if ( isset( $cart_item['pizza_halves'] ) && ! empty( $cart_item['pizza_halves'] ) ) {
+						$halves = $cart_item['pizza_halves'];
+
+						// Display left half
+						if ( isset( $halves['left_half'] ) && ! empty( $halves['left_half'] ) ) {
+							$left = $halves['left_half'];
+							if ( isset( $left['name'] ) ) {
+								$left_display = esc_html( $left['name'] );
+
+								// Add left half toppings
+								if ( isset( $left['toppings'] ) && ! empty( $left['toppings'] ) ) {
+									$left_topping_names = array();
+									foreach ( $left['toppings'] as $topping ) {
+										if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
+											$left_topping_names[] = sprintf(
+												'%s %s',
+												esc_html( $topping['name'] ),
+												wc_price( $topping['price'] )
+											);
+										}
+									}
+									if ( ! empty( $left_topping_names ) ) {
+										$left_display .= '<br>Add ' . implode( '<br>', $left_topping_names );
+									}
+								}
+
+								echo '<dl class="variation"><dt class="variation-' . esc_attr( strtolower( $left['name'] ) ) . '">' . strtoupper( $left['name'] ) . ':</dt><dd class="variation-' . esc_attr( strtolower( $left['name'] ) ) . '"><p>' . $left_display . '</p></dd></dl>';
+							}
+						}
+
+						// Display right half
+						if ( isset( $halves['right_half'] ) && ! empty( $halves['right_half'] ) ) {
+							$right = $halves['right_half'];
+							if ( isset( $right['name'] ) ) {
+								$right_display = esc_html( $right['name'] );
+
+								// Add right half toppings
+								if ( isset( $right['toppings'] ) && ! empty( $right['toppings'] ) ) {
+									$right_topping_names = array();
+									foreach ( $right['toppings'] as $topping ) {
+										if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
+											$right_topping_names[] = sprintf(
+												'%s %s',
+												esc_html( $topping['name'] ),
+												wc_price( $topping['price'] )
+											);
+										}
+									}
+									if ( ! empty( $right_topping_names ) ) {
+										$right_display .= '<br>Add ' . implode( '<br>', $right_topping_names );
+									}
+								}
+
+								echo '<dl class="variation"><dt class="variation-' . esc_attr( strtolower( $right['name'] ) ) . '">' . strtoupper( $right['name'] ) . ':</dt><dd class="variation-' . esc_attr( strtolower( $right['name'] ) ) . '"><p>' . $right_display . '</p></dd></dl>';
+							}
+						}
+					}
+
+					// Display paired products (legacy support)
+					if ( isset( $cart_item['paired_products'] ) && ! empty( $cart_item['paired_products'] ) ) {
+						foreach ( $cart_item['paired_products'] as $paired ) {
+							if ( isset( $paired['name'] ) && isset( $paired['price'] ) ) {
+								echo '<dl class="variation"><dt class="variation-PairedWith">' . __( 'Paired with', 'flatsome' ) . ':</dt><dd class="variation-PairedWith"><p>' . sprintf(
+									'%s (+%s)',
+									esc_html( $paired['name'] ),
+									wc_price( $paired['price'] )
+								) . '</p></dd></dl>';
+							}
+						}
+					}
+
+					// Display special request
+					if ( isset( $cart_item['special_request'] ) && ! empty( $cart_item['special_request'] ) ) {
+						echo '<dl class="variation"><dt class="variation-SpecialRequest">' . __( 'Special Request', 'flatsome' ) . ':</dt><dd class="variation-SpecialRequest"><p>' . esc_html( $cart_item['special_request'] ) . '</p></dd></dl>';
+					}
+					?>
+
 					<?php echo apply_filters( 'woocommerce_widget_cart_item_quantity', '<span class="quantity">' . sprintf( '%s &times; %s', $cart_item['quantity'], $product_price ) . '</span>', $cart_item, $cart_item_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</li>
 				<?php

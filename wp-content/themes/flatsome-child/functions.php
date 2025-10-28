@@ -537,7 +537,8 @@ function save_custom_pizza_options_to_cart( $cart_item_data, $product_id, $varia
 }
 
 // Display custom options in cart
-add_filter( 'woocommerce_get_item_data', 'display_custom_pizza_options_in_cart', 10, 2 );
+// DISABLED: This filter is no longer used. Display logic is now directly in mini-cart.php template
+// add_filter( 'woocommerce_get_item_data', 'display_custom_pizza_options_in_cart', 10, 2 );
 function display_custom_pizza_options_in_cart( $item_data, $cart_item ) {
 	// Display extra toppings (whole pizza)
 	if ( isset( $cart_item['extra_topping_options'] ) && ! empty( $cart_item['extra_topping_options'] ) ) {
