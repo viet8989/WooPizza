@@ -510,8 +510,8 @@ do_action( 'wc_quick_view_after_single_product' );
 /* Header Section */
 .header-section {
 	display: flex;
-	height: auto;
-	max-width: 100%;
+	max-height: 250px;
+	width: auto;
 	position: relative;
 }
 
