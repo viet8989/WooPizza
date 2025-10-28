@@ -84,7 +84,10 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 							}
 						}
 						if ( ! empty( $topping_names ) ) {
-							echo '<dl class="variation"><dt class="variation-Add">' . __( 'Add', 'flatsome' ) . ':</dt><dd class="variation-Add"><p>' . implode( '<br/>', $topping_names ) . '</p></dd></dl>';
+							echo '<div class="pizza-option-row">';
+							echo '<div class="pizza-option-label">' . __( 'Add', 'flatsome' ) . ':</div>';
+							echo '<div class="pizza-option-value">' . implode( '<br/>', $topping_names ) . '</div>';
+							echo '</div>';
 						}
 					}
 
@@ -115,7 +118,10 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 									}
 								}
 
-								echo '<dl class="variation"><dt class="variation-' . esc_attr( strtolower( $left['name'] ) ) . '">' . strtoupper( $left['name'] ) . ':</dt><dd class="variation-' . esc_attr( strtolower( $left['name'] ) ) . '"><p>' . $left_display . '</p></dd></dl>';
+								echo '<div class="pizza-option-row">';
+								echo '<div class="pizza-option-label">' . strtoupper( $left['name'] ) . ':</div>';
+								echo '<div class="pizza-option-value">' . $left_display . '</div>';
+								echo '</div>';
 							}
 						}
 
@@ -142,7 +148,10 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 									}
 								}
 
-								echo '<dl class="variation"><dt class="variation-' . esc_attr( strtolower( $right['name'] ) ) . '">' . strtoupper( $right['name'] ) . ':</dt><dd class="variation-' . esc_attr( strtolower( $right['name'] ) ) . '"><p>' . $right_display . '</p></dd></dl>';
+								echo '<div class="pizza-option-row">';
+								echo '<div class="pizza-option-label">' . strtoupper( $right['name'] ) . ':</div>';
+								echo '<div class="pizza-option-value">' . $right_display . '</div>';
+								echo '</div>';
 							}
 						}
 					}
@@ -151,18 +160,24 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 					if ( isset( $cart_item['paired_products'] ) && ! empty( $cart_item['paired_products'] ) ) {
 						foreach ( $cart_item['paired_products'] as $paired ) {
 							if ( isset( $paired['name'] ) && isset( $paired['price'] ) ) {
-								echo '<dl class="variation"><dt class="variation-PairedWith">' . __( 'Paired with', 'flatsome' ) . ':</dt><dd class="variation-PairedWith"><p>' . sprintf(
+								echo '<div class="pizza-option-row">';
+								echo '<div class="pizza-option-label">' . __( 'Paired with', 'flatsome' ) . ':</div>';
+								echo '<div class="pizza-option-value">' . sprintf(
 									'%s (+%s)',
 									esc_html( $paired['name'] ),
 									wc_price( $paired['price'] )
-								) . '</p></dd></dl>';
+								) . '</div>';
+								echo '</div>';
 							}
 						}
 					}
 
 					// Display special request
 					if ( isset( $cart_item['special_request'] ) && ! empty( $cart_item['special_request'] ) ) {
-						echo '<dl class="variation"><dt class="variation-SpecialRequest">' . __( 'Special Request', 'flatsome' ) . ':</dt><dd class="variation-SpecialRequest"><p>' . esc_html( $cart_item['special_request'] ) . '</p></dd></dl>';
+						echo '<div class="pizza-option-row">';
+						echo '<div class="pizza-option-label">' . __( 'Special Request', 'flatsome' ) . ':</div>';
+						echo '<div class="pizza-option-value">' . esc_html( $cart_item['special_request'] ) . '</div>';
+						echo '</div>';
 					}
 					?>
 
@@ -200,3 +215,30 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 <?php endif; ?>
 
 <?php do_action( 'woocommerce_after_mini_cart' ); ?>
+
+<style>
+/* Custom Pizza Options Display Styling */
+.pizza-option-row {
+	display: flex;
+	margin: 8px 0;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.pizza-option-label {
+	flex: 0 0 auto;
+	min-width: 80px;
+	font-weight: 600;
+	color: #333;
+	padding-right: 10px;
+}
+
+.pizza-option-value {
+	flex: 1;
+	color: #666;
+}
+
+.pizza-option-value .amount {
+	font-weight: 500;
+}
+</style>
