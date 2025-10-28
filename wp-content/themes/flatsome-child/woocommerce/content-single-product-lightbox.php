@@ -550,7 +550,7 @@ do_action( 'wc_quick_view_after_single_product' );
 }
 
 .icon-row {
-	margin-left: 80px;
+	/* margin-left: 80px; */
 }
 
 /* Title Section */
