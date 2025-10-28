@@ -516,12 +516,13 @@ do_action( 'wc_quick_view_after_single_product' );
 }
 
 .half-pizza-container {
-	max-height: 250px;
 	width: 50%;
 	overflow: hidden;
 	background: #f0f0f0;
 	display: flex;
 	align-items: center;
+	justify-content: center;
+	max-height: 250px;
 }
 
 .half-pizza-container img:hover {
@@ -530,19 +531,21 @@ do_action( 'wc_quick_view_after_single_product' );
 
 .left-pizza-img {
 	width: 200%;
+	height: auto;
 	max-height: 250px;
 	object-fit: cover;
-	object-position: left center;
-	transform: translateX(0);
+	object-position: right center;
+	transform: translateX(-50%);
 	display: block;
 }
 
 .right-pizza-img {
 	width: 200%;
+	height: auto;
 	max-height: 250px;
 	object-fit: cover;
-	object-position: right center;
-	transform: translateX(0);
+	object-position: left center;
+	transform: translateX(50%);
 	display: block;
 }
 
