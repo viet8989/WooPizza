@@ -227,7 +227,7 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 
 .pizza-option-label {
 	flex: 0 0 auto;
-	min-width: 80px;
+	min-width: 30px;
 	font-weight: 600;
 	color: #333;
 	padding-right: 10px;
