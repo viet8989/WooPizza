@@ -530,7 +530,6 @@ do_action( 'wc_quick_view_after_single_product' );
 
 .left-pizza-img {
 	width: 200%;
-	height: 100%;
 	max-height: 250px;
 	object-fit: cover;
 	object-position: left center;
@@ -540,7 +539,6 @@ do_action( 'wc_quick_view_after_single_product' );
 
 .right-pizza-img {
 	width: 200%;
-	height: 100%;
 	max-height: 250px;
 	object-fit: cover;
 	object-position: right center;
