@@ -556,7 +556,7 @@ function display_custom_pizza_options_in_cart( $item_data, $cart_item ) {
 		if ( ! empty( $topping_names ) ) {
 			$item_data[] = array(
 				'key'     => __( 'Add', 'flatsome' ),
-				'value'   => implode( '<br>', $topping_names ),
+				'value'   => implode( '<br/><br/>', $topping_names ),
 				'display' => '',
 			);
 		}
