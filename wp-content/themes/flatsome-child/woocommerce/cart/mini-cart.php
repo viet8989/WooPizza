@@ -44,14 +44,6 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 				?>
 				<li class="woocommerce-mini-cart-item <?php echo esc_attr( apply_filters( 'woocommerce_mini_cart_item_class', 'mini_cart_item', $cart_item, $cart_item_key ) ); ?>">
 
-					<?php if ( empty( $product_permalink ) ) : ?>
-						<?php echo $thumbnail . wp_kses_post( $product_name ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					<?php else : ?>
-						<a href="<?php echo esc_url( $product_permalink ); ?>">
-							<?php echo $thumbnail . wp_kses_post( $product_name ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-						</a>
-					<?php endif; ?>
-                    
 					<?php
 					echo apply_filters( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						'woocommerce_cart_item_remove_link',
@@ -70,6 +62,26 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 					);
 					?>
 
+					<?php if ( empty( $product_permalink ) ) : ?>
+						<h3 class="mini-cart-product-title"><?php echo wp_kses_post( $product_name ); ?></h3>
+					<?php else : ?>
+						<a href="<?php echo esc_url( $product_permalink ); ?>">
+							<h3 class="mini-cart-product-title"><?php echo wp_kses_post( $product_name ); ?></h3>
+						</a>
+					<?php endif; ?>
+
+					<div class="mini-cart-item-content">
+						<div class="mini-cart-item-image">
+							<?php if ( empty( $product_permalink ) ) : ?>
+								<?php echo $thumbnail; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<?php else : ?>
+								<a href="<?php echo esc_url( $product_permalink ); ?>">
+									<?php echo $thumbnail; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+								</a>
+							<?php endif; ?>
+						</div>
+
+						<div class="mini-cart-item-details">
 					<?php
 					// Custom Pizza Options Display (inline logic instead of filter)
 
@@ -183,7 +195,9 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 					}
 					?>
 
-					<?php echo apply_filters( 'woocommerce_widget_cart_item_quantity', '<span class="quantity">' . sprintf( '%s &times; %s', $cart_item['quantity'], $product_price ) . '</span>', $cart_item, $cart_item_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<?php echo apply_filters( 'woocommerce_widget_cart_item_quantity', '<span class="quantity">' . sprintf( '%s &times; %s', $cart_item['quantity'], $product_price ) . '</span>', $cart_item, $cart_item_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						</div><!-- .mini-cart-item-details -->
+					</div><!-- .mini-cart-item-content -->
 				</li>
 				<?php
 				}
@@ -219,6 +233,70 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 <?php do_action( 'woocommerce_after_mini_cart' ); ?>
 
 <style>
+/* Mini Cart Item Container */
+.woocommerce-mini-cart-item {
+	position: relative;
+	padding: 15px 0;
+	border-bottom: 1px solid #eee;
+}
+
+/* Remove Button - Absolute Position */
+.woocommerce-mini-cart-item .remove {
+	position: absolute;
+	top: 10px;
+	right: 0;
+	font-size: 24px;
+	line-height: 1;
+	color: #999;
+	z-index: 10;
+}
+
+.woocommerce-mini-cart-item .remove:hover {
+	color: #dc0000;
+}
+
+/* Mini Cart Product Title - Full Width */
+.mini-cart-product-title {
+	font-size: 15px;
+	font-weight: 600;
+	margin: 0 30px 10px 0;
+	line-height: 1.4;
+	color: #333;
+	width: 100%;
+}
+
+a .mini-cart-product-title {
+	color: #333;
+	transition: color 0.3s ease;
+}
+
+a:hover .mini-cart-product-title {
+	color: #dc0000;
+}
+
+/* Two Column Layout - Image Left, Details Right */
+.mini-cart-item-content {
+	display: flex;
+	gap: 15px;
+	align-items: flex-start;
+}
+
+.mini-cart-item-image {
+	flex: 0 0 80px;
+	width: 80px;
+}
+
+.mini-cart-item-image img {
+	width: 100%;
+	height: auto;
+	border-radius: 4px;
+}
+
+.mini-cart-item-details {
+	flex: 1;
+	min-width: 0;
+}
+
 /* Custom Pizza Options Display Styling */
 .pizza-option-row {
 	display: flex;
