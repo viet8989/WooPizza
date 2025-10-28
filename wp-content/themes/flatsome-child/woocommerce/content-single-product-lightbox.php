@@ -516,6 +516,7 @@ do_action( 'wc_quick_view_after_single_product' );
 }
 
 .half-pizza-container {
+	max-height: 250px;
 	width: 50%;
 	overflow: hidden;
 	background: #f0f0f0;
