@@ -534,8 +534,8 @@ do_action( 'wc_quick_view_after_single_product' );
 	height: auto;
 	max-height: 250px;
 	object-fit: cover;
-	object-position: right center;
-	transform: translateX(-50%);
+	object-position: left center;
+	transform: translateX(0);
 	display: block;
 }
 
@@ -544,8 +544,8 @@ do_action( 'wc_quick_view_after_single_product' );
 	height: auto;
 	max-height: 250px;
 	object-fit: cover;
-	object-position: left center;
-	transform: translateX(50%);
+	object-position: right center;
+	transform: translateX(-100%);
 	display: block;
 }
 
