@@ -64,23 +64,34 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 
 					<?php
 					// Check if this is a paired pizza order
+					$is_paired = false;
+					$paired_icon = '';
 					$display_title = $product_name;
+
 					if ( isset( $cart_item['pizza_halves'] ) && ! empty( $cart_item['pizza_halves'] ) ) {
 						$halves = $cart_item['pizza_halves'];
 						$left_name = isset( $halves['left_half']['name'] ) ? $halves['left_half']['name'] : '';
 						$right_name = isset( $halves['right_half']['name'] ) ? $halves['right_half']['name'] : '';
 
 						if ( $left_name && $right_name ) {
+							$is_paired = true;
 							$icon_url = get_site_url() . '/wp-content/uploads/2025/10/pizza_half_active.png';
+							$paired_icon = sprintf(
+								'<img src="%s" alt="Paired Pizza" class="paired-pizza-icon">',
+								esc_url( $icon_url )
+							);
 							$display_title = sprintf(
-								'<img src="%s" alt="Paired Pizza" class="paired-pizza-icon"> %s <strong style="color: red;">X</strong> %s',
-								esc_url( $icon_url ),
+								'%s <strong style="color: red;">X</strong> %s',
 								esc_html( $left_name ),
 								esc_html( $right_name )
 							);
 						}
 					}
 					?>
+
+					<?php if ( $is_paired ) : ?>
+						<?php echo $paired_icon; ?>
+					<?php endif; ?>
 
 					<?php if ( empty( $product_permalink ) ) : ?>
 						<h3 class="mini-cart-product-title"><?php echo $display_title; // Already escaped above ?></h3>
@@ -275,6 +286,16 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 	color: #dc0000;
 }
 
+/* Paired Pizza Icon - Separate Element */
+.paired-pizza-icon {
+	width: 20px;
+	height: 20px;
+	display: inline-block;
+	vertical-align: middle;
+	margin-right: 6px;
+	margin-bottom: 8px;
+}
+
 /* Mini Cart Product Title - Full Width */
 .mini-cart-product-title {
 	font-size: 15px;
@@ -282,18 +303,8 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 	margin: 0 30px 10px 0;
 	line-height: 1.4;
 	color: #333;
-	width: 100%;
-	display: flex;
-	align-items: center;
-	flex-wrap: wrap;
-	gap: 6px;
-}
-
-.mini-cart-product-title .paired-pizza-icon {
-	width: 20px;
-	height: 20px;
-	vertical-align: middle;
 	display: inline-block;
+	vertical-align: middle;
 }
 
 a .mini-cart-product-title {
