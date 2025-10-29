@@ -147,7 +147,7 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 							$left = $halves['left_half'];
 							if ( isset( $left['name'] ) ) {
 								$left_display = esc_html( $left['name'] );
-
+								echo '<script>console.log("Left half name: ' . $left['name'] . '");</script>	';
 								// Add left half toppings
 								if ( isset( $left['toppings'] ) && ! empty( $left['toppings'] ) ) {
 									$left_topping_names = array();
