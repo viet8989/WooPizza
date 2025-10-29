@@ -77,7 +77,7 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 							$is_paired = true;
 							$icon_url = get_site_url() . '/wp-content/uploads/2025/10/pizza_half_active.png';
 							$paired_icon = sprintf(
-								'<img src="%s" alt="Paired Pizza" class="paired-pizza-icon" width="20" height="20"/>',
+								'<img src="%s" alt="Paired Pizza" class="paired-pizza-icon" style="width: 20px !important; height: 20px !important;" />',
 								esc_url( $icon_url )
 							);
 							$display_title = sprintf(
