@@ -321,4 +321,9 @@ a:hover .mini-cart-product-title {
 .pizza-option-value .amount {
 	font-weight: 500;
 }
+
+.widget_shopping_cart ul.product_list_widget li {
+	position: relative;
+    padding: auto;
+}
 </style>
