@@ -240,82 +240,50 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 							// Manually calculate the correct price including all customizations
 							$calculated_price = 0;
 
-							echo '<script>';
-							echo 'console.log("=== PRICE CALCULATION DEBUG ===");';
-							echo 'console.log("Product: ' . esc_js( $product_name ) . '");';
-							echo 'console.log("Base Price: ' . esc_js( $_product->get_price() ) . '");';
-
 							// Check if paired pizza mode
 							if ( isset( $cart_item['pizza_halves'] ) && ! empty( $cart_item['pizza_halves'] ) ) {
-								echo 'console.log("Mode: PAIRED PIZZA");';
 								$halves = $cart_item['pizza_halves'];
 
 								// Add left half price
 								if ( isset( $halves['left_half']['price'] ) ) {
-									$left_price = floatval( $halves['left_half']['price'] );
-									$calculated_price += $left_price;
-									echo 'console.log("  Left Half Price: ' . esc_js( $left_price ) . '");';
+									$calculated_price += floatval( $halves['left_half']['price'] );
 								}
 
 								// Add left half toppings
 								if ( isset( $halves['left_half']['toppings'] ) && ! empty( $halves['left_half']['toppings'] ) ) {
-									echo 'console.log("  Left Half Toppings:");';
 									foreach ( $halves['left_half']['toppings'] as $topping ) {
 										if ( isset( $topping['price'] ) ) {
-											$topping_price = floatval( $topping['price'] );
-											$calculated_price += $topping_price;
-											echo 'console.log("    - ' . esc_js( $topping['name'] ) . ': ' . esc_js( $topping_price ) . '");';
+											$calculated_price += floatval( $topping['price'] );
 										}
 									}
 								}
 
 								// Add right half price
 								if ( isset( $halves['right_half']['price'] ) ) {
-									$right_price = floatval( $halves['right_half']['price'] );
-									$calculated_price += $right_price;
-									echo 'console.log("  Right Half Price: ' . esc_js( $right_price ) . '");';
+									$calculated_price += floatval( $halves['right_half']['price'] );
 								}
 
 								// Add right half toppings
 								if ( isset( $halves['right_half']['toppings'] ) && ! empty( $halves['right_half']['toppings'] ) ) {
-									echo 'console.log("  Right Half Toppings:");';
 									foreach ( $halves['right_half']['toppings'] as $topping ) {
 										if ( isset( $topping['price'] ) ) {
-											$topping_price = floatval( $topping['price'] );
-											$calculated_price += $topping_price;
-											echo 'console.log("    - ' . esc_js( $topping['name'] ) . ': ' . esc_js( $topping_price ) . '");';
+											$calculated_price += floatval( $topping['price'] );
 										}
 									}
 								}
 							} else {
 								// Whole pizza mode - start with base price
 								$calculated_price = floatval( $_product->get_price() );
-								echo 'console.log("Mode: WHOLE PIZZA");';
-								echo 'console.log("  Starting with base price: ' . esc_js( $calculated_price ) . '");';
 
 								// Add whole pizza toppings
 								if ( isset( $cart_item['extra_topping_options'] ) && ! empty( $cart_item['extra_topping_options'] ) ) {
-									echo 'console.log("  Extra Toppings:");';
-									echo 'console.log("  Toppings array:", ' . json_encode( $cart_item['extra_topping_options'] ) . ');';
 									foreach ( $cart_item['extra_topping_options'] as $topping ) {
 										if ( isset( $topping['price'] ) ) {
-											$topping_price = floatval( $topping['price'] );
-											$calculated_price += $topping_price;
-											echo 'console.log("    - ' . esc_js( $topping['name'] ) . ': ' . esc_js( $topping_price ) . '");';
+											$calculated_price += floatval( $topping['price'] );
 										}
 									}
-								} else {
-									echo 'console.log("  No extra toppings");';
 								}
 							}
-
-							echo 'console.log("Unit Price (per item): ' . esc_js( $calculated_price ) . '");';
-							echo 'console.log("Quantity: ' . esc_js( $cart_item['quantity'] ) . '");';
-
-							$item_total = $calculated_price * $cart_item['quantity'];
-							echo 'console.log("Line Total (Unit × Qty): ' . esc_js( $item_total ) . '");';
-							echo 'console.log("===============================");';
-							echo '</script>';
 
 							// Format unit price (not total)
 							$unit_price_formatted = wc_price( $calculated_price );
