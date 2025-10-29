@@ -146,7 +146,7 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 						if ( isset( $halves['left_half'] ) && ! empty( $halves['left_half'] ) ) {
 							$left = $halves['left_half'];
 							if ( isset( $left['name'] ) ) {
-								$left_display = esc_html( $left['name'] );
+								// $left_display = esc_html( $left['name'] );
 								echo '<script>console.log("Left half name: ' . $left['name'] . '");</script>';
 								// Add left half toppings
 								if ( isset( $left['toppings'] ) && ! empty( $left['toppings'] ) ) {
@@ -161,7 +161,7 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 										}
 									}
 									if ( ! empty( $left_topping_names ) ) {
-										$left_display .= '<br>Add ' . implode( '<br>', $left_topping_names );
+										$left_display = '<br>Add ' . implode( '<br>', $left_topping_names );
 									}
 								}
 
