@@ -327,6 +327,10 @@ a:hover .mini-cart-product-title {
     padding: 10px 0 10px;
 }
 
+.widget_shopping_cart ul.product_list_widget li h3 {
+	color: #000;
+}
+
 .widget_shopping_cart ul.product_list_widget li img {
 	position: relative;
 }
