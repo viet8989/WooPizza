@@ -236,7 +236,12 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 					}
 					?>
 
-							<?php echo apply_filters( 'woocommerce_widget_cart_item_quantity', '<span class="quantity">' . sprintf( '%s &times; %s', $cart_item['quantity'], $product_price ) . '</span>', $cart_item, $cart_item_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<?php
+							// Calculate the correct total price including all customizations
+							$item_total = $_product->get_price() * $cart_item['quantity'];
+							$item_total_formatted = wc_price( $item_total );
+							echo apply_filters( 'woocommerce_widget_cart_item_quantity', '<span class="quantity">' . sprintf( '%s &times; %s', $cart_item['quantity'], $item_total_formatted ) . '</span>', $cart_item, $cart_item_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							?>
 						</div><!-- .mini-cart-item-details -->
 					</div><!-- .mini-cart-item-content -->
 				</li>
