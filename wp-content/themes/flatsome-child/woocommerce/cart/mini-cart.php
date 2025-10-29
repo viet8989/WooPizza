@@ -146,28 +146,26 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 						if ( isset( $halves['left_half'] ) && ! empty( $halves['left_half'] ) ) {
 							$left = $halves['left_half'];
 							if ( isset( $left['name'] ) ) {
-								// $left_display = esc_html( $left['name'] );
-								echo '<script>console.log("Left half name: ' . $left['name'] . '");</script>';
-								// Add left half toppings
+								// Display pizza name and price
+								$left_name = esc_html( $left['name'] );
+								$left_price = isset( $left['price'] ) ? wc_price( $left['price'] ) : '';
+
+								echo '<div class="pizza-half-section">';
+								echo '<div class="pizza-half-title">' . $left_name . ' ' . $left_price . '</div>';
+
+								// Display left half toppings
 								if ( isset( $left['toppings'] ) && ! empty( $left['toppings'] ) ) {
-									$left_topping_names = array();
 									foreach ( $left['toppings'] as $topping ) {
 										if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
-											$left_topping_names[] = sprintf(
-												'%s %s',
-												esc_html( $topping['name'] ),
-												wc_price( $topping['price'] )
-											);
+											echo '<div class="pizza-topping-row">';
+											echo '<span class="topping-label">Add:</span> ';
+											echo '<span class="topping-name">' . esc_html( $topping['name'] ) . '</span> ';
+											echo '<span class="topping-price">' . wc_price( $topping['price'] ) . '</span>';
+											echo '</div>';
 										}
-									}
-									if ( ! empty( $left_topping_names ) ) {
-										$left_display = '<br>Add ' . implode( '<br>', $left_topping_names );
 									}
 								}
 
-								echo '<div class="pizza-option-row">';
-								echo '<div class="pizza-option-label">' . strtoupper( $left['name'] ) . ':</div>';
-								echo '<div class="pizza-option-value">' . $left_display . '</div>';
 								echo '</div>';
 							}
 						}
@@ -176,28 +174,26 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 						if ( isset( $halves['right_half'] ) && ! empty( $halves['right_half'] ) ) {
 							$right = $halves['right_half'];
 							if ( isset( $right['name'] ) ) {
-								$right_display = esc_html( $right['name'] );
+								// Display pizza name and price
+								$right_name = esc_html( $right['name'] );
+								$right_price = isset( $right['price'] ) ? wc_price( $right['price'] ) : '';
 
-								// Add right half toppings
+								echo '<div class="pizza-half-section">';
+								echo '<div class="pizza-half-title">' . $right_name . ' ' . $right_price . '</div>';
+
+								// Display right half toppings
 								if ( isset( $right['toppings'] ) && ! empty( $right['toppings'] ) ) {
-									$right_topping_names = array();
 									foreach ( $right['toppings'] as $topping ) {
 										if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
-											$right_topping_names[] = sprintf(
-												'%s %s',
-												esc_html( $topping['name'] ),
-												wc_price( $topping['price'] )
-											);
+											echo '<div class="pizza-topping-row">';
+											echo '<span class="topping-label">Add:</span> ';
+											echo '<span class="topping-name">' . esc_html( $topping['name'] ) . '</span> ';
+											echo '<span class="topping-price">' . wc_price( $topping['price'] ) . '</span>';
+											echo '</div>';
 										}
-									}
-									if ( ! empty( $right_topping_names ) ) {
-										$right_display .= '<br>Add ' . implode( '<br>', $right_topping_names );
 									}
 								}
 
-								echo '<div class="pizza-option-row">';
-								echo '<div class="pizza-option-label">' . strtoupper( $right['name'] ) . ':</div>';
-								echo '<div class="pizza-option-value">' . $right_display . '</div>';
 								echo '</div>';
 							}
 						}
@@ -378,6 +374,43 @@ a:hover .mini-cart-product-title {
 }
 
 .pizza-option-value .amount {
+	font-weight: 500;
+}
+
+/* Pizza Half Section Styling */
+.pizza-half-section {
+	margin: 10px 0;
+	font-size: 13px;
+}
+
+.pizza-half-title {
+	font-weight: 600;
+	color: #333;
+	margin-bottom: 5px;
+	line-height: 1.4;
+}
+
+.pizza-topping-row {
+	margin: 4px 0;
+	padding-left: 10px;
+	color: #666;
+	line-height: 1.4;
+}
+
+.pizza-topping-row .topping-label {
+	font-weight: 500;
+	color: #555;
+}
+
+.pizza-topping-row .topping-name {
+	color: #666;
+}
+
+.pizza-topping-row .topping-price {
+	font-weight: 500;
+}
+
+.pizza-topping-row .topping-price .amount {
 	font-weight: 500;
 }
 
