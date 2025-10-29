@@ -38,7 +38,7 @@ $sidebar_classes = implode( ' ', $sidebar_classes );
 
 do_action( 'woocommerce_before_cart' ); ?>
 <div class="woocommerce row <?php echo $row_classes; ?>">
-<div class="col large-7 pb-0 <?php echo $main_classes; ?>">
+<div class="col large-8 pb-0 <?php echo $main_classes; ?>">
 
 <?php wc_print_notices(); ?>
 
@@ -351,7 +351,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 
 <?php do_action( 'woocommerce_before_cart_collaterals' ); ?>
 
-<div class="cart-collaterals large-5 col pb-0">
+<div class="cart-collaterals large-4 col pb-0">
 	<?php flatsome_sticky_column_open( 'cart_sticky_sidebar' ); ?>
 
 	<div class="cart-sidebar col-inner <?php echo $sidebar_classes; ?>">
