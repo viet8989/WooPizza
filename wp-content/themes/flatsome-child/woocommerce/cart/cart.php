@@ -113,22 +113,25 @@ do_action( 'woocommerce_before_cart' ); ?>
 							<?php
 							// Display extra toppings (whole pizza)
 							if ( isset( $cart_item['extra_topping_options'] ) && ! empty( $cart_item['extra_topping_options'] ) ) {
-								$topping_names = array();
+								echo '<div class="pizza-half-section">';
+
+								$topping_index = 0;
 								foreach ( $cart_item['extra_topping_options'] as $topping ) {
 									if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
-										$topping_names[] = sprintf(
-											'%s %s',
-											esc_html( $topping['name'] ),
-											wc_price( $topping['price'] )
-										);
+										echo '<div class="pizza-topping-row">';
+										if ( $topping_index === 0 ) {
+											echo '<span class="topping-label">Add:</span> ';
+										} else {
+											echo '<span class="topping-label-spacer"></span>';
+										}
+										echo '<span class="topping-name">' . esc_html( $topping['name'] ) . '</span> ';
+										echo '<span class="topping-price">' . wc_price( $topping['price'] ) . '</span>';
+										echo '</div>';
+										$topping_index++;
 									}
 								}
-								if ( ! empty( $topping_names ) ) {
-									echo '<div class="pizza-option-row">';
-									echo '<div class="pizza-option-label">' . __( 'Add', 'flatsome' ) . ':</div>';
-									echo '<div class="pizza-option-value">' . implode( '<br/>', $topping_names ) . '</div>';
-									echo '</div>';
-								}
+
+								echo '</div>';
 							}
 
 							// Display pizza halves (paired pizza with per-half toppings)
