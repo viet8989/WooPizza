@@ -309,18 +309,18 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 								}
 							}
 
-							echo 'console.log("Total Calculated Price: ' . esc_js( $calculated_price ) . '");';
+							echo 'console.log("Unit Price (per item): ' . esc_js( $calculated_price ) . '");';
 							echo 'console.log("Quantity: ' . esc_js( $cart_item['quantity'] ) . '");';
 
-							// Calculate item total (price × quantity)
 							$item_total = $calculated_price * $cart_item['quantity'];
-							echo 'console.log("Item Total (Price × Qty): ' . esc_js( $item_total ) . '");';
+							echo 'console.log("Line Total (Unit × Qty): ' . esc_js( $item_total ) . '");';
 							echo 'console.log("===============================");';
 							echo '</script>';
 
-							$item_total_formatted = wc_price( $item_total );
+							// Format unit price (not total)
+							$unit_price_formatted = wc_price( $calculated_price );
 
-							echo apply_filters( 'woocommerce_widget_cart_item_quantity', '<span class="quantity">' . sprintf( '%s &times; %s', $cart_item['quantity'], $item_total_formatted ) . '</span>', $cart_item, $cart_item_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							echo apply_filters( 'woocommerce_widget_cart_item_quantity', '<span class="quantity">' . sprintf( '%s &times; %s', $cart_item['quantity'], $unit_price_formatted ) . '</span>', $cart_item, $cart_item_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 							?>
 						</div><!-- .mini-cart-item-details -->
 					</div><!-- .mini-cart-item-content -->
