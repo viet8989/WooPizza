@@ -153,6 +153,36 @@ function add_pizza_and_topping_admin_menus() {
 		'post-new.php?post_type=product&product_type=pizza'
 	);
 
+	// Add Other Products menu (top level) - positioned after Pizzas
+	add_menu_page(
+		__( 'Other Products', 'flatsome' ),   // Page title
+		__( 'Other Products', 'flatsome' ),   // Menu title
+		'edit_products',                       // Capability
+		'edit-other-products',                 // Menu slug
+		'display_other_products_page',         // Function to display the page
+		'dashicons-products',                  // Icon
+		53.5                                   // Position (after Pizzas, before Toppings)
+	);
+
+	// Add submenu for All Other Products
+	add_submenu_page(
+		'edit-other-products',
+		__( 'All Other Products', 'flatsome' ),
+		__( 'All Other Products', 'flatsome' ),
+		'edit_products',
+		'edit-other-products',
+		'display_other_products_page'
+	);
+
+	// Add submenu for Add New Other Product
+	add_submenu_page(
+		'edit-other-products',
+		__( 'Add New Product', 'flatsome' ),
+		__( 'Add New Product', 'flatsome' ),
+		'edit_products',
+		'post-new.php?post_type=product&product_type=other'
+	);
+
 	// Add Topping menu (top level)
 	add_menu_page(
 		__( 'Toppings', 'flatsome' ),        // Page title
@@ -243,23 +273,23 @@ function display_pizza_products_page() {
 		</a>
 		<hr class="wp-header-end">
 		<?php
-		// Get category 15 (topping) and all its children to exclude
-		$topping_parent_id = 15;
-		$excluded_cats = array( $topping_parent_id );
+		// Get pizza categories (parent category 17 and its children)
+		$pizza_cats = array( 17 ); // Include parent category 17
 
-		// Get all child categories of category 15
+		// Get all child categories of parent category 17
 		$child_categories = get_terms( array(
 			'taxonomy' => 'product_cat',
-			'parent' => $topping_parent_id,
+			'parent' => 17,
 			'hide_empty' => false,
-			'fields' => 'ids',
 		) );
 
 		if ( ! empty( $child_categories ) && ! is_wp_error( $child_categories ) ) {
-			$excluded_cats = array_merge( $excluded_cats, $child_categories );
+			foreach ( $child_categories as $cat ) {
+				$pizza_cats[] = $cat->term_id;
+			}
 		}
 
-		// Query pizza products (exclude topping products)
+		// Query pizza products (only from category 17 and its children)
 		$args = array(
 			'post_type' => 'product',
 			'posts_per_page' => -1,
@@ -269,8 +299,8 @@ function display_pizza_products_page() {
 				array(
 					'taxonomy' => 'product_cat',
 					'field' => 'term_id',
-					'terms' => $excluded_cats,
-					'operator' => 'NOT IN',
+					'terms' => $pizza_cats,
+					'operator' => 'IN',
 				),
 			),
 		);
@@ -322,6 +352,119 @@ function display_pizza_products_page() {
 					?>
 					<tr>
 						<td colspan="7"><?php esc_html_e( 'No pizzas found.', 'flatsome' ); ?></td>
+					</tr>
+					<?php
+				endif;
+				wp_reset_postdata();
+				?>
+			</tbody>
+		</table>
+	</div>
+	<?php
+}
+
+// Display Other Products page
+function display_other_products_page() {
+	?>
+	<div class="wrap">
+		<h1 class="wp-heading-inline"><?php esc_html_e( 'Other Products', 'flatsome' ); ?></h1>
+		<a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&product_type=other' ) ); ?>" class="page-title-action">
+			<?php esc_html_e( 'Add New', 'flatsome' ); ?>
+		</a>
+		<hr class="wp-header-end">
+		<?php
+		// Get category 15 (topping), 17 (pizza) and all its children to exclude
+		$topping_parent_id = 15;
+		$pizza_parent_id = 17;
+		$excluded_cats = array( $topping_parent_id, $pizza_parent_id );
+
+		// Get all child categories of category 15 (toppings)
+		$child_categories = get_terms( array(
+			'taxonomy' => 'product_cat',
+			'parent' => $topping_parent_id,
+			'hide_empty' => false,
+			'fields' => 'ids',
+		) );
+
+		if ( ! empty( $child_categories ) && ! is_wp_error( $child_categories ) ) {
+			$excluded_cats = array_merge( $excluded_cats, $child_categories );
+		}
+
+		// Get all child categories of category 17 (pizzas)
+		$pizza_child_categories = get_terms( array(
+			'taxonomy' => 'product_cat',
+			'parent' => $pizza_parent_id,
+			'hide_empty' => false,
+			'fields' => 'ids',
+		) );
+
+		if ( ! empty( $pizza_child_categories ) && ! is_wp_error( $pizza_child_categories ) ) {
+			$excluded_cats = array_merge( $excluded_cats, $pizza_child_categories );
+		}
+
+		// Query other products (exclude topping and pizza products)
+		$args = array(
+			'post_type' => 'product',
+			'posts_per_page' => -1,
+			'orderby' => 'title',
+			'order' => 'ASC',
+			'tax_query' => array(
+				array(
+					'taxonomy' => 'product_cat',
+					'field' => 'term_id',
+					'terms' => $excluded_cats,
+					'operator' => 'NOT IN',
+				),
+			),
+		);
+
+		$products = new WP_Query( $args );
+
+		// Display products in a table
+		?>
+		<table class="wp-list-table widefat fixed striped">
+			<thead>
+				<tr>
+					<th style="width: 50px;">ID</th>
+					<th style="width: 80px;">Image</th>
+					<th>Name</th>
+					<th>Price</th>
+					<th>Categories</th>
+					<th>Stock</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php
+				if ( $products->have_posts() ) :
+					while ( $products->have_posts() ) : $products->the_post();
+						$product = wc_get_product( get_the_ID() );
+						?>
+						<tr>
+							<td><?php echo esc_html( get_the_ID() ); ?></td>
+							<td class="column-thumb"><?php echo $product->get_image( 'thumbnail' ); ?></td>
+							<td>
+								<strong>
+									<a href="<?php echo esc_url( add_query_arg( 'product_type', 'other', get_edit_post_link( get_the_ID() ) ) ); ?>">
+										<?php echo esc_html( get_the_title() ); ?>
+									</a>
+								</strong>
+							</td>
+							<td><?php echo $product->get_price_html(); ?></td>
+							<td><?php echo wc_get_product_category_list( get_the_ID(), ', ' ); ?></td>
+							<td><?php echo esc_html( $product->get_stock_status() ); ?></td>
+							<td>
+								<a href="<?php echo esc_url( add_query_arg( 'product_type', 'other', get_edit_post_link( get_the_ID() ) ) ); ?>" class="button button-small">
+									<?php esc_html_e( 'Edit', 'flatsome' ); ?>
+								</a>
+							</td>
+						</tr>
+						<?php
+					endwhile;
+				else :
+					?>
+					<tr>
+						<td colspan="7"><?php esc_html_e( 'No other products found.', 'flatsome' ); ?></td>
 					</tr>
 					<?php
 				endif;
