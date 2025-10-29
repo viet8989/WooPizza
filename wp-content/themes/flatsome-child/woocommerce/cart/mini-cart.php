@@ -418,7 +418,7 @@ a:hover .mini-cart-product-title {
 
 .pizza-topping-row .topping-label-spacer {
 	display: inline-block;
-	width: 35px;
+	width: 38px;
 }
 
 .pizza-topping-row .topping-name {
