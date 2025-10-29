@@ -155,13 +155,19 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 
 								// Display left half toppings
 								if ( isset( $left['toppings'] ) && ! empty( $left['toppings'] ) ) {
+									$topping_index = 0;
 									foreach ( $left['toppings'] as $topping ) {
 										if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
 											echo '<div class="pizza-topping-row">';
-											echo '<span class="topping-label">Add:</span> ';
+											if ( $topping_index === 0 ) {
+												echo '<span class="topping-label">Add:</span> ';
+											} else {
+												echo '<span class="topping-label-spacer"></span>';
+											}
 											echo '<span class="topping-name">' . esc_html( $topping['name'] ) . '</span> ';
 											echo '<span class="topping-price">' . wc_price( $topping['price'] ) . '</span>';
 											echo '</div>';
+											$topping_index++;
 										}
 									}
 								}
@@ -183,13 +189,19 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 
 								// Display right half toppings
 								if ( isset( $right['toppings'] ) && ! empty( $right['toppings'] ) ) {
+									$topping_index = 0;
 									foreach ( $right['toppings'] as $topping ) {
 										if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
 											echo '<div class="pizza-topping-row">';
-											echo '<span class="topping-label">Add:</span> ';
+											if ( $topping_index === 0 ) {
+												echo '<span class="topping-label">Add:</span> ';
+											} else {
+												echo '<span class="topping-label-spacer"></span>';
+											}
 											echo '<span class="topping-name">' . esc_html( $topping['name'] ) . '</span> ';
 											echo '<span class="topping-price">' . wc_price( $topping['price'] ) . '</span>';
 											echo '</div>';
+											$topping_index++;
 										}
 									}
 								}
@@ -398,8 +410,15 @@ a:hover .mini-cart-product-title {
 }
 
 .pizza-topping-row .topping-label {
+	display: inline-block;
+	width: 35px;
 	font-weight: 500;
 	color: #555;
+}
+
+.pizza-topping-row .topping-label-spacer {
+	display: inline-block;
+	width: 35px;
 }
 
 .pizza-topping-row .topping-name {
