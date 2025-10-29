@@ -297,12 +297,6 @@ a:hover .mini-cart-product-title {
 	min-width: 0;
 }
 
-.mini-cart-item-details .quantity{
-	color: #000;
-    opacity: 1.0;
-    font-weight: 500;
-}
-
 /* Custom Pizza Options Display Styling */
 .pizza-option-row {
 	display: flex;
@@ -335,5 +329,11 @@ a:hover .mini-cart-product-title {
 
 .widget_shopping_cart ul.product_list_widget li img {
 	position: relative;
+}
+
+.widget_shopping_cart ul.product_list_widget li .quantity{
+	color: #000;
+    opacity: 1.0;
+    font-weight: 500;
 }
 </style>
