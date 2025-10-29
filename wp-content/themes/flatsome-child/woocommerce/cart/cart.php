@@ -99,10 +99,49 @@ do_action( 'woocommerce_before_cart' ); ?>
 
 						<td class="product-name" data-title="<?php esc_attr_e( 'Product', 'woocommerce' ); ?>">
 						<?php
+						// Check if this is a paired pizza
+						$is_paired = false;
+						$paired_icon = '';
+						$display_title = $_product->get_name();
+
+						if ( isset( $cart_item['pizza_halves'] ) && ! empty( $cart_item['pizza_halves'] ) ) {
+							$halves = $cart_item['pizza_halves'];
+							$left_name = isset( $halves['left_half']['name'] ) ? $halves['left_half']['name'] : '';
+							$right_name = isset( $halves['right_half']['name'] ) ? $halves['right_half']['name'] : '';
+
+							if ( $left_name && $right_name ) {
+								$is_paired = true;
+								$icon_url = get_site_url() . '/wp-content/uploads/2025/10/pizza_half_active.png';
+								$paired_icon = sprintf(
+									'<img src="%s" alt="Paired Pizza" class="paired-pizza-icon">',
+									esc_url( $icon_url )
+								);
+								$display_title = sprintf(
+									'%s <strong style="color: red;">X</strong> %s',
+									esc_html( $left_name ),
+									esc_html( $right_name )
+								);
+							}
+						}
+
 						if ( ! $product_permalink ) {
-							echo wp_kses_post( apply_filters( 'woocommerce_cart_item_name', $_product->get_name(), $cart_item, $cart_item_key ) . '&nbsp;' );
+							if ( $is_paired ) {
+								echo '<div class="cart-title-wrapper">';
+								echo $paired_icon;
+								echo wp_kses_post( apply_filters( 'woocommerce_cart_item_name', $display_title, $cart_item, $cart_item_key ) . '&nbsp;' );
+								echo '</div>';
+							} else {
+								echo wp_kses_post( apply_filters( 'woocommerce_cart_item_name', $_product->get_name(), $cart_item, $cart_item_key ) . '&nbsp;' );
+							}
 						} else {
-							echo wp_kses_post( apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s</a>', esc_url( $product_permalink ), $_product->get_name() ), $cart_item, $cart_item_key ) );
+							if ( $is_paired ) {
+								echo '<div class="cart-title-wrapper">';
+								echo $paired_icon;
+								echo wp_kses_post( apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s</a>', esc_url( $product_permalink ), $display_title ), $cart_item, $cart_item_key ) );
+								echo '</div>';
+							} else {
+								echo wp_kses_post( apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s</a>', esc_url( $product_permalink ), $_product->get_name() ), $cart_item, $cart_item_key ) );
+							}
 						}
 
 						do_action( 'woocommerce_after_cart_item_name', $cart_item, $cart_item_key );
@@ -416,5 +455,22 @@ do_action( 'woocommerce_before_cart' ); ?>
 
 .cart-item-details .pizza-topping-row .topping-price .amount {
 	font-weight: 500;
+}
+
+/* Cart Title Wrapper for Paired Pizza */
+.cart-title-wrapper {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.cart-title-wrapper .paired-pizza-icon {
+	width: 20px;
+	height: 20px;
+	flex-shrink: 0;
+}
+
+.cart-title-wrapper a {
+	display: inline;
 }
 </style>
