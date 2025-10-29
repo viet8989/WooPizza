@@ -326,4 +326,9 @@ a:hover .mini-cart-product-title {
 	position: relative;
     padding: auto;
 }
+
+.widget_shopping_cart ul.product_list_widget li img {
+	position: relative;
+	top: auto;
+}
 </style>
