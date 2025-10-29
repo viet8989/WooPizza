@@ -340,4 +340,9 @@ a:hover .mini-cart-product-title {
     opacity: 1.0;
     font-weight: 500;
 }
+
+.woocommerce-mini-cart__total amount {
+	color: #cd0000;
+	font-weight: 600;
+}
 </style>
