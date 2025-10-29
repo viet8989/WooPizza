@@ -237,40 +237,58 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 					?>
 
 							<?php
-							// Debug: Log cart item data
-							echo '<script>console.log("=== Cart Item Debug ===");';
-							echo 'console.log("Product ID: ' . esc_js( $product_id ) . '");';
-							echo 'console.log("Product Name: ' . esc_js( $product_name ) . '");';
-							echo 'console.log("Base Product Price: ' . esc_js( $_product->get_price() ) . '");';
-							echo 'console.log("Quantity: ' . esc_js( $cart_item['quantity'] ) . '");';
+							// Manually calculate the correct price including all customizations
+							$calculated_price = 0;
 
-							// Check if paired pizza
+							// Check if paired pizza mode
 							if ( isset( $cart_item['pizza_halves'] ) && ! empty( $cart_item['pizza_halves'] ) ) {
-								echo 'console.log("Mode: Paired Pizza");';
 								$halves = $cart_item['pizza_halves'];
 
-								if ( isset( $halves['left_half'] ) ) {
-									echo 'console.log("Left Half:", ' . json_encode( $halves['left_half'] ) . ');';
+								// Add left half price
+								if ( isset( $halves['left_half']['price'] ) ) {
+									$calculated_price += floatval( $halves['left_half']['price'] );
 								}
-								if ( isset( $halves['right_half'] ) ) {
-									echo 'console.log("Right Half:", ' . json_encode( $halves['right_half'] ) . ');';
+
+								// Add left half toppings
+								if ( isset( $halves['left_half']['toppings'] ) && ! empty( $halves['left_half']['toppings'] ) ) {
+									foreach ( $halves['left_half']['toppings'] as $topping ) {
+										if ( isset( $topping['price'] ) ) {
+											$calculated_price += floatval( $topping['price'] );
+										}
+									}
 								}
-							} elseif ( isset( $cart_item['extra_topping_options'] ) && ! empty( $cart_item['extra_topping_options'] ) ) {
-								echo 'console.log("Mode: Whole Pizza with Toppings");';
-								echo 'console.log("Toppings:", ' . json_encode( $cart_item['extra_topping_options'] ) . ');';
+
+								// Add right half price
+								if ( isset( $halves['right_half']['price'] ) ) {
+									$calculated_price += floatval( $halves['right_half']['price'] );
+								}
+
+								// Add right half toppings
+								if ( isset( $halves['right_half']['toppings'] ) && ! empty( $halves['right_half']['toppings'] ) ) {
+									foreach ( $halves['right_half']['toppings'] as $topping ) {
+										if ( isset( $topping['price'] ) ) {
+											$calculated_price += floatval( $topping['price'] );
+										}
+									}
+								}
 							} else {
-								echo 'console.log("Mode: Whole Pizza (no toppings)");';
+								// Whole pizza mode - start with base price
+								$calculated_price = floatval( $_product->get_price() );
+
+								// Add whole pizza toppings
+								if ( isset( $cart_item['extra_topping_options'] ) && ! empty( $cart_item['extra_topping_options'] ) ) {
+									foreach ( $cart_item['extra_topping_options'] as $topping ) {
+										if ( isset( $topping['price'] ) ) {
+											$calculated_price += floatval( $topping['price'] );
+										}
+									}
+								}
 							}
 
-							echo 'console.log("Product Price from $_product->get_price(): ' . esc_js( $_product->get_price() ) . '");';
-
-							// Calculate the correct total price including all customizations
-							$item_total = $_product->get_price() * $cart_item['quantity'];
-							echo 'console.log("Calculated Item Total: ' . esc_js( $item_total ) . '");';
-							echo 'console.log("======================");';
-							echo '</script>';
-
+							// Calculate item total (price × quantity)
+							$item_total = $calculated_price * $cart_item['quantity'];
 							$item_total_formatted = wc_price( $item_total );
+
 							echo apply_filters( 'woocommerce_widget_cart_item_quantity', '<span class="quantity">' . sprintf( '%s &times; %s', $cart_item['quantity'], $item_total_formatted ) . '</span>', $cart_item, $cart_item_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 							?>
 						</div><!-- .mini-cart-item-details -->
