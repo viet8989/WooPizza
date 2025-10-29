@@ -89,17 +89,19 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 					}
 					?>
 
-					<?php if ( $is_paired ) : ?>
-						<?php echo $paired_icon; ?>
-					<?php endif; ?>
+					<div class="mini-cart-title-wrapper">
+						<?php if ( $is_paired ) : ?>
+							<?php echo $paired_icon; ?>
+						<?php endif; ?>
 
-					<?php if ( empty( $product_permalink ) ) : ?>
-						<h3 class="mini-cart-product-title"><?php echo $display_title; // Already escaped above ?></h3>
-					<?php else : ?>
-						<a href="<?php echo esc_url( $product_permalink ); ?>">
+						<?php if ( empty( $product_permalink ) ) : ?>
 							<h3 class="mini-cart-product-title"><?php echo $display_title; // Already escaped above ?></h3>
-						</a>
-					<?php endif; ?>
+						<?php else : ?>
+							<a href="<?php echo esc_url( $product_permalink ); ?>">
+								<h3 class="mini-cart-product-title"><?php echo $display_title; // Already escaped above ?></h3>
+							</a>
+						<?php endif; ?>
+					</div>
 
 					<div class="mini-cart-item-content">
 						<div class="mini-cart-item-image">
@@ -286,25 +288,40 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 	color: #dc0000;
 }
 
-/* Paired Pizza Icon - Separate Element */
+/* Title Wrapper - Override Flatsome styles */
+.mini-cart-title-wrapper {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 10px;
+	margin-right: 30px;
+	line-height: 1.4;
+	white-space: normal;
+}
+
+/* Paired Pizza Icon */
 .paired-pizza-icon {
 	width: 20px;
 	height: 20px;
-	display: inline-block;
-	vertical-align: middle;
-	margin-right: 6px;
-	margin-bottom: 8px;
+	flex-shrink: 0;
 }
 
-/* Mini Cart Product Title - Full Width */
+/* Mini Cart Product Title */
+ul.product_list_widget li a:not(.remove) {
+	display: inline !important;
+	line-height: 1.3 !important;
+	margin-bottom: 0 !important;
+	overflow: visible !important;
+	text-overflow: clip !important;
+}
+
 .mini-cart-product-title {
 	font-size: 15px;
 	font-weight: 600;
-	margin: 0 30px 10px 0;
+	margin: 0;
 	line-height: 1.4;
 	color: #333;
-	display: inline-block;
-	vertical-align: middle;
+	display: inline;
 }
 
 a .mini-cart-product-title {
@@ -375,6 +392,8 @@ a:hover .mini-cart-product-title {
 
 .widget_shopping_cart ul.product_list_widget li img {
 	position: relative;
+	height: 25px;
+	width: 25px;
 }
 
 .widget_shopping_cart ul.product_list_widget li .quantity{
