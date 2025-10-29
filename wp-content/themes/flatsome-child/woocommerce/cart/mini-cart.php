@@ -237,8 +237,39 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 					?>
 
 							<?php
+							// Debug: Log cart item data
+							echo '<script>console.log("=== Cart Item Debug ===");';
+							echo 'console.log("Product ID: ' . esc_js( $product_id ) . '");';
+							echo 'console.log("Product Name: ' . esc_js( $product_name ) . '");';
+							echo 'console.log("Base Product Price: ' . esc_js( $_product->get_price() ) . '");';
+							echo 'console.log("Quantity: ' . esc_js( $cart_item['quantity'] ) . '");';
+
+							// Check if paired pizza
+							if ( isset( $cart_item['pizza_halves'] ) && ! empty( $cart_item['pizza_halves'] ) ) {
+								echo 'console.log("Mode: Paired Pizza");';
+								$halves = $cart_item['pizza_halves'];
+
+								if ( isset( $halves['left_half'] ) ) {
+									echo 'console.log("Left Half:", ' . json_encode( $halves['left_half'] ) . ');';
+								}
+								if ( isset( $halves['right_half'] ) ) {
+									echo 'console.log("Right Half:", ' . json_encode( $halves['right_half'] ) . ');';
+								}
+							} elseif ( isset( $cart_item['extra_topping_options'] ) && ! empty( $cart_item['extra_topping_options'] ) ) {
+								echo 'console.log("Mode: Whole Pizza with Toppings");';
+								echo 'console.log("Toppings:", ' . json_encode( $cart_item['extra_topping_options'] ) . ');';
+							} else {
+								echo 'console.log("Mode: Whole Pizza (no toppings)");';
+							}
+
+							echo 'console.log("Product Price from $_product->get_price(): ' . esc_js( $_product->get_price() ) . '");';
+
 							// Calculate the correct total price including all customizations
 							$item_total = $_product->get_price() * $cart_item['quantity'];
+							echo 'console.log("Calculated Item Total: ' . esc_js( $item_total ) . '");';
+							echo 'console.log("======================");';
+							echo '</script>';
+
 							$item_total_formatted = wc_price( $item_total );
 							echo apply_filters( 'woocommerce_widget_cart_item_quantity', '<span class="quantity">' . sprintf( '%s &times; %s', $cart_item['quantity'], $item_total_formatted ) . '</span>', $cart_item, $cart_item_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 							?>
