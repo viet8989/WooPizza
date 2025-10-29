@@ -392,8 +392,6 @@ a:hover .mini-cart-product-title {
 
 .widget_shopping_cart ul.product_list_widget li img {
 	position: relative;
-	height: 25px;
-	width: 25px;
 }
 
 .widget_shopping_cart ul.product_list_widget li .quantity{
