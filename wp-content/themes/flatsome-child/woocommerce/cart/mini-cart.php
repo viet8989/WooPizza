@@ -62,11 +62,31 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 					);
 					?>
 
+					<?php
+					// Check if this is a paired pizza order
+					$display_title = $product_name;
+					if ( isset( $cart_item['pizza_halves'] ) && ! empty( $cart_item['pizza_halves'] ) ) {
+						$halves = $cart_item['pizza_halves'];
+						$left_name = isset( $halves['left_half']['name'] ) ? $halves['left_half']['name'] : '';
+						$right_name = isset( $halves['right_half']['name'] ) ? $halves['right_half']['name'] : '';
+
+						if ( $left_name && $right_name ) {
+							$icon_url = get_site_url() . '/wp-content/uploads/2025/10/pizza_half_active.png';
+							$display_title = sprintf(
+								'<img src="%s" alt="Paired Pizza" class="paired-pizza-icon"> %s <strong style="color: red;">X</strong> %s',
+								esc_url( $icon_url ),
+								esc_html( $left_name ),
+								esc_html( $right_name )
+							);
+						}
+					}
+					?>
+
 					<?php if ( empty( $product_permalink ) ) : ?>
-						<h3 class="mini-cart-product-title"><?php echo wp_kses_post( $product_name ); ?></h3>
+						<h3 class="mini-cart-product-title"><?php echo $display_title; // Already escaped above ?></h3>
 					<?php else : ?>
 						<a href="<?php echo esc_url( $product_permalink ); ?>">
-							<h3 class="mini-cart-product-title"><?php echo wp_kses_post( $product_name ); ?></h3>
+							<h3 class="mini-cart-product-title"><?php echo $display_title; // Already escaped above ?></h3>
 						</a>
 					<?php endif; ?>
 
@@ -263,6 +283,17 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 	line-height: 1.4;
 	color: #333;
 	width: 100%;
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+
+.mini-cart-product-title .paired-pizza-icon {
+	width: 20px;
+	height: 20px;
+	vertical-align: middle;
+	display: inline-block;
 }
 
 a .mini-cart-product-title {
