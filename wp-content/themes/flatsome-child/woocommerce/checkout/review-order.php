@@ -35,9 +35,133 @@ defined( 'ABSPATH' ) || exit;
 				?>
 				<tr class="<?php echo esc_attr( apply_filters( 'woocommerce_cart_item_class', 'cart_item', $cart_item, $cart_item_key ) ); ?>">
 					<td class="product-name">
-						<?php echo wp_kses_post( apply_filters( 'woocommerce_cart_item_name', $_product->get_name(), $cart_item, $cart_item_key ) ) . '&nbsp;'; ?>
+						<?php
+						// Check if this is a paired pizza
+						$is_paired = false;
+						$paired_icon = '';
+						$display_title = $_product->get_name();
+
+						if ( isset( $cart_item['pizza_halves'] ) && ! empty( $cart_item['pizza_halves'] ) ) {
+							$halves = $cart_item['pizza_halves'];
+							$left_name = isset( $halves['left_half']['name'] ) ? $halves['left_half']['name'] : '';
+							$right_name = isset( $halves['right_half']['name'] ) ? $halves['right_half']['name'] : '';
+
+							if ( $left_name && $right_name ) {
+								$is_paired = true;
+								$icon_url = get_site_url() . '/wp-content/uploads/2025/10/pizza_half_active.png';
+								$paired_icon = sprintf(
+									'<img src="%s" alt="Paired Pizza" class="paired-pizza-icon">',
+									esc_url( $icon_url )
+								);
+								$display_title = sprintf(
+									'%s <strong style="color: red;">X</strong> %s',
+									esc_html( $left_name ),
+									esc_html( $right_name )
+								);
+							}
+						}
+
+						if ( $is_paired ) {
+							echo '<div class="checkout-title-wrapper">';
+							echo $paired_icon;
+							echo wp_kses_post( apply_filters( 'woocommerce_cart_item_name', $display_title, $cart_item, $cart_item_key ) ) . '&nbsp;';
+							echo '</div>';
+						} else {
+							echo wp_kses_post( apply_filters( 'woocommerce_cart_item_name', $_product->get_name(), $cart_item, $cart_item_key ) ) . '&nbsp;';
+						}
+						?>
 						<?php echo apply_filters( 'woocommerce_checkout_cart_item_quantity', ' <strong class="product-quantity">' . sprintf( '&times;&nbsp;%s', $cart_item['quantity'] ) . '</strong>', $cart_item, $cart_item_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-						<?php echo wc_get_formatted_cart_item_data( $cart_item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+
+						<?php
+						// Custom Pizza Options Display
+						?>
+						<div class="checkout-item-details">
+							<?php
+							// Display extra toppings (whole pizza)
+							if ( isset( $cart_item['extra_topping_options'] ) && ! empty( $cart_item['extra_topping_options'] ) ) {
+								$topping_index = 0;
+								foreach ( $cart_item['extra_topping_options'] as $topping ) {
+									echo '<div class="pizza-topping-row">';
+									if ( $topping_index === 0 ) {
+										echo '<span class="topping-label">Add:</span> ';
+									} else {
+										echo '<span class="topping-label-spacer"></span>';
+									}
+									echo '<span class="topping-name">' . esc_html( $topping['name'] ) . '</span> ';
+									echo '<span class="topping-price">' . wc_price( $topping['price'] ) . '</span>';
+									echo '</div>';
+									$topping_index++;
+								}
+							}
+
+							// Display pizza halves (paired pizza)
+							if ( isset( $cart_item['pizza_halves'] ) && ! empty( $cart_item['pizza_halves'] ) ) {
+								$halves = $cart_item['pizza_halves'];
+
+								// Left half
+								if ( isset( $halves['left_half'] ) ) {
+									$left = $halves['left_half'];
+									$left_name = isset( $left['name'] ) ? $left['name'] : '';
+									$left_price = isset( $left['price'] ) ? wc_price( $left['price'] ) : '';
+
+									echo '<div class="pizza-half-section">';
+									echo '<div class="pizza-half-title">' . esc_html( $left_name ) . ' ' . $left_price . '</div>';
+
+									if ( isset( $left['toppings'] ) && ! empty( $left['toppings'] ) ) {
+										$topping_index = 0;
+										foreach ( $left['toppings'] as $topping ) {
+											echo '<div class="pizza-topping-row">';
+											if ( $topping_index === 0 ) {
+												echo '<span class="topping-label">Add:</span> ';
+											} else {
+												echo '<span class="topping-label-spacer"></span>';
+											}
+											echo '<span class="topping-name">' . esc_html( $topping['name'] ) . '</span> ';
+											echo '<span class="topping-price">' . wc_price( $topping['price'] ) . '</span>';
+											echo '</div>';
+											$topping_index++;
+										}
+									}
+									echo '</div>';
+								}
+
+								// Right half
+								if ( isset( $halves['right_half'] ) ) {
+									$right = $halves['right_half'];
+									$right_name = isset( $right['name'] ) ? $right['name'] : '';
+									$right_price = isset( $right['price'] ) ? wc_price( $right['price'] ) : '';
+
+									echo '<div class="pizza-half-section">';
+									echo '<div class="pizza-half-title">' . esc_html( $right_name ) . ' ' . $right_price . '</div>';
+
+									if ( isset( $right['toppings'] ) && ! empty( $right['toppings'] ) ) {
+										$topping_index = 0;
+										foreach ( $right['toppings'] as $topping ) {
+											echo '<div class="pizza-topping-row">';
+											if ( $topping_index === 0 ) {
+												echo '<span class="topping-label">Add:</span> ';
+											} else {
+												echo '<span class="topping-label-spacer"></span>';
+											}
+											echo '<span class="topping-name">' . esc_html( $topping['name'] ) . '</span> ';
+											echo '<span class="topping-price">' . wc_price( $topping['price'] ) . '</span>';
+											echo '</div>';
+											$topping_index++;
+										}
+									}
+									echo '</div>';
+								}
+							}
+
+							// Display special request
+							if ( isset( $cart_item['special_request'] ) && ! empty( $cart_item['special_request'] ) ) {
+								echo '<div class="pizza-option-row">';
+								echo '<span class="pizza-option-label">Special Request:</span> ';
+								echo '<span class="pizza-option-value">' . esc_html( $cart_item['special_request'] ) . '</span>';
+								echo '</div>';
+							}
+							?>
+						</div>
 					</td>
 					<td class="product-total">
 						<?php echo apply_filters( 'woocommerce_cart_item_subtotal', WC()->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -126,3 +250,94 @@ defined( 'ABSPATH' ) || exit;
 
 	</tfoot>
 </table>
+
+<style>
+/* Checkout Item Details Display Styling */
+.checkout-item-details {
+	margin-top: 10px;
+	font-size: 13px;
+}
+
+/* Checkout Title Wrapper for Paired Pizza */
+.checkout-title-wrapper {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 5px;
+}
+
+.checkout-title-wrapper .paired-pizza-icon {
+	width: 20px;
+	height: 20px;
+	flex-shrink: 0;
+}
+
+/* Custom Pizza Options Display Styling */
+.checkout-item-details .pizza-option-row {
+	display: flex;
+	margin: 8px 0;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.checkout-item-details .pizza-option-label {
+	flex: 0 0 auto;
+	min-width: 120px;
+	font-weight: 600;
+	color: #333;
+	padding-right: 10px;
+}
+
+.checkout-item-details .pizza-option-value {
+	flex: 1;
+	color: #666;
+}
+
+.checkout-item-details .pizza-option-value .amount {
+	font-weight: 500;
+}
+
+/* Pizza Half Section Styling */
+.checkout-item-details .pizza-half-section {
+	margin: 10px 0;
+	font-size: 13px;
+}
+
+.checkout-item-details .pizza-half-title {
+	font-weight: 600;
+	color: #333;
+	margin-bottom: 5px;
+	line-height: 1.4;
+}
+
+.checkout-item-details .pizza-topping-row {
+	margin: 4px 0;
+	padding-left: 10px;
+	color: #666;
+	line-height: 1.4;
+}
+
+.checkout-item-details .pizza-topping-row .topping-label {
+	display: inline-block;
+	width: 35px;
+	font-weight: 500;
+	color: #555;
+}
+
+.checkout-item-details .pizza-topping-row .topping-label-spacer {
+	display: inline-block;
+	width: 35px;
+}
+
+.checkout-item-details .pizza-topping-row .topping-name {
+	color: #666;
+}
+
+.checkout-item-details .pizza-topping-row .topping-price {
+	font-weight: 500;
+}
+
+.checkout-item-details .pizza-topping-row .topping-price .amount {
+	font-weight: 500;
+}
+</style>
