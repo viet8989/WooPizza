@@ -97,7 +97,7 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 						<?php if ( empty( $product_permalink ) ) : ?>
 							<h3 class="mini-cart-product-title"><?php echo $display_title; // Already escaped above ?></h3>
 						<?php else : ?>
-							<a href="<?php echo esc_url( $product_permalink ); ?>">
+							<a href="<?php echo esc_url( $product_permalink ); ?>" style="padding-top: 15px;">
 								<h3 class="mini-cart-product-title"><?php echo $display_title; // Already escaped above ?></h3>
 							</a>
 						<?php endif; ?>
@@ -403,9 +403,5 @@ a:hover .mini-cart-product-title {
 .woocommerce-mini-cart__total .amount {
 	color: #cd0000;
 	font-weight: 600;
-}
-
-.mini-cart-title-wrapper a {
-	padding-top: 15px;
 }
 </style>
