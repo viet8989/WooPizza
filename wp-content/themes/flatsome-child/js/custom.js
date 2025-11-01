@@ -57,3 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Carousel centered');
     }
 });
+
+function fadeOutToGroupCategory() {
+    alert('Fade out to group category triggered');    
+}
