@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
             flickitySlider.style.textAlign = 'center';
         }
     }
-    fadeOutToGroupCategory();
+    
 });
 
 function fadeOutToGroupCategory() {
