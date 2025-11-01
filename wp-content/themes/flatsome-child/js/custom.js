@@ -56,7 +56,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     // Check current page URL is delivery page
     if (window.location.href.indexOf('/delivery') > -1) {
-        // foreach in $('.product-category a')
         const categoryLinks = document.querySelectorAll('.product-category a');
         categoryLinks.forEach(function(link) {
             link.addEventListener('click', function(event) {
@@ -70,17 +69,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Check current page URL is home page
     if (window.location.href === window.location.origin + '/' || window.location.href === window.location.origin) {
-        // Home page specific code can go here
+        const categoryLinks = document.querySelectorAll('.product-category a');
+        categoryLinks.forEach(function(link) {
+            link.addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent default link behavior
+                // get text of clicked link
+                const categoryName = this.textContent.trim();   
+                // fadeOutToGroupCategory(categoryName);
+                // Redirect to delivery page with hash
+                window.location.href = window.location.origin + '/delivery#' + encodeURIComponent(categoryName);
+                
+            });
+        });
     }
 });
 
 function fadeOutToGroupCategory(categoryName) {
-    // alert(categoryName);    
-    // in document.querySelectorAll('div.section-content.relative .row.align-middle .col-inner h3')
     const productTitles = document.querySelectorAll('div.section-content.relative .row.align-middle .col-inner h3');
     productTitles.forEach(function(title) {
         if (title.textContent.trim() === categoryName) {
-            // Scroll to the category section with margin offset 50px            
+            // Scroll to the category section with margin offset 100px            
             const offset = 100;
             const target = title.getBoundingClientRect().top + window.scrollY - offset;
             const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
