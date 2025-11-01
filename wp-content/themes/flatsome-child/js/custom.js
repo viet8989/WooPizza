@@ -78,9 +78,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Redirect to delivery page with hash
                 window.location.href = window.location.origin + '/delivery';
                 // After redirection, scroll to the category section
-                window.onload = function() {
-                    fadeOutToGroupCategory(categoryName);
-                };
+                // window.onload = function() {
+                //     fadeOutToGroupCategory(categoryName);
+                // };
             });
         });
     }
