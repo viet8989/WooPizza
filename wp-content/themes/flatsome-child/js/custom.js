@@ -54,7 +54,22 @@ document.addEventListener('DOMContentLoaded', function() {
             flickitySlider.style.textAlign = 'center';
         }
     }
-    
+    // Check current page URL is delivery page
+    if (window.location.href.indexOf('/delivery') > -1) {
+        // foreach in $('.product-category a')
+        const categoryLinks = document.querySelectorAll('.product-category a');
+        categoryLinks.forEach(function(link) {
+            link.addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent default link behavior
+                fadeOutToGroupCategory();
+            });
+        });
+    }
+
+    // Check current page URL is home page
+    if (window.location.href === window.location.origin + '/' || window.location.href === window.location.origin) {
+        // Home page specific code can go here
+    }
 });
 
 function fadeOutToGroupCategory() {
