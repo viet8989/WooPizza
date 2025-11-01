@@ -80,8 +80,11 @@ function fadeOutToGroupCategory(categoryName) {
     const productTitles = document.querySelectorAll('div.section-content.relative .row.align-middle .col-inner h3');
     productTitles.forEach(function(title) {
         if (title.textContent.trim() === categoryName) {
-            // Scroll to the category section
-            title.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Scroll to the category section with margin offset 50px            
+            const offset = 50;
+            const target = title.getBoundingClientRect().top + window.scrollY - offset;
+            const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            window.scrollTo({ top: target, behavior: prefersReduced ? 'auto' : 'smooth' });
         }
     });
 }
