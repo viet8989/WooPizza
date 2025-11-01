@@ -61,6 +61,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (wpslSearch) {
             wpslSearch.style.display = 'none';
         }
+        billing_postcode_field = document.getElementById('billing_postcode_field');
+        if (billing_postcode_field) {
+            billing_postcode_field.style.display = 'none';
+        }
     }
 
     // Check current page URL is delivery page
