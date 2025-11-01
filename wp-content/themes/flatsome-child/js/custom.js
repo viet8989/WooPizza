@@ -61,10 +61,22 @@ document.addEventListener('DOMContentLoaded', function() {
             link.addEventListener('click', function(event) {
                 event.preventDefault(); // Prevent default link behavior
                 // get text of clicked link
-                const categoryName = this.textContent.trim();   
+                const categoryName = this.textContent.trim();
                 fadeOutToGroupCategory(categoryName);
             });
         });
+
+        // Check if redirected from home page with category parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoryParam = urlParams.get('category');
+        if (categoryParam) {
+            // Decode the category name and scroll to it
+            const categoryName = decodeURIComponent(categoryParam);
+            // Use setTimeout to ensure DOM is fully loaded
+            setTimeout(function() {
+                fadeOutToGroupCategory(categoryName);
+            }, 300);
+        }
     }
 
     // Check current page URL is home page
@@ -74,13 +86,9 @@ document.addEventListener('DOMContentLoaded', function() {
             link.addEventListener('click', function(event) {
                 event.preventDefault(); // Prevent default link behavior
                 // get text of clicked link
-                const categoryName = this.textContent.trim();   
-                // Redirect to delivery page with hash
-                window.location.href = window.location.origin + '/delivery';
-                // After redirection, scroll to the category section
-                // window.onload = function() {
-                //     fadeOutToGroupCategory(categoryName);
-                // };
+                const categoryName = this.textContent.trim();
+                // Redirect to delivery page with category parameter
+                window.location.href = window.location.origin + '/delivery?category=' + encodeURIComponent(categoryName);
             });
         });
     }
