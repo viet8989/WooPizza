@@ -502,6 +502,8 @@ function display_topping_products_page() {
 			}
 		}
 
+		$topping_cats = array_merge( $topping_cats, array(15) );
+
 		// Query topping products
 		$args = array(
 			'post_type' => 'product',
