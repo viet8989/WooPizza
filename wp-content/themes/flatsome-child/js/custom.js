@@ -61,7 +61,9 @@ document.addEventListener('DOMContentLoaded', function() {
         categoryLinks.forEach(function(link) {
             link.addEventListener('click', function(event) {
                 event.preventDefault(); // Prevent default link behavior
-                fadeOutToGroupCategory();
+                // get text of clicked link
+                const categoryName = this.textContent.trim();   
+                fadeOutToGroupCategory(categoryName);
             });
         });
     }
@@ -72,6 +74,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-function fadeOutToGroupCategory() {
-    alert('Fade out to group category triggered');    
+function fadeOutToGroupCategory(categoryName) {
+    alert(categoryName);    
 }
