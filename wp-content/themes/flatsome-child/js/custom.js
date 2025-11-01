@@ -81,7 +81,7 @@ function fadeOutToGroupCategory(categoryName) {
     productTitles.forEach(function(title) {
         if (title.textContent.trim() === categoryName) {
             // Scroll to the category section with margin offset 50px            
-            const offset = 50;
+            const offset = 100;
             const target = title.getBoundingClientRect().top + window.scrollY - offset;
             const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             window.scrollTo({ top: target, behavior: prefersReduced ? 'auto' : 'smooth' });
