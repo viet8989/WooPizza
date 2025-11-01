@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // get text of clicked link
                 const categoryName = this.textContent.trim();   
                 // Redirect to delivery page with hash
-                window.location.href = window.location.origin + '/delivery#' + encodeURIComponent(categoryName);
+                window.location.href = window.location.origin + '/delivery';
                 // After redirection, scroll to the category section
                 window.onload = function() {
                     fadeOutToGroupCategory(categoryName);
