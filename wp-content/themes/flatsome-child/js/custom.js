@@ -53,9 +53,8 @@ document.addEventListener('DOMContentLoaded', function() {
             flickitySlider.style.left = '0';
             flickitySlider.style.textAlign = 'center';
         }
-
-        console.log('Carousel centered');
     }
+    fadeOutToGroupCategory();
 });
 
 function fadeOutToGroupCategory() {
