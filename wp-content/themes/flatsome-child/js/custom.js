@@ -54,6 +54,15 @@ document.addEventListener('DOMContentLoaded', function() {
             flickitySlider.style.textAlign = 'center';
         }
     }
+
+    // Check current page URL is checkout page
+    if (window.location.href.indexOf('/checkout') > -1) {
+        const wpslSearch = document.querySelector('.wpsl-search.wpsl-clearfix');
+        if (wpslSearch) {
+            wpslSearch.style.display = 'none';
+        }
+    }
+
     // Check current page URL is delivery page
     if (window.location.href.indexOf('/delivery') > -1) {
         const categoryLinks = document.querySelectorAll('.product-category a');
