@@ -75,5 +75,13 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function fadeOutToGroupCategory(categoryName) {
-    alert(categoryName);    
+    // alert(categoryName);    
+    // in document.querySelectorAll('div.section-content.relative .row.align-middle .col-inner h3')
+    const productTitles = document.querySelectorAll('div.section-content.relative .row.align-middle .col-inner h3');
+    productTitles.forEach(function(title) {
+        if (title.textContent.trim() === categoryName) {
+            // Scroll to the category section
+            title.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    });
 }
