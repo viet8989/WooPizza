@@ -70,7 +70,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check current page URL is delivery page
     if (window.location.href.indexOf('/delivery') > -1) {
         // Make category section sticky at 80px below main menu when scrolling
-        const categorySection = document.querySelectorAll('.section-content')[1];
+        // NOTE: Target the second div.section-content.relative element (category carousel)
+        // The .relative class provides position:relative by default, which we override when sticky
+        const categorySection = document.querySelectorAll('div.section-content.relative')[1];
 
         if (categorySection) {
             // Get header height dynamically
@@ -105,7 +107,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         categorySection.parentNode.insertBefore(placeholder, categorySection);
                     }
 
-                    categorySection.style.position = 'fixed !important';
+                    // Override .relative class with fixed positioning
+                    categorySection.style.position = 'fixed';
                     categorySection.style.top = '80px';
                     categorySection.style.left = 'calc(var(--spacing) * 0)';
                     categorySection.style.right = 'calc(var(--spacing) * 0)';
@@ -121,6 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         placeholder = null;
                     }
 
+                    // Restore .relative class positioning
                     categorySection.style.position = 'relative';
                     categorySection.style.top = 'auto';
                     categorySection.style.left = 'auto';
