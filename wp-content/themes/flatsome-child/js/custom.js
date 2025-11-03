@@ -81,7 +81,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // Calculate position after page fully loads
             const initSticky = function() {
                 originalTop = categorySection.getBoundingClientRect().top + window.pageYOffset;
-                console.log('Initialized - Original top position:', originalTop);
             };
 
             // Wait for images and content to load
@@ -95,7 +94,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const scrollY = window.pageYOffset;
 
                 if (scrollY >= originalTop - stickyOffset && !isSticky) {
-                    console.log('Making sticky at scroll:', scrollY);
                     isSticky = true;
 
                     // Create placeholder to prevent layout shift
@@ -113,7 +111,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     categorySection.style.backgroundColor = '#fff';
                     categorySection.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
                 } else if (scrollY < originalTop - stickyOffset && isSticky) {
-                    console.log('Removing sticky at scroll:', scrollY);
                     isSticky = false;
 
                     // Remove placeholder
