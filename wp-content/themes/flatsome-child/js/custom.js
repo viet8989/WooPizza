@@ -71,20 +71,40 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.location.href.indexOf('/delivery') > -1) {
         // Make category section sticky at 80px below main menu when scrolling
         const categorySection = document.querySelectorAll('.section-content')[1];
-        console.log('Category section found:', categorySection);
 
         if (categorySection) {
             const stickyOffset = 80;
-            const originalTop = categorySection.offsetTop;
-            console.log('Original top position:', originalTop);
-            console.log('Sticky offset:', stickyOffset);
+            let originalTop = 0;
+            let isSticky = false;
+            let placeholder = null;
+
+            // Calculate position after page fully loads
+            const initSticky = function() {
+                originalTop = categorySection.getBoundingClientRect().top + window.pageYOffset;
+                console.log('Initialized - Original top position:', originalTop);
+            };
+
+            // Wait for images and content to load
+            if (document.readyState === 'complete') {
+                initSticky();
+            } else {
+                window.addEventListener('load', initSticky);
+            }
 
             window.addEventListener('scroll', function() {
                 const scrollY = window.pageYOffset;
-                console.log('Scroll Y:', scrollY, 'Trigger at:', originalTop - stickyOffset);
 
-                if (scrollY >= originalTop - stickyOffset) {
-                    console.log('Making sticky');
+                if (scrollY >= originalTop - stickyOffset && !isSticky) {
+                    console.log('Making sticky at scroll:', scrollY);
+                    isSticky = true;
+
+                    // Create placeholder to prevent layout shift
+                    if (!placeholder) {
+                        placeholder = document.createElement('div');
+                        placeholder.style.height = categorySection.offsetHeight + 'px';
+                        categorySection.parentNode.insertBefore(placeholder, categorySection);
+                    }
+
                     categorySection.style.position = 'fixed';
                     categorySection.style.top = stickyOffset + 'px';
                     categorySection.style.left = '0';
@@ -92,15 +112,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     categorySection.style.zIndex = '100';
                     categorySection.style.backgroundColor = '#fff';
                     categorySection.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
-                } else {
-                    console.log('Removing sticky');
+                } else if (scrollY < originalTop - stickyOffset && isSticky) {
+                    console.log('Removing sticky at scroll:', scrollY);
+                    isSticky = false;
+
+                    // Remove placeholder
+                    if (placeholder && placeholder.parentNode) {
+                        placeholder.parentNode.removeChild(placeholder);
+                        placeholder = null;
+                    }
+
                     categorySection.style.position = 'relative';
                     categorySection.style.top = 'auto';
+                    categorySection.style.left = 'auto';
+                    categorySection.style.right = 'auto';
                     categorySection.style.boxShadow = 'none';
                 }
             });
-        } else {
-            console.log('Category section not found!');
         }
 
         const categoryLinks = document.querySelectorAll('.product-category a');
