@@ -73,7 +73,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const categorySection = document.querySelectorAll('.section-content')[1];
 
         if (categorySection) {
-            const stickyOffset = 80;
+            // Get header height dynamically
+            const header = document.querySelector('#header');
+            const stickyOffset = header ? header.offsetHeight : 80;
             let originalTop = 0;
             let isSticky = false;
             let placeholder = null;
@@ -104,9 +106,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
 
                     categorySection.style.position = 'fixed';
-                    categorySection.style.top = stickyOffset + 'px';
-                    categorySection.style.left = '0';
-                    categorySection.style.right = '0';
+                    categorySection.style.top = 'calc(var(--spacing) * 0)';
+                    categorySection.style.left = 'calc(var(--spacing) * 0)';
+                    categorySection.style.right = 'calc(var(--spacing) * 0)';
                     categorySection.style.zIndex = '100';
                     categorySection.style.backgroundColor = '#fff';
                     categorySection.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
