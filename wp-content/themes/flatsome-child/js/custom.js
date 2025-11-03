@@ -69,6 +69,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Check current page URL is delivery page
     if (window.location.href.indexOf('/delivery') > -1) {
+        // Make category section sticky at 80px below main menu when scrolling
+        const categorySection = document.querySelectorAll('.section-content')[1];
+        if (categorySection) {
+            const stickyOffset = 80;
+            const originalTop = categorySection.offsetTop;
+
+            window.addEventListener('scroll', function() {
+                if (window.pageYOffset >= originalTop - stickyOffset) {
+                    categorySection.style.position = 'fixed';
+                    categorySection.style.top = stickyOffset + 'px';
+                    categorySection.style.left = '0';
+                    categorySection.style.right = '0';
+                    categorySection.style.zIndex = '100';
+                    categorySection.style.backgroundColor = '#fff';
+                    categorySection.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
+                } else {
+                    categorySection.style.position = 'relative';
+                    categorySection.style.top = 'auto';
+                    categorySection.style.boxShadow = 'none';
+                }
+            });
+        }
+
         const categoryLinks = document.querySelectorAll('.product-category a');
         categoryLinks.forEach(function(link) {
             link.addEventListener('click', function(event) {
