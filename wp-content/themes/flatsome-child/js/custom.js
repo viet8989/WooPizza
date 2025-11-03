@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
 
                     categorySection.style.position = 'fixed';
-                    categorySection.style.top = 'calc(var(--spacing) * 0)';
+                    categorySection.style.top = '80px';
                     categorySection.style.left = 'calc(var(--spacing) * 0)';
                     categorySection.style.right = 'calc(var(--spacing) * 0)';
                     categorySection.style.zIndex = '100';
