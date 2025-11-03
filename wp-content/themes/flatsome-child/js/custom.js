@@ -180,8 +180,8 @@ function fadeOutToGroupCategory(categoryName) {
     const productTitles = document.querySelectorAll('div.section-content.relative .row.align-middle .col-inner h3');
     productTitles.forEach(function(title) {
         if (title.textContent.trim() === categoryName) {
-            // Scroll to the category section with margin offset 100px            
-            const offset = 100;
+            // Scroll to the category section with margin offset 260px            
+            const offset = 260;
             const target = title.getBoundingClientRect().top + window.scrollY - offset;
             const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             window.scrollTo({ top: target, behavior: prefersReduced ? 'auto' : 'smooth' });
