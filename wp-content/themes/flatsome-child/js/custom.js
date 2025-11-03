@@ -107,8 +107,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         categorySection.parentNode.insertBefore(placeholder, categorySection);
                     }
 
-                    // Override .relative class with fixed positioning
-                    categorySection.style.position = 'fixed';
+                    // Remove .relative class and add .fixed class to override position: relative !important
+                    categorySection.classList.remove('relative');
+                    categorySection.classList.add('fixed');
                     categorySection.style.top = '80px';
                     categorySection.style.left = 'calc(var(--spacing) * 0)';
                     categorySection.style.right = 'calc(var(--spacing) * 0)';
@@ -124,11 +125,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         placeholder = null;
                     }
 
-                    // Restore .relative class positioning
-                    categorySection.style.position = 'relative';
+                    // Restore .relative class and remove .fixed class
+                    categorySection.classList.remove('fixed');
+                    categorySection.classList.add('relative');
                     categorySection.style.top = 'auto';
                     categorySection.style.left = 'auto';
                     categorySection.style.right = 'auto';
+                    categorySection.style.zIndex = '';
+                    categorySection.style.backgroundColor = '';
                     categorySection.style.boxShadow = 'none';
                 }
             });
