@@ -1068,7 +1068,9 @@ jQuery(document).ready(function($) {
 							// Log pizza halves
 							if (item.pizza_halves) {
 								if (item.pizza_halves.left_half) {
-									console.log('  Left Half:', item.pizza_halves.left_half.name, '(' + item.pizza_halves.left_half.price_formatted + ')');
+									console.log('  Left Half:', item.pizza_halves.left_half.name);
+									console.log('    RAW STORED PRICE:', item.pizza_halves.left_half.price_raw);
+									console.log('    CALCULATED PRICE:', item.pizza_halves.left_half.price, '(' + item.pizza_halves.left_half.price_formatted + ')');
 									if (item.pizza_halves.left_half.toppings && item.pizza_halves.left_half.toppings.length > 0) {
 										console.log('    Left Half Toppings:');
 										item.pizza_halves.left_half.toppings.forEach(function(t) {
@@ -1077,7 +1079,9 @@ jQuery(document).ready(function($) {
 									}
 								}
 								if (item.pizza_halves.right_half) {
-									console.log('  Right Half:', item.pizza_halves.right_half.name, '(' + item.pizza_halves.right_half.price_formatted + ')');
+									console.log('  Right Half:', item.pizza_halves.right_half.name);
+									console.log('    RAW STORED PRICE:', item.pizza_halves.right_half.price_raw);
+									console.log('    CALCULATED PRICE:', item.pizza_halves.right_half.price, '(' + item.pizza_halves.right_half.price_formatted + ')');
 									if (item.pizza_halves.right_half.toppings && item.pizza_halves.right_half.toppings.length > 0) {
 										console.log('    Right Half Toppings:');
 										item.pizza_halves.right_half.toppings.forEach(function(t) {
