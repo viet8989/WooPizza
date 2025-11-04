@@ -689,6 +689,9 @@ do_action( 'wc_quick_view_after_single_product' );
 .extra-options-section {
 	margin: 20px 0;
 	padding: 0 20px;
+    min-height: 370px;
+	max-height: 370px;
+    overflow-y: scroll;
 }
 
 .extra-options-title {

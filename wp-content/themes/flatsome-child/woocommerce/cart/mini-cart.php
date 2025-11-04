@@ -297,45 +297,41 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 							?>
 
 							
-
 						</div><!-- .mini-cart-item-details -->
-						<div>
-							<!-- Quantity Controls and Price Row -->
-							<div class="mini-cart-quantity-price-row">
-								<div class="mini-cart-quantity-controls">
-									<button type="button" class="minus" data-cart-item-key="<?php echo esc_attr( $cart_item_key ); ?>">−</button>
-									<input type="number"
-										   class="qty"
-										   value="<?php echo esc_attr( $cart_item['quantity'] ); ?>"
-										   min="1"
-										   max="99"
-										   data-cart-item-key="<?php echo esc_attr( $cart_item_key ); ?>"
-										   readonly>
-									<button type="button" class="plus" data-cart-item-key="<?php echo esc_attr( $cart_item_key ); ?>">+</button>
-								</div>
-								<div class="mini-cart-line-total">
-									<span class="amount"><?php echo $line_total_formatted; ?></span>
-								</div>
-								<div class="mini-cart-remove-action">
-									<?php
-									echo apply_filters(
-										'woocommerce_cart_item_remove_link',
-										sprintf(
-											'<a href="%s" class="remove remove_from_cart_button" aria-label="%s" data-product_id="%s" data-cart_item_key="%s" data-product_sku="%s">&times;</a>',
-											esc_url( wc_get_cart_remove_url( $cart_item_key ) ),
-											esc_attr__( 'Remove this item', 'woocommerce' ),
-											esc_attr( $product_id ),
-											esc_attr( $cart_item_key ),
-											esc_attr( $_product->get_sku() )
-										),
-										$cart_item_key
-									);
-									?>
-								</div>
-							</div>
-
-						</div>
 					</div><!-- .mini-cart-item-content -->
+					<!-- Quantity Controls and Price Row -->
+					<div class="mini-cart-quantity-price-row">
+						<div class="mini-cart-quantity-controls">
+							<button type="button" class="minus" data-cart-item-key="<?php echo esc_attr( $cart_item_key ); ?>">−</button>
+							<input type="number"
+									class="qty"
+									value="<?php echo esc_attr( $cart_item['quantity'] ); ?>"
+									min="1"
+									max="99"
+									data-cart-item-key="<?php echo esc_attr( $cart_item_key ); ?>"
+									readonly>
+							<button type="button" class="plus" data-cart-item-key="<?php echo esc_attr( $cart_item_key ); ?>">+</button>
+						</div>
+						<div class="mini-cart-line-total">
+							<span class="amount"><?php echo $line_total_formatted; ?></span>
+						</div>
+						<div class="mini-cart-remove-action">
+							<?php
+							echo apply_filters(
+								'woocommerce_cart_item_remove_link',
+								sprintf(
+									'<a href="%s" class="remove remove_from_cart_button" aria-label="%s" data-product_id="%s" data-cart_item_key="%s" data-product_sku="%s">&times;</a>',
+									esc_url( wc_get_cart_remove_url( $cart_item_key ) ),
+									esc_attr__( 'Remove this item', 'woocommerce' ),
+									esc_attr( $product_id ),
+									esc_attr( $cart_item_key ),
+									esc_attr( $_product->get_sku() )
+								),
+								$cart_item_key
+							);
+							?>
+						</div>
+					</div>
 				</li>
 				<?php
 				}
@@ -366,7 +362,7 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 				}
 			?>
 			<span class="totals-label"><?php echo esc_html( WC()->countries->tax_or_vat() . $rate_suffix ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-			<span class="totals-value"><?php echo WC()->cart->get_taxes_total(); ?></span>
+			<span class="totals-value"><?php wc_cart_totals_taxes_total_html(); ?></span>
 		</div>
 		<?php endif; ?>
 
