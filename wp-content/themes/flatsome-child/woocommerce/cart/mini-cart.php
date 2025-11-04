@@ -1121,8 +1121,9 @@ jQuery(document).ready(function($) {
 						$total.html('<strong>' + response.data.total + '</strong>');
 					}
 
-					// Trigger cart fragment refresh for other cart elements
-					$(document.body).trigger('wc_fragment_refresh');
+					// Don't trigger wc_fragment_refresh - we're manually updating everything
+					// and it causes race condition with session save
+					// $(document.body).trigger('wc_fragment_refresh');
 
 					// Restore opacity
 					$lineTotal.css('opacity', '1');
