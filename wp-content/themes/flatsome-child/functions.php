@@ -2173,6 +2173,9 @@ function update_mini_cart_quantity_handler() {
 	$cart = WC()->cart;
 	$cart->set_quantity( $cart_item_key, $quantity, true );
 
+	// Recalculate cart totals
+	$cart->calculate_totals();
+
 	// Get updated cart item to calculate line total
 	$cart_contents = $cart->get_cart();
 	$line_total = 0;
@@ -2228,10 +2231,18 @@ function update_mini_cart_quantity_handler() {
 		$line_total_html = wc_price( $line_total );
 	}
 
-	// Return success with line total
+	// Get cart totals
+	$subtotal_html = $cart->get_cart_subtotal();
+	$tax_html = wc_price( $cart->get_taxes_total() );
+	$total_html = $cart->get_total();
+
+	// Return success with all totals
 	wp_send_json_success( array(
 		'message' => 'Cart updated',
 		'cart_hash' => $cart->get_cart_hash(),
-		'line_total' => $line_total_html
+		'line_total' => $line_total_html,
+		'subtotal' => $subtotal_html,
+		'tax' => $tax_html,
+		'total' => $total_html
 	) );
 }

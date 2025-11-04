@@ -953,9 +953,12 @@ jQuery(document).ready(function($) {
 		console.log('Updating cart - Item Key:', cartItemKey, 'Quantity:', quantity);
 		console.log('AJAX URL:', ajaxUrl);
 
-		// Find the current button's container to update the line total
+		// Find elements to update
 		var $quantityRow = $('button[data-cart-item-key="' + cartItemKey + '"]').closest('.mini-cart-quantity-price-row');
 		var $lineTotal = $quantityRow.find('.mini-cart-line-total .amount');
+		var $subtotal = $('.mini-cart-totals-breakdown .subtotal-row .totals-value');
+		var $tax = $('.mini-cart-totals-breakdown .tax-row .totals-value');
+		var $total = $('.mini-cart-totals-breakdown .total-row .totals-value');
 
 		$.ajax({
 			type: 'POST',
@@ -969,31 +972,64 @@ jQuery(document).ready(function($) {
 				console.log('AJAX request starting...');
 				$('.mini-cart-quantity-controls').addClass('updating');
 				$lineTotal.css('opacity', '0.5');
+				$subtotal.css('opacity', '0.5');
+				$tax.css('opacity', '0.5');
+				$total.css('opacity', '0.5');
 			},
 			success: function(response) {
 				console.log('AJAX success response:', response);
 				if (response.success) {
 					console.log('Cart updated successfully');
 
-					// Update line total if provided in response
+					// Update line total
 					if (response.data && response.data.line_total) {
 						console.log('Updating line total to:', response.data.line_total);
 						$lineTotal.html(response.data.line_total);
 					}
 
+					// Update subtotal
+					if (response.data && response.data.subtotal) {
+						console.log('Updating subtotal to:', response.data.subtotal);
+						$subtotal.html(response.data.subtotal);
+					}
+
+					// Update tax
+					if (response.data && response.data.tax) {
+						console.log('Updating tax to:', response.data.tax);
+						$tax.html(response.data.tax);
+					}
+
+					// Update total
+					if (response.data && response.data.total) {
+						console.log('Updating total to:', response.data.total);
+						$total.html('<strong>' + response.data.total + '</strong>');
+					}
+
 					// Trigger cart fragment refresh for other cart elements
 					$(document.body).trigger('wc_fragment_refresh');
 
+					// Restore opacity
 					$lineTotal.css('opacity', '1');
+					$subtotal.css('opacity', '1');
+					$tax.css('opacity', '1');
+					$total.css('opacity', '1');
 				} else {
 					console.error('Cart update failed:', response);
+					// Restore opacity on error
 					$lineTotal.css('opacity', '1');
+					$subtotal.css('opacity', '1');
+					$tax.css('opacity', '1');
+					$total.css('opacity', '1');
 				}
 			},
 			error: function(xhr, status, error) {
 				console.error('AJAX error - Status:', status, 'Error:', error);
 				console.error('XHR:', xhr);
+				// Restore opacity on error
 				$lineTotal.css('opacity', '1');
+				$subtotal.css('opacity', '1');
+				$tax.css('opacity', '1');
+				$total.css('opacity', '1');
 			},
 			complete: function() {
 				console.log('AJAX request completed');
