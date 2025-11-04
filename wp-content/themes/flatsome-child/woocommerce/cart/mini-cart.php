@@ -485,7 +485,7 @@ a:hover .mini-cart-product-title {
 .off-canvas .mini-cart-item-content {
 	display: flex !important;
 	gap: 12px !important;
-	align-items: flex-start !important;
+	align-items: center !important;
 	width: 100% !important;
 	flex-direction: row !important;
 }
