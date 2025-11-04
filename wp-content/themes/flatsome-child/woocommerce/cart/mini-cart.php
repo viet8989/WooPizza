@@ -332,11 +332,14 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 <?php do_action( 'woocommerce_after_mini_cart' ); ?>
 
 <style>
-/* Mini Cart Item Container */
-.woocommerce-mini-cart-item {
-	position: relative;
-	padding: 20px 0;
-	border-bottom: 1px solid #efefef;
+/* Force styles to apply in all cart contexts */
+.woocommerce-mini-cart-item,
+.widget_shopping_cart .woocommerce-mini-cart-item,
+.cart-sidebar .woocommerce-mini-cart-item,
+.off-canvas .woocommerce-mini-cart-item {
+	position: relative !important;
+	padding: 20px 0 !important;
+	border-bottom: 1px solid #efefef !important;
 }
 
 /* Remove Button - Absolute Position */
@@ -406,26 +409,29 @@ a:hover .mini-cart-product-title {
 
 /* Two Column Layout - Image Left, Details Right */
 .mini-cart-item-content {
-	display: flex;
-	gap: 12px;
-	align-items: flex-start;
+	display: flex !important;
+	gap: 12px !important;
+	align-items: flex-start !important;
+	width: 100% !important;
 }
 
 .mini-cart-item-image {
-	flex: 0 0 90px;
-	width: 90px;
+	flex: 0 0 90px !important;
+	width: 90px !important;
+	display: block !important;
 }
 
 .mini-cart-item-image img {
-	width: 100%;
-	height: auto;
-	border-radius: 6px;
-	box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+	width: 100% !important;
+	height: auto !important;
+	border-radius: 6px !important;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+	display: block !important;
 }
 
 .mini-cart-item-details {
-	flex: 1;
-	min-width: 0;
+	flex: 1 !important;
+	min-width: 0 !important;
 }
 
 /* Pizza Half Section Styling */
@@ -451,50 +457,52 @@ a:hover .mini-cart-product-title {
 
 /* Pizza Topping Row Styling */
 .pizza-topping-row {
-	display: flex;
-	align-items: flex-start;
-	margin: 3px 0;
-	padding-left: 0;
-	color: #555;
-	line-height: 1.6;
-	font-size: 13px;
+	display: flex !important;
+	align-items: flex-start !important;
+	margin: 3px 0 !important;
+	padding-left: 0 !important;
+	color: #555 !important;
+	line-height: 1.6 !important;
+	font-size: 13px !important;
+	width: 100% !important;
 }
 
 .pizza-topping-row .topping-label {
-	display: inline-block;
-	min-width: 35px;
-	font-weight: 600;
-	color: #777;
-	flex-shrink: 0;
+	display: inline-block !important;
+	min-width: 35px !important;
+	font-weight: 600 !important;
+	color: #777 !important;
+	flex-shrink: 0 !important;
 }
 
 .pizza-topping-row .topping-label-spacer {
-	display: inline-block;
-	min-width: 35px;
-	flex-shrink: 0;
+	display: inline-block !important;
+	min-width: 35px !important;
+	flex-shrink: 0 !important;
 }
 
 .pizza-topping-row .topping-details {
-	flex: 1;
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
+	flex: 1 !important;
+	display: flex !important;
+	justify-content: space-between !important;
+	align-items: center !important;
+	width: 100% !important;
 }
 
 .pizza-topping-row .topping-name {
-	color: #555;
-	flex: 1;
+	color: #555 !important;
+	flex: 1 !important;
 }
 
 .pizza-topping-row .topping-price {
-	font-weight: 600;
-	color: #000;
-	margin-left: 8px;
+	font-weight: 600 !important;
+	color: #000 !important;
+	margin-left: 8px !important;
 }
 
 .pizza-topping-row .topping-price .amount {
-	font-weight: 600;
-	color: #000;
+	font-weight: 600 !important;
+	color: #000 !important;
 }
 
 /* Custom Pizza Options Display Styling (legacy) */
