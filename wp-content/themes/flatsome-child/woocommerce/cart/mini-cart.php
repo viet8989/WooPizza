@@ -440,30 +440,47 @@ a:hover .mini-cart-product-title {
 }
 
 /* Two Column Layout - Image Left, Details Right */
-.mini-cart-item-content {
+.woocommerce-mini-cart .mini-cart-item-content,
+.widget_shopping_cart .mini-cart-item-content,
+.cart-sidebar .mini-cart-item-content,
+.off-canvas .mini-cart-item-content {
 	display: flex !important;
 	gap: 12px !important;
 	align-items: flex-start !important;
 	width: 100% !important;
+	flex-direction: row !important;
 }
 
-.mini-cart-item-image {
+.woocommerce-mini-cart .mini-cart-item-image,
+.widget_shopping_cart .mini-cart-item-image,
+.cart-sidebar .mini-cart-item-image,
+.off-canvas .mini-cart-item-image {
 	flex: 0 0 90px !important;
 	width: 90px !important;
+	max-width: 90px !important;
 	display: block !important;
+	order: 0 !important;
 }
 
-.mini-cart-item-image img {
+.woocommerce-mini-cart .mini-cart-item-image img,
+.widget_shopping_cart .mini-cart-item-image img,
+.cart-sidebar .mini-cart-item-image img,
+.off-canvas .mini-cart-item-image img {
 	width: 100% !important;
+	max-width: 90px !important;
 	height: auto !important;
 	border-radius: 6px !important;
 	box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
 	display: block !important;
 }
 
-.mini-cart-item-details {
+.woocommerce-mini-cart .mini-cart-item-details,
+.widget_shopping_cart .mini-cart-item-details,
+.cart-sidebar .mini-cart-item-details,
+.off-canvas .mini-cart-item-details {
 	flex: 1 !important;
 	min-width: 0 !important;
+	order: 1 !important;
 }
 
 /* Pizza Half Section Styling */
@@ -488,51 +505,83 @@ a:hover .mini-cart-product-title {
 }
 
 /* Pizza Topping Row Styling */
-.pizza-topping-row {
+.woocommerce-mini-cart .pizza-topping-row,
+.widget_shopping_cart .pizza-topping-row,
+.cart-sidebar .pizza-topping-row,
+.off-canvas .pizza-topping-row {
 	display: flex !important;
-	align-items: flex-start !important;
+	align-items: center !important;
 	margin: 3px 0 !important;
 	padding-left: 0 !important;
+	padding-right: 0 !important;
 	color: #555 !important;
 	line-height: 1.6 !important;
 	font-size: 13px !important;
 	width: 100% !important;
+	flex-wrap: nowrap !important;
 }
 
-.pizza-topping-row .topping-label {
+.woocommerce-mini-cart .pizza-topping-row .topping-label,
+.widget_shopping_cart .pizza-topping-row .topping-label,
+.cart-sidebar .pizza-topping-row .topping-label,
+.off-canvas .pizza-topping-row .topping-label {
 	display: inline-block !important;
 	min-width: 35px !important;
+	max-width: 35px !important;
 	font-weight: 600 !important;
 	color: #777 !important;
 	flex-shrink: 0 !important;
+	flex-grow: 0 !important;
 }
 
-.pizza-topping-row .topping-label-spacer {
+.woocommerce-mini-cart .pizza-topping-row .topping-label-spacer,
+.widget_shopping_cart .pizza-topping-row .topping-label-spacer,
+.cart-sidebar .pizza-topping-row .topping-label-spacer,
+.off-canvas .pizza-topping-row .topping-label-spacer {
 	display: inline-block !important;
 	min-width: 35px !important;
+	max-width: 35px !important;
 	flex-shrink: 0 !important;
+	flex-grow: 0 !important;
 }
 
-.pizza-topping-row .topping-details {
+.woocommerce-mini-cart .pizza-topping-row .topping-details,
+.widget_shopping_cart .pizza-topping-row .topping-details,
+.cart-sidebar .pizza-topping-row .topping-details,
+.off-canvas .pizza-topping-row .topping-details {
 	flex: 1 !important;
 	display: flex !important;
 	justify-content: space-between !important;
 	align-items: center !important;
-	width: 100% !important;
+	min-width: 0 !important;
+	gap: 8px !important;
 }
 
-.pizza-topping-row .topping-name {
+.woocommerce-mini-cart .pizza-topping-row .topping-name,
+.widget_shopping_cart .pizza-topping-row .topping-name,
+.cart-sidebar .pizza-topping-row .topping-name,
+.off-canvas .pizza-topping-row .topping-name {
 	color: #555 !important;
 	flex: 1 !important;
+	white-space: nowrap !important;
+	overflow: hidden !important;
+	text-overflow: ellipsis !important;
 }
 
-.pizza-topping-row .topping-price {
+.woocommerce-mini-cart .pizza-topping-row .topping-price,
+.widget_shopping_cart .pizza-topping-row .topping-price,
+.cart-sidebar .pizza-topping-row .topping-price,
+.off-canvas .pizza-topping-row .topping-price {
 	font-weight: 600 !important;
 	color: #000 !important;
-	margin-left: 8px !important;
+	flex-shrink: 0 !important;
+	white-space: nowrap !important;
 }
 
-.pizza-topping-row .topping-price .amount {
+.woocommerce-mini-cart .pizza-topping-row .topping-price .amount,
+.widget_shopping_cart .pizza-topping-row .topping-price .amount,
+.cart-sidebar .pizza-topping-row .topping-price .amount,
+.off-canvas .pizza-topping-row .topping-price .amount {
 	font-weight: 600 !important;
 	color: #000 !important;
 }
