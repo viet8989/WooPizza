@@ -424,7 +424,7 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 	text-decoration: none !important;
 	transition: all 0.3s ease !important;
 	font-weight: 300 !important;
-	padding: 0 !important;
+	right: 10px !important;
 }
 
 .mini-cart-remove-action .remove:hover {
@@ -768,6 +768,8 @@ ul.product_list_widget li,
 	padding: 10px !important;
 	min-height: 0 !important;
 	overflow: visible !important;
+	background-color: #fff;
+    border-radius: 5px;
 }
 
 .widget_shopping_cart ul.product_list_widget li h3 {
