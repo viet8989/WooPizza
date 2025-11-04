@@ -909,7 +909,7 @@ jQuery(document).ready(function($) {
 		console.log('--- Current Cart Items ---');
 		$('.woocommerce-mini-cart-item').each(function(index) {
 			var $item = $(this);
-			var productName = $item.find('.mini-cart-item-name').text().trim();
+			var productName = $item.find('.mini-cart-product-title').text().trim();
 			var quantity = $item.find('.mini-cart-quantity-controls input.qty').val();
 			var lineTotal = $item.find('.mini-cart-line-total .amount').text().trim();
 
@@ -917,16 +917,6 @@ jQuery(document).ready(function($) {
 			console.log('  Product:', productName);
 			console.log('  Quantity:', quantity);
 			console.log('  Line Total:', lineTotal);
-
-			// Log toppings
-			var toppings = [];
-			$item.find('.mini-cart-topping').each(function() {
-				var toppingText = $(this).text().trim();
-				toppings.push(toppingText);
-			});
-			if (toppings.length > 0) {
-				console.log('  Toppings:', toppings);
-			}
 
 			// Log pizza halves if exists
 			var halves = [];
@@ -936,6 +926,29 @@ jQuery(document).ready(function($) {
 			});
 			if (halves.length > 0) {
 				console.log('  Pizza Halves:', halves);
+			}
+
+			// Log toppings with better detail
+			var toppings = [];
+			$item.find('.pizza-topping-row').each(function() {
+				var $row = $(this);
+				var label = $row.find('.topping-label').text().trim();
+				var name = $row.find('.topping-name').text().trim();
+				var price = $row.find('.topping-price').text().trim();
+
+				if (name) {
+					toppings.push({
+						label: label || '',
+						name: name,
+						price: price
+					});
+				}
+			});
+			if (toppings.length > 0) {
+				console.log('  Toppings:');
+				toppings.forEach(function(t) {
+					console.log('    ' + (t.label ? t.label + ' ' : '') + t.name + ': ' + t.price);
+				});
 			}
 
 			console.log('---');
@@ -1037,8 +1050,47 @@ jQuery(document).ready(function($) {
 
 					// Log detailed cart data if available
 					if (response.data && response.data.cart_details) {
-						console.log('--- Updated Cart Details ---');
-						console.log(response.data.cart_details);
+						console.log('--- Server-Side Cart Details ---');
+						response.data.cart_details.forEach(function(item, idx) {
+							console.log('Item ' + (idx + 1) + ':');
+							console.log('  Product:', item.product_name);
+							console.log('  Quantity:', item.quantity);
+							console.log('  Base Price:', item.base_price_formatted);
+
+							// Log extra toppings (whole pizza)
+							if (item.extra_toppings && item.extra_toppings.length > 0) {
+								console.log('  Extra Toppings:');
+								item.extra_toppings.forEach(function(t) {
+									console.log('    ' + t.name + ': ' + t.price_formatted);
+								});
+							}
+
+							// Log pizza halves
+							if (item.pizza_halves) {
+								if (item.pizza_halves.left_half) {
+									console.log('  Left Half:', item.pizza_halves.left_half.name, '(' + item.pizza_halves.left_half.price_formatted + ')');
+									if (item.pizza_halves.left_half.toppings && item.pizza_halves.left_half.toppings.length > 0) {
+										console.log('    Left Half Toppings:');
+										item.pizza_halves.left_half.toppings.forEach(function(t) {
+											console.log('      ' + t.name + ': ' + t.price_formatted);
+										});
+									}
+								}
+								if (item.pizza_halves.right_half) {
+									console.log('  Right Half:', item.pizza_halves.right_half.name, '(' + item.pizza_halves.right_half.price_formatted + ')');
+									if (item.pizza_halves.right_half.toppings && item.pizza_halves.right_half.toppings.length > 0) {
+										console.log('    Right Half Toppings:');
+										item.pizza_halves.right_half.toppings.forEach(function(t) {
+											console.log('      ' + t.name + ': ' + t.price_formatted);
+										});
+									}
+								}
+							}
+
+							console.log('  CALCULATED Unit Price:', item.unit_price_formatted);
+							console.log('  CALCULATED Line Total:', item.line_total_formatted);
+							console.log('---');
+						});
 					}
 
 					// Update line total
