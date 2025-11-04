@@ -77,7 +77,7 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 							$is_paired = true;
 							$icon_url = get_site_url() . '/wp-content/uploads/2025/10/pizza_half_active.png';
 							$paired_icon = sprintf(
-								'<img src="%s" alt="Paired Pizza" class="paired-pizza-icon" style="width: 20px !important; height: 20px !important;" />',
+								'<img src="%s" alt="Paired Pizza" class="paired-pizza-icon" style="width: 20px !important; height: 20px !important; margin-top: 15px !important;" />',
 								esc_url( $icon_url )
 							);
 							$display_title = sprintf(
@@ -296,6 +296,10 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 							$line_total_formatted = wc_price( $line_total );
 							?>
 
+							
+
+						</div><!-- .mini-cart-item-details -->
+						<div>
 							<!-- Quantity Controls and Price Row -->
 							<div class="mini-cart-quantity-price-row">
 								<div class="mini-cart-quantity-controls">
@@ -312,22 +316,25 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 								<div class="mini-cart-line-total">
 									<span class="amount"><?php echo $line_total_formatted; ?></span>
 								</div>
+								<div class="mini-cart-remove-action">
+									<?php
+									echo apply_filters(
+										'woocommerce_cart_item_remove_link',
+										sprintf(
+											'<a href="%s" class="remove remove_from_cart_button" aria-label="%s" data-product_id="%s" data-cart_item_key="%s" data-product_sku="%s">&times;</a>',
+											esc_url( wc_get_cart_remove_url( $cart_item_key ) ),
+											esc_attr__( 'Remove this item', 'woocommerce' ),
+											esc_attr( $product_id ),
+											esc_attr( $cart_item_key ),
+											esc_attr( $_product->get_sku() )
+										),
+										$cart_item_key
+									);
+									?>
+								</div>
 							</div>
 
-							<!-- Edit/Delete Actions -->
-							<div class="mini-cart-item-actions">
-								<a href="<?php echo esc_url( wc_get_cart_url() ); ?>"
-								   class="edit-item"
-								   title="<?php esc_attr_e( 'Edit item', 'woocommerce' ); ?>"
-								   aria-label="<?php esc_attr_e( 'Edit item', 'woocommerce' ); ?>">
-									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-										<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-										<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-									</svg>
-								</a>
-							</div>
-
-						</div><!-- .mini-cart-item-details -->
+						</div>
 					</div><!-- .mini-cart-item-content -->
 				</li>
 				<?php
@@ -338,12 +345,6 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 		?>
 	</ul>
 
-	<!-- Delivery Options Tabs -->
-	<div class="mini-cart-delivery-tabs">
-		<button class="delivery-tab active" data-method="shipping">Shipping</button>
-		<button class="delivery-tab" data-method="pickup">Pick up</button>
-	</div>
-
 	<!-- Cart Totals Breakdown -->
 	<div class="mini-cart-totals-breakdown">
 		<div class="totals-row subtotal-row">
@@ -351,25 +352,20 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 			<span class="totals-value"><?php echo WC()->cart->get_cart_subtotal(); ?></span>
 		</div>
 
-		<?php if ( WC()->cart->needs_shipping() ) : ?>
-		<div class="totals-row shipping-row">
-			<span class="totals-label">Shipping</span>
-			<span class="totals-value">
-				<?php
-				$shipping_total = WC()->cart->get_shipping_total();
-				if ( $shipping_total > 0 ) {
-					echo wc_price( $shipping_total );
-				} else {
-					echo wc_price( 0 );
-				}
-				?>
-			</span>
-		</div>
-		<?php endif; ?>
-
 		<?php if ( wc_tax_enabled() && ! WC()->cart->display_prices_including_tax() ) : ?>
 		<div class="totals-row tax-row">
-			<span class="totals-label">VAT(<?php echo WC_Tax::get_rate_percent( WC_Tax::get_rates()[0] ?? 0 ); ?>)</span>
+			<?php
+				// For non-itemized display, try to append the first tax rate percent if available
+				$rate_suffix = '';
+				$tax_totals = WC()->cart->get_tax_totals();
+				if ( ! empty( $tax_totals ) ) {
+					$first = reset( $tax_totals );
+					if ( ! empty( $first->tax_rate_id ) ) {
+						$rate_suffix = ' (' . esc_html( WC_Tax::get_rate_percent( $first->tax_rate_id ) ) . ')';
+					}
+				}
+			?>
+			<span class="totals-label"><?php echo esc_html( WC()->countries->tax_or_vat() . $rate_suffix ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
 			<span class="totals-value"><?php echo WC()->cart->get_taxes_total(); ?></span>
 		</div>
 		<?php endif; ?>
@@ -405,23 +401,39 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 	border-bottom: 1px solid #efefef !important;
 }
 
-/* Remove Button - Absolute Position */
-.woocommerce-mini-cart-item .remove {
-	position: absolute;
-	top: 15px;
-	right: 0;
-	font-size: 28px;
-	line-height: 1;
-	color: #ccc;
-	z-index: 10;
-	text-decoration: none;
-	font-weight: 300;
-	transition: all 0.3s ease;
+/* Hide default WooCommerce remove button at top */
+.woocommerce-mini-cart-item > .remove {
+	display: none !important;
 }
 
-.woocommerce-mini-cart-item .remove:hover {
-	color: #dc0000;
-	transform: scale(1.1);
+/* Remove Button in Quantity Row */
+.mini-cart-remove-action {
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	margin-left: auto !important;
+}
+
+.mini-cart-remove-action .remove {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	width: 32px !important;
+	height: 32px !important;
+	border-radius: 4px !important;
+	background-color: #f5f5f5 !important;
+	color: #666 !important;
+	font-size: 24px !important;
+	line-height: 1 !important;
+	text-decoration: none !important;
+	transition: all 0.3s ease !important;
+	font-weight: 300 !important;
+	padding: 0 !important;
+}
+
+.mini-cart-remove-action .remove:hover {
+	background-color: #dc0000 !important;
+	color: #fff !important;
 }
 
 /* Title Wrapper - Override Flatsome styles */
@@ -479,7 +491,17 @@ a:hover .mini-cart-product-title {
 	gap: 12px !important;
 	align-items: flex-start !important;
 	width: 100% !important;
+	flex-direction: column !important;
+}
+
+.woocommerce-mini-cart .mini-cart-item-content > div:first-child,
+.widget_shopping_cart .mini-cart-item-content > div:first-child,
+.cart-sidebar .mini-cart-item-content > div:first-child,
+.off-canvas .mini-cart-item-content > div:first-child {
+	display: flex !important;
 	flex-direction: row !important;
+	width: 100% !important;
+	gap: 12px !important;
 }
 
 .woocommerce-mini-cart .mini-cart-item-image,
@@ -710,11 +732,12 @@ a:hover .mini-cart-product-title {
 
 /* Edit/Delete Action Icons */
 .mini-cart-item-actions {
-	position: absolute !important;
-	top: 15px !important;
-	right: 35px !important;
 	display: flex !important;
+	justify-content: flex-end !important;
 	gap: 6px !important;
+	margin-top: -35px !important;
+	margin-bottom: 10px !important;
+	position: relative !important;
 	z-index: 5 !important;
 }
 
@@ -890,16 +913,6 @@ ul.product_list_widget li img,
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
-	// Handle delivery tab switching
-	$(document).on('click', '.delivery-tab', function() {
-		$('.delivery-tab').removeClass('active');
-		$(this).addClass('active');
-
-		var method = $(this).data('method');
-		// You can add logic here to update shipping method if needed
-		console.log('Delivery method selected:', method);
-	});
-
 	// Handle quantity increase
 	$(document).on('click', '.mini-cart-quantity-controls .plus', function(e) {
 		e.preventDefault();
