@@ -860,7 +860,7 @@ ul.product_list_widget li img,
 	justify-content: space-between !important;
 	align-items: center !important;
 	padding: 8px 0 !important;
-	font-size: 16px !important;
+	font-size: 18px !important;
 	color: #666 !important;
 }
 
@@ -873,7 +873,7 @@ ul.product_list_widget li img,
 }
 
 .mini-cart-totals-breakdown .totals-label {
-	font-weight: 500 !important;
+	font-weight: 600 !important;
 	color: #000 !important;
 }
 
