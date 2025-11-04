@@ -667,6 +667,10 @@ a:hover .mini-cart-product-title {
 	gap: 8px !important;
 }
 
+.mini-cart-quantity-controls button.minus {
+	margin-right: 0 !important;
+}
+
 .mini-cart-quantity-controls button.minus,
 .mini-cart-quantity-controls button.plus {
 	width: 32px !important;
@@ -702,7 +706,7 @@ a:hover .mini-cart-product-title {
 	font-weight: 600 !important;
 	font-size: 14px !important;
 	padding: 0 !important;
-	margin: 0 !important;
+	margin: 0 0 16px 0 !important;
 }
 
 .mini-cart-line-total {
