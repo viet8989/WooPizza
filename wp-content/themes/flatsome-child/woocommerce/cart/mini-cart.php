@@ -487,17 +487,7 @@ a:hover .mini-cart-product-title {
 	gap: 12px !important;
 	align-items: flex-start !important;
 	width: 100% !important;
-	flex-direction: column !important;
-}
-
-.woocommerce-mini-cart .mini-cart-item-content > div:first-child,
-.widget_shopping_cart .mini-cart-item-content > div:first-child,
-.cart-sidebar .mini-cart-item-content > div:first-child,
-.off-canvas .mini-cart-item-content > div:first-child {
-	display: flex !important;
 	flex-direction: row !important;
-	width: 100% !important;
-	gap: 12px !important;
 }
 
 .woocommerce-mini-cart .mini-cart-item-image,
