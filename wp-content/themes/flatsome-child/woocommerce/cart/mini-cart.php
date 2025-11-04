@@ -387,15 +387,6 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 <?php do_action( 'woocommerce_after_mini_cart' ); ?>
 
 <style>
-/* Force styles to apply in all cart contexts */
-.woocommerce-mini-cart-item,
-.widget_shopping_cart .woocommerce-mini-cart-item,
-.cart-sidebar .woocommerce-mini-cart-item,
-.off-canvas .woocommerce-mini-cart-item {
-	position: relative !important;
-	padding: 20px 0 !important;
-	border-bottom: 1px solid #efefef !important;
-}
 
 /* Hide default WooCommerce remove button at top */
 .woocommerce-mini-cart-item > .remove {
@@ -869,7 +860,7 @@ ul.product_list_widget li img,
 	justify-content: space-between !important;
 	align-items: center !important;
 	padding: 8px 0 !important;
-	font-size: 14px !important;
+	font-size: 16px !important;
 	color: #666 !important;
 }
 
@@ -882,7 +873,8 @@ ul.product_list_widget li img,
 }
 
 .mini-cart-totals-breakdown .totals-label {
-	font-weight: 400 !important;
+	font-weight: 500 !important;
+	color: #000 !important;
 }
 
 .mini-cart-totals-breakdown .total-row .totals-label {
