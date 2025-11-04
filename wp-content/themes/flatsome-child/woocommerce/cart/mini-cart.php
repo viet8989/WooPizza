@@ -900,7 +900,60 @@ ul.product_list_widget li img,
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
-	console.log('Mini cart quantity controls initialized');
+	console.log('=== MINI CART INITIALIZATION ===');
+
+	// Log all cart items at initialization
+	logAllCartItems();
+
+	function logAllCartItems() {
+		console.log('--- Current Cart Items ---');
+		$('.woocommerce-mini-cart-item').each(function(index) {
+			var $item = $(this);
+			var productName = $item.find('.mini-cart-item-name').text().trim();
+			var quantity = $item.find('.mini-cart-quantity-controls input.qty').val();
+			var lineTotal = $item.find('.mini-cart-line-total .amount').text().trim();
+
+			console.log('Item ' + (index + 1) + ':');
+			console.log('  Product:', productName);
+			console.log('  Quantity:', quantity);
+			console.log('  Line Total:', lineTotal);
+
+			// Log toppings
+			var toppings = [];
+			$item.find('.mini-cart-topping').each(function() {
+				var toppingText = $(this).text().trim();
+				toppings.push(toppingText);
+			});
+			if (toppings.length > 0) {
+				console.log('  Toppings:', toppings);
+			}
+
+			// Log pizza halves if exists
+			var halves = [];
+			$item.find('.pizza-half-title').each(function() {
+				var halfTitle = $(this).text().trim();
+				halves.push(halfTitle);
+			});
+			if (halves.length > 0) {
+				console.log('  Pizza Halves:', halves);
+			}
+
+			console.log('---');
+		});
+
+		// Log totals
+		var subtotal = $('.mini-cart-totals-breakdown .subtotal-row .totals-value').text().trim();
+		var shipping = $('.mini-cart-totals-breakdown .shipping-row .totals-value').text().trim();
+		var tax = $('.mini-cart-totals-breakdown .tax-row .totals-value').text().trim();
+		var total = $('.mini-cart-totals-breakdown .total-row .totals-value').text().trim();
+
+		console.log('--- Cart Totals ---');
+		console.log('  Subtotal:', subtotal);
+		console.log('  Shipping:', shipping);
+		console.log('  VAT(8%):', tax);
+		console.log('  Total:', total);
+		console.log('=== END CART INITIALIZATION ===');
+	}
 
 	// Handle quantity increase
 	$(document).on('click', '.mini-cart-quantity-controls .plus', function(e) {
@@ -979,7 +1032,14 @@ jQuery(document).ready(function($) {
 			success: function(response) {
 				console.log('AJAX success response:', response);
 				if (response.success) {
+					console.log('=== CART UPDATE SUCCESS ===');
 					console.log('Cart updated successfully');
+
+					// Log detailed cart data if available
+					if (response.data && response.data.cart_details) {
+						console.log('--- Updated Cart Details ---');
+						console.log(response.data.cart_details);
+					}
 
 					// Update line total
 					if (response.data && response.data.line_total) {
@@ -1013,6 +1073,12 @@ jQuery(document).ready(function($) {
 					$subtotal.css('opacity', '1');
 					$tax.css('opacity', '1');
 					$total.css('opacity', '1');
+
+					// Log all cart items after update
+					setTimeout(function() {
+						console.log('=== AFTER QUANTITY CHANGE ===');
+						logAllCartItems();
+					}, 500);
 				} else {
 					console.error('Cart update failed:', response);
 					// Restore opacity on error

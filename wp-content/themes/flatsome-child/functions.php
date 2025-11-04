@@ -2236,13 +2236,111 @@ function update_mini_cart_quantity_handler() {
 	$tax_html = wc_price( $cart->get_taxes_total() );
 	$total_html = $cart->get_total();
 
-	// Return success with all totals
+	// Build detailed cart information for logging
+	$cart_details = array();
+	foreach ( $cart_contents as $key => $item ) {
+		$product = $item['data'];
+		$item_detail = array(
+			'cart_item_key' => $key,
+			'product_name' => $product->get_name(),
+			'quantity' => $item['quantity'],
+			'base_price' => $product->get_price(),
+			'base_price_formatted' => wc_price( $product->get_price() ),
+		);
+
+		// Calculate unit price with all additions
+		$item_unit_price = floatval( $product->get_price() );
+
+		// Extra toppings (whole pizza)
+		if ( isset( $item['extra_topping_options'] ) && ! empty( $item['extra_topping_options'] ) ) {
+			$item_detail['extra_toppings'] = array();
+			foreach ( $item['extra_topping_options'] as $topping ) {
+				$topping_price = isset( $topping['price'] ) ? floatval( $topping['price'] ) : 0;
+				$item_unit_price += $topping_price;
+				$item_detail['extra_toppings'][] = array(
+					'name' => isset( $topping['name'] ) ? $topping['name'] : '',
+					'price' => $topping_price,
+					'price_formatted' => wc_price( $topping_price )
+				);
+			}
+		}
+
+		// Pizza halves
+		if ( isset( $item['pizza_halves'] ) && ! empty( $item['pizza_halves'] ) ) {
+			$halves = $item['pizza_halves'];
+			$item_detail['pizza_halves'] = array();
+
+			// Left half
+			if ( isset( $halves['left_half'] ) ) {
+				$left_price = isset( $halves['left_half']['price'] ) ? floatval( $halves['left_half']['price'] ) / 2 : 0;
+				$item_unit_price += $left_price;
+
+				$left_detail = array(
+					'name' => isset( $halves['left_half']['name'] ) ? $halves['left_half']['name'] : '',
+					'price' => $left_price,
+					'price_formatted' => wc_price( $left_price ),
+					'toppings' => array()
+				);
+
+				if ( isset( $halves['left_half']['toppings'] ) ) {
+					foreach ( $halves['left_half']['toppings'] as $topping ) {
+						$topping_price = isset( $topping['price'] ) ? floatval( $topping['price'] ) : 0;
+						$item_unit_price += $topping_price;
+						$left_detail['toppings'][] = array(
+							'name' => isset( $topping['name'] ) ? $topping['name'] : '',
+							'price' => $topping_price,
+							'price_formatted' => wc_price( $topping_price )
+						);
+					}
+				}
+				$item_detail['pizza_halves']['left_half'] = $left_detail;
+			}
+
+			// Right half
+			if ( isset( $halves['right_half'] ) ) {
+				$right_price = isset( $halves['right_half']['price'] ) ? floatval( $halves['right_half']['price'] ) / 2 : 0;
+				$item_unit_price += $right_price;
+
+				$right_detail = array(
+					'name' => isset( $halves['right_half']['name'] ) ? $halves['right_half']['name'] : '',
+					'price' => $right_price,
+					'price_formatted' => wc_price( $right_price ),
+					'toppings' => array()
+				);
+
+				if ( isset( $halves['right_half']['toppings'] ) ) {
+					foreach ( $halves['right_half']['toppings'] as $topping ) {
+						$topping_price = isset( $topping['price'] ) ? floatval( $topping['price'] ) : 0;
+						$item_unit_price += $topping_price;
+						$right_detail['toppings'][] = array(
+							'name' => isset( $topping['name'] ) ? $topping['name'] : '',
+							'price' => $topping_price,
+							'price_formatted' => wc_price( $topping_price )
+						);
+					}
+				}
+				$item_detail['pizza_halves']['right_half'] = $right_detail;
+			}
+		}
+
+		// Add calculated unit price and line total
+		$item_detail['unit_price'] = $item_unit_price;
+		$item_detail['unit_price_formatted'] = wc_price( $item_unit_price );
+		$item_line_total = $item_unit_price * $item['quantity'];
+		$item_detail['line_total'] = $item_line_total;
+		$item_detail['line_total_formatted'] = wc_price( $item_line_total );
+
+		$cart_details[] = $item_detail;
+	}
+
+	// Return success with all totals and detailed cart info
 	wp_send_json_success( array(
 		'message' => 'Cart updated',
 		'cart_hash' => $cart->get_cart_hash(),
 		'line_total' => $line_total_html,
 		'subtotal' => $subtotal_html,
 		'tax' => $tax_html,
-		'total' => $total_html
+		'total' => $total_html,
+		'cart_details' => $cart_details
 	) );
 }
