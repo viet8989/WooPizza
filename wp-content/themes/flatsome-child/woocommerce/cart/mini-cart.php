@@ -120,21 +120,22 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 
 					// Display extra toppings (whole pizza)
 					if ( isset( $cart_item['extra_topping_options'] ) && ! empty( $cart_item['extra_topping_options'] ) ) {
-						$topping_names = array();
+						$topping_index = 0;
 						foreach ( $cart_item['extra_topping_options'] as $topping ) {
 							if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
-								$topping_names[] = sprintf(
-									'%s %s',
-									esc_html( $topping['name'] ),
-									wc_price( $topping['price'] )
-								);
+								echo '<div class="pizza-topping-row">';
+								if ( $topping_index === 0 ) {
+									echo '<span class="topping-label">Add</span>';
+								} else {
+									echo '<span class="topping-label-spacer"></span>';
+								}
+								echo '<span class="topping-details">';
+								echo '<span class="topping-name">' . esc_html( $topping['name'] ) . '</span> ';
+								echo '<span class="topping-price">' . wc_price( $topping['price'] ) . '</span>';
+								echo '</span>';
+								echo '</div>';
+								$topping_index++;
 							}
-						}
-						if ( ! empty( $topping_names ) ) {
-							echo '<div class="pizza-option-row">';
-							echo '<div class="pizza-option-label">' . __( 'Add', 'flatsome' ) . ':</div>';
-							echo '<div class="pizza-option-value">' . implode( '<br/>', $topping_names ) . '</div>';
-							echo '</div>';
 						}
 					}
 
@@ -160,12 +161,14 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 										if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
 											echo '<div class="pizza-topping-row">';
 											if ( $topping_index === 0 ) {
-												echo '<span class="topping-label">Add:</span> ';
+												echo '<span class="topping-label">Add</span>';
 											} else {
 												echo '<span class="topping-label-spacer"></span>';
 											}
+											echo '<span class="topping-details">';
 											echo '<span class="topping-name">' . esc_html( $topping['name'] ) . '</span> ';
 											echo '<span class="topping-price">' . wc_price( $topping['price'] ) . '</span>';
+											echo '</span>';
 											echo '</div>';
 											$topping_index++;
 										}
@@ -194,12 +197,14 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 										if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
 											echo '<div class="pizza-topping-row">';
 											if ( $topping_index === 0 ) {
-												echo '<span class="topping-label">Add:</span> ';
+												echo '<span class="topping-label">Add</span>';
 											} else {
 												echo '<span class="topping-label-spacer"></span>';
 											}
+											echo '<span class="topping-details">';
 											echo '<span class="topping-name">' . esc_html( $topping['name'] ) . '</span> ';
 											echo '<span class="topping-price">' . wc_price( $topping['price'] ) . '</span>';
+											echo '</span>';
 											echo '</div>';
 											$topping_index++;
 										}
@@ -330,63 +335,68 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 /* Mini Cart Item Container */
 .woocommerce-mini-cart-item {
 	position: relative;
-	padding: 15px 0;
-	border-bottom: 1px solid #eee;
+	padding: 20px 0;
+	border-bottom: 1px solid #efefef;
 }
 
 /* Remove Button - Absolute Position */
 .woocommerce-mini-cart-item .remove {
 	position: absolute;
-	top: 10px;
+	top: 15px;
 	right: 0;
-	font-size: 24px;
+	font-size: 28px;
 	line-height: 1;
-	color: #999;
+	color: #ccc;
 	z-index: 10;
+	text-decoration: none;
+	font-weight: 300;
+	transition: all 0.3s ease;
 }
 
 .woocommerce-mini-cart-item .remove:hover {
 	color: #dc0000;
+	transform: scale(1.1);
 }
 
 /* Title Wrapper - Override Flatsome styles */
 .mini-cart-title-wrapper {
 	display: flex;
 	align-items: center;
-	gap: 6px;
-	margin-bottom: 10px;
-	margin-right: 30px;
+	gap: 8px;
+	margin-bottom: 12px;
+	margin-right: 35px;
 	line-height: 1.4;
 	white-space: normal;
 }
 
 /* Paired Pizza Icon */
 .paired-pizza-icon {
-	width: 20px;
-	height: 20px;
+	width: 22px;
+	height: 22px;
 	flex-shrink: 0;
+	vertical-align: middle;
 }
 
 /* Mini Cart Product Title */
 ul.product_list_widget li a:not(.remove) {
 	display: inline !important;
-	line-height: 1.3 !important;
+	line-height: 1.4 !important;
 	margin-bottom: 0 !important;
 	overflow: visible !important;
 	text-overflow: clip !important;
 }
 
 .mini-cart-product-title {
-	font-size: 15px;
-	font-weight: 600;
+	font-size: 16px;
+	font-weight: 700;
 	margin: 0;
 	line-height: 1.4;
-	color: #333;
+	color: #000;
 	display: inline;
 }
 
 a .mini-cart-product-title {
-	color: #333;
+	color: #000;
 	transition: color 0.3s ease;
 }
 
@@ -397,19 +407,20 @@ a:hover .mini-cart-product-title {
 /* Two Column Layout - Image Left, Details Right */
 .mini-cart-item-content {
 	display: flex;
-	gap: 15px;
+	gap: 12px;
 	align-items: flex-start;
 }
 
 .mini-cart-item-image {
-	flex: 0 0 80px;
-	width: 80px;
+	flex: 0 0 90px;
+	width: 90px;
 }
 
 .mini-cart-item-image img {
 	width: 100%;
 	height: auto;
-	border-radius: 4px;
+	border-radius: 6px;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 .mini-cart-item-details {
@@ -417,7 +428,76 @@ a:hover .mini-cart-product-title {
 	min-width: 0;
 }
 
-/* Custom Pizza Options Display Styling */
+/* Pizza Half Section Styling */
+.pizza-half-section {
+	margin: 8px 0 12px 0;
+	font-size: 14px;
+}
+
+.pizza-half-title {
+	font-weight: 700;
+	color: #000;
+	margin-bottom: 6px;
+	line-height: 1.5;
+	text-transform: uppercase;
+	font-size: 13px;
+	letter-spacing: 0.3px;
+}
+
+.pizza-half-title .amount {
+	color: #000;
+	font-weight: 700;
+}
+
+/* Pizza Topping Row Styling */
+.pizza-topping-row {
+	display: flex;
+	align-items: flex-start;
+	margin: 3px 0;
+	padding-left: 0;
+	color: #555;
+	line-height: 1.6;
+	font-size: 13px;
+}
+
+.pizza-topping-row .topping-label {
+	display: inline-block;
+	min-width: 35px;
+	font-weight: 600;
+	color: #777;
+	flex-shrink: 0;
+}
+
+.pizza-topping-row .topping-label-spacer {
+	display: inline-block;
+	min-width: 35px;
+	flex-shrink: 0;
+}
+
+.pizza-topping-row .topping-details {
+	flex: 1;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.pizza-topping-row .topping-name {
+	color: #555;
+	flex: 1;
+}
+
+.pizza-topping-row .topping-price {
+	font-weight: 600;
+	color: #000;
+	margin-left: 8px;
+}
+
+.pizza-topping-row .topping-price .amount {
+	font-weight: 600;
+	color: #000;
+}
+
+/* Custom Pizza Options Display Styling (legacy) */
 .pizza-option-row {
 	display: flex;
 	margin: 8px 0;
@@ -427,86 +507,63 @@ a:hover .mini-cart-product-title {
 
 .pizza-option-label {
 	flex: 0 0 auto;
-	min-width: 30px;
+	min-width: 35px;
 	font-weight: 600;
-	color: #333;
+	color: #777;
 	padding-right: 10px;
 }
 
 .pizza-option-value {
 	flex: 1;
-	color: #666;
-}
-
-.pizza-option-value .amount {
-	font-weight: 500;
-}
-
-/* Pizza Half Section Styling */
-.pizza-half-section {
-	margin: 10px 0;
-	font-size: 13px;
-}
-
-.pizza-half-title {
-	font-weight: 600;
-	color: #333;
-	margin-bottom: 5px;
-	line-height: 1.4;
-}
-
-.pizza-topping-row {
-	margin: 4px 0;
-	padding-left: 10px;
-	color: #666;
-	line-height: 1.4;
-}
-
-.pizza-topping-row .topping-label {
-	display: inline-block;
-	width: 35px;
-	font-weight: 500;
 	color: #555;
 }
 
-.pizza-topping-row .topping-label-spacer {
-	display: inline-block;
-	width: 38px;
+.pizza-option-value .amount {
+	font-weight: 600;
+	color: #000;
 }
 
-.pizza-topping-row .topping-name {
-	color: #666;
-}
-
-.pizza-topping-row .topping-price {
-	font-weight: 500;
-}
-
-.pizza-topping-row .topping-price .amount {
-	font-weight: 500;
-}
-
+/* Widget Shopping Cart Overrides */
 .widget_shopping_cart ul.product_list_widget li {
 	position: relative;
-    padding: 10px 0 10px;
+	padding: 20px 0;
 }
 
 .widget_shopping_cart ul.product_list_widget li h3 {
 	color: #000;
+	font-weight: 700;
 }
 
 .widget_shopping_cart ul.product_list_widget li img {
 	position: relative;
 }
 
-.widget_shopping_cart ul.product_list_widget li .quantity{
+.widget_shopping_cart ul.product_list_widget li .quantity {
 	color: #000;
-    opacity: 1.0;
-    font-weight: 500;
+	opacity: 1.0;
+	font-weight: 600;
+	font-size: 15px;
+	margin-top: 8px;
+	display: inline-block;
 }
 
+.widget_shopping_cart ul.product_list_widget li .quantity .amount {
+	font-weight: 700;
+	color: #000;
+}
+
+/* Mini Cart Total */
 .woocommerce-mini-cart__total .amount {
 	color: #cd0000;
-	font-weight: 600;
+	font-weight: 700;
+	font-size: 18px;
+}
+
+/* Special Request Styling */
+.pizza-option-row:has(.pizza-option-label:contains("Special Request")) {
+	background-color: #f9f9f9;
+	padding: 8px;
+	border-radius: 4px;
+	margin-top: 10px;
 }
 </style>
