@@ -689,13 +689,13 @@ a:hover .mini-cart-product-title {
 }
 
 .mini-cart-quantity-controls input.qty {
-	width: 45px !important;
+	width: 35px !important;
 	height: 32px !important;
 	text-align: center !important;
 	border: 1px solid #ddd !important;
 	border-radius: 4px !important;
 	font-weight: 600 !important;
-	font-size: 14px !important;
+	font-size: 15px !important;
 	padding: 0 !important;
 	margin: 0 0 16px 0 !important;
 }
@@ -900,37 +900,58 @@ ul.product_list_widget li img,
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
+	console.log('Mini cart quantity controls initialized');
+
 	// Handle quantity increase
 	$(document).on('click', '.mini-cart-quantity-controls .plus', function(e) {
 		e.preventDefault();
+		console.log('Plus button clicked');
+
 		var $button = $(this);
 		var $input = $button.siblings('input.qty');
 		var currentVal = parseInt($input.val());
 		var max = parseInt($input.attr('max'));
 
+		console.log('Current value:', currentVal, 'Max:', max);
+
 		if (currentVal < max) {
-			$input.val(currentVal + 1);
-			updateCartQuantity($input.data('cart-item-key'), currentVal + 1);
+			var newVal = currentVal + 1;
+			$input.val(newVal);
+			console.log('Increasing quantity to:', newVal);
+			updateCartQuantity($input.data('cart-item-key'), newVal);
+		} else {
+			console.log('Already at maximum quantity');
 		}
 	});
 
 	// Handle quantity decrease
 	$(document).on('click', '.mini-cart-quantity-controls .minus', function(e) {
 		e.preventDefault();
+		console.log('Minus button clicked');
+
 		var $button = $(this);
 		var $input = $button.siblings('input.qty');
 		var currentVal = parseInt($input.val());
 		var min = parseInt($input.attr('min'));
 
+		console.log('Current value:', currentVal, 'Min:', min);
+
 		if (currentVal > min) {
-			$input.val(currentVal - 1);
-			updateCartQuantity($input.data('cart-item-key'), currentVal - 1);
+			var newVal = currentVal - 1;
+			$input.val(newVal);
+			console.log('Decreasing quantity to:', newVal);
+			updateCartQuantity($input.data('cart-item-key'), newVal);
+		} else {
+			console.log('Already at minimum quantity');
 		}
 	});
 
 	// Update cart via AJAX
 	function updateCartQuantity(cartItemKey, quantity) {
 		var ajaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
+
+		console.log('Updating cart - Item Key:', cartItemKey, 'Quantity:', quantity);
+		console.log('AJAX URL:', ajaxUrl);
 
 		$.ajax({
 			type: 'POST',
@@ -941,21 +962,24 @@ jQuery(document).ready(function($) {
 				quantity: quantity
 			},
 			beforeSend: function() {
-				// Add loading state
+				console.log('AJAX request starting...');
 				$('.mini-cart-quantity-controls').addClass('updating');
 			},
 			success: function(response) {
+				console.log('AJAX success response:', response);
 				if (response.success) {
-					// Trigger cart fragment refresh
+					console.log('Cart updated successfully, triggering fragment refresh');
 					$(document.body).trigger('wc_fragment_refresh');
 				} else {
 					console.error('Cart update failed:', response);
 				}
 			},
 			error: function(xhr, status, error) {
-				console.error('AJAX error:', error);
+				console.error('AJAX error - Status:', status, 'Error:', error);
+				console.error('XHR:', xhr);
 			},
 			complete: function() {
+				console.log('AJAX request completed');
 				$('.mini-cart-quantity-controls').removeClass('updating');
 			}
 		});
