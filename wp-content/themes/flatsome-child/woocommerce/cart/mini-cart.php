@@ -338,16 +338,47 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 		?>
 	</ul>
 
-	<p class="woocommerce-mini-cart__total total">
-		<?php
-		/**
-		 * Hook: woocommerce_widget_shopping_cart_total.
-		 *
-		 * @hooked woocommerce_widget_shopping_cart_subtotal - 10
-		 */
-		do_action( 'woocommerce_widget_shopping_cart_total' );
-		?>
-	</p>
+	<!-- Delivery Options Tabs -->
+	<div class="mini-cart-delivery-tabs">
+		<button class="delivery-tab active" data-method="shipping">Shipping</button>
+		<button class="delivery-tab" data-method="pickup">Pick up</button>
+	</div>
+
+	<!-- Cart Totals Breakdown -->
+	<div class="mini-cart-totals-breakdown">
+		<div class="totals-row subtotal-row">
+			<span class="totals-label">Subtotal</span>
+			<span class="totals-value"><?php echo WC()->cart->get_cart_subtotal(); ?></span>
+		</div>
+
+		<?php if ( WC()->cart->needs_shipping() ) : ?>
+		<div class="totals-row shipping-row">
+			<span class="totals-label">Shipping</span>
+			<span class="totals-value">
+				<?php
+				$shipping_total = WC()->cart->get_shipping_total();
+				if ( $shipping_total > 0 ) {
+					echo wc_price( $shipping_total );
+				} else {
+					echo wc_price( 0 );
+				}
+				?>
+			</span>
+		</div>
+		<?php endif; ?>
+
+		<?php if ( wc_tax_enabled() && ! WC()->cart->display_prices_including_tax() ) : ?>
+		<div class="totals-row tax-row">
+			<span class="totals-label">VAT(<?php echo WC_Tax::get_rate_percent( WC_Tax::get_rates()[0] ?? 0 ); ?>)</span>
+			<span class="totals-value"><?php echo WC()->cart->get_taxes_total(); ?></span>
+		</div>
+		<?php endif; ?>
+
+		<div class="totals-row total-row">
+			<span class="totals-label"><strong>Total</strong></span>
+			<span class="totals-value"><strong><?php echo WC()->cart->get_total(); ?></strong></span>
+		</div>
+	</div>
 
 	<?php do_action( 'woocommerce_widget_shopping_cart_before_buttons' ); ?>
 
@@ -768,10 +799,107 @@ ul.product_list_widget li img,
 	border-radius: 4px;
 	margin-top: 10px;
 }
+
+/* Delivery Tabs */
+.mini-cart-delivery-tabs {
+	display: flex !important;
+	gap: 0 !important;
+	margin: 20px 0 15px 0 !important;
+	border-radius: 6px !important;
+	overflow: hidden !important;
+}
+
+.mini-cart-delivery-tabs .delivery-tab {
+	flex: 1 !important;
+	padding: 10px 20px !important;
+	background-color: #fff !important;
+	border: 1px solid #ddd !important;
+	color: #666 !important;
+	font-size: 14px !important;
+	font-weight: 600 !important;
+	cursor: pointer !important;
+	transition: all 0.3s ease !important;
+}
+
+.mini-cart-delivery-tabs .delivery-tab:first-child {
+	border-right: none !important;
+	border-radius: 6px 0 0 6px !important;
+}
+
+.mini-cart-delivery-tabs .delivery-tab:last-child {
+	border-radius: 0 6px 6px 0 !important;
+}
+
+.mini-cart-delivery-tabs .delivery-tab.active {
+	background-color: #cd0000 !important;
+	border-color: #cd0000 !important;
+	color: #fff !important;
+}
+
+.mini-cart-delivery-tabs .delivery-tab:hover:not(.active) {
+	background-color: #f5f5f5 !important;
+}
+
+/* Cart Totals Breakdown */
+.mini-cart-totals-breakdown {
+	margin: 15px 0 !important;
+	padding: 0 !important;
+}
+
+.mini-cart-totals-breakdown .totals-row {
+	display: flex !important;
+	justify-content: space-between !important;
+	align-items: center !important;
+	padding: 8px 0 !important;
+	font-size: 14px !important;
+	color: #666 !important;
+}
+
+.mini-cart-totals-breakdown .totals-row.total-row {
+	border-top: 2px solid #000 !important;
+	padding-top: 12px !important;
+	margin-top: 8px !important;
+	font-size: 18px !important;
+	color: #000 !important;
+}
+
+.mini-cart-totals-breakdown .totals-label {
+	font-weight: 400 !important;
+}
+
+.mini-cart-totals-breakdown .total-row .totals-label {
+	font-weight: 700 !important;
+	font-size: 18px !important;
+}
+
+.mini-cart-totals-breakdown .totals-value {
+	font-weight: 600 !important;
+}
+
+.mini-cart-totals-breakdown .total-row .totals-value {
+	color: #cd0000 !important;
+	font-weight: 700 !important;
+	font-size: 18px !important;
+}
+
+.mini-cart-totals-breakdown .totals-value .amount {
+	font-weight: inherit !important;
+	color: inherit !important;
+}
 </style>
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
+	// Handle delivery tab switching
+	$(document).on('click', '.delivery-tab', function() {
+		$('.delivery-tab').removeClass('active');
+		$(this).addClass('active');
+
+		var method = $(this).data('method');
+		// You can add logic here to update shipping method if needed
+		console.log('Delivery method selected:', method);
+	});
+
 	// Handle quantity increase
 	$(document).on('click', '.mini-cart-quantity-controls .plus', function(e) {
 		e.preventDefault();
@@ -802,14 +930,15 @@ jQuery(document).ready(function($) {
 
 	// Update cart via AJAX
 	function updateCartQuantity(cartItemKey, quantity) {
+		var ajaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
+
 		$.ajax({
 			type: 'POST',
-			url: wc_add_to_cart_params.ajax_url,
+			url: ajaxUrl,
 			data: {
 				action: 'update_mini_cart_quantity',
 				cart_item_key: cartItemKey,
-				quantity: quantity,
-				security: wc_add_to_cart_params.wc_ajax_url.split('security=')[1]
+				quantity: quantity
 			},
 			beforeSend: function() {
 				// Add loading state
@@ -817,9 +946,14 @@ jQuery(document).ready(function($) {
 			},
 			success: function(response) {
 				if (response.success) {
-					// Trigger cart update
+					// Trigger cart fragment refresh
 					$(document.body).trigger('wc_fragment_refresh');
+				} else {
+					console.error('Cart update failed:', response);
 				}
+			},
+			error: function(xhr, status, error) {
+				console.error('AJAX error:', error);
 			},
 			complete: function() {
 				$('.mini-cart-quantity-controls').removeClass('updating');
