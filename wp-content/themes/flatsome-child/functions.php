@@ -2176,6 +2176,10 @@ function update_mini_cart_quantity_handler() {
 	// Recalculate cart totals
 	$cart->calculate_totals();
 
+	// Persist cart to session
+	$cart->persistent_cart_update();
+	WC()->session->save_data();
+
 	// Get updated cart item to calculate line total
 	$cart_contents = $cart->get_cart();
 	$line_total = 0;
