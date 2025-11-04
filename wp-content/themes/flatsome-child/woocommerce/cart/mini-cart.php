@@ -755,14 +755,17 @@ a:hover .mini-cart-product-title {
 	height: 14px !important;
 }
 
+.inner-padding {
+    padding: 20px !important;
+}
+
 /* Widget Shopping Cart Overrides - Force override Flatsome defaults */
 ul.product_list_widget li,
 .widget_shopping_cart ul.product_list_widget li,
 .cart-sidebar ul.product_list_widget li,
 .off-canvas ul.product_list_widget li {
 	position: relative !important;
-	padding: 20px 0 !important;
-	padding-left: 0 !important;
+	padding: 10px !important;
 	min-height: 0 !important;
 	overflow: visible !important;
 }
