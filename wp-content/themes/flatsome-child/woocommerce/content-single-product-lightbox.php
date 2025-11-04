@@ -258,7 +258,7 @@ do_action( 'wc_quick_view_before_single_product' );
 			</div>
 
 			<!-- Special Request Section -->
-			<div class="extra-options-section special-request-section">
+			<div class="special-request-section">
 				<h4 class="extra-options-title"><?php esc_html_e( 'Special Request:', 'flatsome' ); ?></h4>
 				<textarea
 					id="special-request"
@@ -733,9 +733,7 @@ do_action( 'wc_quick_view_after_single_product' );
 
 /* Special Request Section */
 .special-request-section {
-	margin-top: 25px;
-	padding-top: 20px;
-	border-top: 2px solid #e0e0e0;
+	padding: 20px;
 }
 
 .special-request-textarea {
