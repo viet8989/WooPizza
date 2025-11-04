@@ -292,9 +292,41 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 
 							// Format unit price (not total)
 							$unit_price_formatted = wc_price( $calculated_price );
-
-							echo apply_filters( 'woocommerce_widget_cart_item_quantity', '<span class="quantity">' . sprintf( '%s &times; %s', $cart_item['quantity'], $unit_price_formatted ) . '</span>', $cart_item, $cart_item_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							$line_total = $calculated_price * $cart_item['quantity'];
+							$line_total_formatted = wc_price( $line_total );
 							?>
+
+							<!-- Quantity Controls and Price Row -->
+							<div class="mini-cart-quantity-price-row">
+								<div class="mini-cart-quantity-controls">
+									<button type="button" class="minus" data-cart-item-key="<?php echo esc_attr( $cart_item_key ); ?>">−</button>
+									<input type="number"
+										   class="qty"
+										   value="<?php echo esc_attr( $cart_item['quantity'] ); ?>"
+										   min="1"
+										   max="99"
+										   data-cart-item-key="<?php echo esc_attr( $cart_item_key ); ?>"
+										   readonly>
+									<button type="button" class="plus" data-cart-item-key="<?php echo esc_attr( $cart_item_key ); ?>">+</button>
+								</div>
+								<div class="mini-cart-line-total">
+									<span class="amount"><?php echo $line_total_formatted; ?></span>
+								</div>
+							</div>
+
+							<!-- Edit/Delete Actions -->
+							<div class="mini-cart-item-actions">
+								<a href="<?php echo esc_url( wc_get_cart_url() ); ?>"
+								   class="edit-item"
+								   title="<?php esc_attr_e( 'Edit item', 'woocommerce' ); ?>"
+								   aria-label="<?php esc_attr_e( 'Edit item', 'woocommerce' ); ?>">
+									<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+										<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+									</svg>
+								</a>
+							</div>
+
 						</div><!-- .mini-cart-item-details -->
 					</div><!-- .mini-cart-item-content -->
 				</li>
@@ -531,6 +563,105 @@ a:hover .mini-cart-product-title {
 	color: #000;
 }
 
+/* Quantity Controls and Price Row */
+.mini-cart-quantity-price-row {
+	display: flex !important;
+	justify-content: space-between !important;
+	align-items: center !important;
+	margin-top: 12px !important;
+	padding-top: 8px !important;
+	border-top: 1px solid #f0f0f0 !important;
+}
+
+.mini-cart-quantity-controls {
+	display: flex !important;
+	align-items: center !important;
+	gap: 8px !important;
+}
+
+.mini-cart-quantity-controls button.minus,
+.mini-cart-quantity-controls button.plus {
+	width: 32px !important;
+	height: 32px !important;
+	border-radius: 50% !important;
+	border: 1px solid #ddd !important;
+	background-color: #fff !important;
+	color: #333 !important;
+	font-size: 18px !important;
+	font-weight: 300 !important;
+	cursor: pointer !important;
+	transition: all 0.3s ease !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	line-height: 1 !important;
+	padding: 0 !important;
+}
+
+.mini-cart-quantity-controls button.minus:hover,
+.mini-cart-quantity-controls button.plus:hover {
+	background-color: #cd0000 !important;
+	color: #fff !important;
+	border-color: #cd0000 !important;
+}
+
+.mini-cart-quantity-controls input.qty {
+	width: 45px !important;
+	height: 32px !important;
+	text-align: center !important;
+	border: 1px solid #ddd !important;
+	border-radius: 4px !important;
+	font-weight: 600 !important;
+	font-size: 14px !important;
+	padding: 0 !important;
+	margin: 0 !important;
+}
+
+.mini-cart-line-total {
+	font-size: 16px !important;
+	font-weight: 700 !important;
+	color: #000 !important;
+}
+
+.mini-cart-line-total .amount {
+	color: #000 !important;
+	font-weight: 700 !important;
+}
+
+/* Edit/Delete Action Icons */
+.mini-cart-item-actions {
+	position: absolute !important;
+	top: 15px !important;
+	right: 35px !important;
+	display: flex !important;
+	gap: 6px !important;
+	z-index: 5 !important;
+}
+
+.mini-cart-item-actions a {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	width: 28px !important;
+	height: 28px !important;
+	border-radius: 4px !important;
+	background-color: #f5f5f5 !important;
+	color: #666 !important;
+	transition: all 0.3s ease !important;
+	text-decoration: none !important;
+	padding: 5px !important;
+}
+
+.mini-cart-item-actions a:hover {
+	background-color: #cd0000 !important;
+	color: #fff !important;
+}
+
+.mini-cart-item-actions svg {
+	width: 14px !important;
+	height: 14px !important;
+}
+
 /* Widget Shopping Cart Overrides - Force override Flatsome defaults */
 ul.product_list_widget li,
 .widget_shopping_cart ul.product_list_widget li,
@@ -589,3 +720,62 @@ ul.product_list_widget li img,
 	margin-top: 10px;
 }
 </style>
+
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+	// Handle quantity increase
+	$(document).on('click', '.mini-cart-quantity-controls .plus', function(e) {
+		e.preventDefault();
+		var $button = $(this);
+		var $input = $button.siblings('input.qty');
+		var currentVal = parseInt($input.val());
+		var max = parseInt($input.attr('max'));
+
+		if (currentVal < max) {
+			$input.val(currentVal + 1);
+			updateCartQuantity($input.data('cart-item-key'), currentVal + 1);
+		}
+	});
+
+	// Handle quantity decrease
+	$(document).on('click', '.mini-cart-quantity-controls .minus', function(e) {
+		e.preventDefault();
+		var $button = $(this);
+		var $input = $button.siblings('input.qty');
+		var currentVal = parseInt($input.val());
+		var min = parseInt($input.attr('min'));
+
+		if (currentVal > min) {
+			$input.val(currentVal - 1);
+			updateCartQuantity($input.data('cart-item-key'), currentVal - 1);
+		}
+	});
+
+	// Update cart via AJAX
+	function updateCartQuantity(cartItemKey, quantity) {
+		$.ajax({
+			type: 'POST',
+			url: wc_add_to_cart_params.ajax_url,
+			data: {
+				action: 'update_mini_cart_quantity',
+				cart_item_key: cartItemKey,
+				quantity: quantity,
+				security: wc_add_to_cart_params.wc_ajax_url.split('security=')[1]
+			},
+			beforeSend: function() {
+				// Add loading state
+				$('.mini-cart-quantity-controls').addClass('updating');
+			},
+			success: function(response) {
+				if (response.success) {
+					// Trigger cart update
+					$(document.body).trigger('wc_fragment_refresh');
+				}
+			},
+			complete: function() {
+				$('.mini-cart-quantity-controls').removeClass('updating');
+			}
+		});
+	}
+});
+</script>

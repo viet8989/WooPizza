@@ -2147,3 +2147,35 @@ function filter_products_by_field_type( $products ) {
 		return $products;
 	}
 }
+
+/**
+ * AJAX handler to update mini-cart quantity
+ */
+add_action( 'wp_ajax_update_mini_cart_quantity', 'update_mini_cart_quantity_handler' );
+add_action( 'wp_ajax_nopriv_update_mini_cart_quantity', 'update_mini_cart_quantity_handler' );
+
+function update_mini_cart_quantity_handler() {
+	// Check if cart item key and quantity are set
+	if ( ! isset( $_POST['cart_item_key'] ) || ! isset( $_POST['quantity'] ) ) {
+		wp_send_json_error( array( 'message' => 'Invalid request' ) );
+		return;
+	}
+
+	$cart_item_key = sanitize_text_field( $_POST['cart_item_key'] );
+	$quantity = intval( $_POST['quantity'] );
+
+	// Validate quantity
+	if ( $quantity < 1 ) {
+		$quantity = 1;
+	}
+
+	// Update cart
+	$cart = WC()->cart;
+	$cart->set_quantity( $cart_item_key, $quantity, true );
+
+	// Return success
+	wp_send_json_success( array(
+		'message' => 'Cart updated',
+		'cart_hash' => $cart->get_cart_hash()
+	) );
+}
