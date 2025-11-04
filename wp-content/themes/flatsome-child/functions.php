@@ -2173,9 +2173,65 @@ function update_mini_cart_quantity_handler() {
 	$cart = WC()->cart;
 	$cart->set_quantity( $cart_item_key, $quantity, true );
 
-	// Return success
+	// Get updated cart item to calculate line total
+	$cart_contents = $cart->get_cart();
+	$line_total = 0;
+	$line_total_html = '';
+
+	if ( isset( $cart_contents[ $cart_item_key ] ) ) {
+		$cart_item = $cart_contents[ $cart_item_key ];
+		$_product = $cart_item['data'];
+
+		// Calculate base price
+		$unit_price = $_product->get_price();
+
+		// Add extra toppings (whole pizza)
+		if ( isset( $cart_item['extra_topping_options'] ) && ! empty( $cart_item['extra_topping_options'] ) ) {
+			foreach ( $cart_item['extra_topping_options'] as $topping ) {
+				if ( isset( $topping['price'] ) ) {
+					$unit_price += floatval( $topping['price'] );
+				}
+			}
+		}
+
+		// Add pizza halves prices
+		if ( isset( $cart_item['pizza_halves'] ) && ! empty( $cart_item['pizza_halves'] ) ) {
+			$halves = $cart_item['pizza_halves'];
+
+			// Left half
+			if ( isset( $halves['left_half']['price'] ) ) {
+				$unit_price += floatval( $halves['left_half']['price'] ) / 2;
+			}
+			if ( isset( $halves['left_half']['toppings'] ) ) {
+				foreach ( $halves['left_half']['toppings'] as $topping ) {
+					if ( isset( $topping['price'] ) ) {
+						$unit_price += floatval( $topping['price'] );
+					}
+				}
+			}
+
+			// Right half
+			if ( isset( $halves['right_half']['price'] ) ) {
+				$unit_price += floatval( $halves['right_half']['price'] ) / 2;
+			}
+			if ( isset( $halves['right_half']['toppings'] ) ) {
+				foreach ( $halves['right_half']['toppings'] as $topping ) {
+					if ( isset( $topping['price'] ) ) {
+						$unit_price += floatval( $topping['price'] );
+					}
+				}
+			}
+		}
+
+		// Calculate line total
+		$line_total = $unit_price * $quantity;
+		$line_total_html = wc_price( $line_total );
+	}
+
+	// Return success with line total
 	wp_send_json_success( array(
 		'message' => 'Cart updated',
-		'cart_hash' => $cart->get_cart_hash()
+		'cart_hash' => $cart->get_cart_hash(),
+		'line_total' => $line_total_html
 	) );
 }
