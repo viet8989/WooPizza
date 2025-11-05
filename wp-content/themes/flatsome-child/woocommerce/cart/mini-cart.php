@@ -559,7 +559,7 @@ a:hover .mini-cart-product-title {
 	min-width: 35px !important;
 	max-width: 35px !important;
 	font-weight: 600 !important;
-	color: #777 !important;
+	color: #000 !important;
 	flex-shrink: 0 !important;
 	flex-grow: 0 !important;
 }
@@ -982,9 +982,8 @@ jQuery(document).ready(function($) {
 
 		if (currentVal < max) {
 			var newVal = currentVal + 1;
-			$input.val(newVal);
 			console.log('Increasing quantity to:', newVal);
-			updateCartQuantity($input.data('cart-item-key'), newVal);
+			updateCartQuantity($input.data('cart-item-key'), newVal, $input);
 		} else {
 			console.log('Already at maximum quantity');
 		}

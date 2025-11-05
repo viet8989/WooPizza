@@ -321,7 +321,7 @@ defined( 'ABSPATH' ) || exit;
 	display: inline-block;
 	width: 35px;
 	font-weight: 500;
-	color: #555;
+	color: #000;
 }
 
 .checkout-item-details .pizza-topping-row .topping-label-spacer {
