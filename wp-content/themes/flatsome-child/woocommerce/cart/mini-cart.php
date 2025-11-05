@@ -1128,6 +1128,19 @@ jQuery(document).ready(function($) {
 						console.log('Updated quantity input to:', quantity);
 					}
 
+					// Store in localStorage as backup (for guest users without login)
+					try {
+						var cartBackup = JSON.parse(localStorage.getItem('woo_mini_cart_backup') || '{}');
+						cartBackup[cartItemKey] = {
+							quantity: quantity,
+							timestamp: new Date().getTime()
+						};
+						localStorage.setItem('woo_mini_cart_backup', JSON.stringify(cartBackup));
+						console.log('Saved quantity to localStorage backup:', cartItemKey, quantity);
+					} catch (e) {
+						console.warn('Could not save to localStorage:', e);
+					}
+
 					// Don't trigger wc_fragment_refresh - we're manually updating everything
 					// and it causes race condition with session save
 					// $(document.body).trigger('wc_fragment_refresh');

@@ -2176,9 +2176,37 @@ function update_mini_cart_quantity_handler() {
 	// Recalculate cart totals
 	$cart->calculate_totals();
 
-	// Persist cart to session
+	// Persist cart to session - CRITICAL for guest users (non-logged-in)
+	error_log( 'CART UPDATE: Before persist - Item: ' . $cart_item_key . ', Quantity: ' . $quantity );
+	error_log( 'CART UPDATE: User logged in: ' . ( is_user_logged_in() ? 'YES' : 'NO (using cookies)' ) );
+
+	// Method 1: Standard WooCommerce persistence
 	$cart->persistent_cart_update();
+
+	// Method 2: Explicitly set cart in session
+	WC()->session->set( 'cart', $cart->get_cart_for_session() );
+
+	// Method 3: Set cart hash to trigger cookie update
+	WC()->session->set( 'cart_totals', $cart->get_totals() );
+
+	// Method 4: Force save to database and update cookies
 	WC()->session->save_data();
+
+	// Method 5: For guest users, ensure cookies are set
+	if ( ! is_user_logged_in() ) {
+		// Force WooCommerce to set cookies
+		wc_setcookie( 'woocommerce_items_in_cart', '1' );
+		wc_setcookie( 'woocommerce_cart_hash', md5( json_encode( $cart->get_cart_for_session() ) ) );
+	}
+
+	// Verify the quantity was saved
+	$saved_cart = WC()->session->get( 'cart' );
+	if ( isset( $saved_cart[ $cart_item_key ] ) ) {
+		$saved_qty = $saved_cart[ $cart_item_key ]['quantity'];
+		error_log( 'CART UPDATE: After persist - Saved Quantity: ' . $saved_qty );
+	} else {
+		error_log( 'CART UPDATE: WARNING - Cart item not found in session after save!' );
+	}
 
 	// Get updated cart item to calculate line total
 	$cart_contents = $cart->get_cart();
