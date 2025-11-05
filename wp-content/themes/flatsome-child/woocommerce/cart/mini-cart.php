@@ -900,6 +900,9 @@ ul.product_list_widget li img,
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
+	$('.woocommerce-mini-cart__buttons.buttons .button.wc-forward').eq(0).hide();
+	$('.woocommerce-mini-cart__buttons.buttons .button.wc-forward').eq(1).text('Process your order');
+
 	console.log('=== MINI CART INITIALIZATION ===');
 
 	// Log all cart items at initialization
@@ -1003,16 +1006,15 @@ jQuery(document).ready(function($) {
 
 		if (currentVal > min) {
 			var newVal = currentVal - 1;
-			$input.val(newVal);
 			console.log('Decreasing quantity to:', newVal);
-			updateCartQuantity($input.data('cart-item-key'), newVal);
+			updateCartQuantity($input.data('cart-item-key'), newVal, $input);
 		} else {
 			console.log('Already at minimum quantity');
 		}
 	});
 
 	// Update cart via AJAX
-	function updateCartQuantity(cartItemKey, quantity) {
+	function updateCartQuantity(cartItemKey, quantity, $quantityInput) {
 		var ajaxUrl = '<?php echo admin_url('admin-ajax.php'); ?>';
 
 		console.log('Updating cart - Item Key:', cartItemKey, 'Quantity:', quantity);
@@ -1118,6 +1120,12 @@ jQuery(document).ready(function($) {
 					if (response.data && response.data.total) {
 						console.log('Updating total to:', response.data.total);
 						$total.html('<strong>' + response.data.total + '</strong>');
+					}
+
+					// Update the quantity input field AFTER successful save
+					if ($quantityInput) {
+						$quantityInput.val(quantity);
+						console.log('Updated quantity input to:', quantity);
 					}
 
 					// Don't trigger wc_fragment_refresh - we're manually updating everything
