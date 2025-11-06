@@ -155,23 +155,28 @@
         });
 
         /**
-         * Form validation
+         * Form validation for Shipping Prices only
          */
         $('form[action*="admin-post.php"]').on('submit', function() {
             var $form = $(this);
-            var storeId = $form.find('#store_id').val();
-            var districtId = $form.find('#district_id').val();
-            var wardId = $form.find('#ward_id').val();
-            var price = $form.find('#price').val();
+            var actionInput = $form.find('input[name="action"]').val();
 
-            if (!storeId || !districtId || !wardId) {
-                alert('Please fill in all required fields.');
-                return false;
-            }
+            // Only validate shipping price forms
+            if (actionInput === 'sic_save_shipping_price') {
+                var storeId = $form.find('#store_id').val();
+                var districtId = $form.find('#district_id').val();
+                var wardId = $form.find('#ward_id').val();
+                var price = $form.find('#price').val();
 
-            if (price < 0) {
-                alert('Price must be a positive number.');
-                return false;
+                if (!storeId || !districtId || !wardId) {
+                    alert('Please fill in all required fields.');
+                    return false;
+                }
+
+                if (price < 0) {
+                    alert('Price must be a positive number.');
+                    return false;
+                }
             }
 
             return true;
