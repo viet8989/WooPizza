@@ -2441,7 +2441,7 @@ function customize_checkout_labels_and_requirements( $fields ) {
 	// Move billing_city above billing_address_1 and set to readonly with default value
 	if ( isset( $fields['billing']['billing_city'] ) ) {
 		// Set priority to be before address_1 (address_1 default priority is 50)
-		$fields['billing']['billing_city']['priority'] = 45;
+		$fields['billing']['billing_city']['priority'] = 40;
 
 		// Set default value
 		$fields['billing']['billing_city']['default'] = 'Ho Chi Minh';
