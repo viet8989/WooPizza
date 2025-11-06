@@ -198,6 +198,12 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 	transition: color 0.3s ease;
 }
 
+.checkout-sidebar.sm-touch-scroll {
+	border: 1px solid #d3d7d3;
+    border-radius: 10px;
+    padding: 20px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
 	.delivery-options {
