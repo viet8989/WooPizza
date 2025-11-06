@@ -225,8 +225,8 @@ jQuery(document).ready(function($) {
 		// Update hidden field
 		$('#selected_delivery_method').val(method);
 
-		// Update shipping method
-		$(document.body).trigger('update_checkout');
+		// // Update shipping method
+		// $(document.body).trigger('update_checkout');
 	});
 
 	// Set initial state
