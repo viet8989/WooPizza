@@ -243,3 +243,60 @@ jQuery(document).ready(function($) {
 
 <?php do_action( 'woocommerce_after_checkout_form', $checkout ); ?>
 
+<?php
+// Remove billing_postcode from checkout fields
+add_filter( 'woocommerce_checkout_fields', 'my_hide_billing_postcode' );
+function my_hide_billing_postcode( $fields ) {
+    if ( isset( $fields['billing']['billing_postcode'] ) ) {
+        unset( $fields['billing']['billing_postcode'] );
+    }
+    return $fields;
+}
+
+// Remove Last Name fields from checkout (billing and shipping)
+add_filter( 'woocommerce_checkout_fields', 'my_hide_last_name_fields' );
+function my_hide_last_name_fields( $fields ) {
+	// Remove billing last name
+	if ( isset( $fields['billing']['billing_last_name'] ) ) {
+		unset( $fields['billing']['billing_last_name'] );
+	}
+
+	// Remove shipping last name
+	if ( isset( $fields['shipping']['shipping_last_name'] ) ) {
+		unset( $fields['shipping']['shipping_last_name'] );
+	}
+
+	return $fields;
+}
+
+// Alternative: make billing_last_name optional instead of removing
+/*
+add_filter( 'woocommerce_checkout_fields', function( $fields ) {
+	if ( isset( $fields['billing']['billing_last_name'] ) ) {
+		$fields['billing']['billing_last_name']['required'] = false;
+	}
+	return $fields;
+} );
+*/
+
+// Customize checkout labels and requirements
+add_filter( 'woocommerce_checkout_fields', 'customize_checkout_labels_and_requirements' );
+function customize_checkout_labels_and_requirements( $fields ) {
+	// Change 'First name' to 'Full name'
+	if ( isset( $fields['billing']['billing_first_name'] ) ) {
+		$fields['billing']['billing_first_name']['label'] = __( 'Full name', 'flatsome' );
+		// Update placeholder as well if present
+		$fields['billing']['billing_first_name']['placeholder'] = __( 'Full name', 'flatsome' );
+	}
+
+	// Make phone required and change label from 'Phone (optional)' to 'Phone'
+	if ( isset( $fields['billing']['billing_phone'] ) ) {
+		$fields['billing']['billing_phone']['label']    = __( 'Phone', 'flatsome' );
+		$fields['billing']['billing_phone']['required'] = true;
+		// Ensure placeholder matches label
+		$fields['billing']['billing_phone']['placeholder'] = __( 'Phone', 'flatsome' );
+	}
+
+	return $fields;
+}
+?>
