@@ -58,11 +58,6 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 	</div>
 </div>
 
-<!-- Store Locator (custom checkout layout) -->
-<div id="wpsl-container" style="margin-bottom: 30px;">
-	<?php echo do_shortcode('[wpsl template="checkout" map_type="roadmap" auto_locate="false" start_marker="red" store_marker="blue" category="DELIVERY" category_selection=""]'); ?>
-</div>
-
 <form name="checkout" method="post" class="checkout woocommerce-checkout" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" enctype="multipart/form-data" aria-label="<?php echo esc_attr__( 'Checkout', 'woocommerce' ); ?>">
 
 	<!-- Hidden field to store delivery method -->
@@ -116,10 +111,6 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 </form>
 
 <style>
-#wpsl-wrap #wpsl-result-list ul li {
-    list-style: none !important;
-    width: 99%;
-}
 
 .delivery-method-selection {
 	background: #f8f8f8;
@@ -221,61 +212,6 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
-	// Force initialize wpslMap if it doesn't exist (fallback for when Google Maps fails)
-	if (typeof wpslMap === 'undefined') {
-		window.wpslMap = [{ storeData: [] }];
-	}
-
-	// Function to update WPSL category filter
-	function updateWPSLCategory(category) {
-		// Update hidden category filter field
-		var filterInput = $('#wpsl-category-filter');
-		if (filterInput.length) {
-			filterInput.val(category);
-		}
-
-		// Check wpslMap
-		if (typeof wpslMap !== 'undefined' && wpslMap.length > 0) {
-			wpslMap[0].storeData = [];
-
-			// Update the category filter in wpslSettings
-			if (typeof wpslSettings !== 'undefined') {
-				wpslSettings.categoryIds = category;
-			}
-
-			// Trigger WPSL search directly via AJAX
-			var lat = 0;
-			var lng = 0;
-
-			try {
-				if (wpslMap[0] && wpslMap[0].settings && wpslMap[0].settings.startLatLng) {
-					lat = wpslMap[0].settings.startLatLng.lat || 0;
-					lng = wpslMap[0].settings.startLatLng.lng || 0;
-				}
-			} catch(e) {
-				// Use default coordinates
-			}
-
-			var searchData = {
-				action: 'store_search',
-				lat: lat,
-				lng: lng,
-				max_results: wpslSettings.maxResults || 25,
-				search_radius: wpslSettings.searchRadius || 50,
-				autoload: 1,
-				wpsl_custom_filter: category,
-				skip_cache: 1
-			};
-
-			// Perform the search
-			$.get(wpslSettings.ajaxurl, searchData, function(response) {
-				// The ajaxComplete handler will render the stores automatically
-			}).fail(function(xhr, status, error) {
-				console.error('Store search failed:', error);
-			});
-		}
-	}
-
 	// Handle delivery method change
 	$('input[name="delivery_method"]').on('change', function() {
 		var method = $(this).val();
@@ -284,9 +220,6 @@ jQuery(document).ready(function($) {
 		// Update hidden field
 		$('#selected_delivery_method').val(method);
 
-		// Update WPSL category filter
-		updateWPSLCategory(category);
-
 		// Update shipping method
 		$(document.body).trigger('update_checkout');
 	});
@@ -294,75 +227,6 @@ jQuery(document).ready(function($) {
 	// Set initial state
 	var initialMethod = $('input[name="delivery_method"]:checked').val();
 	var initialCategory = (initialMethod === 'pickup') ? 'PICKUP' : 'DELIVERY';
-
-	// Set initial category
-	if ($('#wpsl-category-filter').length) {
-		$('#wpsl-category-filter').val(initialCategory);
-	}
-
-	// Override WPSL category filter when search is triggered
-	$(document).on('click', '#wpsl-search-btn', function(e) {
-		var selectedMethod = $('input[name="delivery_method"]:checked').val();
-		var category = (selectedMethod === 'pickup') ? 'PICKUP' : 'DELIVERY';
-
-		// Update wpslSettings before search
-		if (typeof wpslSettings !== 'undefined') {
-			wpslSettings.categoryIds = category;
-		}
-	});
-
-	// Intercept WPSL AJAX request to add category filter
-	$(document).ajaxSend(function(event, jqxhr, settings) {
-		if (settings.url && settings.url.indexOf('store_search') !== -1) {
-			var selectedMethod = $('input[name="delivery_method"]:checked').val();
-			var category = (selectedMethod === 'pickup') ? 'PICKUP' : 'DELIVERY';
-
-			// Use custom parameter 'wpsl_custom_filter' instead of 'filter'
-			if (settings.url.indexOf('?') !== -1) {
-				settings.url += '&wpsl_custom_filter=' + category + '&skip_cache=1';
-			} else {
-				settings.url += '?wpsl_custom_filter=' + category + '&skip_cache=1';
-			}
-
-			// Also add to data if it exists
-			if (settings.data) {
-				settings.data += '&wpsl_custom_filter=' + category + '&skip_cache=1';
-			}
-		}
-	});
-
-	// Monitor AJAX responses and manually render store list
-	$(document).ajaxComplete(function(event, xhr, settings) {
-		if (settings.url && settings.url.indexOf('store_search') !== -1) {
-			try {
-				var response = JSON.parse(xhr.responseText);
-
-				if (response.length) {
-					// Manually render store list
-					var storeListHtml = '';
-					response.forEach(function(store) {
-						storeListHtml += '<li data-store-id="' + store.id + '">';
-						storeListHtml += '<div class="wpsl-store-location">';
-						storeListHtml += '<p><strong>' + store.store + '</strong></p>';
-						if (store.address) storeListHtml += '<p>' + store.address + '</p>';
-						if (store.city) storeListHtml += '<p>' + store.city + ', ' + (store.zip || '') + '</p>';
-						if (store.phone) storeListHtml += '<p>Phone: ' + store.phone + '</p>';
-						if (store.distance) storeListHtml += '<p><small>Distance: ' + parseFloat(store.distance).toFixed(1) + ' km</small></p>';
-						storeListHtml += '</div>';
-						storeListHtml += '</li>';
-					});
-
-					// Update store list
-					$('#wpsl-stores ul').html(storeListHtml);
-					$('#wpsl-stores').removeClass('wpsl-not-loaded');
-				} else {
-					$('#wpsl-stores ul').html('<li><p>Không tìm thấy cửa hàng nào.</p></li>');
-				}
-			} catch(e) {
-				console.error('Error parsing store search response:', e);
-			}
-		}
-	});
 });
 </script>
 
