@@ -2473,19 +2473,32 @@ function set_default_billing_city_value( $value, $input ) {
  */
 add_filter( 'woocommerce_checkout_fields', 'add_district_ward_checkout_fields', 25 );
 function add_district_ward_checkout_fields( $fields ) {
+	error_log( '=== CHECKOUT FIELDS FILTER STARTED ===' );
+
 	// Check if Shipping in City plugin classes exist
-	if ( ! class_exists( 'SIC_District' ) || ! class_exists( 'SIC_Ward' ) ) {
+	if ( ! class_exists( 'SIC_District' ) ) {
+		error_log( 'ERROR: SIC_District class not found!' );
 		return $fields;
 	}
+
+	if ( ! class_exists( 'SIC_Ward' ) ) {
+		error_log( 'ERROR: SIC_Ward class not found!' );
+		return $fields;
+	}
+
+	error_log( 'SUCCESS: Plugin classes found' );
 
 	// Get all districts
 	$district_obj = SIC_District::get_instance();
 	$districts = $district_obj->get_all();
 
+	error_log( 'Districts count: ' . count( $districts ) );
+
 	// Prepare district options
 	$district_options = array( '' => __( '-- Select District --', 'flatsome' ) );
 	foreach ( $districts as $district ) {
 		$district_options[ $district->id ] = $district->name;
+		error_log( 'District added: ID=' . $district->id . ', Name=' . $district->name );
 	}
 
 	// Add District field (after city, priority 46)
@@ -2499,6 +2512,8 @@ function add_district_ward_checkout_fields( $fields ) {
 		'placeholder' => __( 'Select district', 'flatsome' ),
 	);
 
+	error_log( 'District field added to checkout' );
+
 	// Add Ward field (after district, priority 47)
 	$fields['billing']['billing_ward'] = array(
 		'type'        => 'select',
@@ -2510,6 +2525,9 @@ function add_district_ward_checkout_fields( $fields ) {
 		'placeholder' => __( 'Select ward', 'flatsome' ),
 	);
 
+	error_log( 'Ward field added to checkout' );
+	error_log( '=== CHECKOUT FIELDS FILTER COMPLETED ===' );
+
 	return $fields;
 }
 
@@ -2520,23 +2538,34 @@ add_action( 'wp_ajax_get_wards_by_district_checkout', 'ajax_get_wards_by_distric
 add_action( 'wp_ajax_nopriv_get_wards_by_district_checkout', 'ajax_get_wards_by_district_checkout' );
 
 function ajax_get_wards_by_district_checkout() {
+	error_log( '=== AJAX GET WARDS STARTED ===' );
+	error_log( 'POST data: ' . print_r( $_POST, true ) );
+
 	// Check nonce
 	check_ajax_referer( 'woocommerce-process_checkout', 'security' );
+	error_log( 'Nonce verified successfully' );
 
 	$district_id = isset( $_POST['district_id'] ) ? absint( $_POST['district_id'] ) : 0;
+	error_log( 'District ID: ' . $district_id );
 
 	if ( ! $district_id ) {
+		error_log( 'ERROR: Invalid district ID' );
 		wp_send_json_error( array( 'message' => __( 'Invalid district', 'flatsome' ) ) );
 	}
 
 	// Check if Shipping in City plugin exists
 	if ( ! class_exists( 'SIC_Ward' ) ) {
+		error_log( 'ERROR: SIC_Ward class not found' );
 		wp_send_json_error( array( 'message' => __( 'Plugin not found', 'flatsome' ) ) );
 	}
+
+	error_log( 'SIC_Ward class found' );
 
 	// Get wards for this district
 	$ward_obj = SIC_Ward::get_instance();
 	$wards = $ward_obj->get_all( $district_id );
+
+	error_log( 'Wards found: ' . count( $wards ) );
 
 	// Format response
 	$ward_options = array();
@@ -2545,8 +2574,10 @@ function ajax_get_wards_by_district_checkout() {
 			'value' => $ward->id,
 			'text'  => $ward->name,
 		);
+		error_log( 'Ward added: ID=' . $ward->id . ', Name=' . $ward->name );
 	}
 
+	error_log( 'Sending success response with ' . count( $ward_options ) . ' wards' );
 	wp_send_json_success( array( 'wards' => $ward_options ) );
 }
 
@@ -2557,17 +2588,28 @@ add_action( 'wp_footer', 'add_district_ward_checkout_script' );
 function add_district_ward_checkout_script() {
 	// Only on checkout page
 	if ( ! is_checkout() ) {
+		error_log( 'District/Ward script not loaded - not checkout page' );
 		return;
 	}
+
+	error_log( 'District/Ward checkout script loaded' );
 	?>
 	<script type="text/javascript">
 	jQuery(document).ready(function($) {
+		console.log('=== District/Ward Checkout Script Loaded ===');
+		console.log('Billing District Field:', $('#billing_district').length);
+		console.log('Billing Ward Field:', $('#billing_ward').length);
+
 		// Handle district change
 		$(document.body).on('change', '#billing_district', function() {
+			console.log('=== District Changed ===');
 			var districtId = $(this).val();
 			var $wardSelect = $('#billing_ward');
 
+			console.log('Selected District ID:', districtId);
+
 			if (!districtId) {
+				console.log('No district selected, clearing wards');
 				$wardSelect.html('<option value="">-- Select Ward --</option>');
 				return;
 			}
@@ -2575,6 +2617,9 @@ function add_district_ward_checkout_script() {
 			// Show loading
 			$wardSelect.prop('disabled', true);
 			$wardSelect.html('<option value="">Loading...</option>');
+
+			console.log('AJAX URL:', wc_checkout_params.ajax_url);
+			console.log('Security Nonce:', wc_checkout_params.update_order_review_nonce);
 
 			// AJAX request to get wards
 			$.ajax({
@@ -2585,31 +2630,50 @@ function add_district_ward_checkout_script() {
 					district_id: districtId,
 					security: wc_checkout_params.update_order_review_nonce
 				},
+				beforeSend: function() {
+					console.log('AJAX request started');
+				},
 				success: function(response) {
+					console.log('=== AJAX Response ===');
+					console.log('Response:', response);
+
 					if (response.success && response.data.wards) {
+						console.log('Wards received:', response.data.wards.length);
 						var options = '<option value="">-- Select Ward --</option>';
 						$.each(response.data.wards, function(index, ward) {
+							console.log('Adding ward:', ward);
 							options += '<option value="' + ward.value + '">' + ward.text + '</option>';
 						});
 						$wardSelect.html(options);
 						$wardSelect.prop('disabled', false);
+						console.log('Wards loaded successfully');
 					} else {
+						console.error('No wards in response or error:', response);
 						$wardSelect.html('<option value="">No wards found</option>');
 						$wardSelect.prop('disabled', false);
 					}
 				},
-				error: function() {
+				error: function(xhr, status, error) {
+					console.error('=== AJAX Error ===');
+					console.error('Status:', status);
+					console.error('Error:', error);
+					console.error('Response:', xhr.responseText);
 					$wardSelect.html('<option value="">Error loading wards</option>');
 					$wardSelect.prop('disabled', false);
-					alert('Failed to load wards. Please try again.');
+					alert('Failed to load wards. Please check console for details.');
 				}
 			});
 		});
 
 		// Trigger update_checkout when district or ward changes
 		$(document.body).on('change', '#billing_district, #billing_ward', function() {
+			console.log('Triggering checkout update');
 			$(document.body).trigger('update_checkout');
 		});
+
+		// Log on page load
+		console.log('District options:', $('#billing_district option').length);
+		console.log('Ward options:', $('#billing_ward option').length);
 	});
 	</script>
 	<?php
@@ -2620,8 +2684,14 @@ function add_district_ward_checkout_script() {
  */
 add_action( 'woocommerce_checkout_update_order_meta', 'save_district_ward_to_order_meta' );
 function save_district_ward_to_order_meta( $order_id ) {
+	error_log( '=== SAVE DISTRICT/WARD TO ORDER META ===' );
+	error_log( 'Order ID: ' . $order_id );
+	error_log( 'District POST: ' . ( isset( $_POST['billing_district'] ) ? $_POST['billing_district'] : 'NOT SET' ) );
+	error_log( 'Ward POST: ' . ( isset( $_POST['billing_ward'] ) ? $_POST['billing_ward'] : 'NOT SET' ) );
+
 	if ( isset( $_POST['billing_district'] ) && ! empty( $_POST['billing_district'] ) ) {
 		$district_id = absint( $_POST['billing_district'] );
+		error_log( 'Saving District ID: ' . $district_id );
 
 		// Get district name
 		if ( class_exists( 'SIC_District' ) ) {
@@ -2629,13 +2699,18 @@ function save_district_ward_to_order_meta( $order_id ) {
 			$district = $district_obj->get_by_id( $district_id );
 			$district_name = $district ? $district->name : '';
 
+			error_log( 'District Name: ' . $district_name );
+
 			update_post_meta( $order_id, '_billing_district', $district_id );
 			update_post_meta( $order_id, '_billing_district_name', $district_name );
+
+			error_log( 'District saved to order meta' );
 		}
 	}
 
 	if ( isset( $_POST['billing_ward'] ) && ! empty( $_POST['billing_ward'] ) ) {
 		$ward_id = absint( $_POST['billing_ward'] );
+		error_log( 'Saving Ward ID: ' . $ward_id );
 
 		// Get ward name
 		if ( class_exists( 'SIC_Ward' ) ) {
@@ -2643,10 +2718,16 @@ function save_district_ward_to_order_meta( $order_id ) {
 			$ward = $ward_obj->get_by_id( $ward_id );
 			$ward_name = $ward ? $ward->name : '';
 
+			error_log( 'Ward Name: ' . $ward_name );
+
 			update_post_meta( $order_id, '_billing_ward', $ward_id );
 			update_post_meta( $order_id, '_billing_ward_name', $ward_name );
+
+			error_log( 'Ward saved to order meta' );
 		}
 	}
+
+	error_log( '=== SAVE COMPLETE ===' );
 }
 
 /**

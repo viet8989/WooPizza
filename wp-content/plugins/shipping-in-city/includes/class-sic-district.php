@@ -50,7 +50,8 @@ class SIC_District {
         $table_name = $wpdb->prefix . 'sic_districts';
         $charset_collate = $wpdb->get_charset_collate();
 
-        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+        // Use dbDelta with proper formatting (TWO spaces after PRIMARY KEY)
+        $sql = "CREATE TABLE $table_name (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             name varchar(255) NOT NULL,
             slug varchar(255) NOT NULL,
@@ -64,6 +65,13 @@ class SIC_District {
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
+
+        // Log the result
+        error_log('SIC_District::create_table() executed. Table: ' . $table_name);
+
+        // Verify table was created
+        $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table_name'") === $table_name;
+        error_log('SIC_District table exists after creation: ' . ($table_exists ? 'YES' : 'NO'));
     }
 
     /**
