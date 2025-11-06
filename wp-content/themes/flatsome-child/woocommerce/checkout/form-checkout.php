@@ -34,7 +34,7 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 	<h3>Chọn phương thức nhận hàng</h3>
 	<div class="delivery-options" style="display: flex; gap: 20px; margin-top: 15px;">
 		<label class="delivery-option" style="flex: 1; cursor: pointer;">
-			<input type="radio" name="delivery_method" value="delivery" id="delivery_delivery" checked>
+			<input type="radio" name="delivery_method" value="delivery" id="delivery_delivery">
 			<span class="delivery-icon">
 				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 					<path d="M16 3H1V16H16V3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -99,8 +99,6 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 						<div id="order_review" class="woocommerce-checkout-review-order">
 							<?php do_action( 'woocommerce_checkout_order_review' ); ?>
 						</div>
-
-						<!-- <?php do_action( 'woocommerce_checkout_after_order_review' ); ?> -->
 					</div>
 				</div>
 
@@ -236,7 +234,7 @@ jQuery(document).ready(function($) {
 	});
 
 	// Set initial state
-	var initialMethod = $('input[name="delivery_method"]:checked').val();
+	$('input[name="delivery_method"]').eq(0).click();
 	// var initialCategory = (initialMethod === 'pickup') ? 'PICKUP' : 'DELIVERY';
 });
 </script>
