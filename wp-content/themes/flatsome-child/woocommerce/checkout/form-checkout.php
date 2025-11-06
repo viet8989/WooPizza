@@ -215,7 +215,12 @@ jQuery(document).ready(function($) {
 	// Handle delivery method change
 	$('input[name="delivery_method"]').on('change', function() {
 		var method = $(this).val();
-		var category = (method === 'pickup') ? 'PICKUP' : 'DELIVERY';
+		if (method === 'pickup') {
+			$('.shipping__table th').text('Local pickup');
+		} else {
+			// Set shipping method to flat rate (or your default shipping method)
+			$('.shipping__table th').text('Shipping');	
+		}
 
 		// Update hidden field
 		$('#selected_delivery_method').val(method);
@@ -226,8 +231,9 @@ jQuery(document).ready(function($) {
 
 	// Set initial state
 	var initialMethod = $('input[name="delivery_method"]:checked').val();
-	var initialCategory = (initialMethod === 'pickup') ? 'PICKUP' : 'DELIVERY';
+	// var initialCategory = (initialMethod === 'pickup') ? 'PICKUP' : 'DELIVERY';
 });
 </script>
 
 <?php do_action( 'woocommerce_after_checkout_form', $checkout ); ?>
+
