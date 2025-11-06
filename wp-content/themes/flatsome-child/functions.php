@@ -2392,3 +2392,51 @@ function update_mini_cart_quantity_handler() {
 		'cart_details' => $cart_details
 	) );
 }
+
+/**
+ * Customize WooCommerce Checkout Fields
+ */
+
+// Remove billing_postcode from checkout fields
+add_filter( 'woocommerce_checkout_fields', 'my_hide_billing_postcode', 20 );
+function my_hide_billing_postcode( $fields ) {
+    if ( isset( $fields['billing']['billing_postcode'] ) ) {
+        unset( $fields['billing']['billing_postcode'] );
+    }
+    return $fields;
+}
+
+// Remove Last Name fields from checkout (billing and shipping)
+add_filter( 'woocommerce_checkout_fields', 'my_hide_last_name_fields', 20 );
+function my_hide_last_name_fields( $fields ) {
+	// Remove billing last name
+	if ( isset( $fields['billing']['billing_last_name'] ) ) {
+		unset( $fields['billing']['billing_last_name'] );
+	}
+
+	// Remove shipping last name
+	if ( isset( $fields['shipping']['shipping_last_name'] ) ) {
+		unset( $fields['shipping']['shipping_last_name'] );
+	}
+
+	return $fields;
+}
+
+// Customize checkout labels and requirements
+add_filter( 'woocommerce_checkout_fields', 'customize_checkout_labels_and_requirements', 20 );
+function customize_checkout_labels_and_requirements( $fields ) {
+	// Change 'First name' to 'Full name'
+	if ( isset( $fields['billing']['billing_first_name'] ) ) {
+		$fields['billing']['billing_first_name']['label'] = __( 'Full name', 'flatsome' );
+		$fields['billing']['billing_first_name']['placeholder'] = __( 'Full name', 'flatsome' );
+	}
+
+	// Make phone required and change label from 'Phone (optional)' to 'Phone'
+	if ( isset( $fields['billing']['billing_phone'] ) ) {
+		$fields['billing']['billing_phone']['label']    = __( 'Phone', 'flatsome' );
+		$fields['billing']['billing_phone']['required'] = true;
+		$fields['billing']['billing_phone']['placeholder'] = __( 'Phone', 'flatsome' );
+	}
+
+	return $fields;
+}
