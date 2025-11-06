@@ -1,7 +1,5 @@
-you can change way display half image pizza:
-+ Left half pizza: split right image with intrinsic size (width=width/2:width), after display in right <div class="half-pizza-container"> with max-height:250px
-+ Right half pizza: split left image with intrinsic size (width=0:width/2), after display in left <div class="half-pizza-container"> with max-height:250px
-
-you cropped images OK, but display wrong 
-+ first <div class="half-pizza-container"> is panel left I need image cropped display right
-+ second <div class="half-pizza-container"> is panel right I need image cropped display left
+Write plugin 'Shipping in City' with:
+- In menu admin: 
+    + List District, Add New District (Edit, Delete similar Product)
+    + List Ward, Add New Ward (Edit, Delete similar Product)
+    + Price Shipping: List Price Shipping(Select store from plugin Store Locator, Select District, Select Ward, Price) with functions Add, Edit, Delete
