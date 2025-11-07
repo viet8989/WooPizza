@@ -1446,7 +1446,7 @@ function add_toppings_tab_content() {
 	}
 
 	// Only show if product_type=pizza parameter is present
-	$is_pizza_edit_mode = isset( $_GET['product_type'] ) && $_GET['product_type'] === 'pizza';
+	$is_pizza_edit_mode = isset( $_GET['product_type'] ) && ($_GET['product_type'] === 'pizza' || $_GET['product_type'] === 'other');
 	if ( ! $is_pizza_edit_mode ) {
 		return;
 	}
