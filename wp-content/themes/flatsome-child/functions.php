@@ -369,7 +369,7 @@ function display_other_products_page() {
 	<div class="wrap">
 		<h1 class="wp-heading-inline"><?php esc_html_e( 'Other Products', 'flatsome' ); ?></h1>
 		<a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&product_type=other' ) ); ?>" class="page-title-action">
-			<?php esc_html_e( 'Add New', 'flatsome' ); ?>
+			<?php esc_html_e( 'Add New Other Product', 'flatsome' ); ?>
 		</a>
 		<hr class="wp-header-end">
 		<?php
