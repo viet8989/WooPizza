@@ -1,5 +1,1 @@
-Write plugin 'Shipping in City' with:
-- In menu admin: 
-    + List District, Add New District (Edit, Delete similar Product)
-    + List Ward, Add New Ward (Edit, Delete similar Product)
-    + Price Shipping: List Price Shipping(Select store from plugin Store Locator, Select District, Select Ward, Price) with functions Add, Edit, Delete
+SELECT * FROM R6vhU_posts WHERE post_content LIKE '%Branch%' AND post_content LIKE '%ux_menu%' AND post_status = 'publish';

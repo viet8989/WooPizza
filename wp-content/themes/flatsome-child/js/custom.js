@@ -1,4 +1,19 @@
 document.addEventListener('DOMContentLoaded', function() {
+
+    const menuOpenLinks = document.querySelectorAll('.ux-menu-link.flex.menu-item .ux-menu-link__link.flex');
+        menuOpenLinks.forEach(function(link) {
+            link.addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent default link behavior
+                // get href of link
+                const href = this.getAttribute('href').trim();
+                if(href === '' || href === '#contact') {
+                    return;
+                }
+
+                fadeOutToGroupOpenMenu(textName);
+            });
+        });
+
     const button = document.querySelector('.button-reservation');
     if (button) {
         button.addEventListener('click', function() {
@@ -162,7 +177,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Check current page URL is home page
-    if (window.location.href === window.location.origin + '/' || window.location.href === window.location.origin) {
+    const caseLinkHome = ['', '/', '/home', '?', '/?', '/#'];
+    const currentPath = window.location.href.replace(window.location.origin, '');
+    const isHomePage = caseLinkHome.some(path => currentPath === path || currentPath.startsWith(path));
+
+    if (isHomePage) {
         const categoryLinks = document.querySelectorAll('.product-category a');
         categoryLinks.forEach(function(link) {
             link.addEventListener('click', function(event) {
@@ -173,6 +192,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.location.href = window.location.origin + '/delivery?category=' + encodeURIComponent(categoryName);
             });
         });
+
+        if(currentPath.indexOf('#') > -1) {
+            const hash = currentPath.split('#')[1]; 
+            // Use setTimeout to ensure DOM is fully loaded
+            setTimeout(function() {
+                fadeOutToGroupOpenMenu(hash);
+            }, 300);
+        }
     }
 });
 
@@ -183,6 +210,20 @@ function fadeOutToGroupCategory(categoryName) {
             // Scroll to the category section with margin offset 260px            
             const offset = 260;
             const target = title.getBoundingClientRect().top + window.scrollY - offset;
+            const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            window.scrollTo({ top: target, behavior: prefersReduced ? 'auto' : 'smooth' });
+        }
+    });
+}
+
+function fadeOutToGroupOpenMenu(textName) {
+    const menuItems = document.querySelectorAll('.ux-menu-link.flex.menu-item .ux-menu-link__link.flex');       
+    menuItems.forEach(function(item) {
+        const href = item.getAttribute('href').trim();
+        if (href === textName) {
+            // Scroll to the menu item section with margin offset 100px            
+            const offset = 100;             
+            const target = item.getBoundingClientRect().top + window.scrollY - offset;
             const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             window.scrollTo({ top: target, behavior: prefersReduced ? 'auto' : 'smooth' });
         }
