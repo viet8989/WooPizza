@@ -232,7 +232,9 @@ function add_pizza_and_topping_admin_menus() {
 add_action( 'admin_enqueue_scripts', 'enqueue_woocommerce_admin_assets_for_custom_pages' );
 function enqueue_woocommerce_admin_assets_for_custom_pages( $hook ) {
 	// Only load on our custom pizza and topping product pages
-	if ( $hook !== 'toplevel_page_edit-pizza-products' && $hook !== 'toplevel_page_edit-topping-products' ) {
+	if ( $hook !== 'toplevel_page_edit-pizza-products' && 
+		$hook !== 'toplevel_page_edit-topping-products' && 
+		$hook !== 'toplevel_page_edit-other-products' ) {
 		return;
 	}
 
