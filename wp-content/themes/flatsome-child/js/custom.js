@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (menuButton && menuOpen) {
         menuButton.addEventListener('click', function() {
-            menuOpen.classList.add('show');
+            // menuOpen.classList.add('show');
             header.classList.add('show-menu');
             // body.classList.add('hidden-show');
             // menuOpen.classList.remove('hide'); // Xóa class hide nếu có
