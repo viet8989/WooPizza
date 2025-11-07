@@ -73,6 +73,20 @@ function flatsome_header_elements( $options, $type = '' ) {
 	// Get options.
 	$get_options = get_theme_mod( $options );
 
+	// DEBUG LOG: Log when header_elements_right is called
+	if ( $options === 'header_elements_right' ) {
+		error_log( '========== FLATSOME HEADER ELEMENTS RIGHT DEBUG ==========' );
+		error_log( 'Options Parameter: ' . $options );
+		error_log( 'Type Parameter: ' . $type );
+		error_log( 'Get Options (from get_theme_mod): ' . print_r( $get_options, true ) );
+		error_log( 'Is Array: ' . ( is_array( $get_options ) ? 'YES' : 'NO' ) );
+		if ( is_array( $get_options ) ) {
+			error_log( 'Array Count: ' . count( $get_options ) );
+			error_log( 'Array Values: ' . json_encode( $get_options ) );
+		}
+		error_log( '=========================================================' );
+	}
+
 	$walker                         = 'FlatsomeNavDropdown';
 	if ($type == 'sidebar') $walker = 'FlatsomeNavSidebar';
 
