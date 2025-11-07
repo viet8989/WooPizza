@@ -1,19 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
 
-    const menuOpenLinks = document.querySelectorAll('.ux-menu-link.flex.menu-item .ux-menu-link__link.flex');
-        menuOpenLinks.forEach(function(link) {
-            link.addEventListener('click', function(event) {
-                event.preventDefault(); // Prevent default link behavior
-                // get href of link
-                const href = this.getAttribute('href').trim();
-                if(href === '' || href === '#contact') {
-                    return;
-                }
-
-                fadeOutToGroupOpenMenu(textName);
-            });
-        });
-
     const button = document.querySelector('.button-reservation');
     if (button) {
         button.addEventListener('click', function() {
@@ -52,6 +38,23 @@ document.addEventListener('DOMContentLoaded', function() {
             header.classList.remove('show-menu'); // Xóa class show nếu có
         });
     }
+
+    const menuOpenLinks = document.querySelectorAll('.ux-menu-link.flex.menu-item .ux-menu-link__link.flex');
+        menuOpenLinks.forEach(function(link) {
+            link.addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent default link behavior
+
+                menuClose.click(); // Close the menu
+
+                // // get href of link
+                // const href = this.getAttribute('href').trim();
+                // if(href === '' || href === '#contact') {
+                //     return;
+                // }
+
+                // fadeOutToGroupOpenMenu(textName);
+            });
+        });
 
     // Center flickity slider container on delivery page
     const rowSlider = document.querySelector('.row-slider');
