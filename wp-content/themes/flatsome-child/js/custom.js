@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
         menuButton.addEventListener('click', function() {
             menuOpen.classList.add('show');
             header.classList.add('show-menu');
-            body.classList.add('hidden-show');
+            // body.classList.add('hidden-show');
             // menuOpen.classList.remove('hide'); // Xóa class hide nếu có
         });
     }
