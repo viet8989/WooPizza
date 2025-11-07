@@ -2491,25 +2491,3 @@ function customize_checkout_labels_and_requirements( $fields ) {
 
 	return $fields;
 }
-
-/**
- * Add menu-open overlay to header
- * This div is controlled by .menu-button click in custom.js
- */
-add_action('flatsome_header_wrapper', 'add_menu_open_overlay');
-function add_menu_open_overlay() {
-	?>
-	<div class="menu-open">
-		<?php
-		// Output ux_menu shortcode with your custom menu items
-		echo do_shortcode('[ux_menu class="header-custom-menu"]
-			[ux_menu_link text="Home" link="/"]
-			[ux_menu_link text="Delivery" link="/delivery"]
-			[ux_menu_link text="Menu" link="/menu"]
-			[ux_menu_link text="About" link="/about"]
-			[ux_menu_link text="Contact" link="/contact"]
-		[/ux_menu]');
-		?>
-	</div>
-	<?php
-}
