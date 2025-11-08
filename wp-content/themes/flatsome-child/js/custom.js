@@ -241,7 +241,7 @@ function fadeOutToGroupOpenMenu(hash, calledFrom = 'redirect') {
     // Determine offset based on where function was called from
     // 'home' = called from home page menu (90px)
     // 'redirect' = called after redirect from another page (120px)
-    const offset = calledFrom === 'home' ? 90 : 120;
+    const offset = calledFrom === 'home' ? 90 : 150;
 
     // Wait for DOM/images to fully load before calculating position
     setTimeout(function() {

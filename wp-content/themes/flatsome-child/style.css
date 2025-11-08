@@ -154,6 +154,10 @@ body #header.stuck {
 	text-align: center
 }
 
+.box-category .box-text .box-text-inner.selected {
+	border-bottom: 5px solid #cd0000;
+}
+
 /* .is-selected .box-category {
 	background-color: #fff;
 	box-shadow: rgba(101, 118, 122, 0.25) 0px 0px 10px;
