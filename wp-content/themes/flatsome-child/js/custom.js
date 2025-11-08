@@ -196,6 +196,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // get href of link
             const href = this.getAttribute('href').trim();
+            alert(href);
             if(href === '' || href === '#contact') {
                 return;
             }
