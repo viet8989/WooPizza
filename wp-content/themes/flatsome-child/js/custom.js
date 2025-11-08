@@ -213,6 +213,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const isHomePage = pathname === '/' || pathname === '' || pathname === '/home' || pathname === '/index.php';
 
     if (isHomePage) {
+        // Reset to PIZZA when loading home page (before DOM manipulation)
+        sessionStorage.setItem('selectedCategory', 'PIZZA');
+        console.log('Home page loaded - Set default category to PIZZA');
+
         const categoryLinks = document.querySelectorAll('.product-category a');
         categoryLinks.forEach(function(link) {
             link.addEventListener('click', function(event) {
@@ -234,14 +238,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 1000);
         }
 
-        // Auto-select "PIZZA" category on home page load
+        // Set visual selected state for PIZZA after DOM loads
         setTimeout(function() {
-            const savedCategory = sessionStorage.getItem('selectedCategory');
-            if (!savedCategory) {
-                // Only set PIZZA as default if no category is saved
-                sessionStorage.setItem('selectedCategory', 'PIZZA');
-            }
-            setSelectedCategory(savedCategory || 'PIZZA');
+            setSelectedCategory('PIZZA');
         }, 300);
     }
 
