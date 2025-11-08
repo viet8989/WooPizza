@@ -39,23 +39,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    const menuOpenLinks = document.querySelectorAll('.ux-menu-link.flex.menu-item .ux-menu-link__link.flex');
-        menuOpenLinks.forEach(function(link) {
-            link.addEventListener('click', function(event) {
-                event.preventDefault(); // Prevent default link behavior
-
-                menuClose.click(); // Close the menu
-
-                // // get href of link
-                // const href = this.getAttribute('href').trim();
-                // if(href === '' || href === '#contact') {
-                //     return;
-                // }
-
-                // fadeOutToGroupOpenMenu(textName);
-            });
-        });
-
     // Center flickity slider container on delivery page
     const rowSlider = document.querySelector('.row-slider');
     if (rowSlider) {
@@ -196,14 +179,34 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
-        if(currentPath.indexOf('#') > -1) {
-            const hash = currentPath.split('#')[1]; 
+        if(currentPath.indexOf('?tab=') > -1) {
+            const hash = currentPath.split('?tab=')[1]; 
             // Use setTimeout to ensure DOM is fully loaded
             setTimeout(function() {
                 fadeOutToGroupOpenMenu(hash);
             }, 300);
         }
     }
+
+    const menuOpenLinks = document.querySelectorAll('.ux-menu-link.flex.menu-item .ux-menu-link__link.flex');
+    menuOpenLinks.forEach(function(link) {
+        link.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent default link behavior
+            menuClose.click(); // Close the menu
+
+            // get href of link
+            const href = this.getAttribute('href').trim();
+            if(href === '' || href === '#contact') {
+                return;
+            }
+            if (isHomePage) {
+                fadeOutToGroupOpenMenu(href);
+            } else {
+                // Redirect to home page with hash
+                window.location.href = window.location.origin + '?tab=' + href.replace('#', '');
+            }
+        });
+    });
 });
 
 function fadeOutToGroupCategory(categoryName) {
@@ -219,16 +222,20 @@ function fadeOutToGroupCategory(categoryName) {
     });
 }
 
-function fadeOutToGroupOpenMenu(textName) {
-    const menuItems = document.querySelectorAll('.ux-menu-link.flex.menu-item .ux-menu-link__link.flex');       
-    menuItems.forEach(function(item) {
-        const href = item.getAttribute('href').trim();
-        if (href === textName) {
-            // Scroll to the menu item section with margin offset 100px            
-            const offset = 100;             
-            const target = item.getBoundingClientRect().top + window.scrollY - offset;
-            const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-            window.scrollTo({ top: target, behavior: prefersReduced ? 'auto' : 'smooth' });
+function fadeOutToGroupOpenMenu(hash) {
+    const item = document.querySelector('.tabbed-content.tab-service');
+    if (!item) return;
+
+    // Scroll to the menu item section with margin offset 80px
+    const offset = 80;
+    const target = item.getBoundingClientRect().top + window.scrollY - offset;
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: target, behavior: prefersReduced ? 'auto' : 'smooth' });
+
+    setTimeout(function() {
+        const branchTabLink = document.querySelector('a[href="#' + hash + '"]');
+        if (branchTabLink) {
+            branchTabLink.click();
         }
-    });
+    }, 300);
 }
