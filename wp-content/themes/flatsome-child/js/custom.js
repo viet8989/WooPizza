@@ -143,8 +143,24 @@ document.addEventListener('DOMContentLoaded', function() {
         categoryLinks.forEach(function(link) {
             link.addEventListener('click', function(event) {
                 event.preventDefault(); // Prevent default link behavior
-                // get text of clicked link
+
+                // Remove .selected class from all categories
+                document.querySelectorAll('.box-category .box-text .box-text-inner').forEach(function(box) {
+                    box.classList.remove('selected');
+                });
+
+                // Add .selected class to clicked category
+                const boxTextInner = this.closest('.box-category').querySelector('.box-text .box-text-inner');
+                if (boxTextInner) {
+                    boxTextInner.classList.add('selected');
+                }
+
+                // Get text of clicked link
                 const categoryName = this.textContent.trim();
+
+                // Save selected category to sessionStorage
+                sessionStorage.setItem('selectedCategory', categoryName);
+
                 fadeOutToGroupCategory(categoryName);
             });
         });
@@ -155,10 +171,23 @@ document.addEventListener('DOMContentLoaded', function() {
         if (categoryParam) {
             // Decode the category name and scroll to it
             const categoryName = decodeURIComponent(categoryParam);
+
+            // Save to sessionStorage and set selected class
+            sessionStorage.setItem('selectedCategory', categoryName);
+
             // Use setTimeout to ensure DOM is fully loaded
             setTimeout(function() {
                 fadeOutToGroupCategory(categoryName);
+
+                // Set selected class for the category
+                setSelectedCategory(categoryName);
             }, 300);
+        } else {
+            // Restore selected category from sessionStorage if available
+            const savedCategory = sessionStorage.getItem('selectedCategory');
+            if (savedCategory) {
+                setSelectedCategory(savedCategory);
+            }
         }
     }
 
@@ -220,6 +249,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// Helper function to set selected category class
+function setSelectedCategory(categoryName) {
+    // Remove .selected class from all categories
+    document.querySelectorAll('.box-category .box-text .box-text-inner').forEach(function(box) {
+        box.classList.remove('selected');
+    });
+
+    // Find and add .selected class to matching category
+    const categoryLinks = document.querySelectorAll('.product-category a');
+    categoryLinks.forEach(function(link) {
+        if (link.textContent.trim() === categoryName) {
+            const boxTextInner = link.closest('.box-category').querySelector('.box-text .box-text-inner');
+            if (boxTextInner) {
+                boxTextInner.classList.add('selected');
+            }
+        }
+    });
+}
 
 function fadeOutToGroupCategory(categoryName) {
     const productTitles = document.querySelectorAll('div.section-content.relative .row.align-middle .col-inner h3');
