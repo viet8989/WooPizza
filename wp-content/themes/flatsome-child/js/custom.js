@@ -178,13 +178,14 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
-        // Check if URL has tab parameter and auto-open that tab (no scroll needed)
+        // Check if URL has tab parameter and auto-open that tab
         const urlParams = new URLSearchParams(window.location.search);
         const tabParam = urlParams.get('tab');
         if (tabParam) {
+            // Wait longer for DOM/images to load before scrolling
             setTimeout(function() {
-                fadeOutToGroupOpenMenu(tabParam, false); // Don't scroll, just click the tab
-            }, 300);
+                fadeOutToGroupOpenMenu(tabParam, 'redirect'); // Called after redirect from another page
+            }, 1000);
         }
     }
 
@@ -212,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (currentlyOnHome) {
                 console.log('Calling fadeOutToGroupOpenMenu with:', href);
-                fadeOutToGroupOpenMenu(href);
+                fadeOutToGroupOpenMenu(href, 'home'); // Called from home page
             } else {
                 window.location.href = window.location.origin + '?tab=' + href.replace('#', '');
             }
@@ -233,35 +234,40 @@ function fadeOutToGroupCategory(categoryName) {
     });
 }
 
-function fadeOutToGroupOpenMenu(hash, shouldScroll = true) {
+function fadeOutToGroupOpenMenu(hash, calledFrom = 'redirect') {
     // Remove # from hash if present
     const cleanHash = hash.replace('#', '');
 
-    const item = document.querySelector('.tabbed-content.tab-service');
-    if (!item) {
-        console.warn('Tab container .tabbed-content.tab-service not found');
-        return;
-    }
+    // Determine offset based on where function was called from
+    // 'home' = called from home page menu (90px)
+    // 'redirect' = called after redirect from another page (120px)
+    const offset = calledFrom === 'home' ? 90 : 120;
 
-    // Only scroll if explicitly requested (e.g., from menu click)
-    if (shouldScroll) {
-        const offset = 90;
+    // Wait for DOM/images to fully load before calculating position
+    setTimeout(function() {
+        const item = document.querySelector('.tabbed-content.tab-service');
+        if (!item) {
+            console.warn('Tab container .tabbed-content.tab-service not found');
+            return;
+        }
+
+        // Scroll with offset based on call origin
         const target = item.getBoundingClientRect().top + window.scrollY - offset;
         const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         window.scrollTo({ top: target, behavior: prefersReduced ? 'auto' : 'smooth' });
-    }
 
-    // Wait for scroll (or just a bit for DOM to be ready), then click the tab
-    setTimeout(function() {
-        // Find the tab link within .tabbed-content only
-        const tabLink = document.querySelector('.tabbed-content.tab-service a[href="#' + cleanHash + '"]');
+        // Wait for scroll to complete, then click the tab
+        setTimeout(function() {
+            // Find the tab link within .tabbed-content only
+            const tabLink = document.querySelector('.tabbed-content.tab-service a[href="#' + cleanHash + '"]');
 
-        if (tabLink) {
-            console.log('Clicking tab:', cleanHash);
-            tabLink.click();
-        } else {
-            console.warn('Tab link not found for:', cleanHash);
-            console.log('Available tabs:', Array.from(document.querySelectorAll('.tabbed-content.tab-service a[role="tab"]')).map(a => a.getAttribute('href')));
-        }
-    }, shouldScroll ? 500 : 100);
+            if (tabLink) {
+                console.log('Clicking tab:', cleanHash, '| Offset:', offset + 'px');
+                tabLink.click();
+            } else {
+                console.warn('Tab link not found for:', cleanHash);
+                console.log('Available tabs:', Array.from(document.querySelectorAll('.tabbed-content.tab-service a[role="tab"]')).map(a => a.getAttribute('href')));
+            }
+        }, 500);
+    }, 300);
 }
