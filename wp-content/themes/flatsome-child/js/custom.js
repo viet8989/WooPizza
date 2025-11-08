@@ -150,9 +150,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 // Add .selected class to clicked category
-                const boxTextInner = this.closest('.box-category').querySelector('.box-text .box-text-inner');
-                if (boxTextInner) {
-                    boxTextInner.classList.add('selected');
+                const boxCategory = this.closest('.box-category');
+                if (boxCategory) {
+                    const boxTextInner = boxCategory.querySelector('.box-text .box-text-inner');
+                    if (boxTextInner) {
+                        boxTextInner.classList.add('selected');
+                    }
                 }
 
                 // Get text of clicked link
@@ -261,9 +264,12 @@ function setSelectedCategory(categoryName) {
     const categoryLinks = document.querySelectorAll('.product-category a');
     categoryLinks.forEach(function(link) {
         if (link.textContent.trim() === categoryName) {
-            const boxTextInner = link.closest('.box-category').querySelector('.box-text .box-text-inner');
-            if (boxTextInner) {
-                boxTextInner.classList.add('selected');
+            const boxCategory = link.closest('.box-category');
+            if (boxCategory) {
+                const boxTextInner = boxCategory.querySelector('.box-text .box-text-inner');
+                if (boxTextInner) {
+                    boxTextInner.classList.add('selected');
+                }
             }
         }
     });
