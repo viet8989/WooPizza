@@ -140,9 +140,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const categoryLinks = document.querySelectorAll('.product-category a');
+        console.log('Found category links:', categoryLinks.length);
+
         categoryLinks.forEach(function(link) {
             link.addEventListener('click', function(event) {
                 event.preventDefault(); // Prevent default link behavior
+                console.log('Category clicked:', this);
 
                 // Remove .selected class from all categories
                 document.querySelectorAll('.box-category .box-text .box-text-inner').forEach(function(box) {
@@ -151,15 +154,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Add .selected class to clicked category
                 const boxCategory = this.closest('.box-category');
+                console.log('Found .box-category:', boxCategory);
+
                 if (boxCategory) {
                     const boxTextInner = boxCategory.querySelector('.box-text .box-text-inner');
+                    console.log('Found .box-text-inner:', boxTextInner);
+
                     if (boxTextInner) {
                         boxTextInner.classList.add('selected');
+                        console.log('Added .selected class to:', boxTextInner);
+                    } else {
+                        console.warn('Could not find .box-text .box-text-inner inside .box-category');
                     }
+                } else {
+                    console.warn('Could not find .box-category parent. Link structure:', this.parentElement);
                 }
 
                 // Get text of clicked link
                 const categoryName = this.textContent.trim();
+                console.log('Category name:', categoryName);
 
                 // Save selected category to sessionStorage
                 sessionStorage.setItem('selectedCategory', categoryName);
@@ -255,6 +268,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Helper function to set selected category class
 function setSelectedCategory(categoryName) {
+    console.log('setSelectedCategory called with:', categoryName);
+
     // Remove .selected class from all categories
     document.querySelectorAll('.box-category .box-text .box-text-inner').forEach(function(box) {
         box.classList.remove('selected');
@@ -262,17 +277,33 @@ function setSelectedCategory(categoryName) {
 
     // Find and add .selected class to matching category
     const categoryLinks = document.querySelectorAll('.product-category a');
+    console.log('Looking through', categoryLinks.length, 'category links');
+
+    let found = false;
     categoryLinks.forEach(function(link) {
-        if (link.textContent.trim() === categoryName) {
+        const linkText = link.textContent.trim();
+        if (linkText === categoryName) {
+            console.log('Found matching link:', link);
             const boxCategory = link.closest('.box-category');
+            console.log('boxCategory:', boxCategory);
+
             if (boxCategory) {
                 const boxTextInner = boxCategory.querySelector('.box-text .box-text-inner');
+                console.log('boxTextInner:', boxTextInner);
+
                 if (boxTextInner) {
                     boxTextInner.classList.add('selected');
+                    console.log('Successfully added .selected class');
+                    found = true;
                 }
             }
         }
     });
+
+    if (!found) {
+        console.warn('Could not find category:', categoryName);
+        console.log('Available categories:', Array.from(categoryLinks).map(l => l.textContent.trim()));
+    }
 }
 
 function fadeOutToGroupCategory(categoryName) {
