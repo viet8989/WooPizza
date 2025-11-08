@@ -233,6 +233,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 fadeOutToGroupOpenMenu(tabParam, 'redirect'); // Called after redirect from another page
             }, 1000);
         }
+
+        // Auto-select "PIZZA" category on home page load
+        setTimeout(function() {
+            const savedCategory = sessionStorage.getItem('selectedCategory');
+            if (!savedCategory) {
+                // Only set PIZZA as default if no category is saved
+                sessionStorage.setItem('selectedCategory', 'PIZZA');
+            }
+            setSelectedCategory(savedCategory || 'PIZZA');
+        }, 300);
     }
 
     // Header menu links - ONLY in the menu overlay, not in tab content
