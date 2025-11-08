@@ -241,8 +241,8 @@ function fadeOutToGroupOpenMenu(hash) {
     const item = document.querySelector('.tabbed-content.tab-service');
     if (!item) return;
 
-    // Scroll to the menu item section with margin offset 80px
-    const offset = 80;
+    // Scroll to the menu item section with margin offset 90px
+    const offset = 90;
     const target = item.getBoundingClientRect().top + window.scrollY - offset;
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     window.scrollTo({ top: target, behavior: prefersReduced ? 'auto' : 'smooth' });
