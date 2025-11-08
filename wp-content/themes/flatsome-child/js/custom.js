@@ -178,32 +178,43 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
-        if(currentPath.indexOf('?tab=') > -1) {
-            const hash = currentPath.split('?tab=')[1]; 
-            // Use setTimeout to ensure DOM is fully loaded
+        // Check if URL has tab parameter and auto-open that tab
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('tab');
+        if (tabParam) {
             setTimeout(function() {
-                fadeOutToGroupOpenMenu(hash);
+                fadeOutToGroupOpenMenu(tabParam);
             }, 300);
         }
     }
 
-    const menuOpenLinks = document.querySelectorAll('.ux-menu-link.flex.menu-item .ux-menu-link__link.flex');
+    // Header menu links - works on all pages
+    const menuOpenLinks = document.querySelectorAll('.ux-menu-link.flex.menu-item a.ux-menu-link__link.flex');
     menuOpenLinks.forEach(function(link) {
         link.addEventListener('click', function(event) {
             event.preventDefault(); // Prevent default link behavior
-            menuClose.click(); // Close the menu
 
-            // get href of link
+            if (menuClose) {
+                menuClose.click(); // Close the menu
+            }
+
+            // Get href of link
             const href = this.getAttribute('href').trim();
-            alert(href);
-            alert(isHomePage);
-            if(href === '' || href === '#contact') {
+
+            // Skip empty or contact links
+            if (href === '' || href === '#contact') {
                 return;
             }
-            if (isHomePage) {
+
+            // Check if currently on home page
+            const currentPathname = window.location.pathname;
+            const currentlyOnHome = currentPathname === '/' || currentPathname === '' || currentPathname === '/home' || currentPathname === '/index.php';
+
+            if (currentlyOnHome) {
+                // On home page: scroll to section
                 fadeOutToGroupOpenMenu(href);
             } else {
-                // Redirect to home page with hash
+                // On other pages: redirect to home with tab parameter
                 window.location.href = window.location.origin + '?tab=' + href.replace('#', '');
             }
         });
@@ -224,6 +235,9 @@ function fadeOutToGroupCategory(categoryName) {
 }
 
 function fadeOutToGroupOpenMenu(hash) {
+    // Remove # from hash if present
+    const cleanHash = hash.replace('#', '');
+
     const item = document.querySelector('.tabbed-content.tab-service');
     if (!item) return;
 
@@ -233,10 +247,11 @@ function fadeOutToGroupOpenMenu(hash) {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     window.scrollTo({ top: target, behavior: prefersReduced ? 'auto' : 'smooth' });
 
+    // Wait for scroll, then click the tab
     setTimeout(function() {
-        const branchTabLink = document.querySelector('a[href="#' + hash + '"]');
-        if (branchTabLink) {
-            branchTabLink.click();
+        const tabLink = document.querySelector('a[href="#' + cleanHash + '"]');
+        if (tabLink) {
+            tabLink.click();
         }
     }, 300);
 }
