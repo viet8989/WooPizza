@@ -178,81 +178,46 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
-        // Check if URL has tab parameter and auto-open that tab
+        // Check if URL has tab parameter and auto-open that tab (no scroll needed)
         const urlParams = new URLSearchParams(window.location.search);
         const tabParam = urlParams.get('tab');
         if (tabParam) {
             setTimeout(function() {
-                fadeOutToGroupOpenMenu(tabParam);
+                fadeOutToGroupOpenMenu(tabParam, false); // Don't scroll, just click the tab
             }, 300);
         }
     }
 
-    // Header menu links - works on all pages
-    const menuOpenLinks = document.querySelectorAll('.ux-menu-link.flex.menu-item a.ux-menu-link__link.flex');
+    // Header menu links - ONLY in the menu overlay, not in tab content
+    const menuOpenLinks = document.querySelectorAll('.menu-open .ux-menu > .ux-menu-link a');
     console.log('Found menu links:', menuOpenLinks.length);
 
-    if (menuOpenLinks.length === 0) {
-        // Try alternative selector
-        const altLinks = document.querySelectorAll('.menu-open .ux-menu a');
-        console.log('Found alternative menu links:', altLinks.length);
+    menuOpenLinks.forEach(function(link) {
+        link.addEventListener('click', function(event) {
+            console.log('Menu link clicked:', this.getAttribute('href'));
+            event.preventDefault();
 
-        altLinks.forEach(function(link) {
-            link.addEventListener('click', function(event) {
-                console.log('Menu link clicked:', this.getAttribute('href'));
-                event.preventDefault();
+            if (menuClose) {
+                menuClose.click();
+            }
 
-                if (menuClose) {
-                    menuClose.click();
-                }
+            const href = this.getAttribute('href').trim();
 
-                const href = this.getAttribute('href').trim();
-                console.log('Processing href:', href);
+            if (href === '' || href === '#contact') {
+                return;
+            }
 
-                if (href === '' || href === '#contact') {
-                    console.log('Skipping empty or contact link');
-                    return;
-                }
+            const currentPathname = window.location.pathname;
+            const currentlyOnHome = currentPathname === '/' || currentPathname === '' || currentPathname === '/home' || currentPathname === '/index.php';
 
-                const currentPathname = window.location.pathname;
-                const currentlyOnHome = currentPathname === '/' || currentPathname === '' || currentPathname === '/home' || currentPathname === '/index.php';
-                console.log('Currently on home?', currentlyOnHome);
-
-                if (currentlyOnHome) {
-                    console.log('Calling fadeOutToGroupOpenMenu with:', href);
-                    fadeOutToGroupOpenMenu(href);
-                } else {
-                    window.location.href = window.location.origin + '?tab=' + href.replace('#', '');
-                }
-            });
+            if (currentlyOnHome) {
+                console.log('Calling fadeOutToGroupOpenMenu with:', href);
+                fadeOutToGroupOpenMenu(href);
+            } else {
+                window.location.href = window.location.origin + '?tab=' + href.replace('#', '');
+            }
         });
-    } else {
-        menuOpenLinks.forEach(function(link) {
-            link.addEventListener('click', function(event) {
-                console.log('Menu link clicked:', this.getAttribute('href'));
-                event.preventDefault();
-
-                if (menuClose) {
-                    menuClose.click();
-                }
-
-                const href = this.getAttribute('href').trim();
-
-                if (href === '' || href === '#contact') {
-                    return;
-                }
-
-                const currentPathname = window.location.pathname;
-                const currentlyOnHome = currentPathname === '/' || currentPathname === '' || currentPathname === '/home' || currentPathname === '/index.php';
-
-                if (currentlyOnHome) {
-                    fadeOutToGroupOpenMenu(href);
-                } else {
-                    window.location.href = window.location.origin + '?tab=' + href.replace('#', '');
-                }
-            });
-        });
-    }
+    });
 });
 
 function fadeOutToGroupCategory(categoryName) {
@@ -268,7 +233,7 @@ function fadeOutToGroupCategory(categoryName) {
     });
 }
 
-function fadeOutToGroupOpenMenu(hash) {
+function fadeOutToGroupOpenMenu(hash, shouldScroll = true) {
     // Remove # from hash if present
     const cleanHash = hash.replace('#', '');
 
@@ -278,29 +243,18 @@ function fadeOutToGroupOpenMenu(hash) {
         return;
     }
 
-    // Scroll to the menu item section with margin offset 90px
-    const offset = 90;
-    const target = item.getBoundingClientRect().top + window.scrollY - offset;
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    window.scrollTo({ top: target, behavior: prefersReduced ? 'auto' : 'smooth' });
+    // Only scroll if explicitly requested (e.g., from menu click)
+    if (shouldScroll) {
+        const offset = 90;
+        const target = item.getBoundingClientRect().top + window.scrollY - offset;
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        window.scrollTo({ top: target, behavior: prefersReduced ? 'auto' : 'smooth' });
+    }
 
-    // Wait for scroll, then click the tab - try multiple selectors
+    // Wait for scroll (or just a bit for DOM to be ready), then click the tab
     setTimeout(function() {
-        // Try different selectors to find the tab link
-        let tabLink = document.querySelector('a[href="#' + cleanHash + '"]');
-
-        if (!tabLink) {
-            // Try with aria-controls
-            tabLink = document.querySelector('a[aria-controls="' + cleanHash + '"]');
-        }
-
-        if (!tabLink) {
-            // Try finding by ID on parent li
-            const tabLi = document.getElementById(cleanHash.replace('tab_', 'tab-'));
-            if (tabLi) {
-                tabLink = tabLi.querySelector('a');
-            }
-        }
+        // Find the tab link within .tabbed-content only
+        const tabLink = document.querySelector('.tabbed-content.tab-service a[href="#' + cleanHash + '"]');
 
         if (tabLink) {
             console.log('Clicking tab:', cleanHash);
@@ -309,5 +263,5 @@ function fadeOutToGroupOpenMenu(hash) {
             console.warn('Tab link not found for:', cleanHash);
             console.log('Available tabs:', Array.from(document.querySelectorAll('.tabbed-content.tab-service a[role="tab"]')).map(a => a.getAttribute('href')));
         }
-    }, 500);
+    }, shouldScroll ? 500 : 100);
 }
