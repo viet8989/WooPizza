@@ -162,10 +162,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Check current page URL is home page
-    const caseLinkHome = ['', '/', '/home', '?', '/?', '/#'];
-    const currentPath = window.location.href.replace(window.location.origin, '');
-    const isHomePage = caseLinkHome.some(path => currentPath === path || currentPath.startsWith(path));
+    // Check current page URL is home page (works with query params/hash like ?tab=abc or #section)
+    const pathname = window.location.pathname;
+    const isHomePage = pathname === '/' || pathname === '' || pathname === '/home' || pathname === '/index.php';
 
     if (isHomePage) {
         const categoryLinks = document.querySelectorAll('.product-category a');
