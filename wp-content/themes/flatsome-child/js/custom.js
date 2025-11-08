@@ -190,35 +190,69 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Header menu links - works on all pages
     const menuOpenLinks = document.querySelectorAll('.ux-menu-link.flex.menu-item a.ux-menu-link__link.flex');
-    menuOpenLinks.forEach(function(link) {
-        link.addEventListener('click', function(event) {
-            event.preventDefault(); // Prevent default link behavior
+    console.log('Found menu links:', menuOpenLinks.length);
 
-            if (menuClose) {
-                menuClose.click(); // Close the menu
-            }
+    if (menuOpenLinks.length === 0) {
+        // Try alternative selector
+        const altLinks = document.querySelectorAll('.menu-open .ux-menu a');
+        console.log('Found alternative menu links:', altLinks.length);
 
-            // Get href of link
-            const href = this.getAttribute('href').trim();
+        altLinks.forEach(function(link) {
+            link.addEventListener('click', function(event) {
+                console.log('Menu link clicked:', this.getAttribute('href'));
+                event.preventDefault();
 
-            // Skip empty or contact links
-            if (href === '' || href === '#contact') {
-                return;
-            }
+                if (menuClose) {
+                    menuClose.click();
+                }
 
-            // Check if currently on home page
-            const currentPathname = window.location.pathname;
-            const currentlyOnHome = currentPathname === '/' || currentPathname === '' || currentPathname === '/home' || currentPathname === '/index.php';
+                const href = this.getAttribute('href').trim();
+                console.log('Processing href:', href);
 
-            if (currentlyOnHome) {
-                // On home page: scroll to section
-                fadeOutToGroupOpenMenu(href);
-            } else {
-                // On other pages: redirect to home with tab parameter
-                window.location.href = window.location.origin + '?tab=' + href.replace('#', '');
-            }
+                if (href === '' || href === '#contact') {
+                    console.log('Skipping empty or contact link');
+                    return;
+                }
+
+                const currentPathname = window.location.pathname;
+                const currentlyOnHome = currentPathname === '/' || currentPathname === '' || currentPathname === '/home' || currentPathname === '/index.php';
+                console.log('Currently on home?', currentlyOnHome);
+
+                if (currentlyOnHome) {
+                    console.log('Calling fadeOutToGroupOpenMenu with:', href);
+                    fadeOutToGroupOpenMenu(href);
+                } else {
+                    window.location.href = window.location.origin + '?tab=' + href.replace('#', '');
+                }
+            });
         });
-    });
+    } else {
+        menuOpenLinks.forEach(function(link) {
+            link.addEventListener('click', function(event) {
+                console.log('Menu link clicked:', this.getAttribute('href'));
+                event.preventDefault();
+
+                if (menuClose) {
+                    menuClose.click();
+                }
+
+                const href = this.getAttribute('href').trim();
+
+                if (href === '' || href === '#contact') {
+                    return;
+                }
+
+                const currentPathname = window.location.pathname;
+                const currentlyOnHome = currentPathname === '/' || currentPathname === '' || currentPathname === '/home' || currentPathname === '/index.php';
+
+                if (currentlyOnHome) {
+                    fadeOutToGroupOpenMenu(href);
+                } else {
+                    window.location.href = window.location.origin + '?tab=' + href.replace('#', '');
+                }
+            });
+        });
+    }
 });
 
 function fadeOutToGroupCategory(categoryName) {
@@ -239,7 +273,10 @@ function fadeOutToGroupOpenMenu(hash) {
     const cleanHash = hash.replace('#', '');
 
     const item = document.querySelector('.tabbed-content.tab-service');
-    if (!item) return;
+    if (!item) {
+        console.warn('Tab container .tabbed-content.tab-service not found');
+        return;
+    }
 
     // Scroll to the menu item section with margin offset 90px
     const offset = 90;
@@ -247,11 +284,30 @@ function fadeOutToGroupOpenMenu(hash) {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     window.scrollTo({ top: target, behavior: prefersReduced ? 'auto' : 'smooth' });
 
-    // Wait for scroll, then click the tab
+    // Wait for scroll, then click the tab - try multiple selectors
     setTimeout(function() {
-        const tabLink = document.querySelector('a[href="#' + cleanHash + '"]');
-        if (tabLink) {
-            tabLink.click();
+        // Try different selectors to find the tab link
+        let tabLink = document.querySelector('a[href="#' + cleanHash + '"]');
+
+        if (!tabLink) {
+            // Try with aria-controls
+            tabLink = document.querySelector('a[aria-controls="' + cleanHash + '"]');
         }
-    }, 300);
+
+        if (!tabLink) {
+            // Try finding by ID on parent li
+            const tabLi = document.getElementById(cleanHash.replace('tab_', 'tab-'));
+            if (tabLi) {
+                tabLink = tabLi.querySelector('a');
+            }
+        }
+
+        if (tabLink) {
+            console.log('Clicking tab:', cleanHash);
+            tabLink.click();
+        } else {
+            console.warn('Tab link not found for:', cleanHash);
+            console.log('Available tabs:', Array.from(document.querySelectorAll('.tabbed-content.tab-service a[role="tab"]')).map(a => a.getAttribute('href')));
+        }
+    }, 500);
 }
