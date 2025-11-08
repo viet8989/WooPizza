@@ -153,21 +153,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 // Add .selected class to clicked category
-                const boxCategory = this.closest('.box-category');
-                console.log('Found .box-category:', boxCategory);
+                // The link is inside .col-inner, find .box-text-inner within the same container
+                const colInner = this.closest('.col-inner');
+                console.log('Found .col-inner:', colInner);
 
-                if (boxCategory) {
-                    const boxTextInner = boxCategory.querySelector('.box-text .box-text-inner');
+                if (colInner) {
+                    const boxTextInner = colInner.querySelector('.box-text .box-text-inner');
                     console.log('Found .box-text-inner:', boxTextInner);
 
                     if (boxTextInner) {
                         boxTextInner.classList.add('selected');
                         console.log('Added .selected class to:', boxTextInner);
                     } else {
-                        console.warn('Could not find .box-text .box-text-inner inside .box-category');
+                        console.warn('Could not find .box-text .box-text-inner inside .col-inner');
                     }
                 } else {
-                    console.warn('Could not find .box-category parent. Link structure:', this.parentElement);
+                    console.warn('Could not find .col-inner parent. Link structure:', this.parentElement);
                 }
 
                 // Get text of clicked link
@@ -284,11 +285,11 @@ function setSelectedCategory(categoryName) {
         const linkText = link.textContent.trim();
         if (linkText === categoryName) {
             console.log('Found matching link:', link);
-            const boxCategory = link.closest('.box-category');
-            console.log('boxCategory:', boxCategory);
+            const colInner = link.closest('.col-inner');
+            console.log('colInner:', colInner);
 
-            if (boxCategory) {
-                const boxTextInner = boxCategory.querySelector('.box-text .box-text-inner');
+            if (colInner) {
+                const boxTextInner = colInner.querySelector('.box-text .box-text-inner');
                 console.log('boxTextInner:', boxTextInner);
 
                 if (boxTextInner) {
