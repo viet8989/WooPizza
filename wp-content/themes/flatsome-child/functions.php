@@ -2212,7 +2212,14 @@ function update_mini_cart_quantity_handler() {
 	$cart = WC()->cart;
 	$cart->set_quantity( $cart_item_key, $quantity, true );
 
-	// Recalculate cart totals
+	// IMPORTANT: Reset the action counter to allow add_custom_pizza_options_price to run again
+	// This ensures prices are recalculated correctly for the new quantity
+	global $wp_actions;
+	if ( isset( $wp_actions['woocommerce_before_calculate_totals'] ) ) {
+		$wp_actions['woocommerce_before_calculate_totals'] = 0;
+	}
+
+	// Recalculate cart totals (this will trigger add_custom_pizza_options_price hook)
 	$cart->calculate_totals();
 
 	// Persist cart to session - CRITICAL for guest users (non-logged-in)
@@ -2259,46 +2266,66 @@ function update_mini_cart_quantity_handler() {
 		// Calculate unit price based on mode
 		$unit_price = 0;
 
+		error_log( '=== PRICE CALCULATION DEBUG ===' );
+		error_log( 'Product Base Price: ' . $_product->get_price() );
+
 		// Check if paired pizza mode
 		if ( isset( $cart_item['pizza_halves'] ) && ! empty( $cart_item['pizza_halves'] ) ) {
 			$halves = $cart_item['pizza_halves'];
+			error_log( 'MODE: Paired Pizza' );
 
-			// Add left half price (already divided by 2 when stored, but divide again to be safe)
+			// Add left half price
 			if ( isset( $halves['left_half']['price'] ) ) {
-				$unit_price += floatval( $halves['left_half']['price'] );
+				$left_price = floatval( $halves['left_half']['price'] );
+				error_log( 'Left Half Price (stored): ' . $halves['left_half']['price'] );
+				error_log( 'Left Half Price (float): ' . $left_price );
+				$unit_price += $left_price;
 			}
 
 			// Add left half toppings
 			if ( isset( $halves['left_half']['toppings'] ) && ! empty( $halves['left_half']['toppings'] ) ) {
+				error_log( 'Left Half Toppings: ' . count( $halves['left_half']['toppings'] ) );
 				foreach ( $halves['left_half']['toppings'] as $topping ) {
 					if ( isset( $topping['price'] ) ) {
-						$unit_price += floatval( $topping['price'] );
+						$topping_price = floatval( $topping['price'] );
+						error_log( '  - ' . $topping['name'] . ': ' . $topping_price );
+						$unit_price += $topping_price;
 					}
 				}
 			}
 
-			// Add right half price (already divided by 2 when stored, but divide again to be safe)
+			// Add right half price
 			if ( isset( $halves['right_half']['price'] ) ) {
-				$unit_price += floatval( $halves['right_half']['price'] );
+				$right_price = floatval( $halves['right_half']['price'] );
+				error_log( 'Right Half Price (stored): ' . $halves['right_half']['price'] );
+				error_log( 'Right Half Price (float): ' . $right_price );
+				$unit_price += $right_price;
 			}
 
 			// Add right half toppings
 			if ( isset( $halves['right_half']['toppings'] ) && ! empty( $halves['right_half']['toppings'] ) ) {
+				error_log( 'Right Half Toppings: ' . count( $halves['right_half']['toppings'] ) );
 				foreach ( $halves['right_half']['toppings'] as $topping ) {
 					if ( isset( $topping['price'] ) ) {
-						$unit_price += floatval( $topping['price'] );
+						$topping_price = floatval( $topping['price'] );
+						error_log( '  - ' . $topping['name'] . ': ' . $topping_price );
+						$unit_price += $topping_price;
 					}
 				}
 			}
 		} else {
 			// Whole pizza mode - start with base price
+			error_log( 'MODE: Whole Pizza' );
 			$unit_price = floatval( $_product->get_price() );
 
 			// Add extra toppings (whole pizza)
 			if ( isset( $cart_item['extra_topping_options'] ) && ! empty( $cart_item['extra_topping_options'] ) ) {
+				error_log( 'Extra Toppings: ' . count( $cart_item['extra_topping_options'] ) );
 				foreach ( $cart_item['extra_topping_options'] as $topping ) {
 					if ( isset( $topping['price'] ) ) {
-						$unit_price += floatval( $topping['price'] );
+						$topping_price = floatval( $topping['price'] );
+						error_log( '  - ' . $topping['name'] . ': ' . $topping_price );
+						$unit_price += $topping_price;
 					}
 				}
 			}
@@ -2306,13 +2333,52 @@ function update_mini_cart_quantity_handler() {
 
 		// Calculate line total
 		$line_total = $unit_price * $quantity;
+		error_log( 'Unit Price (calculated): ' . $unit_price );
+		error_log( 'Quantity: ' . $quantity );
+		error_log( 'Line Total (unit * qty): ' . $line_total );
+		error_log( '=== END PRICE CALCULATION ===' );
+
 		$line_total_html = wc_price( $line_total );
 	}
 
 	// Get cart totals
-	$subtotal_html = $cart->get_cart_subtotal();
-	$tax_html = wc_price( $cart->get_taxes_total() );
-	$total_html = $cart->get_total();
+	error_log( '=== CART TOTALS CALCULATION ===' );
+
+	try {
+		$subtotal_html = $cart->get_cart_subtotal();
+		error_log( 'Subtotal HTML: ' . strip_tags( $subtotal_html ) );
+	} catch ( Exception $e ) {
+		error_log( 'Error getting subtotal: ' . $e->getMessage() );
+		$subtotal_html = wc_price( 0 );
+	}
+
+	// Get tax total HTML - use the same method as mini-cart template for consistency
+	try {
+		ob_start();
+		wc_cart_totals_taxes_total_html();
+		$tax_html = ob_get_clean();
+
+		// If no tax HTML was generated, calculate it manually
+		if ( empty( $tax_html ) ) {
+			$tax_total_raw = $cart->get_taxes_total();
+			error_log( 'Tax Total (raw): ' . $tax_total_raw );
+			$tax_html = wc_price( $tax_total_raw );
+		}
+		error_log( 'Tax HTML: ' . strip_tags( $tax_html ) );
+	} catch ( Exception $e ) {
+		error_log( 'Error getting tax: ' . $e->getMessage() );
+		$tax_html = wc_price( 0 );
+	}
+
+	try {
+		$total_html = $cart->get_total();
+		error_log( 'Total HTML: ' . strip_tags( $total_html ) );
+	} catch ( Exception $e ) {
+		error_log( 'Error getting total: ' . $e->getMessage() );
+		$total_html = wc_price( 0 );
+	}
+
+	error_log( '=== END CART TOTALS ===' );
 
 	// Build detailed cart information for logging
 	$cart_details = array();
