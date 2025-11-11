@@ -109,7 +109,7 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 								<span class="product-base-price" style="float: right;"><?php echo $base_price_formatted; ?></span>
 							</h3>
 						<?php else : ?>
-							<a href="<?php echo esc_url( $product_permalink ); ?>" style="padding-top: 15px;">
+							<a href="<?php echo esc_url( $product_permalink ); ?>">
 								<h3 class="mini-cart-product-title">
 									<?php echo $display_title; // Already escaped above ?>
 									<span class="product-base-price" style="float: right;"><?php echo $base_price_formatted; ?></span>
@@ -446,6 +446,11 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 	margin-bottom: 12px;
 	line-height: 1.4;
 	white-space: normal;
+}
+
+.mini-cart-title-wrapper > a {
+	padding-top: 15px;
+	width: 100% !important;
 }
 
 /* Paired Pizza Icon */
