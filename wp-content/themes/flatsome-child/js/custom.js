@@ -409,3 +409,43 @@ function writeLogServer(data, logLevel = 'info') {
         console.error('Error writing log to server:', error);
     });
 }
+
+/**
+ * Clear both debug.log and custom-debug.log files on server
+ * Usage: clearLogsServer()
+ */
+function clearLogsServer() {
+    // Check if customJsParams is available (localized from PHP)
+    if (typeof customJsParams === 'undefined') {
+        console.error('customJsParams not found. Make sure script is properly enqueued.');
+        return;
+    }
+
+    // Prepare request data
+    const requestData = {
+        action: 'clear_debug_logs',
+        nonce: customJsParams.nonce
+    };
+
+    console.log('Clearing server logs...');
+
+    // Send AJAX request to WordPress
+    fetch(customJsParams.ajax_url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams(requestData)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            console.log('✅ Logs cleared successfully:', result.data);
+        } else {
+            console.error('❌ Failed to clear logs:', result.data);
+        }
+    })
+    .catch(error => {
+        console.error('Error clearing logs:', error);
+    });
+}

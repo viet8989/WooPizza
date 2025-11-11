@@ -2,7 +2,13 @@ Process auto test and fix bug mini cart
 
 Current bug: when click 'plus' or 'minus' quantity, fields have amount change value wrong(total amount on every item, subtotal, tax, ...)
 
+you can auto order below steps with your idea
+
 auto run:
+
+    cmd: curl https://terravivapizza.com/wp-content/themes/flatsome-child/clear-logs.php
+
+    sleep 3 seconds
 
     cmd: open https://terravivapizza.com
 
@@ -12,6 +18,10 @@ auto call javascript:
 
     // show mini cart
     document.querySelectorAll('.header-nav.header-nav-main.nav.nav-right.nav-size-large.nav-spacing-xlarge.nav-uppercase li a')[0].click();
+
+    sleep 5 seconds
+
+    
 
     write log(anything you need to fix bug, log server save to /wp-content/debug.log, log client call javascript writeLogServer('{data log}'); save to /wp-content/custom-debug.log);
 

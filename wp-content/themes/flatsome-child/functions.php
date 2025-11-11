@@ -2545,3 +2545,49 @@ function handle_write_custom_log() {
         ));
     }
 }
+
+/**
+ * AJAX handler to clear debug logs
+ * Called from JavaScript clearLogsServer() function
+ */
+add_action('wp_ajax_clear_debug_logs', 'handle_clear_debug_logs');
+add_action('wp_ajax_nopriv_clear_debug_logs', 'handle_clear_debug_logs');
+
+function handle_clear_debug_logs() {
+    // Verify nonce for security
+    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'custom_log_nonce')) {
+        wp_send_json_error(array(
+            'message' => 'Invalid nonce'
+        ));
+        return;
+    }
+
+    $results = array();
+    $log_files = array(
+        'debug.log' => WP_CONTENT_DIR . '/debug.log',
+        'custom-debug.log' => WP_CONTENT_DIR . '/custom-debug.log'
+    );
+
+    foreach ($log_files as $name => $path) {
+        if (file_exists($path)) {
+            if (is_writable($path)) {
+                $success = file_put_contents($path, '');
+                if ($success !== false) {
+                    $results[$name] = 'Cleared successfully';
+                } else {
+                    $results[$name] = 'Failed to clear (write error)';
+                }
+            } else {
+                $results[$name] = 'File not writable';
+            }
+        } else {
+            $results[$name] = 'File does not exist';
+        }
+    }
+
+    wp_send_json_success(array(
+        'message' => 'Log clear operation completed',
+        'results' => $results,
+        'timestamp' => date('Y-m-d H:i:s')
+    ));
+}
