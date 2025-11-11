@@ -820,6 +820,27 @@ function display_custom_pizza_options_in_cart( $item_data, $cart_item ) {
 	return $item_data;
 }
 
+// Set default customer location for tax calculation
+add_action( 'woocommerce_before_calculate_totals', 'set_default_customer_location_for_tax', 5, 1 );
+function set_default_customer_location_for_tax( $cart ) {
+	if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
+		return;
+	}
+
+	// If customer location is not set, use shop base location for tax calculation
+	$customer = WC()->customer;
+	if ( $customer && empty( $customer->get_billing_country() ) ) {
+		$base_country = WC()->countries->get_base_country();
+		$base_state = WC()->countries->get_base_state();
+
+		// Set customer location to base location
+		$customer->set_billing_country( $base_country );
+		$customer->set_billing_state( $base_state );
+		$customer->set_shipping_country( $base_country );
+		$customer->set_shipping_state( $base_state );
+	}
+}
+
 // Add custom options price to cart item price
 add_action( 'woocommerce_before_calculate_totals', 'add_custom_pizza_options_price', 10, 1 );
 function add_custom_pizza_options_price( $cart ) {
@@ -827,11 +848,20 @@ function add_custom_pizza_options_price( $cart ) {
 		return;
 	}
 
-	if ( did_action( 'woocommerce_before_calculate_totals' ) >= 2 ) {
+	$action_count = did_action( 'woocommerce_before_calculate_totals' );
+	error_log( 'add_custom_pizza_options_price: Action count = ' . $action_count );
+
+	// Allow hook to run during AJAX updates (when action count may be higher)
+	// Only skip if action count is very high (> 5) to prevent infinite loops
+	if ( $action_count > 5 ) {
+		error_log( 'add_custom_pizza_options_price: EXITING due to action count > 5' );
 		return;
 	}
 
+	error_log( 'add_custom_pizza_options_price: RUNNING price calculation' );
+
 	foreach ( $cart->get_cart() as $cart_item_key => $cart_item ) {
+		error_log( 'Processing cart item: ' . $cart_item_key );
 		$new_total_price = 0;
 		$is_paired_mode = false;
 
@@ -868,17 +898,40 @@ function add_custom_pizza_options_price( $cart ) {
 				}
 			}
 		} else {
-			// Whole pizza mode - start with base price
-			$new_total_price = $cart_item['data']->get_price();
+			// Whole pizza mode - start with ORIGINAL base price (not current price which may be modified)
+			// Use get_regular_price() to get the original price before any modifications
+			$regular_price = $cart_item['data']->get_regular_price();
+			$current_price = $cart_item['data']->get_price();
+			$sale_price = $cart_item['data']->get_sale_price();
+
+			error_log( 'Product prices - Regular: ' . $regular_price . ', Current: ' . $current_price . ', Sale: ' . $sale_price );
+
+			if ( ! empty( $regular_price ) ) {
+				$new_total_price = floatval( $regular_price );
+				error_log( 'Using regular price: ' . $new_total_price );
+			} else {
+				// Fallback: Use the original product price from the database
+				$product_id = $cart_item['data']->get_id();
+				$product = wc_get_product( $product_id );
+				$new_total_price = floatval( $product->get_regular_price() );
+				error_log( 'Fetched product from DB - ID: ' . $product_id . ', Regular price: ' . $new_total_price );
+			}
 		}
 
 		// Add topping prices (whole pizza toppings)
 		if ( isset( $cart_item['extra_topping_options'] ) && ! empty( $cart_item['extra_topping_options'] ) ) {
-			foreach ( $cart_item['extra_topping_options'] as $topping ) {
+			error_log( 'Found extra_topping_options: ' . count( $cart_item['extra_topping_options'] ) );
+			foreach ( $cart_item['extra_topping_options'] as $index => $topping ) {
 				if ( isset( $topping['price'] ) ) {
+					error_log( '  Topping ' . $index . ': price = ' . $topping['price'] );
 					$new_total_price += floatval( $topping['price'] );
+				} else {
+					error_log( '  Topping ' . $index . ': NO PRICE FIELD!' );
 				}
 			}
+			error_log( 'Price after adding toppings: ' . $new_total_price );
+		} else {
+			error_log( 'NO extra_topping_options found' );
 		}
 
 		// Add paired product prices (legacy support)
@@ -892,9 +945,12 @@ function add_custom_pizza_options_price( $cart ) {
 
 		// Set the new price
 		if ( $is_paired_mode || isset( $cart_item['extra_topping_options'] ) || isset( $cart_item['paired_products'] ) ) {
+			error_log( 'Setting price for cart item ' . $cart_item_key . ': ' . $new_total_price );
 			$cart_item['data']->set_price( $new_total_price );
+			error_log( 'Price after set_price: ' . $cart_item['data']->get_price() );
 		}
 	}
+	error_log( 'add_custom_pizza_options_price: FINISHED' );
 }
 
 // Save custom options to order items
@@ -2263,82 +2319,95 @@ function update_mini_cart_quantity_handler() {
 		$cart_item = $cart_contents[ $cart_item_key ];
 		$_product = $cart_item['data'];
 
-		// Calculate unit price based on mode
-		$unit_price = 0;
-
 		error_log( '=== PRICE CALCULATION DEBUG ===' );
-		error_log( 'Product Base Price: ' . $_product->get_price() );
 
-		// Check if paired pizza mode
+		// IMPORTANT: Use the ORIGINAL product price, not the modified price
+		// The hook may have already modified the price, so we need to get the regular price
+		$original_price = $_product->get_regular_price();
+		if ( empty( $original_price ) ) {
+			$original_price = $_product->get_price();
+		}
+
+		error_log( 'Product Regular Price: ' . $original_price );
+		error_log( 'Product Current Price (may be modified): ' . $_product->get_price() );
+
+		// Start with the original price
+		$unit_price = floatval( $original_price );
+
+		// Manually add toppings to the unit price (same logic as add_custom_pizza_options_price)
+		// Check if pizza halves (paired mode)
 		if ( isset( $cart_item['pizza_halves'] ) && ! empty( $cart_item['pizza_halves'] ) ) {
+			error_log( 'MODE: Paired Pizza - recalculating from halves' );
 			$halves = $cart_item['pizza_halves'];
-			error_log( 'MODE: Paired Pizza' );
+			$unit_price = 0;
 
-			// Add left half price
+			// Add left half price + toppings
 			if ( isset( $halves['left_half']['price'] ) ) {
-				$left_price = floatval( $halves['left_half']['price'] );
-				error_log( 'Left Half Price (stored): ' . $halves['left_half']['price'] );
-				error_log( 'Left Half Price (float): ' . $left_price );
-				$unit_price += $left_price;
+				$unit_price += floatval( $halves['left_half']['price'] );
 			}
-
-			// Add left half toppings
 			if ( isset( $halves['left_half']['toppings'] ) && ! empty( $halves['left_half']['toppings'] ) ) {
-				error_log( 'Left Half Toppings: ' . count( $halves['left_half']['toppings'] ) );
 				foreach ( $halves['left_half']['toppings'] as $topping ) {
 					if ( isset( $topping['price'] ) ) {
-						$topping_price = floatval( $topping['price'] );
-						error_log( '  - ' . $topping['name'] . ': ' . $topping_price );
-						$unit_price += $topping_price;
+						$unit_price += floatval( $topping['price'] );
 					}
 				}
 			}
 
-			// Add right half price
+			// Add right half price + toppings
 			if ( isset( $halves['right_half']['price'] ) ) {
-				$right_price = floatval( $halves['right_half']['price'] );
-				error_log( 'Right Half Price (stored): ' . $halves['right_half']['price'] );
-				error_log( 'Right Half Price (float): ' . $right_price );
-				$unit_price += $right_price;
+				$unit_price += floatval( $halves['right_half']['price'] );
 			}
-
-			// Add right half toppings
 			if ( isset( $halves['right_half']['toppings'] ) && ! empty( $halves['right_half']['toppings'] ) ) {
-				error_log( 'Right Half Toppings: ' . count( $halves['right_half']['toppings'] ) );
 				foreach ( $halves['right_half']['toppings'] as $topping ) {
 					if ( isset( $topping['price'] ) ) {
-						$topping_price = floatval( $topping['price'] );
-						error_log( '  - ' . $topping['name'] . ': ' . $topping_price );
-						$unit_price += $topping_price;
+						$unit_price += floatval( $topping['price'] );
 					}
 				}
 			}
 		} else {
-			// Whole pizza mode - start with base price
-			error_log( 'MODE: Whole Pizza' );
-			$unit_price = floatval( $_product->get_price() );
+			error_log( 'MODE: Whole Pizza - adding toppings to base price' );
+		}
 
-			// Add extra toppings (whole pizza)
-			if ( isset( $cart_item['extra_topping_options'] ) && ! empty( $cart_item['extra_topping_options'] ) ) {
-				error_log( 'Extra Toppings: ' . count( $cart_item['extra_topping_options'] ) );
-				foreach ( $cart_item['extra_topping_options'] as $topping ) {
-					if ( isset( $topping['price'] ) ) {
-						$topping_price = floatval( $topping['price'] );
-						error_log( '  - ' . $topping['name'] . ': ' . $topping_price );
-						$unit_price += $topping_price;
-					}
+		// Add whole pizza toppings
+		if ( isset( $cart_item['extra_topping_options'] ) && ! empty( $cart_item['extra_topping_options'] ) ) {
+			error_log( 'Extra Toppings: ' . count( $cart_item['extra_topping_options'] ) );
+			foreach ( $cart_item['extra_topping_options'] as $topping ) {
+				if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
+					error_log( '  - ' . $topping['name'] . ': ' . $topping['price'] );
+					$unit_price += floatval( $topping['price'] );
 				}
 			}
 		}
 
+		// Add legacy paired products
+		if ( isset( $cart_item['paired_products'] ) && ! empty( $cart_item['paired_products'] ) ) {
+			foreach ( $cart_item['paired_products'] as $paired ) {
+				if ( isset( $paired['price'] ) ) {
+					$unit_price += floatval( $paired['price'] );
+				}
+			}
+		}
+
+		error_log( 'Unit Price (calculated with toppings): ' . $unit_price );
+
 		// Calculate line total
 		$line_total = $unit_price * $quantity;
-		error_log( 'Unit Price (calculated): ' . $unit_price );
+
 		error_log( 'Quantity: ' . $quantity );
 		error_log( 'Line Total (unit * qty): ' . $line_total );
 		error_log( '=== END PRICE CALCULATION ===' );
 
+		// Format prices
+		$unit_price_html = wc_price( $unit_price );
 		$line_total_html = wc_price( $line_total );
+
+		// Create price breakdown HTML (same format as mini-cart template)
+		$price_breakdown_html = sprintf(
+			'<span class="price-breakdown"><span class="unit-price">%s</span><span class="multiply-sign"> × </span><span class="quantity-display">%d</span><span class="equals-sign"> = </span><span class="line-total-amount">%s</span></span>',
+			$unit_price_html,
+			$quantity,
+			$line_total_html
+		);
 	}
 
 	// Get cart totals
@@ -2354,6 +2423,72 @@ function update_mini_cart_quantity_handler() {
 
 	// Get tax total HTML - use the same method as mini-cart template for consistency
 	try {
+		// Debug tax settings
+		error_log( '=== TAX CONFIGURATION DEBUG ===' );
+		error_log( 'Tax calculation enabled: ' . ( get_option( 'woocommerce_calc_taxes' ) === 'yes' ? 'YES' : 'NO' ) );
+		error_log( 'Prices include tax: ' . ( get_option( 'woocommerce_prices_include_tax' ) === 'yes' ? 'YES' : 'NO' ) );
+		error_log( 'Tax display in cart: ' . get_option( 'woocommerce_tax_display_cart' ) );
+
+		// Check for tax rates in database
+		global $wpdb;
+		$tax_rates = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates LIMIT 10" );
+		error_log( 'Tax rates from DB: ' . print_r( $tax_rates, true ) );
+		error_log( 'Number of tax rates: ' . count( $tax_rates ) );
+
+		// Check customer location and shop settings
+		$customer = WC()->customer;
+		if ( $customer ) {
+			$customer_country = $customer->get_billing_country();
+			$customer_state = $customer->get_billing_state();
+
+			error_log( 'Customer country (before): ' . $customer_country );
+			error_log( 'Customer state (before): ' . $customer_state );
+
+			// FIX: If customer location is not set, use shop base location for tax calculation
+			if ( empty( $customer_country ) ) {
+				$base_country = WC()->countries->get_base_country();
+				$base_state = WC()->countries->get_base_state();
+
+				error_log( 'Setting customer location to shop base: ' . $base_country . ' / ' . $base_state );
+
+				// Set customer location to base location for tax calculation
+				$customer->set_billing_country( $base_country );
+				$customer->set_billing_state( $base_state );
+				$customer->set_shipping_country( $base_country );
+				$customer->set_shipping_state( $base_state );
+
+				error_log( 'Customer country (after): ' . $customer->get_billing_country() );
+				error_log( 'Customer state (after): ' . $customer->get_billing_state() );
+
+				// IMPORTANT: Recalculate cart totals after setting customer location
+				// so that WooCommerce can apply the correct tax rates
+				error_log( 'Recalculating cart totals with new customer location...' );
+				$cart->calculate_totals();
+				error_log( 'Cart recalculated' );
+			}
+
+			error_log( 'Customer is taxable: ' . ( $customer->is_customer_outside_base() ? 'Outside base' : 'In base' ) );
+		}
+		error_log( 'Shop base country: ' . WC()->countries->get_base_country() );
+		error_log( 'Shop base state: ' . WC()->countries->get_base_state() );
+		error_log( 'Tax based on: ' . get_option( 'woocommerce_tax_based_on' ) );
+
+		// Debug cart tax calculation
+		$cart_taxes = $cart->get_taxes();
+		error_log( 'Cart taxes array: ' . print_r( $cart_taxes, true ) );
+
+		$tax_totals = $cart->get_tax_totals();
+		error_log( 'Cart tax totals: ' . print_r( $tax_totals, true ) );
+		error_log( 'Cart get_taxes_total: ' . $cart->get_taxes_total() );
+
+		// Check product tax status
+		if ( isset( $cart_contents[ $cart_item_key ] ) ) {
+			$product_tax_status = $cart_contents[ $cart_item_key ]['data']->get_tax_status();
+			$product_tax_class = $cart_contents[ $cart_item_key ]['data']->get_tax_class();
+			error_log( 'Product tax status: ' . $product_tax_status );
+			error_log( 'Product tax class: ' . $product_tax_class );
+		}
+
 		ob_start();
 		wc_cart_totals_taxes_total_html();
 		$tax_html = ob_get_clean();
@@ -2365,6 +2500,7 @@ function update_mini_cart_quantity_handler() {
 			$tax_html = wc_price( $tax_total_raw );
 		}
 		error_log( 'Tax HTML: ' . strip_tags( $tax_html ) );
+		error_log( '=== END TAX CONFIGURATION DEBUG ===' );
 	} catch ( Exception $e ) {
 		error_log( 'Error getting tax: ' . $e->getMessage() );
 		$tax_html = wc_price( 0 );
@@ -2491,6 +2627,9 @@ function update_mini_cart_quantity_handler() {
 		'message' => 'Cart updated',
 		'cart_hash' => $cart->get_cart_hash(),
 		'line_total' => $line_total_html,
+		'price_breakdown' => $price_breakdown_html, // New: formatted price breakdown
+		'unit_price' => $unit_price_html,
+		'quantity' => $quantity,
 		'subtotal' => $subtotal_html,
 		'tax' => $tax_html,
 		'total' => $total_html,

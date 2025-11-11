@@ -94,11 +94,26 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 							<?php echo $paired_icon; ?>
 						<?php endif; ?>
 
+						<?php
+						// Get base product price (regular price without modifications)
+						$base_price = $_product->get_regular_price();
+						if ( empty( $base_price ) ) {
+							$base_price = $_product->get_price();
+						}
+						$base_price_formatted = wc_price( $base_price );
+						?>
+
 						<?php if ( empty( $product_permalink ) ) : ?>
-							<h3 class="mini-cart-product-title"><?php echo $display_title; // Already escaped above ?></h3>
+							<h3 class="mini-cart-product-title">
+								<?php echo $display_title; // Already escaped above ?>
+								<span class="product-base-price" style="float: right;"><?php echo $base_price_formatted; ?></span>
+							</h3>
 						<?php else : ?>
 							<a href="<?php echo esc_url( $product_permalink ); ?>" style="padding-top: 15px;">
-								<h3 class="mini-cart-product-title"><?php echo $display_title; // Already escaped above ?></h3>
+								<h3 class="mini-cart-product-title">
+									<?php echo $display_title; // Already escaped above ?>
+									<span class="product-base-price" style="float: right;"><?php echo $base_price_formatted; ?></span>
+								</h3>
 							</a>
 						<?php endif; ?>
 					</div>
@@ -429,7 +444,6 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 	align-items: center;
 	gap: 8px;
 	margin-bottom: 12px;
-	margin-right: 35px;
 	line-height: 1.4;
 	white-space: normal;
 }
