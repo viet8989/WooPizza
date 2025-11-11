@@ -127,6 +127,20 @@ body #header.stuck {
 	margin-bottom: 100px;
 }
 
+.menu-open.show .row.row-collapse > .col:first-child {
+	position: fixed;
+	top: 35%;
+	left: 45%;
+}
+
+.menu-open.show .row.row-collapse > .col:first-child .ux-menu-link__text {
+	font-size: x-large;
+}
+
+.menu-open.show .row.row-collapse > .col:first-child .ux-menu-link__text:hover {
+	border-bottom: 5px solid #cd0000;
+}
+
 .menu-open .social-icons span {
 	display: block;
 	color: #000;
@@ -823,7 +837,7 @@ td.product-name a {
 	z-index: -1;
 }
 
-.paired-name{
+.paired-name {
 	display: flex;
 	font-size: 30px;
 	font-weight: 700;
@@ -832,7 +846,7 @@ td.product-name a {
 	margin: 30px 0;
 }
 
-.paired-name h1{
+.paired-name h1 {
 	font-size: 30px;
 	font-weight: 700;
 	margin: 0;

@@ -2491,3 +2491,43 @@ function customize_checkout_labels_and_requirements( $fields ) {
 
 	return $fields;
 }
+
+/**
+ * AJAX handler to write custom logs to file
+ */
+add_action('wp_ajax_write_custom_log', 'handle_write_custom_log');
+add_action('wp_ajax_nopriv_write_custom_log', 'handle_write_custom_log');
+
+function handle_write_custom_log() {
+    // Get POST data
+    $log_level = isset($_POST['log_level']) ? sanitize_text_field($_POST['log_level']) : 'info';
+    $log_data = isset($_POST['log_data']) ? $_POST['log_data'] : '';
+    $page_url = isset($_POST['page_url']) ? esc_url_raw($_POST['page_url']) : '';
+    $timestamp = isset($_POST['timestamp']) ? sanitize_text_field($_POST['timestamp']) : date('Y-m-d H:i:s');
+
+    // Prepare log message
+    $log_message = sprintf(
+        "[%s] [%s] [%s] %s\n",
+        $timestamp,
+        strtoupper($log_level),
+        $page_url,
+        $log_data
+    );
+
+    // Log file path
+    $log_file = WP_CONTENT_DIR . '/debug.log';
+
+    // Write to log file
+    $result = error_log($log_message, 3, $log_file);
+
+    if ($result) {
+        wp_send_json_success(array(
+            'message' => 'Log written successfully',
+            'log_file' => $log_file
+        ));
+    } else {
+        wp_send_json_error(array(
+            'message' => 'Failed to write log'
+        ));
+    }
+}

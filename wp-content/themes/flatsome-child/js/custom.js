@@ -366,3 +366,40 @@ function fadeOutToGroupOpenMenu(hash, calledFrom = 'redirect') {
         }, 500);
     }, 300);
 }
+
+/**
+ * Write log data to server
+ * @param {*} data - Any data to log (string, object, array, etc.)
+ * @param {string} logLevel - Log level: 'info', 'warning', 'error', 'debug'
+ */
+function writeLogServer(data, logLevel = 'info') {
+    // Prepare log data
+    const logData = {
+        action: 'write_custom_log',
+        nonce: wc_add_to_cart_params?.nonce || '',
+        log_level: logLevel,
+        log_data: typeof data === 'object' ? JSON.stringify(data) : String(data),
+        page_url: window.location.href,
+        timestamp: new Date().toISOString()
+    };
+
+    // Send AJAX request to WordPress
+    fetch(wc_add_to_cart_params?.ajax_url || '/wp-admin/admin-ajax.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams(logData)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            console.log('Log written to server:', result.data);
+        } else {
+            console.error('Failed to write log:', result.data);
+        }
+    })
+    .catch(error => {
+        console.error('Error writing log to server:', error);
+    });
+}

@@ -4,6 +4,9 @@
 # WordPress debug log
 wp-content/debug.log
 
+# Custom debug log
+wp-content/custom-debug.log
+
 # PHP error logs
 error_log
 
