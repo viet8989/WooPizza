@@ -4,6 +4,12 @@
 function enqueue_custom_js()
 {
     wp_enqueue_script('custom-js', get_stylesheet_directory_uri() . '/js/custom.js', array(), '1.0.1', true);
+
+    // Localize script to provide AJAX URL for all users (logged in or not)
+    wp_localize_script('custom-js', 'customJsParams', array(
+        'ajax_url' => admin_url('admin-ajax.php'),
+        'nonce' => wp_create_nonce('custom_log_nonce')
+    ));
 }
 add_action('wp_enqueue_scripts', 'enqueue_custom_js');
 
@@ -2499,9 +2505,17 @@ add_action('wp_ajax_write_custom_log', 'handle_write_custom_log');
 add_action('wp_ajax_nopriv_write_custom_log', 'handle_write_custom_log');
 
 function handle_write_custom_log() {
+    // Verify nonce for security
+    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'custom_log_nonce')) {
+        wp_send_json_error(array(
+            'message' => 'Invalid nonce'
+        ));
+        return;
+    }
+
     // Get POST data
     $log_level = isset($_POST['log_level']) ? sanitize_text_field($_POST['log_level']) : 'info';
-    $log_data = isset($_POST['log_data']) ? $_POST['log_data'] : '';
+    $log_data = isset($_POST['log_data']) ? sanitize_text_field($_POST['log_data']) : '';
     $page_url = isset($_POST['page_url']) ? esc_url_raw($_POST['page_url']) : '';
     $timestamp = isset($_POST['timestamp']) ? sanitize_text_field($_POST['timestamp']) : date('Y-m-d H:i:s');
 
@@ -2515,7 +2529,7 @@ function handle_write_custom_log() {
     );
 
     // Log file path
-    $log_file = WP_CONTENT_DIR . '/debug.log';
+    $log_file = WP_CONTENT_DIR . '/custom-debug.log';
 
     // Write to log file
     $result = error_log($log_message, 3, $log_file);
@@ -2523,7 +2537,7 @@ function handle_write_custom_log() {
     if ($result) {
         wp_send_json_success(array(
             'message' => 'Log written successfully',
-            'log_file' => $log_file
+            'log_file' => basename($log_file) // Don't expose full path
         ));
     } else {
         wp_send_json_error(array(

@@ -373,10 +373,16 @@ function fadeOutToGroupOpenMenu(hash, calledFrom = 'redirect') {
  * @param {string} logLevel - Log level: 'info', 'warning', 'error', 'debug'
  */
 function writeLogServer(data, logLevel = 'info') {
+    // Check if customJsParams is available (localized from PHP)
+    if (typeof customJsParams === 'undefined') {
+        console.error('customJsParams not found. Make sure script is properly enqueued.');
+        return;
+    }
+
     // Prepare log data
     const logData = {
         action: 'write_custom_log',
-        nonce: wc_add_to_cart_params?.nonce || '',
+        nonce: customJsParams.nonce,
         log_level: logLevel,
         log_data: typeof data === 'object' ? JSON.stringify(data) : String(data),
         page_url: window.location.href,
@@ -384,7 +390,7 @@ function writeLogServer(data, logLevel = 'info') {
     };
 
     // Send AJAX request to WordPress
-    fetch(wc_add_to_cart_params?.ajax_url || '/wp-admin/admin-ajax.php', {
+    fetch(customJsParams.ajax_url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
