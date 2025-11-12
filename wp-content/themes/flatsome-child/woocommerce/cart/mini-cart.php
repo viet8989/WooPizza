@@ -106,13 +106,17 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 						<?php if ( empty( $product_permalink ) ) : ?>
 							<h3 class="mini-cart-product-title">
 								<?php echo $display_title; // Already escaped above ?>
-								<span class="product-base-price" style="float: right;"><?php echo $base_price_formatted; ?></span>
+								<?php if ( !$is_paired ) : ?>
+									<span class="product-base-price" style="float: right;"><?php echo $base_price_formatted; ?></span>
+								<?php endif; ?>
 							</h3>
 						<?php else : ?>
 							<a href="<?php echo esc_url( $product_permalink ); ?>">
 								<h3 class="mini-cart-product-title">
 									<?php echo $display_title; // Already escaped above ?>
-									<span class="product-base-price" style="float: right;"><?php echo $base_price_formatted; ?></span>
+									<?php if ( !$is_paired ) : ?>
+										<span class="product-base-price" style="float: right;"><?php echo $base_price_formatted; ?></span>
+									<?php endif; ?>
 								</h3>
 							</a>
 						<?php endif; ?>
