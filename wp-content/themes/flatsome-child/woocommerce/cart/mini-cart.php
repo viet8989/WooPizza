@@ -171,7 +171,7 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 								$left_price = isset( $left['price'] ) ? wc_price( $left['price'] ) : '';
 
 								echo '<div class="pizza-half-section">';
-								echo '<div class="pizza-half-title">' . $left_name . ' ' . $left_price . '</div>';
+								echo '<div class="pizza-half-title">1/2 ' . $left_name . '<span style="float: right;">' . $left_price . '</span></div>';
 
 								// Display left half toppings
 								if ( isset( $left['toppings'] ) && ! empty( $left['toppings'] ) ) {
@@ -207,7 +207,7 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 								$right_price = isset( $right['price'] ) ? wc_price( $right['price'] ) : '';
 
 								echo '<div class="pizza-half-section">';
-								echo '<div class="pizza-half-title">' . $right_name . ' ' . $right_price . '</div>';
+								echo '<div class="pizza-half-title">1/2' . $right_name . '<span style="float: right;">' . $right_price . '</span></div>';
 
 								// Display right half toppings
 								if ( isset( $right['toppings'] ) && ! empty( $right['toppings'] ) ) {
