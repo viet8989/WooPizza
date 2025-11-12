@@ -829,6 +829,16 @@ do_action( 'wc_quick_view_after_single_product' );
 	display: none !important;
 }
 <?php endif; ?>
+
+/* Add to Cart Button - Disabled State */
+.single_add_to_cart_button.disabled,
+.single_add_to_cart_button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed !important;
+	pointer-events: none;
+	background-color: #ccc !important;
+	border-color: #ccc !important;
+}
 </style>
 
 <script>
@@ -939,7 +949,7 @@ do_action( 'wc_quick_view_after_single_product' );
 				// Set main product as left half when switching to paired mode
 				const mainProductId = <?php echo esc_js( $product_id ); ?>;
 				const mainProductName = <?php echo json_encode( get_the_title() ); ?>;
-				const mainProductPrice = <?php echo esc_js( $product_price ); ?>;
+				let mainProductPrice = <?php echo esc_js( $product_price ); ?>;
 				const mainProductImage = <?php
 					if ( has_post_thumbnail() ) {
 						$image_id = get_post_thumbnail_id();
@@ -948,6 +958,22 @@ do_action( 'wc_quick_view_after_single_product' );
 						echo json_encode( wc_placeholder_img_src( 'woocommerce_single' ) );
 					}
 				?>
+
+				// Get current variation price if available (for variable products)
+				const $variationsForm = $('.variations_form');
+				if ($variationsForm.length) {
+					// Listen for variation changes
+					$variationsForm.on('found_variation', function(event, variation) {
+						mainProductPrice = parseFloat(variation.display_price);
+						console.log('Variation changed, new price:', mainProductPrice);
+
+						// Update selectedLeftHalf if in paired mode
+						if ($('#btn-paired').hasClass('active') && selectedLeftHalf && selectedLeftHalf.product_id === mainProductId) {
+							selectedLeftHalf.price = mainProductPrice / 2;
+							updateSubtotal();
+						}
+					});
+				}
 
 				selectedLeftHalf = {
 					product_id: mainProductId,
@@ -1121,18 +1147,28 @@ do_action( 'wc_quick_view_after_single_product' );
 		// Subtotal Calculation
 		function updateSubtotal() {
 			let subtotal = 0;
+			let canAddToCart = true;
 
 			// Check if paired mode is active
 			const isPairedMode = $('#btn-paired').hasClass('active');
 
 			if (isPairedMode) {
+				// Validate that both halves are selected
+				const hasLeftHalf = selectedLeftHalf && selectedLeftHalf.price;
+				const hasRightHalf = selectedRightHalf && selectedRightHalf.price;
+
+				if (!hasRightHalf) {
+					// In paired mode but right half not selected - disable add to cart
+					canAddToCart = false;
+				}
+
 				// Add left half price (if exists)
-				if (selectedLeftHalf && selectedLeftHalf.price) {
+				if (hasLeftHalf) {
 					subtotal += selectedLeftHalf.price;
 				}
 
 				// Add right half price (if exists)
-				if (selectedRightHalf && selectedRightHalf.price) {
+				if (hasRightHalf) {
 					subtotal += selectedRightHalf.price;
 				}
 
@@ -1167,6 +1203,14 @@ do_action( 'wc_quick_view_after_single_product' );
 			// Update display
 			const formatted = new Intl.NumberFormat('vi-VN', config.currencyFormat).format(subtotal);
 			$('#sub_total').text(formatted);
+
+			// Enable/disable Add to Cart button based on validation
+			const $addToCartBtn = $('.single_add_to_cart_button');
+			if (canAddToCart) {
+				$addToCartBtn.prop('disabled', false).removeClass('disabled');
+			} else {
+				$addToCartBtn.prop('disabled', true).addClass('disabled');
+			}
 		}
 
 		// Topping Checkbox Handler

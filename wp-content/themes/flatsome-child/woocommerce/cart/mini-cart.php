@@ -264,30 +264,51 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 							if ( isset( $cart_item['pizza_halves'] ) && ! empty( $cart_item['pizza_halves'] ) ) {
 								$halves = $cart_item['pizza_halves'];
 
-								// Add left half price
-								if ( isset( $halves['left_half']['price'] ) ) {
-									$calculated_price += floatval( $halves['left_half']['price'] );
-								}
+								// Check if right half has a product (true paired pizza) or is empty (single half = whole pizza)
+								$has_right_half = isset( $halves['right_half']['product_id'] ) && ! empty( $halves['right_half']['product_id'] );
 
-								// Add left half toppings
-								if ( isset( $halves['left_half']['toppings'] ) && ! empty( $halves['left_half']['toppings'] ) ) {
-									foreach ( $halves['left_half']['toppings'] as $topping ) {
-										if ( isset( $topping['price'] ) ) {
-											$calculated_price += floatval( $topping['price'] );
+								if ( $has_right_half ) {
+									// TRUE PAIRED MODE - two different halves
+									// Add left half price
+									if ( isset( $halves['left_half']['price'] ) ) {
+										$calculated_price += floatval( $halves['left_half']['price'] );
+									}
+
+									// Add left half toppings
+									if ( isset( $halves['left_half']['toppings'] ) && ! empty( $halves['left_half']['toppings'] ) ) {
+										foreach ( $halves['left_half']['toppings'] as $topping ) {
+											if ( isset( $topping['price'] ) ) {
+												$calculated_price += floatval( $topping['price'] );
+											}
 										}
 									}
-								}
 
-								// Add right half price
-								if ( isset( $halves['right_half']['price'] ) ) {
-									$calculated_price += floatval( $halves['right_half']['price'] );
-								}
+									// Add right half price
+									if ( isset( $halves['right_half']['price'] ) ) {
+										$calculated_price += floatval( $halves['right_half']['price'] );
+									}
 
-								// Add right half toppings
-								if ( isset( $halves['right_half']['toppings'] ) && ! empty( $halves['right_half']['toppings'] ) ) {
-									foreach ( $halves['right_half']['toppings'] as $topping ) {
-										if ( isset( $topping['price'] ) ) {
-											$calculated_price += floatval( $topping['price'] );
+									// Add right half toppings
+									if ( isset( $halves['right_half']['toppings'] ) && ! empty( $halves['right_half']['toppings'] ) ) {
+										foreach ( $halves['right_half']['toppings'] as $topping ) {
+											if ( isset( $topping['price'] ) ) {
+												$calculated_price += floatval( $topping['price'] );
+											}
+										}
+									}
+								} else {
+									// SINGLE HALF MODE - right half is empty, treat as WHOLE pizza
+									// Double the left half price to get the full pizza price
+									if ( isset( $halves['left_half']['price'] ) ) {
+										$calculated_price += floatval( $halves['left_half']['price'] ) * 2;
+									}
+
+									// Add left half toppings (also double them for whole pizza)
+									if ( isset( $halves['left_half']['toppings'] ) && ! empty( $halves['left_half']['toppings'] ) ) {
+										foreach ( $halves['left_half']['toppings'] as $topping ) {
+											if ( isset( $topping['price'] ) ) {
+												$calculated_price += floatval( $topping['price'] ) * 2;
+											}
 										}
 									}
 								}

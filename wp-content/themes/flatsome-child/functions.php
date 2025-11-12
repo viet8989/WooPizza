@@ -862,59 +862,96 @@ function add_custom_pizza_options_price( $cart ) {
 
 	foreach ( $cart->get_cart() as $cart_item_key => $cart_item ) {
 		error_log( 'Processing cart item: ' . $cart_item_key );
+		error_log( 'Has pizza_halves: ' . ( isset( $cart_item['pizza_halves'] ) ? 'YES' : 'NO' ) );
+		error_log( 'Has extra_topping_options: ' . ( isset( $cart_item['extra_topping_options'] ) ? 'YES' : 'NO' ) );
+		error_log( 'Product ID: ' . $cart_item['product_id'] );
+		error_log( 'Variation ID: ' . ( isset( $cart_item['variation_id'] ) ? $cart_item['variation_id'] : 'NONE' ) );
 		$new_total_price = 0;
 		$is_paired_mode = false;
 
 		// Check if pizza halves (new structure with per-half toppings)
 		if ( isset( $cart_item['pizza_halves'] ) && ! empty( $cart_item['pizza_halves'] ) ) {
-			$is_paired_mode = true;
 			$halves = $cart_item['pizza_halves'];
+			error_log( 'PAIRED MODE - pizza_halves data: ' . print_r( $halves, true ) );
 
-			// Add left half price
-			if ( isset( $halves['left_half']['price'] ) ) {
-				$new_total_price += floatval( $halves['left_half']['price'] );
-			}
+			// Check if right half has a product (true paired pizza) or is empty (single half = whole pizza)
+			$has_right_half = isset( $halves['right_half']['product_id'] ) && ! empty( $halves['right_half']['product_id'] );
 
-			// Add left half toppings
-			if ( isset( $halves['left_half']['toppings'] ) && ! empty( $halves['left_half']['toppings'] ) ) {
-				foreach ( $halves['left_half']['toppings'] as $topping ) {
-					if ( isset( $topping['price'] ) ) {
-						$new_total_price += floatval( $topping['price'] );
+			// Set paired mode flag for BOTH true paired and single half
+			$is_paired_mode = true;
+
+			if ( $has_right_half ) {
+				// TRUE PAIRED MODE - two different halves
+				error_log( 'TRUE PAIRED MODE - both halves present' );
+
+				// Add left half price
+				if ( isset( $halves['left_half']['price'] ) ) {
+					$new_total_price += floatval( $halves['left_half']['price'] );
+				}
+
+				// Add left half toppings
+				if ( isset( $halves['left_half']['toppings'] ) && ! empty( $halves['left_half']['toppings'] ) ) {
+					foreach ( $halves['left_half']['toppings'] as $topping ) {
+						if ( isset( $topping['price'] ) ) {
+							$new_total_price += floatval( $topping['price'] );
+						}
 					}
 				}
-			}
 
-			// Add right half price
-			if ( isset( $halves['right_half']['price'] ) ) {
-				$new_total_price += floatval( $halves['right_half']['price'] );
-			}
+				// Add right half price
+				if ( isset( $halves['right_half']['price'] ) ) {
+					$new_total_price += floatval( $halves['right_half']['price'] );
+				}
 
-			// Add right half toppings
-			if ( isset( $halves['right_half']['toppings'] ) && ! empty( $halves['right_half']['toppings'] ) ) {
-				foreach ( $halves['right_half']['toppings'] as $topping ) {
-					if ( isset( $topping['price'] ) ) {
-						$new_total_price += floatval( $topping['price'] );
+				// Add right half toppings
+				if ( isset( $halves['right_half']['toppings'] ) && ! empty( $halves['right_half']['toppings'] ) ) {
+					foreach ( $halves['right_half']['toppings'] as $topping ) {
+						if ( isset( $topping['price'] ) ) {
+							$new_total_price += floatval( $topping['price'] );
+						}
+					}
+				}
+			} else {
+				// SINGLE HALF MODE - right half is empty, treat as WHOLE pizza
+				// Double the left half price to get the full pizza price
+				error_log( 'SINGLE HALF MODE - only left half, treating as whole pizza' );
+
+				if ( isset( $halves['left_half']['price'] ) ) {
+					// Left half price is already 50% of full price, so multiply by 2
+					$new_total_price += floatval( $halves['left_half']['price'] ) * 2;
+					error_log( 'Left half price: ' . $halves['left_half']['price'] . ', doubled to: ' . ( floatval( $halves['left_half']['price'] ) * 2 ) );
+				}
+
+				// Add left half toppings (also double them for whole pizza)
+				if ( isset( $halves['left_half']['toppings'] ) && ! empty( $halves['left_half']['toppings'] ) ) {
+					foreach ( $halves['left_half']['toppings'] as $topping ) {
+						if ( isset( $topping['price'] ) ) {
+							$new_total_price += floatval( $topping['price'] ) * 2;
+							error_log( 'Topping price: ' . $topping['price'] . ', doubled to: ' . ( floatval( $topping['price'] ) * 2 ) );
+						}
 					}
 				}
 			}
 		} else {
 			// Whole pizza mode - start with ORIGINAL base price (not current price which may be modified)
-			// Use get_regular_price() to get the original price before any modifications
 			$regular_price = $cart_item['data']->get_regular_price();
 			$current_price = $cart_item['data']->get_price();
 			$sale_price = $cart_item['data']->get_sale_price();
 
 			error_log( 'Product prices - Regular: ' . $regular_price . ', Current: ' . $current_price . ', Sale: ' . $sale_price );
 
-			if ( ! empty( $regular_price ) ) {
-				$new_total_price = floatval( $regular_price );
-				error_log( 'Using regular price: ' . $new_total_price );
+			// For variable products (with variations like size), get_regular_price() returns parent product price
+			// We need to check if price has been modified already
+			// If current_price == regular_price, this is first calculation, use current_price (has variation price)
+			// If current_price != regular_price, price was modified (toppings added), use regular_price to reset
+			if ( $current_price == $regular_price ) {
+				// First calculation - use current price which has the correct variation price
+				$new_total_price = floatval( $current_price );
+				error_log( 'First calculation - Using current price (variation price): ' . $new_total_price );
 			} else {
-				// Fallback: Use the original product price from the database
-				$product_id = $cart_item['data']->get_id();
-				$product = wc_get_product( $product_id );
-				$new_total_price = floatval( $product->get_regular_price() );
-				error_log( 'Fetched product from DB - ID: ' . $product_id . ', Regular price: ' . $new_total_price );
+				// Price was already modified - use regular price to reset and avoid double-counting
+				$new_total_price = floatval( $regular_price );
+				error_log( 'Already modified - Using regular price to reset: ' . $new_total_price );
 			}
 		}
 
