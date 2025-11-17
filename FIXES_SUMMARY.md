@@ -1,6 +1,34 @@
 # Product Lightbox - Size Selection & Subtotal Fix
 
-## CRITICAL FIXES (Latest - Session 2)
+## CRITICAL FIXES (Latest - Session 3)
+
+### Fix 6: Manual Handler Always Attached as Fallback
+**Problem:** Manual variation handler was only attached when WooCommerce script was NOT available:
+- Handler was inside `else` block (old line 1621-1654)
+- When WooCommerce script exists but fails to match variations, no fallback handler
+- Result: Subtotal never updates even though handler code exists
+
+**Fix Applied:**
+- **Moved manual handler OUTSIDE if-else block** (line 1623-1661)
+- Now ALWAYS attaches as fallback, even when WooCommerce script exists
+- Logs `attaching_manual_fallback` event
+- Result: If WooCommerce fails, manual handler catches size changes
+
+### Fix 7: Paired Mode Left Half Price Not Updating
+**Problem:** When changing sizes in paired mode, left half price stays at initial value:
+- `selectedLeftHalf.price` set once when paired mode activated (line 1157)
+- Manual handler updates `mainProductPrice` but not `selectedLeftHalf.price`
+- WooCommerce's `found_variation` handler had this logic (line 1693-1698), but manual handler didn't
+- Result: Subtotal stuck at initial paired price
+
+**Fix Applied:**
+- **Added paired mode price update to manual handler** (line 1647-1653)
+- Now checks if paired mode active: `$('#btn-paired').hasClass('active')`
+- Updates `selectedLeftHalf.price = mainProductPrice / 2`
+- Logs `paired_left_half_price_updated` event
+- Mirrors exact logic from WooCommerce's `found_variation` handler
+
+## CRITICAL FIXES (Session 2)
 
 ### Fix 4: Manual Variation Handler Not Executing
 **Problem:** The manual variation handler was never attached because:
@@ -126,18 +154,33 @@ setTimeout(() => {
 ```javascript
 // After opening lightbox:
 // 1. Click "Paired pizza" button
-// 2. Check if subtotal shows correct price (not 0 or "+0")
+// 2. Select a right half pizza
+// 3. Change left half size (S → M → L)
+// 4. Check if subtotal updates correctly
+
+// OR use this automated test:
+document.querySelectorAll('a.quick-view')[0].click();
+// Wait 3 seconds, then run:
+document.querySelector('#btn-paired').click();
+// Select any right half pizza card
+document.querySelector('.pizza-card').click();
+// Wait 2 seconds, then test size changes:
+document.querySelector('.variation-select-hidden').value = 'M';
+jQuery('.variation-select-hidden').trigger('change');
+// Check subtotal increased...
 ```
 
 ## Expected Results
 
 **Whole Mode:**
 - Initial: S selected (red), Subtotal: 250.000 ₫
-- After M: M selected (red), Subtotal: ~300.000 ₫ (or M's price)
-- After L: L selected (red), Subtotal: ~350.000 ₫ (or L's price)
+- After M: M selected (red), Subtotal: 290.000 ₫
+- After L: L selected (red), Subtotal: 350.000 ₫
 
-**Paired Mode:**
-- Should show correct half prices, not "+0"
+**Paired Mode (with left half only, no toppings):**
+- Initial S: Left half (S/2) = 125.000 ₫, Right half = varies, Subtotal updates
+- After M: Left half (M/2) = 145.000 ₫, Right half = varies, Subtotal updates
+- After L: Left half (L/2) = 175.000 ₫, Right half = varies, Subtotal updates
 
 ## Complete Flow After Fix
 
@@ -173,39 +216,40 @@ setTimeout(() => {
 
 After uploading the fixed file and running the test, you should see these logs in [custom-debug.log](wp-content/custom-debug.log):
 
-**On Lightbox Open:**
+**On Lightbox Open (Whole Mode):**
 ```json
-{"event":"mfpOpen","message":"Lightbox opened"}
-{"event":"mfpOpen_setup","message":"Calling setupVariationForm"}
 {"event":"setupVariationForm_start","formFound":1}
-{"event":"setup_variation_form","isAlreadyInitialized":false,"hasWcScript":false}
-{"event":"wc_script_not_loaded","message":"Using manual variation handler"}
-{"event":"variations_data_check","hasData":true,"dataLength":3}
-{"event":"attaching_manual_handler","selector":".variation-select-hidden"}
+{"event":"setup_variation_form","hasWcScript":true}
+{"event":"wc_script_found","message":"Initializing WC variation form","variationsCount":3}
+{"event":"attaching_manual_fallback","hasData":true,"dataLength":3}
+{"event":"attaching_wc_listeners"}
 {"event":"setDefaultVariation_called"}
-{"event":"setDefault_changeTriggered","value":"S"}
 {"event":"manual_handler_fired","selectedValue":"S"}
-{"event":"manual_price_update","price":250000,"variation_id":xxx}
+{"event":"manual_price_update","price":250000,"variation_id":862}
 ```
 
-**When Size M is Selected:**
+**When Size M is Selected (Whole Mode):**
 ```json
+{"event":"button_click","value":"M","attribute":"size"}
+{"event":"button_select_value_set","selectName":"attribute_size","value":"M","selectFound":1}
 {"event":"manual_handler_fired","selectedValue":"M"}
-{"event":"manual_price_update","price":300000,"variation_id":xxx}
+{"event":"manual_price_update","price":290000,"variation_id":863}
+{"event":"updateSubtotal_called","currentPrice":290000}
 ```
 
-**When Size L is Selected:**
+**When Size L is Selected (Whole Mode):**
 ```json
 {"event":"manual_handler_fired","selectedValue":"L"}
-{"event":"manual_price_update","price":350000,"variation_id":xxx}
+{"event":"manual_price_update","price":350000,"variation_id":864}
+{"event":"updateSubtotal_called","currentPrice":350000}
 ```
 
-If WooCommerce script IS loaded (you'll see different logs):
+**When Size M is Selected (Paired Mode):**
 ```json
-{"event":"setup_variation_form","hasWcScript":true}
-{"event":"wc_script_found","message":"Initializing WC variation form"}
-{"event":"found_variation","display_price":xxx,"attributes":{...}}
-{"event":"mainProductPrice_updated","mainProductPrice":xxx}
+{"event":"manual_handler_fired","selectedValue":"M"}
+{"event":"manual_price_update","price":290000,"variation_id":863}
+{"event":"paired_left_half_price_updated","price":145000}
+{"event":"updateSubtotal_called","currentPrice":290000}
 ```
 
 ## Cache Clearing

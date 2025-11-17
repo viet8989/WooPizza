@@ -1084,6 +1084,7 @@ do_action( 'wc_quick_view_after_single_product' );
 		// Size Toggle
 		function initSizeToggle() {
 			$('#btn-whole').on('click', function() {
+				console.log('Whole pizza button clicked');
 				$('.size-option').removeClass('active');
 				$(this).addClass('active');
 				$('#pizza-whole').show();
@@ -1095,6 +1096,7 @@ do_action( 'wc_quick_view_after_single_product' );
 
 				// Set default variation after switching to whole mode
 				setTimeout(function() {
+					console.log('Setting default variation after whole button click');
 					if (typeof setDefaultVariation === 'function') {
 						setDefaultVariation();
 					}
@@ -1323,6 +1325,7 @@ do_action( 'wc_quick_view_after_single_product' );
 		function getCurrentProductPrice() {
 			// Use mainProductPrice which is updated by found_variation event
 			// This is more reliable than reading from DOM
+			if (typeof writeLogServer === 'function') writeLogServer({event: 'getCurrentProductPrice', mainProductPrice: mainProductPrice, basePrice: config.basePrice}, 'info');
 			if (mainProductPrice && mainProductPrice > 0) {
 				return mainProductPrice;
 			}
@@ -1333,6 +1336,7 @@ do_action( 'wc_quick_view_after_single_product' );
 		// Subtotal Calculation
 		function updateSubtotal() {
 			let subtotal = 0;
+			if (typeof writeLogServer === 'function') writeLogServer({event: 'updateSubtotal_called', currentPrice: getCurrentProductPrice()}, 'info');
 			let canAddToCart = true;
 
 			// Check if paired mode is active
@@ -1523,6 +1527,7 @@ do_action( 'wc_quick_view_after_single_product' );
 			}
 			window.variationHandlerAttached = true;
 
+			if (typeof writeLogServer === 'function') writeLogServer({event: 'initVariationHandler_called', attached: window.variationHandlerAttached}, 'info');
 			// Attach event handler to document (works even if lightbox not loaded yet)
 			$(document).on('click', '.variation-button', function(e) {
 				e.preventDefault();
@@ -1530,6 +1535,7 @@ do_action( 'wc_quick_view_after_single_product' );
 				const $button = $(this);
 				const value = $button.data('value');
 				const attribute = $button.data('attribute');
+				if (typeof writeLogServer === 'function') writeLogServer({event: 'button_click', value: value, attribute: attribute}, 'info');
 
 				// Remove selected class from sibling buttons
 				$button.siblings('.variation-button').removeClass('selected');
@@ -1544,6 +1550,7 @@ do_action( 'wc_quick_view_after_single_product' );
 					const selectName = 'attribute_' + attribute;
 					const $hiddenSelect = $('select[name="' + selectName + '"]');
 					$hiddenSelect.val(value).trigger('change');
+					if (typeof writeLogServer === 'function') writeLogServer({event: 'button_select_value_set', selectName: selectName, value: value, selectFound: $hiddenSelect.length}, 'info');
 				} else {
 					$button.removeClass('selected');
 
@@ -1561,6 +1568,7 @@ do_action( 'wc_quick_view_after_single_product' );
 					$variationsForm.find('.variation-select-hidden').each(function() {
 						currentSelections[$(this).attr('name')] = $(this).val();
 					});
+					if (typeof writeLogServer === 'function') writeLogServer({event: 'before_check_variations', selections: currentSelections}, 'info');
 
 					$variationsForm.trigger('check_variations');
 				}
@@ -1569,6 +1577,7 @@ do_action( 'wc_quick_view_after_single_product' );
 			// Move hidden selects into form when lightbox opens
 			const setupVariationForm = function() {
 				const $variationsForm = $('.variations_form');
+				if (typeof writeLogServer === 'function') writeLogServer({event: 'setupVariationForm_start', formFound: $variationsForm.length}, 'info');
 
 				if ($variationsForm.length) {
 					// Move selects to form
@@ -1581,17 +1590,32 @@ do_action( 'wc_quick_view_after_single_product' );
 
 					// Initialize WooCommerce variation form if not already initialized for THIS specific form instance
 					const isInitialized = $variationsForm.data('wc-variation-form-initialized');
+					if (typeof writeLogServer === 'function') writeLogServer({event: 'setup_variation_form', isAlreadyInitialized: isInitialized, hasWcScript: typeof $variationsForm.wc_variation_form === 'function'}, 'info');
 
 					if (!isInitialized) {
 						$variationsForm.data('wc-variation-form-initialized', true);
 
 						// Check if WooCommerce variation form plugin is available
 						if (typeof $variationsForm.wc_variation_form === 'function') {
+							const variationsData = $variationsForm.data('product_variations');
+							if (typeof writeLogServer === 'function') writeLogServer({event: 'wc_script_found', message: 'Initializing WC variation form', variationsCount: variationsData ? variationsData.length : 0}, 'info');
+							if (typeof writeLogServer === 'function' && variationsData && variationsData.length > 0) {
+								// Log all variations to verify they exist
+								const allVariations = variationsData.map(v => ({
+									id: v.variation_id,
+									attributes: v.attributes,
+									price: v.display_price,
+									in_stock: v.is_in_stock
+								}));
+								writeLogServer({event: 'all_variations', variations: allVariations}, 'info');
+							}
+
 							$variationsForm.wc_variation_form();
 
 							// Trigger WooCommerce to check for the pre-selected variation (set in PHP)
 							// Use delay to ensure form is fully initialized
 							setTimeout(function() {
+								if (typeof writeLogServer === 'function') writeLogServer({event: 'triggering_check_variations'}, 'info');
 								$variationsForm.trigger('check_variations');
 							}, 300);
 						}
@@ -1599,10 +1623,12 @@ do_action( 'wc_quick_view_after_single_product' );
 						// ALWAYS attach manual handler as fallback (even if WooCommerce script exists)
 						// This ensures subtotal updates even if WooCommerce fails to match variations
 						const variationsData = $variationsForm.data('product_variations');
+						if (typeof writeLogServer === 'function') writeLogServer({event: 'attaching_manual_fallback', hasData: !!variationsData, dataLength: variationsData ? variationsData.length : 0}, 'info');
 
 						if (variationsData && variationsData.length) {
 							// Attach change handler to hidden select
 							$variationsForm.find('.variation-select-hidden').on('change', function() {
+								if (typeof writeLogServer === 'function') writeLogServer({event: 'manual_handler_fired', selectedValue: $(this).val()}, 'info');
 								const selectedValue = $(this).val();
 								if (!selectedValue) return;
 
@@ -1616,11 +1642,13 @@ do_action( 'wc_quick_view_after_single_product' );
 										if (v.attributes[attr] && v.attributes[attr].toLowerCase() === selectedValue.toLowerCase()) {
 											// Match found - update price
 											mainProductPrice = parseFloat(v.display_price);
+											if (typeof writeLogServer === 'function') writeLogServer({event: 'manual_price_update', price: mainProductPrice, variation_id: v.variation_id}, 'info');
 
 											// Update left half price for paired mode (same as found_variation handler)
 											if ($('#btn-paired').hasClass('active') && selectedLeftHalf) {
 												if (selectedLeftHalf.product_id === mainProductId) {
 													selectedLeftHalf.price = mainProductPrice / 2;
+													if (typeof writeLogServer === 'function') writeLogServer({event: 'paired_left_half_price_updated', price: selectedLeftHalf.price}, 'info');
 												}
 											}
 
@@ -1636,11 +1664,23 @@ do_action( 'wc_quick_view_after_single_product' );
 					// Attach WooCommerce event listeners (only once globally)
 					if (!window.wcVariationListenersAttached) {
 						window.wcVariationListenersAttached = true;
+						if (typeof writeLogServer === 'function') writeLogServer({event: 'attaching_wc_listeners'}, 'info');
+
+						// Log ALL WooCommerce variation events for debugging
+						$(document).on('check_variations', '.variations_form', function() {
+							if (typeof writeLogServer === 'function') writeLogServer({event: 'wc_check_variations_fired'}, 'info');
+						});
+
+						$(document).on('woocommerce_variation_has_changed', '.variations_form', function() {
+							if (typeof writeLogServer === 'function') writeLogServer({event: 'wc_variation_has_changed'}, 'info');
+						});
 
 						// Use event delegation on document to avoid duplicates
 						$(document).on('found_variation', '.variations_form', function(event, variation) {
 							// Update main product price
+							if (typeof writeLogServer === 'function') writeLogServer({event: 'found_variation', display_price: variation.display_price, attributes: variation.attributes}, 'info');
 							mainProductPrice = parseFloat(variation.display_price);
+							if (typeof writeLogServer === 'function') writeLogServer({event: 'mainProductPrice_updated', mainProductPrice: mainProductPrice}, 'info');
 							// Update button visual selection based on variation attributes
 							if (variation.attributes) {
 								Object.keys(variation.attributes).forEach(function(attrKey) {
@@ -1693,8 +1733,10 @@ do_action( 'wc_quick_view_after_single_product' );
 
 			// Also try when lightbox opens (MagnificPopup event with delay)
 			$(document).on('mfpOpen', function() {
+				if (typeof writeLogServer === 'function') writeLogServer({event: 'mfpOpen', message: 'Lightbox opened'}, 'info');
 				// Wait for lightbox content to fully render
 				setTimeout(function() {
+					if (typeof writeLogServer === 'function') writeLogServer({event: 'mfpOpen_setup', message: 'Calling setupVariationForm'}, 'info');
 					setupVariationForm();
 					// Set default variation after a longer delay to ensure everything is ready
 					setTimeout(setDefaultVariation, 500);
@@ -1704,12 +1746,15 @@ do_action( 'wc_quick_view_after_single_product' );
 
 		// Function to set default variation (first option) - defined at global scope
 		function setDefaultVariation() {
+			if (typeof writeLogServer === 'function') writeLogServer({event: 'setDefaultVariation_called'}, 'info');
 			const $firstButton = $('.variation-button').first();
+			if (typeof writeLogServer === 'function') writeLogServer({event: 'setDefault_buttonCheck', buttonFound: $firstButton.length}, 'info');
 
 			if ($firstButton.length) {
 				// Add selected class to first button (if not already selected)
 				if (!$firstButton.hasClass('selected')) {
 					$firstButton.addClass('selected');
+					if (typeof writeLogServer === 'function') writeLogServer({event: 'setDefault_addedSelected'}, 'info');
 				}
 
 				// Update the hidden select
@@ -1717,19 +1762,28 @@ do_action( 'wc_quick_view_after_single_product' );
 				const attribute = $firstButton.data('attribute');
 				const selectName = 'attribute_' + attribute;
 				const $hiddenSelect = $('select[name="' + selectName + '"]');
+				if (typeof writeLogServer === 'function') writeLogServer({event: 'setDefault_selectCheck', selectFound: $hiddenSelect.length, value: value}, 'info');
 
 				if ($hiddenSelect.length) {
 					$hiddenSelect.val(value);
 
 					// Trigger change event on the select to notify WooCommerce/manual handler
 					$hiddenSelect.trigger('change');
+					if (typeof writeLogServer === 'function') writeLogServer({event: 'setDefault_changeTriggered', value: value}, 'info');
 
 					// Trigger WooCommerce to check variations
 					const $variationsForm = $('.variations_form');
 					if ($variationsForm.length) {
+						if (typeof writeLogServer === 'function') writeLogServer({event: 'setDefault_checkVariations'}, 'info');
 						$variationsForm.trigger('check_variations');
+					} else {
+						console.error('Variation form NOT found!');
 					}
 				}
+
+				console.log('Default variation set to:', value);
+			} else {
+				console.log('Button already selected or not found');
 			}
 		}
 
