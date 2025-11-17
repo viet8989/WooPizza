@@ -1600,7 +1600,14 @@ do_action( 'wc_quick_view_after_single_product' );
 							const variationsData = $variationsForm.data('product_variations');
 							if (typeof writeLogServer === 'function') writeLogServer({event: 'wc_script_found', message: 'Initializing WC variation form', variationsCount: variationsData ? variationsData.length : 0}, 'info');
 							if (typeof writeLogServer === 'function' && variationsData && variationsData.length > 0) {
-								writeLogServer({event: 'variations_sample', first_variation: variationsData[0]}, 'info');
+								// Log all variations to verify they exist
+								const allVariations = variationsData.map(v => ({
+									id: v.variation_id,
+									attributes: v.attributes,
+									price: v.display_price,
+									in_stock: v.is_in_stock
+								}));
+								writeLogServer({event: 'all_variations', variations: allVariations}, 'info');
 							}
 
 							$variationsForm.wc_variation_form();
@@ -1611,39 +1618,37 @@ do_action( 'wc_quick_view_after_single_product' );
 								if (typeof writeLogServer === 'function') writeLogServer({event: 'triggering_check_variations'}, 'info');
 								$variationsForm.trigger('check_variations');
 							}, 300);
-						} else {
-							// WooCommerce variation script not loaded - use manual handler
-							if (typeof writeLogServer === 'function') writeLogServer({event: 'wc_script_not_loaded', message: 'Using manual variation handler'}, 'info');
-							const variationsData = $variationsForm.data('product_variations');
-							if (typeof writeLogServer === 'function') writeLogServer({event: 'variations_data_check', hasData: !!variationsData, dataLength: variationsData ? variationsData.length : 0}, 'info');
+						}
 
-							if (variationsData && variationsData.length) {
-								if (typeof writeLogServer === 'function') writeLogServer({event: 'attaching_manual_handler', selector: '.variation-select-hidden'}, 'info');
+						// ALWAYS attach manual handler as fallback (even if WooCommerce script exists)
+						// This ensures subtotal updates even if WooCommerce fails to match variations
+						const variationsData = $variationsForm.data('product_variations');
+						if (typeof writeLogServer === 'function') writeLogServer({event: 'attaching_manual_fallback', hasData: !!variationsData, dataLength: variationsData ? variationsData.length : 0}, 'info');
 
-								// Attach change handler to hidden select
-								$variationsForm.find('.variation-select-hidden').on('change', function() {
-									if (typeof writeLogServer === 'function') writeLogServer({event: 'manual_handler_fired', selectedValue: $(this).val()}, 'info');
-									const selectedValue = $(this).val();
-									if (!selectedValue) return;
+						if (variationsData && variationsData.length) {
+							// Attach change handler to hidden select
+							$variationsForm.find('.variation-select-hidden').on('change', function() {
+								if (typeof writeLogServer === 'function') writeLogServer({event: 'manual_handler_fired', selectedValue: $(this).val()}, 'info');
+								const selectedValue = $(this).val();
+								if (!selectedValue) return;
 
-									// Find matching variation
-									for (let i = 0; i < variationsData.length; i++) {
-										const v = variationsData[i];
-										if (!v.attributes) continue;
+								// Find matching variation
+								for (let i = 0; i < variationsData.length; i++) {
+									const v = variationsData[i];
+									if (!v.attributes) continue;
 
-										// Simple match: check if any attribute matches selected value
-										for (let attr in v.attributes) {
-											if (v.attributes[attr] && v.attributes[attr].toLowerCase() === selectedValue.toLowerCase()) {
-												// Match found - update price
-												mainProductPrice = parseFloat(v.display_price);
-												if (typeof writeLogServer === 'function') writeLogServer({event: 'manual_price_update', price: mainProductPrice, variation_id: v.variation_id}, 'info');
-												updateSubtotal();
-												return;
-											}
+									// Simple match: check if any attribute matches selected value
+									for (let attr in v.attributes) {
+										if (v.attributes[attr] && v.attributes[attr].toLowerCase() === selectedValue.toLowerCase()) {
+											// Match found - update price
+											mainProductPrice = parseFloat(v.display_price);
+											if (typeof writeLogServer === 'function') writeLogServer({event: 'manual_price_update', price: mainProductPrice, variation_id: v.variation_id}, 'info');
+											updateSubtotal();
+											return;
 										}
 									}
-								});
-							}
+								}
+							});
 						}
 					}
 
