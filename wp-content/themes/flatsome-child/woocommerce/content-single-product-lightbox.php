@@ -1018,10 +1018,16 @@ do_action( 'wc_quick_view_after_single_product' );
 </style>
 
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+	// Alert to confirm script is loaded
+	alert('BBB');
+});
+
 (function($) {
 	'use strict';
 
 	$(document).ready(function() {
+		alert('AAA');
 		// Check if upsells exist and hide paired button if not
 		const hasUpsells = <?php echo $has_upsells ? 'true' : 'false'; ?>;
 
@@ -1518,10 +1524,12 @@ do_action( 'wc_quick_view_after_single_product' );
 				$('.special-request-counter').text(length + '/' + maxLength);
 			});
 		}
-
+		
 		// Variation Change Handler
 		function initVariationHandler() {
+			alert('OK');
 			debugger;
+
 			// Prevent multiple attachments
 			if (window.variationHandlerAttached) {
 				return;

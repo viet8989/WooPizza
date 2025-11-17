@@ -140,12 +140,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const categoryLinks = document.querySelectorAll('.product-category a');
-        console.log('Found category links:', categoryLinks.length);
+        // Found category links: 
 
         categoryLinks.forEach(function(link) {
             link.addEventListener('click', function(event) {
                 event.preventDefault(); // Prevent default link behavior
-                console.log('Category clicked:', this);
+            // Category clicked
 
                 // Remove .selected class from all categories
                 document.querySelectorAll('.box-category .box-text .box-text-inner').forEach(function(box) {
@@ -155,25 +155,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Add .selected class to clicked category
                 // The link is inside .col-inner, find .box-text-inner within the same container
                 const colInner = this.closest('.col-inner');
-                console.log('Found .col-inner:', colInner);
+                // Found .col-inner: 
 
                 if (colInner) {
                     const boxTextInner = colInner.querySelector('.box-text .box-text-inner');
-                    console.log('Found .box-text-inner:', boxTextInner);
+                    // Found .box-text-inner: 
 
                     if (boxTextInner) {
                         boxTextInner.classList.add('selected');
-                        console.log('Added .selected class to:', boxTextInner);
+                        // Added .selected class to: 
                     } else {
                         console.warn('Could not find .box-text .box-text-inner inside .col-inner');
                     }
                 } else {
-                    console.warn('Could not find .col-inner parent. Link structure:', this.parentElement);
+                    console.warn('Could not find .col-inner parent. Link structure:'); 
                 }
 
                 // Get text of clicked link
                 const categoryName = this.textContent.trim();
-                console.log('Category name:', categoryName);
+                // Category name: 
 
                 // Save selected category to sessionStorage
                 sessionStorage.setItem('selectedCategory', categoryName);
@@ -215,7 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (isHomePage) {
         // Reset to PIZZA when loading home page (before DOM manipulation)
         sessionStorage.setItem('selectedCategory', 'PIZZA');
-        console.log('Home page loaded - Set default category to PIZZA');
+        // Home page loaded - Set default category to PIZZA
 
         const categoryLinks = document.querySelectorAll('.product-category a');
         categoryLinks.forEach(function(link) {
@@ -246,11 +246,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Header menu links - ONLY in the menu overlay, not in tab content
     const menuOpenLinks = document.querySelectorAll('.menu-open .ux-menu > .ux-menu-link a');
-    console.log('Found menu links:', menuOpenLinks.length);
+        // Found menu links: 
 
     menuOpenLinks.forEach(function(link) {
         link.addEventListener('click', function(event) {
-            console.log('Menu link clicked:', this.getAttribute('href'));
+                // Menu link clicked: 
             event.preventDefault();
 
             if (menuClose) {
@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const currentlyOnHome = currentPathname === '/' || currentPathname === '' || currentPathname === '/home' || currentPathname === '/index.php';
 
             if (currentlyOnHome) {
-                console.log('Calling fadeOutToGroupOpenMenu with:', href);
+                // Calling fadeOutToGroupOpenMenu with: 
                 fadeOutToGroupOpenMenu(href, 'home'); // Called from home page
             } else {
                 window.location.href = window.location.origin + '?tab=' + href.replace('#', '');
@@ -278,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Helper function to set selected category class
 function setSelectedCategory(categoryName) {
-    console.log('setSelectedCategory called with:', categoryName);
+    // setSelectedCategory called with: 
 
     // Remove .selected class from all categories
     document.querySelectorAll('.box-category .box-text .box-text-inner').forEach(function(box) {
@@ -287,32 +287,32 @@ function setSelectedCategory(categoryName) {
 
     // Find and add .selected class to matching category
     const categoryLinks = document.querySelectorAll('.product-category a');
-    console.log('Looking through', categoryLinks.length, 'category links');
+    // Looking through category links 
 
     let found = false;
     categoryLinks.forEach(function(link) {
         const linkText = link.textContent.trim();
         if (linkText === categoryName) {
-            console.log('Found matching link:', link);
+            // Found matching link: 
             const colInner = link.closest('.col-inner');
-            console.log('colInner:', colInner);
+            // colInner: 
 
             if (colInner) {
                 const boxTextInner = colInner.querySelector('.box-text .box-text-inner');
-                console.log('boxTextInner:', boxTextInner);
+                // boxTextInner: 
 
                 if (boxTextInner) {
                     boxTextInner.classList.add('selected');
-                    console.log('Successfully added .selected class');
+                    // Successfully added .selected class 
                     found = true;
                 }
             }
         }
     });
 
-    if (!found) {
-        console.warn('Could not find category:', categoryName);
-        console.log('Available categories:', Array.from(categoryLinks).map(l => l.textContent.trim()));
+    if (!found) { 
+        console.warn('Could not find category:', categoryName); 
+        // Available categories: 
     }
 }
 
@@ -427,7 +427,7 @@ function clearLogsServer() {
         nonce: customJsParams.nonce
     };
 
-    console.log('Clearing server logs...');
+    // Clearing server logs... 
 
     // Send AJAX request to WordPress
     fetch(customJsParams.ajax_url, {
@@ -440,7 +440,7 @@ function clearLogsServer() {
     .then(response => response.json())
     .then(result => {
         if (result.success) {
-            console.log('✅ Logs cleared successfully:', result.data);
+                        // Logs cleared successfully 
         } else {
             console.error('❌ Failed to clear logs:', result.data);
         }
@@ -454,16 +454,16 @@ function clearLogsServer() {
 document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('autotest') === 'minicart') {
-        console.log('🚀 Starting automated mini cart bug testing...');
+        // Starting automated mini cart bug testing... 
 
         // Step 1: Open mini cart (wait 2 seconds for page load)
         setTimeout(function() {
-            console.log('Step 1: Opening mini cart...');
+            // Step 1: Opening mini cart... 
             try {
                 const cartIcon = document.querySelectorAll('.header-nav.header-nav-main.nav.nav-right.nav-size-large.nav-spacing-xlarge.nav-uppercase li a')[0];
                 if (cartIcon) {
                     cartIcon.click();
-                    console.log('✅ Mini cart opened');
+                    // ✅ Mini cart opened 
                 } else {
                     console.error('❌ Cart icon not found');
                 }
@@ -474,11 +474,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Step 2: Clear logs (wait 5 seconds after step 1)
         setTimeout(function() {
-            console.log('Step 2: Clearing server logs...');
+            // Step 2: Clearing server logs... 
             try {
                 if (typeof clearLogsServer === 'function') {
                     clearLogsServer();
-                    console.log('✅ Logs cleared');
+                    // ✅ Logs cleared 
                 } else {
                     console.error('❌ clearLogsServer function not found');
                 }
@@ -489,7 +489,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Step 3: Log before state (wait 5 seconds after step 2)
         setTimeout(function() {
-            console.log('Step 3: Logging initial state before quantity change...');
+            // Step 3: Logging initial state before quantity change... 
             try {
                 const cartItems = document.querySelectorAll('.woocommerce-mini-cart-item');
                 const subtotal = document.querySelector('.mini-cart-totals-breakdown .subtotal-row .totals-value');
@@ -522,7 +522,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (typeof writeLogServer === 'function') {
                     writeLogServer(beforeData, 'info');
-                    console.log('✅ Before state logged:', beforeData);
+                    // ✅ Before state logged: 
                 } else {
                     console.error('❌ writeLogServer function not found');
                 }
@@ -533,12 +533,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Step 4: Click plus button (wait 5 seconds after step 3)
         setTimeout(function() {
-            console.log('Step 4: Clicking plus button on first item...');
+            // Step 4: Clicking plus button on first item... 
             try {
                 const plusButton = document.querySelector('button.plus');
                 if (plusButton) {
                     plusButton.click();
-                    console.log('✅ Plus button clicked');
+                    // ✅ Plus button clicked 
                 } else {
                     console.error('❌ Plus button not found');
                 }
@@ -549,7 +549,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Step 5: Log after state (wait 10 seconds after step 4 for AJAX to complete)
         setTimeout(function() {
-            console.log('Step 5: Logging state after quantity change...');
+            // Step 5: Logging state after quantity change... 
             try {
                 const cartItems = document.querySelectorAll('.woocommerce-mini-cart-item');
                 const subtotal = document.querySelector('.mini-cart-totals-breakdown .subtotal-row .totals-value');
@@ -582,7 +582,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (typeof writeLogServer === 'function') {
                     writeLogServer(afterData, 'info');
-                    console.log('✅ After state logged:', afterData);
+                    // ✅ After state logged: 
                 } else {
                     console.error('❌ writeLogServer function not found');
                 }
@@ -593,12 +593,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Step 6: Final completion message
         setTimeout(function() {
-            console.log('✅ ========================================');
-            console.log('✅ Automated testing completed!');
-            console.log('✅ Logs have been written to server');
-            console.log('✅ Run download command to analyze:');
-            console.log('✅ python3 ~/Documents/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/debug.log && python3 ~/Documents/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/custom-debug.log');
-            console.log('✅ ========================================');
+            // Automated testing completed 
+            // Logs have been written to server 
+            // Run download command to analyze: 
+            // python3 ~/Documents/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/debug.log && python3 ~/Documents/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/custom-debug.log
         }, 32000);
     }
 

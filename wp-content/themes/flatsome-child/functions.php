@@ -274,6 +274,31 @@ function enqueue_woocommerce_admin_assets_for_custom_pages( $hook ) {
 	wp_enqueue_style( 'common' );
 	wp_enqueue_style( 'wp-admin' );
 	wp_enqueue_style( 'forms' );
+	
+	/**
+	 * Override parent theme `flatsome-theme-woocommerce-js` with child theme version.
+	 * This deregisters the parent script and registers the child copy under the same handle
+	 * so dependencies remain intact.
+	 */
+	add_action( 'wp_enqueue_scripts', function() {
+		// If parent registered the handle, remove it.
+		if ( wp_script_is( 'flatsome-theme-woocommerce-js', 'registered' ) ) {
+			wp_dequeue_script( 'flatsome-theme-woocommerce-js' );
+			wp_deregister_script( 'flatsome-theme-woocommerce-js' );
+		}
+
+		$child_path = get_stylesheet_directory() . '/assets/js/woocommerce.js';
+		if ( file_exists( $child_path ) ) {
+			wp_register_script(
+				'flatsome-theme-woocommerce-js',
+				get_stylesheet_directory_uri() . '/assets/js/woocommerce.js',
+				array( 'flatsome-js', 'woocommerce' ),
+				filemtime( $child_path ),
+				true
+			);
+			wp_enqueue_script( 'flatsome-theme-woocommerce-js' );
+		}
+	}, 120 );
 }
 
 // Display Pizza products page
