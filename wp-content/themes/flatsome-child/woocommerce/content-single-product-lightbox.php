@@ -1093,13 +1093,6 @@ do_action( 'wc_quick_view_after_single_product' );
 				$('#whole-pizza-toppings').show();
 				$('#paired-pizza-toppings').hide();
 
-				// Set default variation after switching to whole mode
-				setTimeout(function() {
-					if (typeof setDefaultVariation === 'function') {
-						setDefaultVariation();
-					}
-				}, 200);
-
 				// Clear all topping selections
 				$('.topping-checkbox').prop('checked', false);
 
@@ -1707,10 +1700,9 @@ do_action( 'wc_quick_view_after_single_product' );
 			const $firstButton = $('.variation-button').first();
 
 			if ($firstButton.length) {
-				// Add selected class to first button (if not already selected)
-				if (!$firstButton.hasClass('selected')) {
-					$firstButton.addClass('selected');
-				}
+				// Remove selected class from all buttons first, then add to first button
+				$('.variation-button').removeClass('selected');
+				$firstButton.addClass('selected');
 
 				// Update the hidden select
 				const value = $firstButton.data('value');
