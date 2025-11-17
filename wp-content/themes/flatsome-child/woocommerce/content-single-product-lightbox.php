@@ -1715,16 +1715,17 @@ do_action( 'wc_quick_view_after_single_product' );
 
 			// Try to setup immediately (in case lightbox already open)
 			setupVariationForm();
+			setTimeout(setDefaultVariation, 500);
 
-			// Also try when lightbox opens (MagnificPopup event with delay)
-			$(document).on('mfpOpen', function() {
-				// Wait for lightbox content to fully render
-				setTimeout(function() {
-					setupVariationForm();
-					// Set default variation after a longer delay to ensure everything is ready
-					setTimeout(setDefaultVariation, 500);
-				}, 100);
-			});
+			// // Also try when lightbox opens (MagnificPopup event with delay)
+			// $(document).on('mfpOpen', function() {
+			// 	// Wait for lightbox content to fully render
+			// 	setTimeout(function() {
+			// 		setupVariationForm();
+			// 		// Set default variation after a longer delay to ensure everything is ready
+			// 		setTimeout(setDefaultVariation, 500);
+			// 	}, 100);
+			// });
 		}
 
 		// Function to set default variation (first option) - defined at global scope
