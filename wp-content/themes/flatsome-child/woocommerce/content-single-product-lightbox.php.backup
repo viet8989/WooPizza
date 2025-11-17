@@ -178,57 +178,55 @@ do_action( 'wc_quick_view_before_single_product' );
 				$attributes           = $product->get_variation_attributes();
 				$available_variations = $product->get_available_variations();
 				$attribute_keys       = array_keys( $attributes );
-				$variations_json      = wp_json_encode( $available_variations );
-				$variations_attr      = function_exists( 'wc_esc_json' ) ? wc_esc_json( $variations_json ) : _wp_specialchars( $variations_json, ENT_QUOTES, 'UTF-8', true );
-
-				do_action( 'woocommerce_before_add_to_cart_form' );
 				?>
-			<form class="variations_form cart" action="<?php echo esc_url( apply_filters( 'woocommerce_add_to_cart_form_action', $product->get_permalink() ) ); ?>" method="post" enctype='multipart/form-data' data-product_id="<?php echo absint( $product->get_id() ); ?>" data-product_variations="<?php echo $variations_attr; // WPCS: XSS ok. ?>">
-				<?php do_action( 'woocommerce_before_variations_form' ); ?>
-			<div id="product-variations-section" class="product-variations-wrapper">
-				<?php foreach ( $attributes as $attribute_name => $options ) : ?>
-					<div class="variation-attribute-group">
-						<h3 class="variation-attribute-title"><?php echo wc_attribute_label( $attribute_name ); ?>:</h3>
-						<div class="variation-buttons-container" data-attribute="<?php echo esc_attr( sanitize_title( $attribute_name ) ); ?>">
-							<?php
-							// Create button-style options instead of dropdown
-							$attribute_slug = sanitize_title( $attribute_name );
-							$option_index = 0;
-							foreach ( $options as $option ) :
-								$option_slug = sanitize_title( $option );
-								// Set first option as selected by default
-								$is_first = ( $option_index === 0 );
-								$button_class = 'variation-button';
-								$option_index++;
-							?>
-								<button type="button"
-										class="<?php echo esc_attr( $button_class ); ?>"
-										data-value="<?php echo esc_attr( $option ); ?>"
-										data-attribute="<?php echo esc_attr( $attribute_slug ); ?>">
-									<?php echo esc_html( $option ); ?>
-								</button>
+				<div id="product-variations-section" class="product-variations-wrapper">
+					<h3 class="variation-section-title"><?php esc_html_e( 'Select size pizza:', 'flatsome' ); ?></h3>
+					<table class="variations" cellspacing="0" role="presentation">
+						<tbody>
+							<?php foreach ( $attributes as $attribute_name => $options ) : ?>
+								<tr>
+									<th class="label"><label for="<?php echo esc_attr( sanitize_title( $attribute_name ) ); ?>"><?php echo wc_attribute_label( $attribute_name ); // WPCS: XSS ok. ?></label></th>
+									<td class="value">
+										<?php
+											wc_dropdown_variation_attribute_options(
+												array(
+													'options'   => $options,
+													'attribute' => $attribute_name,
+													'product'   => $product,
+												)
+											);
+											echo end( $attribute_keys ) === $attribute_name ? wp_kses_post( apply_filters( 'woocommerce_reset_variations_link', '<a class="reset_variations" href="#" aria-label="' . esc_attr__( 'Clear options', 'woocommerce' ) . '">' . esc_html__( 'Clear', 'woocommerce' ) . '</a>' ) ) : '';
+										?>
+									</td>
+								</tr>
 							<?php endforeach; ?>
-						</div>
-						<!-- Hidden select for WooCommerce compatibility -->
-						<select class="variation-select-hidden"
-								name="<?php echo esc_attr( 'attribute_' . $attribute_slug ); ?>"
-								data-attribute_name="<?php echo esc_attr( 'attribute_' . $attribute_slug ); ?>"
-								style="display: none;">
-							<option value=""><?php esc_html_e( 'Choose an option', 'woocommerce' ); ?></option>
-							<?php
-							$option_index = 0;
-							foreach ( $options as $option ) :
-								// Set first option as selected by default
-								$is_first = ( $option_index === 0 );
-								$option_index++;
-							?>
-								<option value="<?php echo esc_attr( $option ); ?>" <?php selected( $is_first, true ); ?>><?php echo esc_html( $option ); ?></option>
-							<?php endforeach; ?>
-						</select>
+						</tbody>
+					</table>
+					<div class="reset_variations_alert screen-reader-text" role="alert" aria-live="polite" aria-relevant="all"></div>
+					<?php do_action( 'woocommerce_after_variations_table' ); ?>
+					<div class="single_variation_wrap">
+						<?php
+							/**
+							 * Hook: woocommerce_before_single_variation.
+							 */
+							do_action( 'woocommerce_before_single_variation' );
+
+							/**
+							 * Hook: woocommerce_single_variation. Used to output the cart button and placeholder for variation data.
+							 *
+							 * @since 2.4.0
+							 * @hooked woocommerce_single_variation - 10 Empty div for variation data.
+							 * @hooked woocommerce_single_variation_add_to_cart_button - 20 Qty and cart button.
+							 */
+							do_action( 'woocommerce_single_variation' );
+
+							/**
+							 * Hook: woocommerce_after_single_variation.
+							 */
+							do_action( 'woocommerce_after_single_variation' );
+						?>
 					</div>
-				<?php endforeach; ?>
-				<div class="reset_variations_alert screen-reader-text" role="alert" aria-live="polite" aria-relevant="all"></div>
-			</div>
+				</div>
 			<?php endif; ?>
 
 			<!-- Whole Pizza Toppings -->
@@ -343,43 +341,13 @@ do_action( 'wc_quick_view_before_single_product' );
 			<?php echo wp_kses_post( wc_price( $product_price ) ); ?>
 		</span>
 	</div>
-
+	
 	<!-- Quantity & Add to Cart -->
-	<?php if ( $product->is_type( 'variable' ) ) : ?>
-		<!-- WooCommerce single variation container (uses standard WooCommerce hooks) -->
-		<div class="single_variation_wrap">
-			<?php
-			/**
-			 * Hook: woocommerce_before_single_variation.
-			 */
-			do_action( 'woocommerce_before_single_variation' );
-
-			/**
-			 * Hook: woocommerce_single_variation. Used to output the cart button and placeholder for variation data.
-			 *
-			 * @since 2.4.0
-			 * @hooked woocommerce_single_variation - 10 Empty div for variation data.
-			 * @hooked woocommerce_single_variation_add_to_cart_button - 20 Qty and cart button.
-			 */
-			do_action( 'woocommerce_single_variation' );
-
-			/**
-			 * Hook: woocommerce_after_single_variation.
-			 */
-			do_action( 'woocommerce_after_single_variation' );
-			?>
-		</div>
-	<?php else : ?>
-		<?php
-		// For non-variable products
-		do_action( 'woocommerce_single_product_lightbox_summary' );
-		?>
-	<?php endif; ?>
-
-	<!-- Close WooCommerce variations form -->
-	<?php do_action( 'woocommerce_after_variations_form' ); ?>
-	</form>
-	<?php do_action( 'woocommerce_after_add_to_cart_form' ); ?>
+	<?php
+	// For variable products, we need to make sure the variations form wraps the entire content
+	// This action will output the add-to-cart form which includes variations
+	do_action( 'woocommerce_single_product_lightbox_summary' );
+	?>
 </div>
 
 <?php
@@ -779,86 +747,85 @@ do_action( 'wc_quick_view_after_single_product' );
 	padding: 10px 10px;
 }
 
-/* Hide default WooCommerce variation dropdown in bottom bar */
-.qv-bottom-bar .variations_form .variations,
-.qv-bottom-bar .variations_form table.variations,
-.qv-bottom-bar .reset_variations,
-.qv-bottom-bar .woocommerce-variation-description,
-.qv-bottom-bar .woocommerce-variation-price,
-.qv-bottom-bar .woocommerce-variation-availability {
-	display: none !important;
+/* Hide default WooCommerce variation table initially (will be moved to right column via JavaScript)
+.variations_form .variations {
+	display: none;
+} */
+
+/* Show variation table when it's inside our custom section */
+.product-variations-wrapper .variations {
+	display: table !important;
 }
 
-/* Keep add-to-cart button visible */
-.qv-bottom-bar .single_variation_wrap {
-	display: block !important;
-}
-
-.qv-bottom-bar .variations_form .cart {
-	margin: 0;
-}
-
-/* Product Variation Section (Custom Button Style) */
+/* Product Variation Section (Custom in Right Column) */
 .product-variations-wrapper {
-	padding: 0 20px;
+	padding: 15px 20px;
+	background: #f9f9f9;
+	border-radius: 8px;
 	margin-bottom: 20px;
 }
 
-.variation-attribute-group {
-	margin-bottom: 20px;
-}
-
-.variation-attribute-title {
+.variation-section-title {
 	font-size: 16px;
 	font-weight: bold;
-	margin: 0 0 12px 0;
-	color: #000;
-}
-
-.variation-buttons-container {
-	display: flex;
-	gap: 10px;
-	flex-wrap: wrap;
-}
-
-.variation-button {
-	flex: 1;
-	min-width: 80px;
-	padding: 12px 20px;
-	background: #f5f5f5;
+	margin: 0 0 15px 0;
 	color: #333;
-	border: 2px solid transparent;
-	border-radius: 4px;
-	cursor: pointer;
-	font-size: 14px;
+}
+
+.product-variations-wrapper .variations {
+	width: 100%;
+	border: none;
+	margin-bottom: 0;
+}
+
+.product-variations-wrapper .variations tr {
+	border-bottom: 1px solid #e0e0e0;
+}
+
+.product-variations-wrapper .variations tr:last-child {
+	border-bottom: none;
+}
+
+.product-variations-wrapper .variations th {
+	padding: 10px 0;
+	text-align: left;
 	font-weight: 600;
-	text-transform: uppercase;
-	transition: all 0.3s ease;
-	position: relative;
-	z-index: 10;
-	pointer-events: auto;
+	color: #333;
+	font-size: 14px;
+	width: 35%;
 }
 
-.variation-button:hover {
-	background: #e8e8e8;
+.product-variations-wrapper .variations td {
+	padding: 10px 0;
 }
 
-.variation-button.selected {
-	background: #dc0000;
-	color: white;
+.product-variations-wrapper .variations select {
+	width: 100%;
+	padding: 8px 12px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	font-size: 14px;
+	background: white;
+	cursor: pointer;
+	transition: border-color 0.3s ease;
+}
+
+.product-variations-wrapper .variations select:focus {
+	outline: none;
 	border-color: #dc0000;
 }
 
-.variation-button:disabled {
-	opacity: 0.4;
-	cursor: not-allowed;
-	background: #f5f5f5;
-	color: #999;
+.product-variations-wrapper .reset_variations {
+	display: inline-block;
+	margin-left: 10px;
+	color: #dc0000;
+	text-decoration: none;
+	font-size: 13px;
+	font-weight: 500;
 }
 
-/* Hide the default select dropdown */
-.variation-select-hidden {
-	display: none !important;
+.product-variations-wrapper .reset_variations:hover {
+	text-decoration: underline;
 }
 
 /* Extra Options Section */
@@ -1033,10 +1000,6 @@ do_action( 'wc_quick_view_after_single_product' );
 			$pairedBtn.addClass('hidden-no-upsells');
 		}
 
-		// Global variable for main product price (updated when variation changes)
-		let mainProductPrice = <?php echo esc_js( $product_price ); ?>;
-		const mainProductId = <?php echo esc_js( $product_id ); ?>;
-
 		// Configuration
 		const config = {
 			basePrice: parseFloat($('#sub_total').data('base-price')) || 0,
@@ -1084,7 +1047,6 @@ do_action( 'wc_quick_view_after_single_product' );
 		// Size Toggle
 		function initSizeToggle() {
 			$('#btn-whole').on('click', function() {
-				console.log('Whole pizza button clicked');
 				$('.size-option').removeClass('active');
 				$(this).addClass('active');
 				$('#pizza-whole').show();
@@ -1093,14 +1055,6 @@ do_action( 'wc_quick_view_after_single_product' );
 				// Show whole toppings, hide paired toppings
 				$('#whole-pizza-toppings').show();
 				$('#paired-pizza-toppings').hide();
-
-				// Set default variation after switching to whole mode
-				setTimeout(function() {
-					console.log('Setting default variation after whole button click');
-					if (typeof setDefaultVariation === 'function') {
-						setDefaultVariation();
-					}
-				}, 200);
 
 				// Clear all topping selections
 				$('.topping-checkbox').prop('checked', false);
@@ -1136,8 +1090,9 @@ do_action( 'wc_quick_view_after_single_product' );
 				$('.topping-checkbox').prop('checked', false);
 
 				// Set main product as left half when switching to paired mode
-				// Note: mainProductId and mainProductPrice are global variables (declared at top)
+				const mainProductId = <?php echo esc_js( $product_id ); ?>;
 				const mainProductName = <?php echo json_encode( get_the_title() ); ?>;
+				let mainProductPrice = <?php echo esc_js( $product_price ); ?>;
 				const mainProductImage = <?php
 					if ( has_post_thumbnail() ) {
 						$image_id = get_post_thumbnail_id();
@@ -1148,8 +1103,20 @@ do_action( 'wc_quick_view_after_single_product' );
 				?>
 
 				// Get current variation price if available (for variable products)
-				// Note: Variation change handler is set up globally in setupVariationForm()
-				// No need to attach handler here as it causes duplicates
+				const $variationsForm = $('.variations_form');
+				if ($variationsForm.length) {
+					// Listen for variation changes
+					$variationsForm.on('found_variation', function(event, variation) {
+						mainProductPrice = parseFloat(variation.display_price);
+						console.log('Variation changed, new price:', mainProductPrice);
+
+						// Update selectedLeftHalf if in paired mode
+						if ($('#btn-paired').hasClass('active') && selectedLeftHalf && selectedLeftHalf.product_id === mainProductId) {
+							selectedLeftHalf.price = mainProductPrice / 2;
+							updateSubtotal();
+						}
+					});
+				}
 
 				selectedLeftHalf = {
 					product_id: mainProductId,
@@ -1180,7 +1147,6 @@ do_action( 'wc_quick_view_after_single_product' );
 			});
 
 			// Wait for DOM to be ready and modal to be visible
-			// This runs AFTER default variation is set to ensure mainProductPrice is available
 			setTimeout(function() {
 				// Get the view type from sessionStorage
 				const viewType = sessionStorage.getItem('pizza_view') || 'whole';
@@ -1196,7 +1162,7 @@ do_action( 'wc_quick_view_after_single_product' );
 
 				// Clear the storage after using it
 				sessionStorage.removeItem('pizza_view');
-			}, 800); // Increased delay to run after setDefaultVariation (100ms + 500ms + buffer)
+			}, 100);
 		}
 
 		// Function to load right half toppings via AJAX
@@ -1323,11 +1289,18 @@ do_action( 'wc_quick_view_after_single_product' );
 
 		// Function to get current product price (variation-aware)
 		function getCurrentProductPrice() {
-			// Use mainProductPrice which is updated by found_variation event
-			// This is more reliable than reading from DOM
-			console.log('[DEBUG] getCurrentProductPrice called, mainProductPrice:', mainProductPrice, 'basePrice:', config.basePrice);
-			if (mainProductPrice && mainProductPrice > 0) {
-				return mainProductPrice;
+			// Check if there's a variation form and if a variation is selected
+			const $variationsForm = $('.variations_form');
+			if ($variationsForm.length) {
+				const $priceDiv = $variationsForm.find('.single_variation_wrap .woocommerce-variation-price .price .amount');
+				if ($priceDiv.length && $priceDiv.text()) {
+					// Extract price from formatted price string
+					const priceText = $priceDiv.text().replace(/[^\d]/g, '');
+					const variationPrice = parseFloat(priceText);
+					if (!isNaN(variationPrice) && variationPrice > 0) {
+						return variationPrice;
+					}
+				}
 			}
 			// Fall back to base price
 			return config.basePrice;
@@ -1336,7 +1309,6 @@ do_action( 'wc_quick_view_after_single_product' );
 		// Subtotal Calculation
 		function updateSubtotal() {
 			let subtotal = 0;
-			console.log('[DEBUG] updateSubtotal called, getCurrentProductPrice():', getCurrentProductPrice());
 			let canAddToCart = true;
 
 			// Check if paired mode is active
@@ -1521,203 +1493,42 @@ do_action( 'wc_quick_view_after_single_product' );
 
 		// Variation Change Handler
 		function initVariationHandler() {
-			// Prevent multiple attachments
-			if (window.variationHandlerAttached) {
-				return;
-			}
-			window.variationHandlerAttached = true;
+			const $variationsForm = $('.variations_form');
+			if ($variationsForm.length) {
+				// Move the variation table from the default location to our custom section
+				const $defaultVariationTable = $variationsForm.find('.variations');
+				const $customVariationSection = $('#product-variations-section');
 
-			// Attach event handler to document (works even if lightbox not loaded yet)
-			$(document).on('click', '.variation-button', function(e) {
-				e.preventDefault();
-				e.stopPropagation();
-				const $button = $(this);
-				const value = $button.data('value');
-				const attribute = $button.data('attribute');
+				if ($defaultVariationTable.length && $customVariationSection.length) {
+					// Remove the custom table we created (it was just a placeholder)
+					$customVariationSection.find('.variations').remove();
 
-				// Remove selected class from sibling buttons
-				$button.siblings('.variation-button').removeClass('selected');
+					// Move the actual WooCommerce variation table into our custom section
+					$customVariationSection.append($defaultVariationTable);
 
-				// Toggle selection
-				const wasSelected = $button.hasClass('selected');
-				if (!wasSelected) {
-					$button.addClass('selected');
-
-					// Find hidden select by matching attribute name
-					// The select might have been moved to the form, so search globally
-					const selectName = 'attribute_' + attribute;
-					const $hiddenSelect = $('select[name="' + selectName + '"]');
-					$hiddenSelect.val(value).trigger('change');
-				} else {
-					$button.removeClass('selected');
-
-					// Find and clear the hidden select
-					const selectName = 'attribute_' + attribute;
-					const $hiddenSelect = $('select[name="' + selectName + '"]');
-					$hiddenSelect.val('').trigger('change');
+					// Show the variation table (we hid it with CSS)
+					$defaultVariationTable.show();
 				}
 
-				// Trigger WooCommerce variation form update
-				const $variationsForm = $('.variations_form');
-				if ($variationsForm.length) {
-					$variationsForm.trigger('check_variations');
-				}
-			});
+				// Listen for variation selection
+				$variationsForm.on('found_variation', function(event, variation) {
+					// Update subtotal when variation changes
+					updateSubtotal();
+				});
 
-			// Move hidden selects into form when lightbox opens
-			const setupVariationForm = function() {
-				const $variationsForm = $('.variations_form');
-				if ($variationsForm.length) {
-					// Move selects to form
-					$('.variation-select-hidden').each(function() {
-						const $select = $(this);
-						if (!$select.closest('form.variations_form').length) {
-							$variationsForm.append($select.detach());
-						}
+				// Listen for variation reset
+				$variationsForm.on('reset_data', function() {
+					// Update subtotal when variation is reset
+					updateSubtotal();
+				});
+
+				// Listen for variation dropdown changes
+				$(document).off('change', '.variations select').off('change.variationSelect', '.variations select')
+					.on('change.variationSelect', '.variations select', function() {
+						// Update subtotal when user changes variation dropdown
+						// Note: This will trigger before found_variation, but it's safe
+						setTimeout(updateSubtotal, 100);
 					});
-
-					// Initialize WooCommerce variation form if not already initialized
-					if (!$variationsForm.data('wc-variation-form-initialized')) {
-						$variationsForm.data('wc-variation-form-initialized', true);
-
-						// Check if WooCommerce variation form plugin is available
-						if (typeof $variationsForm.wc_variation_form === 'function') {
-							$variationsForm.wc_variation_form();
-
-							// Trigger WooCommerce to check for the pre-selected variation (set in PHP)
-							// Use delay to ensure form is fully initialized
-							setTimeout(function() {
-								$variationsForm.trigger('check_variations');
-							}, 300);
-						}
-					}
-
-					// Attach WooCommerce event listeners (only once globally)
-					if (!window.wcVariationListenersAttached) {
-						window.wcVariationListenersAttached = true;
-
-						// Use event delegation on document to avoid duplicates
-						$(document).on('found_variation', '.variations_form', function(event, variation) {
-							console.log('[DEBUG] found_variation event fired!', variation);
-							console.log('[DEBUG] found_variation event fired!', variation);
-							// Update main product price
-							mainProductPrice = parseFloat(variation.display_price);
-
-							console.log('[DEBUG] mainProductPrice updated to:', mainProductPrice);
-							console.log('[DEBUG] mainProductPrice updated to:
-							// Update button visual selection based on variation attributes
-							if (variation.attributes) {
-								Object.keys(variation.attributes).forEach(function(attrKey) {
-									const attrValue = variation.attributes[attrKey];
-									if (attrValue) {
-										// Find and select the matching button
-										$('.variation-button[data-attribute="' + attrKey.replace('attribute_', '') + '"][data-value="' + attrValue + '"]')
-											.addClass('selected')
-											.siblings('.variation-button')
-											.removeClass('selected');
-									}
-								});
-							}
-
-							// Update subtotal when variation changes
-							updateSubtotal();
-
-							// Update base price for paired mode
-							if ($('#btn-paired').hasClass('active') && selectedLeftHalf) {
-								if (selectedLeftHalf.product_id === mainProductId) {
-									selectedLeftHalf.price = mainProductPrice / 2;
-									updateSubtotal();
-								}
-							}
-						});
-
-						// Listen for variation reset
-						$(document).on('reset_data', '.variations_form', function() {
-								// Only clear button selections if variation is truly being reset (select value is empty)
-								const $select = $('.variation-select-hidden');
-								if ($select.length && !$select.val()) {
-									$('.variation-button').removeClass('selected');
-								}
-							// Update subtotal when variation is reset
-							updateSubtotal();
-						});
-
-						// Listen for when variation is not available
-						$(document).on('update_variation_values', '.variations_form', function() {
-							// This event fires when WooCommerce updates which variations are available
-							// We could use this to disable/enable buttons based on availability
-						});
-					}
-				}
-			};
-
-			// Try to setup immediately (in case lightbox already open)
-			setupVariationForm();
-
-			// Also try when lightbox opens (MagnificPopup event with delay)
-			$(document).on('mfpOpen', function() {
-				// Wait for lightbox content to fully render
-				setTimeout(function() {
-					setupVariationForm();
-					// Set default variation after a longer delay to ensure everything is ready
-					setTimeout(setDefaultVariation, 500);
-				}, 100);
-			});
-		}
-
-		// Function to set default variation (first option) - defined at global scope
-		function setDefaultVariation() {
-			console.log('setDefaultVariation called');
-			const $firstButton = $('.variation-button').first();
-			console.log('First button found:', $firstButton.length);
-
-			if ($firstButton.length) {
-				console.log('Setting default variation...');
-				// Add selected class to first button (if not already selected)
-				if (!$firstButton.hasClass('selected')) {
-					$firstButton.addClass('selected');
-				}
-
-				// Update the hidden select
-				const value = $firstButton.data('value');
-				const attribute = $firstButton.data('attribute');
-				const selectName = 'attribute_' + attribute;
-				const $hiddenSelect = $('select[name="' + selectName + '"]');
-
-				console.log('Hidden select found:', $hiddenSelect.length, 'Setting value to:', value);
-
-				if ($hiddenSelect.length) {
-					$hiddenSelect.val(value);
-
-					// Trigger change event on the select to notify WooCommerce
-					$hiddenSelect.trigger('change');
-
-					// Trigger WooCommerce to check variations
-					const $variationsForm = $('.variations_form');
-					console.log('Variation form found:', $variationsForm.length);
-					if ($variationsForm.length) {
-						console.log('Form has wc-variation-form:', typeof $variationsForm.wc_variation_form);
-						console.log('Form data:', $variationsForm.data('product_variations'));
-						console.log('Triggering check_variations');
-						$variationsForm.trigger('check_variations');
-
-						// Check result after triggering
-						setTimeout(function() {
-							const $addToCartBtn = $('.single_add_to_cart_button');
-							const $singleVariation = $('.single_variation_wrap');
-							console.log('After check_variations:');
-							console.log('  - Add to cart button exists:', $addToCartBtn.length);
-							console.log('  - Single variation wrap exists:', $singleVariation.length);
-							console.log('  - Variation wrap visible:', $singleVariation.length ? $singleVariation.is(':visible') : 'N/A');
-						}, 1000);
-					} else {
-						console.error('Variation form NOT found!');
-					}
-				}
-
-				console.log('Default variation set to:', value);
-			} else {
-				console.log('Button already selected or not found');
 			}
 		}
 
@@ -1730,10 +1541,6 @@ do_action( 'wc_quick_view_after_single_product' );
 
 			// Uncheck all topping checkboxes
 			$('.topping-checkbox').prop('checked', false);
-
-			// Reset variation buttons
-			$('.variation-button').removeClass('selected');
-			$('.variation-select-hidden').val('');
 
 			// Reset selected halves and UI selection
 			selectedLeftHalf = null;

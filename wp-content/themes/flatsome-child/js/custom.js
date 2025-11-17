@@ -601,4 +601,188 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('✅ ========================================');
         }, 32000);
     }
+
+    // Auto-test product lightbox variation buttons (only run when URL has ?autotest=product-lightbox parameter)
+    if (urlParams.get('autotest') === 'product-lightbox') {
+        // Wait for writeLogServer to be available
+        setTimeout(function() {
+            if (typeof writeLogServer !== 'function') {
+                console.error('writeLogServer not available, test cannot run');
+                return;
+            }
+            writeLogServer({event: 'test_start', message: 'Starting automated product lightbox variation button testing'}, 'info');
+        }, 500);
+
+        // Step 1: Clear logs (wait 2 seconds for page load)
+        setTimeout(function() {
+            writeLogServer({event: 'step_1', message: 'Clearing server logs'}, 'info');
+            try {
+                if (typeof clearLogsServer === 'function') {
+                    clearLogsServer();
+                    writeLogServer({event: 'step_1_success', message: 'Logs cleared'}, 'info');
+                } else {
+                    writeLogServer({event: 'step_1_error', message: 'clearLogsServer function not found'}, 'error');
+                }
+            } catch (e) {
+                writeLogServer({event: 'step_1_exception', message: 'Error clearing logs', error: e.message}, 'error');
+            }
+        }, 2000);
+
+        // Step 2: Open product lightbox (wait 3 seconds after step 1)
+        setTimeout(function() {
+            writeLogServer({event: 'step_2', message: 'Opening product lightbox'}, 'info');
+            try {
+                const productLink = document.querySelector('a.quick-view');
+                if (productLink) {
+                    writeLogServer({event: 'step_2_found', message: 'Found product link', link: productLink.outerHTML.substring(0, 100)}, 'info');
+                    productLink.click();
+                    writeLogServer({event: 'step_2_success', message: 'Product lightbox clicked'}, 'info');
+                } else {
+                    writeLogServer({event: 'step_2_error', message: 'Product link not found'}, 'error');
+                }
+            } catch (e) {
+                writeLogServer({event: 'step_2_exception', message: 'Error opening lightbox', error: e.message}, 'error');
+            }
+        }, 5000);
+
+        // Step 3: Log initial state (wait 6 seconds for default variation selection to complete)
+        setTimeout(function() {
+            writeLogServer({event: 'step_3', message: 'Logging initial state of variation UI'}, 'info');
+            try {
+                const variationButtons = document.querySelectorAll('.variation-button');
+                const dropdown = document.querySelector('.qv-bottom-bar .variations');
+                const addToCartBtn = document.querySelector('.single_add_to_cart_button');
+                const subtotal = document.querySelector('#sub_total');
+
+                const beforeData = {
+                    event: 'variation_ui_initial_state',
+                    timestamp: new Date().toISOString(),
+                    variation_buttons_count: variationButtons.length,
+                    dropdown_visible: dropdown ? (window.getComputedStyle(dropdown).display !== 'none') : false,
+                    add_to_cart_visible: addToCartBtn ? (window.getComputedStyle(addToCartBtn).display !== 'none') : false,
+                    add_to_cart_disabled: addToCartBtn ? addToCartBtn.disabled : 'N/A',
+                    subtotal: subtotal ? subtotal.textContent.trim() : 'N/A',
+                    buttons: []
+                };
+
+                variationButtons.forEach(function(btn, index) {
+                    beforeData.buttons.push({
+                        index: index,
+                        text: btn.textContent.trim(),
+                        selected: btn.classList.contains('selected'),
+                        value: btn.getAttribute('data-value')
+                    });
+                });
+
+                writeLogServer(beforeData, 'info');
+                writeLogServer({event: 'step_3_success', message: 'Initial state logged successfully'}, 'info');
+            } catch (e) {
+                writeLogServer({event: 'step_3_exception', message: 'Error logging initial state', error: e.message}, 'error');
+            }
+        }, 11000);
+
+        // Step 4: Click M button (wait 3 seconds after step 3)
+        setTimeout(function() {
+            writeLogServer({event: 'step_4', message: 'Clicking M button to test size change'}, 'info');
+            try {
+                const mButton = document.querySelectorAll('.variation-button')[1];
+                if (mButton) {
+                    mButton.click();
+                    writeLogServer({event: 'step_4_success', message: 'M button clicked', button_text: mButton.textContent.trim()}, 'info');
+                } else {
+                    writeLogServer({event: 'step_4_error', message: 'M button not found'}, 'error');
+                }
+            } catch (e) {
+                writeLogServer({event: 'step_4_exception', message: 'Error clicking M button', error: e.message}, 'error');
+            }
+        }, 14000);
+
+        // Step 5: Log state after M button click (wait 2 seconds for variation to update)
+        setTimeout(function() {
+            writeLogServer({event: 'step_5', message: 'Logging state after M button click'}, 'info');
+            try {
+                const variationButtons = document.querySelectorAll('.variation-button');
+                const hiddenSelect = document.querySelector('.variation-select-hidden');
+                const subtotal = document.querySelector('#sub_total');
+
+                const afterMData = {
+                    event: 'after_m_click',
+                    timestamp: new Date().toISOString(),
+                    hidden_select_value: hiddenSelect ? hiddenSelect.value : 'N/A',
+                    subtotal: subtotal ? subtotal.textContent.trim() : 'N/A',
+                    buttons: []
+                };
+
+                variationButtons.forEach(function(btn, index) {
+                    afterMData.buttons.push({
+                        index: index,
+                        text: btn.textContent.trim(),
+                        selected: btn.classList.contains('selected')
+                    });
+                });
+
+                writeLogServer(afterMData, 'info');
+                writeLogServer({event: 'step_5_success', message: 'After M click state logged'}, 'info');
+            } catch (e) {
+                writeLogServer({event: 'step_5_exception', message: 'Error logging after M click', error: e.message}, 'error');
+            }
+        }, 16000);
+
+        // Step 6: Click L button (wait 3 seconds after step 5)
+        setTimeout(function() {
+            writeLogServer({event: 'step_6', message: 'Clicking L button to test size change'}, 'info');
+            try {
+                const lButton = document.querySelectorAll('.variation-button')[2];
+                if (lButton) {
+                    lButton.click();
+                    writeLogServer({event: 'step_6_success', message: 'L button clicked', button_text: lButton.textContent.trim()}, 'info');
+                } else {
+                    writeLogServer({event: 'step_6_error', message: 'L button not found'}, 'error');
+                }
+            } catch (e) {
+                writeLogServer({event: 'step_6_exception', message: 'Error clicking L button', error: e.message}, 'error');
+            }
+        }, 19000);
+
+        // Step 7: Log state after L button click (wait 2 seconds for variation to update)
+        setTimeout(function() {
+            writeLogServer({event: 'step_7', message: 'Logging state after L button click'}, 'info');
+            try {
+                const variationButtons = document.querySelectorAll('.variation-button');
+                const hiddenSelect = document.querySelector('.variation-select-hidden');
+                const subtotal = document.querySelector('#sub_total');
+
+                const afterLData = {
+                    event: 'after_l_click',
+                    timestamp: new Date().toISOString(),
+                    hidden_select_value: hiddenSelect ? hiddenSelect.value : 'N/A',
+                    subtotal: subtotal ? subtotal.textContent.trim() : 'N/A',
+                    buttons: []
+                };
+
+                variationButtons.forEach(function(btn, index) {
+                    afterLData.buttons.push({
+                        index: index,
+                        text: btn.textContent.trim(),
+                        selected: btn.classList.contains('selected')
+                    });
+                });
+
+                writeLogServer(afterLData, 'info');
+                writeLogServer({event: 'step_7_success', message: 'After L click state logged'}, 'info');
+            } catch (e) {
+                writeLogServer({event: 'step_7_exception', message: 'Error logging after L click', error: e.message}, 'error');
+            }
+        }, 21000);
+
+        // Step 8: Final completion message
+        setTimeout(function() {
+            writeLogServer({
+                event: 'test_completed',
+                message: 'Size change testing completed - check subtotals for S/M/L',
+                timestamp: new Date().toISOString(),
+                download_command: 'python3 ~/Documents/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/custom-debug.log'
+            }, 'info');
+        }, 24000);
+    }
 });
