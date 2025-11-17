@@ -1,6 +1,46 @@
 <?php
 // Add custom Theme Functions here
 
+/**
+ * Tắt TẤT CẢ các link không cần thiết (RSS, JSON, API, Pingback, oEmbed, v.v.)
+ * trong phần <head> của WordPress.
+ */
+function cleanup_wordpress_head() {
+    
+    // 1. Loại bỏ link Pingback:
+    remove_action( 'wp_head', 'pingback_link' );
+    
+    // 2. Loại bỏ các link RSS Feed:
+    remove_action( 'wp_head', 'feed_links', 2 );
+    remove_action( 'wp_head', 'feed_links_extra', 3 );
+    remove_action( 'wp_head', 'post_comments_feed_link', 10 );
+    
+    // 3. Loại bỏ các link REST API (JSON API):
+    remove_action( 'wp_head', 'rest_output_link_wp_head', 10 );
+    remove_action( 'template_redirect', 'rest_output_link_header', 11 );
+    
+    // 4. Loại bỏ TẤT CẢ các link oEmbed:
+    remove_action( 'wp_head', 'wp_oembed_add_discovery_links' ); 
+    remove_action( 'wp_head', 'wp_oembed_add_host_js' ); // Loại bỏ JS liên quan
+    
+    // 5. Loại bỏ link Shortlink
+    remove_action( 'wp_head', 'wp_shortlink_wp_head', 10 );
+    
+    // 6. Loại bỏ các link khác (RSD/Edit URI, Windows Live Writer):
+    remove_action( 'wp_head', 'rsd_link' );
+    remove_action( 'wp_head', 'wlwmanifest_link' );
+    
+    // 7. Loại bỏ phiên bản WordPress
+    remove_action( 'wp_head', 'wp_generator' );
+}
+add_action( 'init', 'cleanup_wordpress_head' );
+
+/**
+ * (Tùy chọn) Vô hiệu hóa hoàn toàn XML-RPC (Bảo mật).
+ * Việc xóa link pingback không vô hiệu hóa XML-RPC, nên cần thêm bước này nếu bạn muốn bảo mật cao hơn.
+ */
+add_filter( 'xmlrpc_enabled', '__return_false' );
+
 function enqueue_custom_js()
 {
     wp_enqueue_script('custom-js', get_stylesheet_directory_uri() . '/js/custom.js', array(), '1.0.1', true);

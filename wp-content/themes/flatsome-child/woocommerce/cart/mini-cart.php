@@ -947,10 +947,10 @@ jQuery(document).ready(function($) {
 	$('.woocommerce-mini-cart__buttons.buttons .button.wc-forward').eq(0).hide();
 	$('.woocommerce-mini-cart__buttons.buttons .button.wc-forward').eq(1).text('Process your order');
 
-	console.log('=== MINI CART INITIALIZATION ===');
+	// console.log('=== MINI CART INITIALIZATION ===');
 
 	// Log all cart items at initialization
-	logAllCartItems();
+	// logAllCartItems();
 
 	function logAllCartItems() {
 		console.log('--- Current Cart Items ---');
@@ -1018,28 +1018,28 @@ jQuery(document).ready(function($) {
 	// Handle quantity increase
 	$(document).on('click', '.mini-cart-quantity-controls .plus', function(e) {
 		e.preventDefault();
-		console.log('Plus button clicked');
+		// console.log('Plus button clicked');
 
 		var $button = $(this);
 		var $input = $button.siblings('input.qty');
 		var currentVal = parseInt($input.val());
 		var max = parseInt($input.attr('max'));
 
-		console.log('Current value:', currentVal, 'Max:', max);
+		// console.log('Current value:', currentVal, 'Max:', max);
 
 		if (currentVal < max) {
 			var newVal = currentVal + 1;
-			console.log('Increasing quantity to:', newVal);
+			// console.log('Increasing quantity to:', newVal);
 			updateCartQuantity($input.data('cart-item-key'), newVal, $input);
 		} else {
-			console.log('Already at maximum quantity');
+			// console.log('Already at maximum quantity');
 		}
 	});
 
 	// Handle quantity decrease
 	$(document).on('click', '.mini-cart-quantity-controls .minus', function(e) {
 		e.preventDefault();
-		console.log('Minus button clicked');
+		// console.log('Minus button clicked');
 
 		var $button = $(this);
 		var $input = $button.siblings('input.qty');
