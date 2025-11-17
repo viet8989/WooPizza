@@ -345,13 +345,14 @@ function enqueue_woocommerce_admin_assets_for_custom_pages( $hook ) {
 function display_pizza_products_page() {
 	// Redirect to WooCommerce products page with pizza filter
 	?>
-	<div class="wrap">
-		<h1 class="wp-heading-inline"><?php esc_html_e( 'Pizzas', 'flatsome' ); ?></h1>
-		<a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&product_type=pizza' ) ); ?>" class="page-title-action">
-			<?php esc_html_e( 'Add New', 'flatsome' ); ?>
-		</a>
-		<hr class="wp-header-end">
-		<?php
+<div class="wrap">
+    <h1 class="wp-heading-inline"><?php esc_html_e( 'Pizzas', 'flatsome' ); ?></h1>
+    <a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&product_type=pizza' ) ); ?>"
+        class="page-title-action">
+        <?php esc_html_e( 'Add New', 'flatsome' ); ?>
+    </a>
+    <hr class="wp-header-end">
+    <?php
 		// Get pizza categories (parent category 17 and its children)
 		$pizza_cats = array( 17 ); // Include parent category 17
 
@@ -388,70 +389,73 @@ function display_pizza_products_page() {
 
 		// Display products in a table
 		?>
-		<table class="wp-list-table widefat fixed striped">
-			<thead>
-				<tr>
-					<th style="width: 50px;">ID</th>
-					<th style="width: 80px;">Image</th>
-					<th>Name</th>
-					<th>Price</th>
-					<th>Categories</th>
-					<th>Stock</th>
-					<th>Actions</th>
-				</tr>
-			</thead>
-			<tbody>
-				<?php
+    <table class="wp-list-table widefat fixed striped">
+        <thead>
+            <tr>
+                <th style="width: 50px;">ID</th>
+                <th style="width: 80px;">Image</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Categories</th>
+                <th>Stock</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
 				if ( $products->have_posts() ) :
 					while ( $products->have_posts() ) : $products->the_post();
 						$product = wc_get_product( get_the_ID() );
 						?>
-						<tr>
-							<td><?php echo esc_html( get_the_ID() ); ?></td>
-							<td class="column-thumb"><?php echo $product->get_image( 'thumbnail' ); ?></td>
-							<td>
-								<strong>
-									<a href="<?php echo esc_url( add_query_arg( 'product_type', 'pizza', get_edit_post_link( get_the_ID() ) ) ); ?>">
-										<?php echo esc_html( get_the_title() ); ?>
-									</a>
-								</strong>
-							</td>
-							<td><?php echo $product->get_price_html(); ?></td>
-							<td><?php echo wc_get_product_category_list( get_the_ID(), ', ' ); ?></td>
-							<td><?php echo esc_html( $product->get_stock_status() ); ?></td>
-							<td>
-								<a href="<?php echo esc_url( add_query_arg( 'product_type', 'pizza', get_edit_post_link( get_the_ID() ) ) ); ?>" class="button button-small">
-									<?php esc_html_e( 'Edit', 'flatsome' ); ?>
-								</a>
-							</td>
-						</tr>
-						<?php
+            <tr>
+                <td><?php echo esc_html( get_the_ID() ); ?></td>
+                <td class="column-thumb"><?php echo $product->get_image( 'thumbnail' ); ?></td>
+                <td>
+                    <strong>
+                        <a
+                            href="<?php echo esc_url( add_query_arg( 'product_type', 'pizza', get_edit_post_link( get_the_ID() ) ) ); ?>">
+                            <?php echo esc_html( get_the_title() ); ?>
+                        </a>
+                    </strong>
+                </td>
+                <td><?php echo $product->get_price_html(); ?></td>
+                <td><?php echo wc_get_product_category_list( get_the_ID(), ', ' ); ?></td>
+                <td><?php echo esc_html( $product->get_stock_status() ); ?></td>
+                <td>
+                    <a href="<?php echo esc_url( add_query_arg( 'product_type', 'pizza', get_edit_post_link( get_the_ID() ) ) ); ?>"
+                        class="button button-small">
+                        <?php esc_html_e( 'Edit', 'flatsome' ); ?>
+                    </a>
+                </td>
+            </tr>
+            <?php
 					endwhile;
 				else :
 					?>
-					<tr>
-						<td colspan="7"><?php esc_html_e( 'No pizzas found.', 'flatsome' ); ?></td>
-					</tr>
-					<?php
+            <tr>
+                <td colspan="7"><?php esc_html_e( 'No pizzas found.', 'flatsome' ); ?></td>
+            </tr>
+            <?php
 				endif;
 				wp_reset_postdata();
 				?>
-			</tbody>
-		</table>
-	</div>
-	<?php
+        </tbody>
+    </table>
+</div>
+<?php
 }
 
 // Display Other Products page
 function display_other_products_page() {
 	?>
-	<div class="wrap">
-		<h1 class="wp-heading-inline"><?php esc_html_e( 'Other Products', 'flatsome' ); ?></h1>
-		<a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&product_type=other' ) ); ?>" class="page-title-action">
-			<?php esc_html_e( 'Add New Other Product', 'flatsome' ); ?>
-		</a>
-		<hr class="wp-header-end">
-		<?php
+<div class="wrap">
+    <h1 class="wp-heading-inline"><?php esc_html_e( 'Other Products', 'flatsome' ); ?></h1>
+    <a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&product_type=other' ) ); ?>"
+        class="page-title-action">
+        <?php esc_html_e( 'Add New Other Product', 'flatsome' ); ?>
+    </a>
+    <hr class="wp-header-end">
+    <?php
 		// Get category 15 (topping), 17 (pizza) and all its children to exclude
 		$topping_parent_id = 15;
 		$pizza_parent_id = 17;
@@ -501,70 +505,73 @@ function display_other_products_page() {
 
 		// Display products in a table
 		?>
-		<table class="wp-list-table widefat fixed striped">
-			<thead>
-				<tr>
-					<th style="width: 50px;">ID</th>
-					<th style="width: 80px;">Image</th>
-					<th>Name</th>
-					<th>Price</th>
-					<th>Categories</th>
-					<th>Stock</th>
-					<th>Actions</th>
-				</tr>
-			</thead>
-			<tbody>
-				<?php
+    <table class="wp-list-table widefat fixed striped">
+        <thead>
+            <tr>
+                <th style="width: 50px;">ID</th>
+                <th style="width: 80px;">Image</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Categories</th>
+                <th>Stock</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
 				if ( $products->have_posts() ) :
 					while ( $products->have_posts() ) : $products->the_post();
 						$product = wc_get_product( get_the_ID() );
 						?>
-						<tr>
-							<td><?php echo esc_html( get_the_ID() ); ?></td>
-							<td class="column-thumb"><?php echo $product->get_image( 'thumbnail' ); ?></td>
-							<td>
-								<strong>
-									<a href="<?php echo esc_url( add_query_arg( 'product_type', 'other', get_edit_post_link( get_the_ID() ) ) ); ?>">
-										<?php echo esc_html( get_the_title() ); ?>
-									</a>
-								</strong>
-							</td>
-							<td><?php echo $product->get_price_html(); ?></td>
-							<td><?php echo wc_get_product_category_list( get_the_ID(), ', ' ); ?></td>
-							<td><?php echo esc_html( $product->get_stock_status() ); ?></td>
-							<td>
-								<a href="<?php echo esc_url( add_query_arg( 'product_type', 'other', get_edit_post_link( get_the_ID() ) ) ); ?>" class="button button-small">
-									<?php esc_html_e( 'Edit', 'flatsome' ); ?>
-								</a>
-							</td>
-						</tr>
-						<?php
+            <tr>
+                <td><?php echo esc_html( get_the_ID() ); ?></td>
+                <td class="column-thumb"><?php echo $product->get_image( 'thumbnail' ); ?></td>
+                <td>
+                    <strong>
+                        <a
+                            href="<?php echo esc_url( add_query_arg( 'product_type', 'other', get_edit_post_link( get_the_ID() ) ) ); ?>">
+                            <?php echo esc_html( get_the_title() ); ?>
+                        </a>
+                    </strong>
+                </td>
+                <td><?php echo $product->get_price_html(); ?></td>
+                <td><?php echo wc_get_product_category_list( get_the_ID(), ', ' ); ?></td>
+                <td><?php echo esc_html( $product->get_stock_status() ); ?></td>
+                <td>
+                    <a href="<?php echo esc_url( add_query_arg( 'product_type', 'other', get_edit_post_link( get_the_ID() ) ) ); ?>"
+                        class="button button-small">
+                        <?php esc_html_e( 'Edit', 'flatsome' ); ?>
+                    </a>
+                </td>
+            </tr>
+            <?php
 					endwhile;
 				else :
 					?>
-					<tr>
-						<td colspan="7"><?php esc_html_e( 'No other products found.', 'flatsome' ); ?></td>
-					</tr>
-					<?php
+            <tr>
+                <td colspan="7"><?php esc_html_e( 'No other products found.', 'flatsome' ); ?></td>
+            </tr>
+            <?php
 				endif;
 				wp_reset_postdata();
 				?>
-			</tbody>
-		</table>
-	</div>
-	<?php
+        </tbody>
+    </table>
+</div>
+<?php
 }
 
 // Display Topping products page
 function display_topping_products_page() {
 	?>
-	<div class="wrap">
-		<h1 class="wp-heading-inline"><?php esc_html_e( 'Toppings', 'flatsome' ); ?></h1>
-		<a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&product_type=topping' ) ); ?>" class="page-title-action">
-			<?php esc_html_e( 'Add New', 'flatsome' ); ?>
-		</a>
-		<hr class="wp-header-end">
-		<?php
+<div class="wrap">
+    <h1 class="wp-heading-inline"><?php esc_html_e( 'Toppings', 'flatsome' ); ?></h1>
+    <a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&product_type=topping' ) ); ?>"
+        class="page-title-action">
+        <?php esc_html_e( 'Add New', 'flatsome' ); ?>
+    </a>
+    <hr class="wp-header-end">
+    <?php
 		// Get topping categories (have parent category 15 based on CLAUDE.md)
 		$topping_cats = array();
 
@@ -603,58 +610,60 @@ function display_topping_products_page() {
 
 		// Display products in a table
 		?>
-		<table class="wp-list-table widefat fixed striped">
-			<thead>
-				<tr>
-					<th style="width: 50px;">ID</th>
-					<th style="width: 80px;">Image</th>
-					<th>Name</th>
-					<th>Price</th>
-					<th>Categories</th>
-					<th>Stock</th>
-					<th>Actions</th>
-				</tr>
-			</thead>
-			<tbody>
-				<?php
+    <table class="wp-list-table widefat fixed striped">
+        <thead>
+            <tr>
+                <th style="width: 50px;">ID</th>
+                <th style="width: 80px;">Image</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Categories</th>
+                <th>Stock</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
 				if ( $products->have_posts() ) :
 					while ( $products->have_posts() ) : $products->the_post();
 						$product = wc_get_product( get_the_ID() );
 						?>
-						<tr>
-							<td><?php echo esc_html( get_the_ID() ); ?></td>
-							<td class="thumb column-thumb"><?php echo $product->get_image( 'thumbnail' ); ?></td>
-							<td>
-								<strong>
-									<a href="<?php echo esc_url( add_query_arg( 'product_type', 'topping', get_edit_post_link( get_the_ID() ) ) ); ?>">
-										<?php echo esc_html( get_the_title() ); ?>
-									</a>
-								</strong>
-							</td>
-							<td><?php echo $product->get_price_html(); ?></td>
-							<td><?php echo wc_get_product_category_list( get_the_ID(), ', ' ); ?></td>
-							<td><?php echo esc_html( $product->get_stock_status() ); ?></td>
-							<td>
-								<a href="<?php echo esc_url( add_query_arg( 'product_type', 'topping', get_edit_post_link( get_the_ID() ) ) ); ?>" class="button button-small">
-									<?php esc_html_e( 'Edit', 'flatsome' ); ?>
-								</a>
-							</td>
-						</tr>
-						<?php
+            <tr>
+                <td><?php echo esc_html( get_the_ID() ); ?></td>
+                <td class="thumb column-thumb"><?php echo $product->get_image( 'thumbnail' ); ?></td>
+                <td>
+                    <strong>
+                        <a
+                            href="<?php echo esc_url( add_query_arg( 'product_type', 'topping', get_edit_post_link( get_the_ID() ) ) ); ?>">
+                            <?php echo esc_html( get_the_title() ); ?>
+                        </a>
+                    </strong>
+                </td>
+                <td><?php echo $product->get_price_html(); ?></td>
+                <td><?php echo wc_get_product_category_list( get_the_ID(), ', ' ); ?></td>
+                <td><?php echo esc_html( $product->get_stock_status() ); ?></td>
+                <td>
+                    <a href="<?php echo esc_url( add_query_arg( 'product_type', 'topping', get_edit_post_link( get_the_ID() ) ) ); ?>"
+                        class="button button-small">
+                        <?php esc_html_e( 'Edit', 'flatsome' ); ?>
+                    </a>
+                </td>
+            </tr>
+            <?php
 					endwhile;
 				else :
 					?>
-					<tr>
-						<td colspan="7"><?php esc_html_e( 'No toppings found.', 'flatsome' ); ?></td>
-					</tr>
-					<?php
+            <tr>
+                <td colspan="7"><?php esc_html_e( 'No toppings found.', 'flatsome' ); ?></td>
+            </tr>
+            <?php
 				endif;
 				wp_reset_postdata();
 				?>
-			</tbody>
-		</table>
-	</div>
-	<?php
+        </tbody>
+    </table>
+</div>
+<?php
 }
 
 /**
@@ -1248,82 +1257,106 @@ function hide_categories_css_js() {
 	}
 	// Always apply on product edit screen
 	?>
-		<script type="text/javascript">
-			jQuery(document).ready(function($) {
-				$('#uxbuilder-enable-disable').hide();
-				$('.woocommerce-help-tip').hide();
-				$('#woocommerce-product-data .product_data_tabs li.advanced_options').hide();
-				$('#woocommerce-product-data .product_data_tabs li.ux_product_layout_tab').hide();
-				$('#woocommerce-product-data .product_data_tabs li.ux_extra_tab').hide();
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    $('#uxbuilder-enable-disable').hide();
+    $('.woocommerce-help-tip').hide();
+    $('#woocommerce-product-data .product_data_tabs li.advanced_options').hide();
+    $('#woocommerce-product-data .product_data_tabs li.ux_product_layout_tab').hide();
+    $('#woocommerce-product-data .product_data_tabs li.ux_extra_tab').hide();
 
-				// Hide "Paired With" and "Toppings" tabs from Product Categories metabox
-				// These tabs should only appear in WooCommerce Product Data panel
-				$('#product_cat-tabs li, #product_cattabs li').each(function() {
-					var $link = $(this).find('a');
-					var tabText = $link.text().trim();
-					var tabHref = $link.attr('href');
+    // Hide "Paired With" and "Toppings" tabs from Product Categories metabox
+    // These tabs should only appear in WooCommerce Product Data panel
+    $('#product_cat-tabs li, #product_cattabs li').each(function() {
+        var $link = $(this).find('a');
+        var tabText = $link.text().trim();
+        var tabHref = $link.attr('href');
 
-					// Remove if text matches OR if href targets our custom panels
-					if (tabText === 'Paired With' ||
-					    tabText === 'Toppings' ||
-					    tabHref === '#paired_with_product_data' ||
-					    tabHref === '#toppings_product_data') {
-						$(this).remove();
-					}
-				});
+        // Remove if text matches OR if href targets our custom panels
+        if (tabText === 'Paired With' ||
+            tabText === 'Toppings' ||
+            tabHref === '#paired_with_product_data' ||
+            tabHref === '#toppings_product_data') {
+            $(this).remove();
+        }
+    });
 
-				// Also hide the content panels if they appear in Product Categories
-				$('#product_catdiv').find('#paired_with_product_data, #toppings_product_data').remove();
+    // Also hide the content panels if they appear in Product Categories
+    $('#product_catdiv').find('#paired_with_product_data, #toppings_product_data').remove();
 
-				// Add custom parameter to cross-sell search to filter only topping products
-				var isCrosssellActive = false;
+    // Add custom parameter to cross-sell search to filter only topping products
+    var isCrosssellActive = false;
 
-				// Track when crosssell field is opened
-				$(document).on('select2:opening', '#crosssell_ids', function(e) {
-					isCrosssellActive = true;
-				});
+    // Track when crosssell field is opened
+    $(document).on('select2:opening', '#crosssell_ids', function(e) {
+        isCrosssellActive = true;
+    });
 
-				// Track when crosssell field is closed
-				$(document).on('select2:closing', '#crosssell_ids', function(e) {
-					setTimeout(function() {
-						isCrosssellActive = false;
-					}, 500);
-				});
+    // Track when crosssell field is closed
+    $(document).on('select2:closing', '#crosssell_ids', function(e) {
+        setTimeout(function() {
+            isCrosssellActive = false;
+        }, 500);
+    });
 
-				// Hook into AJAX requests to add field parameter
-				$(document).ajaxSend(function(event, jqxhr, settings) {
-					// Check if this is a product search AJAX request (URL contains the action parameter)
-					if (settings.url && settings.url.indexOf('admin-ajax.php') > -1 &&
-					    settings.url.indexOf('woocommerce_json_search_products') > -1) {
+    // Hook into AJAX requests to add field parameter
+    $(document).ajaxSend(function(event, jqxhr, settings) {
+        // Check if this is a product search AJAX request (URL contains the action parameter)
+        if (settings.url && settings.url.indexOf('admin-ajax.php') > -1 &&
+            settings.url.indexOf('woocommerce_json_search_products') > -1) {
 
-						// Add field=crosssell to URL if crosssell is active
-						if (isCrosssellActive) {
-							settings.url += '&field=crosssell';
-						}
-					}
-				});
-			});
-		</script>
-	<?php
+            // Add field=crosssell to URL if crosssell is active
+            if (isCrosssellActive) {
+                settings.url += '&field=crosssell';
+            }
+        }
+    });
+});
+</script>
+<?php
 	
 	if ( isset( $_GET['product_type'] ) ) {
 		// Only apply when product_type=pizza parameter is in the URL
 		if ( $_GET['product_type'] === 'pizza' ) {
+			// Get all child categories of category 17
+			$child_categories = get_terms( array(
+				'taxonomy' => 'product_cat',
+				'parent' => 17,
+				'hide_empty' => false,
+				'fields' => 'ids',
+			) );
+
+			if ( empty( $child_categories ) || is_wp_error( $child_categories ) ) {
+				$child_categories = [17];
+			} else {
+				$child_categories[] = 17; // Include parent category as well
+			}
 			?>
-				<script type="text/javascript">
-					jQuery(document).ready(function($) {
-						$('.wp-heading-inline').text('Add New Pizza');
-						$('#woocommerce-product-data .product_data_tabs li.attribute_options').show();
-						$('#woocommerce-product-data .postbox-header h2').first().text('Pizza data');
-						// Hide category 15 (topping) and all its children
-						$('#in-product_cat-15-1').hide();
-						$('#product_cat-tabs li.tabs a').text('Pizza categories');
-						// Remove "Most Used" tab
-						$('#product_cat-tabs li.hide-if-no-js').remove();
-						$('#product_cat-pop').remove();
-					});
-				</script>
-			<?php
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    // Hide all categories except its children of category 17 (pizza)
+    $('#product_catchecklist li').each(function() {
+        var $checkbox = $(this).find('input[type="checkbox"]');
+        if ($checkbox.length) {
+            var catId = parseInt($checkbox.val());
+            var childCatIds = <?php echo json_encode( $child_categories ); ?>;
+            if (childCatIds.indexOf(catId) === -1) {
+                $(this).hide();
+            }
+        }
+    });
+    $('.wp-heading-inline').text('Add New Pizza');
+    $('#woocommerce-product-data .product_data_tabs li.attribute_options').show();
+    $('#woocommerce-product-data .postbox-header h2').first().text('Pizza data');
+    // // Hide category 15 (topping) and all its children
+    // $('#in-product_cat-15-1').hide();
+    $('#product_cat-tabs li.tabs a').text('Pizza categories');
+    // Remove "Most Used" tab
+    $('#product_cat-tabs li.hide-if-no-js').remove();
+    $('#product_cat-pop').remove();
+});
+</script>
+<?php
 		}else if ( $_GET['product_type'] === 'topping' ) {
 			// Get all child categories of category 15
 			$child_categories = get_terms( array(
@@ -1334,34 +1367,36 @@ function hide_categories_css_js() {
 			) );
 
 			if ( empty( $child_categories ) || is_wp_error( $child_categories ) ) {
-				return;
+				$child_categories = [15];
+			} else {
+				$child_categories[] = 15; // Include parent category as well
 			}
 			?>
-				<script type="text/javascript">
-					jQuery(document).ready(function($) {
-						// Hide all categories except its children of category 15 (topping)
-						$('#product_catchecklist li').each(function() {
-							var $checkbox = $(this).find('input[type="checkbox"]');
-							if ($checkbox.length) {
-								var catId = parseInt($checkbox.val());
-								var childCatIds = <?php echo json_encode( $child_categories ); ?>;
-								if (catId !== 15 && childCatIds.indexOf(catId) === -1) {
-									$(this).hide();
-								}
-							}
-						});
-						$('.wp-heading-inline').text('Add New Topping');
-						$('#woocommerce-product-data .postbox-header h2').first().text('Topping data');
-						$('#woocommerce-product-data .product_data_tabs li.linked_product_options').hide();
-						$('#woocommerce-product-data .product_data_tabs li.attribute_options').hide();
-						$('#in-product_cat-15-1 label').first().hide();
-						$('#product_cat-tabs li.tabs a').text('Topping categories');
-						// Remove "Most Used" tab
-						$('#product_cat-tabs li.hide-if-no-js').remove();
-						$('#product_cat-pop').remove();
-					});
-				</script>
-			<?php
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    // Hide all categories except its children of category 15 (topping)
+    $('#product_catchecklist li').each(function() {
+        var $checkbox = $(this).find('input[type="checkbox"]');
+        if ($checkbox.length) {
+            var catId = parseInt($checkbox.val());
+            var childCatIds = <?php echo json_encode( $child_categories ); ?>;
+            if (childCatIds.indexOf(catId) === -1) {
+                $(this).hide();
+            }
+        }
+    });
+    $('.wp-heading-inline').text('Add New Topping');
+    $('#woocommerce-product-data .postbox-header h2').first().text('Topping data');
+    $('#woocommerce-product-data .product_data_tabs li.linked_product_options').hide();
+    $('#woocommerce-product-data .product_data_tabs li.attribute_options').hide();
+    // $('#in-product_cat-15-1 label').first().hide();
+    $('#product_cat-tabs li.tabs a').text('Topping categories');
+    // Remove "Most Used" tab
+    $('#product_cat-tabs li.hide-if-no-js').remove();
+    $('#product_cat-pop').remove();
+});
+</script>
+<?php
 		}
 	}
 
@@ -1494,14 +1529,15 @@ function add_paired_with_tab_content() {
 	$rendered = true;
 
 	?>
-	<div id="paired_with_product_data" class="panel woocommerce_options_panel hidden">
-		<div class="options_group">
-			<p class="form-field">
-				<label><strong><?php _e( 'Select Pizzas for Pairing', 'flatsome' ); ?></strong></label>
-				<span class="description"><?php _e( 'Choose pizzas that customers can pair with this pizza for half-and-half combinations.', 'flatsome' ); ?></span>
-			</p>
+<div id="paired_with_product_data" class="panel woocommerce_options_panel hidden">
+    <div class="options_group">
+        <p class="form-field">
+            <label><strong><?php _e( 'Select Pizzas for Pairing', 'flatsome' ); ?></strong></label>
+            <span
+                class="description"><?php _e( 'Choose pizzas that customers can pair with this pizza for half-and-half combinations.', 'flatsome' ); ?></span>
+        </p>
 
-			<?php
+        <?php
 			// Get current upsell IDs - use the correct product ID
 			$current_upsells = get_post_meta( $product_id, '_upsell_ids', true );
 			if ( ! is_array( $current_upsells ) ) {
@@ -1544,61 +1580,58 @@ function add_paired_with_tab_content() {
 			$pizza_products = new WP_Query( $args );
 			?>
 
-			<div class="paired-products-grid">
-				<table class="widefat" style="margin-top: 10px;">
-					<thead>
-						<tr>
-							<th style="width: 40px; text-align: center;">
-								<input type="checkbox" id="select_all_paired" />
-							</th>
-							<th style="width: 100px;"><?php _e( 'SKU', 'flatsome' ); ?></th>
-							<th><?php _e( 'Name', 'flatsome' ); ?></th>
-							<th style="width: 150px;"><?php _e( 'Category', 'flatsome' ); ?></th>
-							<th style="width: 120px;"><?php _e( 'Price', 'flatsome' ); ?></th>
-						</tr>
-					</thead>
-					<tbody>
-						<?php
+        <div class="paired-products-grid">
+            <table class="widefat" style="margin-top: 10px;">
+                <thead>
+                    <tr>
+                        <th style="width: 40px; text-align: center;">
+                            <input type="checkbox" id="select_all_paired" />
+                        </th>
+                        <th style="width: 100px;"><?php _e( 'SKU', 'flatsome' ); ?></th>
+                        <th><?php _e( 'Name', 'flatsome' ); ?></th>
+                        <th style="width: 150px;"><?php _e( 'Category', 'flatsome' ); ?></th>
+                        <th style="width: 120px;"><?php _e( 'Price', 'flatsome' ); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
 						if ( $pizza_products->have_posts() ) :
 							while ( $pizza_products->have_posts() ) : $pizza_products->the_post();
 								$product_obj = wc_get_product( get_the_ID() );
 								$is_checked = in_array( get_the_ID(), $current_upsells );
 								$categories = wc_get_product_category_list( get_the_ID(), ', ', '', '' );
 								?>
-								<tr>
-									<td style="text-align: center;">
-										<input type="checkbox"
-											id="paired_product_<?php echo esc_attr( get_the_ID() ); ?>"
-											name="upsell_ids[]"
-											value="<?php echo esc_attr( get_the_ID() ); ?>"
-											<?php checked( $is_checked, true ); ?>
-											class="paired-product-checkbox"
-											data-product-id="<?php echo esc_attr( get_the_ID() ); ?>" />
-									</td>
-									<td><?php echo esc_html( $product_obj->get_sku() ? $product_obj->get_sku() : '-' ); ?></td>
-									<td><strong><?php echo esc_html( get_the_title() ); ?></strong></td>
-									<td><?php echo $categories ? $categories : '-'; ?></td>
-									<td><?php echo $product_obj->get_price_html(); ?></td>
-								</tr>
-								<?php
+                    <tr>
+                        <td style="text-align: center;">
+                            <input type="checkbox" id="paired_product_<?php echo esc_attr( get_the_ID() ); ?>"
+                                name="upsell_ids[]" value="<?php echo esc_attr( get_the_ID() ); ?>"
+                                <?php checked( $is_checked, true ); ?> class="paired-product-checkbox"
+                                data-product-id="<?php echo esc_attr( get_the_ID() ); ?>" />
+                        </td>
+                        <td><?php echo esc_html( $product_obj->get_sku() ? $product_obj->get_sku() : '-' ); ?></td>
+                        <td><strong><?php echo esc_html( get_the_title() ); ?></strong></td>
+                        <td><?php echo $categories ? $categories : '-'; ?></td>
+                        <td><?php echo $product_obj->get_price_html(); ?></td>
+                    </tr>
+                    <?php
 							endwhile;
 							wp_reset_postdata();
 						else :
 							?>
-							<tr>
-								<td colspan="5" style="text-align: center; padding: 20px;">
-									<?php _e( 'No pizza products found.', 'flatsome' ); ?>
-								</td>
-							</tr>
-							<?php
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 20px;">
+                            <?php _e( 'No pizza products found.', 'flatsome' ); ?>
+                        </td>
+                    </tr>
+                    <?php
 						endif;
 						?>
-					</tbody>
-				</table>
-			</div>
-		</div>
-	</div>
-	<?php
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<?php
 }
 
 // Add content for "Toppings" tab
@@ -1635,14 +1668,16 @@ function add_toppings_tab_content() {
 	// echo '<!-- Toppings tab rendering #' . $render_count . ' for product ' . $product_id . ' -->';
 
 	?>
-	<div id="toppings_product_data" class="panel woocommerce_options_panel hidden" data-render-count="<?php echo $render_count; ?>">
-		<div class="options_group">
-			<p class="form-field">
-				<label><strong><?php _e( 'Select Available Toppings', 'flatsome' ); ?></strong></label>
-				<span class="description"><?php _e( 'Choose topping products that customers can add to this pizza.', 'flatsome' ); ?></span>
-			</p>
+<div id="toppings_product_data" class="panel woocommerce_options_panel hidden"
+    data-render-count="<?php echo $render_count; ?>">
+    <div class="options_group">
+        <p class="form-field">
+            <label><strong><?php _e( 'Select Available Toppings', 'flatsome' ); ?></strong></label>
+            <span
+                class="description"><?php _e( 'Choose topping products that customers can add to this pizza.', 'flatsome' ); ?></span>
+        </p>
 
-			<?php
+        <?php
 			// Get current cross-sell IDs - use the correct product ID
 
 			// Try multiple methods to get cross-sells
@@ -1700,21 +1735,21 @@ function add_toppings_tab_content() {
 			$topping_products = new WP_Query( $args );
 			?>
 
-			<div class="topping-products-grid">
-				<table class="widefat" style="margin-top: 10px;">
-					<thead>
-						<tr>
-							<th style="width: 40px; text-align: center;">
-								<input type="checkbox" id="select_all_toppings" />
-							</th>
-							<th style="width: 100px;"><?php _e( 'SKU', 'flatsome' ); ?></th>
-							<th><?php _e( 'Name', 'flatsome' ); ?></th>
-							<th style="width: 150px;"><?php _e( 'Category', 'flatsome' ); ?></th>
-							<th style="width: 120px;"><?php _e( 'Price', 'flatsome' ); ?></th>
-						</tr>
-					</thead>
-					<tbody>
-						<?php
+        <div class="topping-products-grid">
+            <table class="widefat" style="margin-top: 10px;">
+                <thead>
+                    <tr>
+                        <th style="width: 40px; text-align: center;">
+                            <input type="checkbox" id="select_all_toppings" />
+                        </th>
+                        <th style="width: 100px;"><?php _e( 'SKU', 'flatsome' ); ?></th>
+                        <th><?php _e( 'Name', 'flatsome' ); ?></th>
+                        <th style="width: 150px;"><?php _e( 'Category', 'flatsome' ); ?></th>
+                        <th style="width: 120px;"><?php _e( 'Price', 'flatsome' ); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
 						if ( $topping_products->have_posts() ) :
 							while ( $topping_products->have_posts() ) : $topping_products->the_post();
 								$product_obj = wc_get_product( get_the_ID() );
@@ -1730,41 +1765,38 @@ function add_toppings_tab_content() {
 								// echo ' | Is Checked: ' . var_export( $is_checked, true );
 								// echo ' -->';
 								?>
-								<tr>
-									<td style="text-align: center;">
-										<input type="checkbox"
-											id="topping_product_<?php echo esc_attr( $product_id ); ?>"
-											name="crosssell_ids[]"
-											value="<?php echo esc_attr( $product_id ); ?>"
-											<?php checked( $is_checked, true ); ?>
-											class="topping-product-checkbox"
-											data-product-id="<?php echo esc_attr( $product_id ); ?>"
-											data-is-checked="<?php echo $is_checked ? 'true' : 'false'; ?>" />
-									</td>
-									<td><?php echo esc_html( $product_obj->get_sku() ? $product_obj->get_sku() : '-' ); ?></td>
-									<td><strong><?php echo esc_html( get_the_title() ); ?></strong></td>
-									<td><?php echo $categories ? $categories : '-'; ?></td>
-									<td><?php echo $product_obj->get_price_html(); ?></td>
-								</tr>
-								<?php
+                    <tr>
+                        <td style="text-align: center;">
+                            <input type="checkbox" id="topping_product_<?php echo esc_attr( $product_id ); ?>"
+                                name="crosssell_ids[]" value="<?php echo esc_attr( $product_id ); ?>"
+                                <?php checked( $is_checked, true ); ?> class="topping-product-checkbox"
+                                data-product-id="<?php echo esc_attr( $product_id ); ?>"
+                                data-is-checked="<?php echo $is_checked ? 'true' : 'false'; ?>" />
+                        </td>
+                        <td><?php echo esc_html( $product_obj->get_sku() ? $product_obj->get_sku() : '-' ); ?></td>
+                        <td><strong><?php echo esc_html( get_the_title() ); ?></strong></td>
+                        <td><?php echo $categories ? $categories : '-'; ?></td>
+                        <td><?php echo $product_obj->get_price_html(); ?></td>
+                    </tr>
+                    <?php
 							endwhile;
 							wp_reset_postdata();
 						else :
 							?>
-							<tr>
-								<td colspan="5" style="text-align: center; padding: 20px;">
-									<?php _e( 'No topping products found.', 'flatsome' ); ?>
-								</td>
-							</tr>
-							<?php
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 20px;">
+                            <?php _e( 'No topping products found.', 'flatsome' ); ?>
+                        </td>
+                    </tr>
+                    <?php
 						endif;
 						?>
-					</tbody>
-				</table>
-			</div>
-		</div>
-	</div>
-	<?php
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<?php
 }
 
 // Save the custom tab data (priority 99 to run after WooCommerce defaults)
@@ -1939,285 +1971,289 @@ function customize_pizza_tabs_styles_scripts() {
 	}
 
 	?>
-	<style>
-		/* Hide custom tabs from Product Categories metabox */
-		#product_cat-tabs li a[href="#paired_with_product_data"],
-		#product_cat-tabs li a[href="#toppings_product_data"],
-		#product_cattabs li a[href="#paired_with_product_data"],
-		#product_cattabs li a[href="#toppings_product_data"] {
-			display: none !important;
-		}
+<style>
+/* Hide custom tabs from Product Categories metabox */
+#product_cat-tabs li a[href="#paired_with_product_data"],
+#product_cat-tabs li a[href="#toppings_product_data"],
+#product_cattabs li a[href="#paired_with_product_data"],
+#product_cattabs li a[href="#toppings_product_data"] {
+    display: none !important;
+}
 
-		/* Ensure custom tab panels only appear in WooCommerce product data */
-		#product_catdiv #paired_with_product_data,
-		#product_catdiv #toppings_product_data {
-			display: none !important;
-		}
+/* Ensure custom tab panels only appear in WooCommerce product data */
+#product_catdiv #paired_with_product_data,
+#product_catdiv #toppings_product_data {
+    display: none !important;
+}
 
-		/* Style for custom product grid tables */
-		.paired-products-grid table,
-		.topping-products-grid table {
-			border: 1px solid #ddd;
-		}
+/* Style for custom product grid tables */
+.paired-products-grid table,
+.topping-products-grid table {
+    border: 1px solid #ddd;
+}
 
-		.paired-products-grid table thead th,
-		.topping-products-grid table thead th {
-			background-color: #f9f9f9;
-			font-weight: 600;
-			padding: 10px;
-			border-bottom: 2px solid #ddd;
-		}
+.paired-products-grid table thead th,
+.topping-products-grid table thead th {
+    background-color: #f9f9f9;
+    font-weight: 600;
+    padding: 10px;
+    border-bottom: 2px solid #ddd;
+}
 
-		.paired-products-grid table tbody td,
-		.topping-products-grid table tbody td {
-			padding: 8px 10px;
-			vertical-align: middle;
-		}
+.paired-products-grid table tbody td,
+.topping-products-grid table tbody td {
+    padding: 8px 10px;
+    vertical-align: middle;
+}
 
-		.paired-products-grid table tbody tr:hover,
-		.topping-products-grid table tbody tr:hover {
-			background-color: #f5f5f5;
-		}
+.paired-products-grid table tbody tr:hover,
+.topping-products-grid table tbody tr:hover {
+    background-color: #f5f5f5;
+}
 
-		/* Checkbox styling */
-		.paired-product-checkbox,
-		.topping-product-checkbox,
-		#select_all_paired,
-		#select_all_toppings {
-			cursor: pointer;
-			width: 16px;
-			height: 16px;
-		}
+/* Checkbox styling */
+.paired-product-checkbox,
+.topping-product-checkbox,
+#select_all_paired,
+#select_all_toppings {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+}
 
-		/* Description text styling */
-		#paired_with_product_data .description,
-		#toppings_product_data .description {
-			color: #666;
-			font-style: italic;
-			display: block;
-			margin-top: 5px;
-		}
+/* Description text styling */
+#paired_with_product_data .description,
+#toppings_product_data .description {
+    color: #666;
+    font-style: italic;
+    display: block;
+    margin-top: 5px;
+}
 
-		/* Tab label styling */
-		#woocommerce-product-data ul.wc-tabs li.paired_with_tab_options a:before {
-			content: "\f500"; /* dashicons-food */
-			font-family: dashicons;
-		}
+/* Tab label styling */
+#woocommerce-product-data ul.wc-tabs li.paired_with_tab_options a:before {
+    content: "\f500";
+    /* dashicons-food */
+    font-family: dashicons;
+}
 
-		#woocommerce-product_data ul.wc-tabs li.toppings_tab_options a:before {
-			content: "\f336"; /* dashicons-carrot */
-			font-family: dashicons;
-		}
+#woocommerce-product_data ul.wc-tabs li.toppings_tab_options a:before {
+    content: "\f336";
+    /* dashicons-carrot */
+    font-family: dashicons;
+}
 
-		/* Search/filter box styling */
-		.product-filter-box {
-			margin: 10px 0;
-			padding: 10px;
-			background: #f9f9f9;
-			border: 1px solid #ddd;
-			border-radius: 3px;
-		}
+/* Search/filter box styling */
+.product-filter-box {
+    margin: 10px 0;
+    padding: 10px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+}
 
-		.product-filter-box input[type="text"] {
-			width: 100%;
-			max-width: 300px;
-			padding: 5px 10px;
-		}
+.product-filter-box input[type="text"] {
+    width: 100%;
+    max-width: 300px;
+    padding: 5px 10px;
+}
 
-		/* Counter styling */
-		.selected-count {
-			display: inline-block;
-			margin-left: 10px;
-			padding: 3px 8px;
-			background: #0073aa;
-			color: #fff;
-			border-radius: 3px;
-			font-size: 12px;
-			font-weight: 600;
-		}
-	</style>
+/* Counter styling */
+.selected-count {
+    display: inline-block;
+    margin-left: 10px;
+    padding: 3px 8px;
+    background: #0073aa;
+    color: #fff;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 600;
+}
+</style>
 
-	<script type="text/javascript">
-		jQuery(document).ready(function($) {
+<script type="text/javascript">
+jQuery(document).ready(function($) {
 
-			// CRITICAL FIX: Remove the 'name' attribute from ALL checkboxes immediately
-			// This prevents them from being submitted with the form
-			// We'll add hidden fields with the correct values on submit
-			var pairedCount = 0;
-			$('.paired-product-checkbox').each(function() {
-				var originalName = $(this).attr('name');
-				$(this).attr('data-original-name', originalName);  // Save for reference
-				$(this).removeAttr('name');  // Remove name so it won't submit
-				pairedCount++;
-			});
+    // CRITICAL FIX: Remove the 'name' attribute from ALL checkboxes immediately
+    // This prevents them from being submitted with the form
+    // We'll add hidden fields with the correct values on submit
+    var pairedCount = 0;
+    $('.paired-product-checkbox').each(function() {
+        var originalName = $(this).attr('name');
+        $(this).attr('data-original-name', originalName); // Save for reference
+        $(this).removeAttr('name'); // Remove name so it won't submit
+        pairedCount++;
+    });
 
-			var toppingCount = 0;
-			$('.topping-product-checkbox').each(function() {
-				var originalName = $(this).attr('name');
-				$(this).attr('data-original-name', originalName);  // Save for reference
-				$(this).removeAttr('name');  // Remove name so it won't submit
-				toppingCount++;
-			});
+    var toppingCount = 0;
+    $('.topping-product-checkbox').each(function() {
+        var originalName = $(this).attr('name');
+        $(this).attr('data-original-name', originalName); // Save for reference
+        $(this).removeAttr('name'); // Remove name so it won't submit
+        toppingCount++;
+    });
 
-			// CRITICAL: Remove WooCommerce's default linked product fields from the DOM
-			// These might be hidden but still submitting
-			var removedFields = 0;
-			$('select[name="upsell_ids[]"], select[name="crosssell_ids[]"]').each(function() {
-				$(this).remove();
-				removedFields++;
-			});
-			// Also remove any hidden inputs that might have been added
-			$('#linked_product_data input[name="upsell_ids[]"], #linked_product_data input[name="crosssell_ids[]"]').remove();
+    // CRITICAL: Remove WooCommerce's default linked product fields from the DOM
+    // These might be hidden but still submitting
+    var removedFields = 0;
+    $('select[name="upsell_ids[]"], select[name="crosssell_ids[]"]').each(function() {
+        $(this).remove();
+        removedFields++;
+    });
+    // Also remove any hidden inputs that might have been added
+    $('#linked_product_data input[name="upsell_ids[]"], #linked_product_data input[name="crosssell_ids[]"]')
+        .remove();
 
-			// Handle "Select All" for Paired With tab
-			$('#select_all_paired').on('change', function() {
-				var isChecked = $(this).is(':checked');
-				$('.paired-product-checkbox:visible').prop('checked', isChecked);
-				updatePairedCount();
-			});
+    // Handle "Select All" for Paired With tab
+    $('#select_all_paired').on('change', function() {
+        var isChecked = $(this).is(':checked');
+        $('.paired-product-checkbox:visible').prop('checked', isChecked);
+        updatePairedCount();
+    });
 
-			// Handle individual checkboxes for Paired With tab
-			$('.paired-product-checkbox').on('change', function() {
-				var total = $('.paired-product-checkbox').length;
-				var checked = $('.paired-product-checkbox:checked').length;
-				$('#select_all_paired').prop('checked', total === checked);
-				updatePairedCount();
-			});
+    // Handle individual checkboxes for Paired With tab
+    $('.paired-product-checkbox').on('change', function() {
+        var total = $('.paired-product-checkbox').length;
+        var checked = $('.paired-product-checkbox:checked').length;
+        $('#select_all_paired').prop('checked', total === checked);
+        updatePairedCount();
+    });
 
-			// Handle "Select All" for Toppings tab
-			$('#select_all_toppings').on('change', function() {
-				var isChecked = $(this).is(':checked');
-				$('.topping-product-checkbox:visible').prop('checked', isChecked);
-				updateToppingCount();
-			});
+    // Handle "Select All" for Toppings tab
+    $('#select_all_toppings').on('change', function() {
+        var isChecked = $(this).is(':checked');
+        $('.topping-product-checkbox:visible').prop('checked', isChecked);
+        updateToppingCount();
+    });
 
-			// Handle individual checkboxes for Toppings tab
-			$('.topping-product-checkbox').on('change', function() {
-				var total = $('.topping-product-checkbox').length;
-				var checked = $('.topping-product-checkbox:checked').length;
-				$('#select_all_toppings').prop('checked', total === checked);
-				updateToppingCount();
-			});
+    // Handle individual checkboxes for Toppings tab
+    $('.topping-product-checkbox').on('change', function() {
+        var total = $('.topping-product-checkbox').length;
+        var checked = $('.topping-product-checkbox:checked').length;
+        $('#select_all_toppings').prop('checked', total === checked);
+        updateToppingCount();
+    });
 
-			// Update selected count for Paired With
-			function updatePairedCount() {
-				var count = $('.paired-product-checkbox:checked').length;
-				var $label = $('#paired_with_product_data .form-field label strong');
+    // Update selected count for Paired With
+    function updatePairedCount() {
+        var count = $('.paired-product-checkbox:checked').length;
+        var $label = $('#paired_with_product_data .form-field label strong');
 
-				// Remove existing count badge
-				$label.find('.selected-count').remove();
+        // Remove existing count badge
+        $label.find('.selected-count').remove();
 
-				// Add new count badge
-				if (count > 0) {
-					$label.append(' <span class="selected-count">' + count + ' selected</span>');
-				}
-			}
+        // Add new count badge
+        if (count > 0) {
+            $label.append(' <span class="selected-count">' + count + ' selected</span>');
+        }
+    }
 
-			// Update selected count for Toppings
-			function updateToppingCount() {
-				var count = $('.topping-product-checkbox:checked').length;
-				var $label = $('#toppings_product_data .form-field label strong');
+    // Update selected count for Toppings
+    function updateToppingCount() {
+        var count = $('.topping-product-checkbox:checked').length;
+        var $label = $('#toppings_product_data .form-field label strong');
 
-				// Remove existing count badge
-				$label.find('.selected-count').remove();
+        // Remove existing count badge
+        $label.find('.selected-count').remove();
 
-				// Add new count badge
-				if (count > 0) {
-					$label.append(' <span class="selected-count">' + count + ' selected</span>');
-				}
-			}
+        // Add new count badge
+        if (count > 0) {
+            $label.append(' <span class="selected-count">' + count + ' selected</span>');
+        }
+    }
 
-			// Initialize counts on page load
-			updatePairedCount();
-			updateToppingCount();
+    // Initialize counts on page load
+    updatePairedCount();
+    updateToppingCount();
 
-			// Check "Select All" state on page load
-			var totalPaired = $('.paired-product-checkbox').length;
-			var checkedPaired = $('.paired-product-checkbox:checked').length;
-			if (totalPaired > 0 && totalPaired === checkedPaired) {
-				$('#select_all_paired').prop('checked', true);
-			}
+    // Check "Select All" state on page load
+    var totalPaired = $('.paired-product-checkbox').length;
+    var checkedPaired = $('.paired-product-checkbox:checked').length;
+    if (totalPaired > 0 && totalPaired === checkedPaired) {
+        $('#select_all_paired').prop('checked', true);
+    }
 
-			var totalToppings = $('.topping-product-checkbox').length;
-			var checkedToppings = $('.topping-product-checkbox:checked').length;
-			if (totalToppings > 0 && totalToppings === checkedToppings) {
-				$('#select_all_toppings').prop('checked', true);
-			}
+    var totalToppings = $('.topping-product-checkbox').length;
+    var checkedToppings = $('.topping-product-checkbox:checked').length;
+    if (totalToppings > 0 && totalToppings === checkedToppings) {
+        $('#select_all_toppings').prop('checked', true);
+    }
 
-			// FIX: Add hidden fields for checked items only (checkboxes have no 'name' so won't submit)
-			function addHiddenFieldsForSubmit() {
-				// CRITICAL: Remove name attribute from ALL checkboxes again (in case they were re-rendered)
-				var pairedRemoved = 0;
-				$('.paired-product-checkbox[name]').each(function() {
-					$(this).removeAttr('name');
-					pairedRemoved++;
-				});
-				var toppingRemoved = 0;
-				$('.topping-product-checkbox[name]').each(function() {
-					$(this).removeAttr('name');
-					toppingRemoved++;
-				});
+    // FIX: Add hidden fields for checked items only (checkboxes have no 'name' so won't submit)
+    function addHiddenFieldsForSubmit() {
+        // CRITICAL: Remove name attribute from ALL checkboxes again (in case they were re-rendered)
+        var pairedRemoved = 0;
+        $('.paired-product-checkbox[name]').each(function() {
+            $(this).removeAttr('name');
+            pairedRemoved++;
+        });
+        var toppingRemoved = 0;
+        $('.topping-product-checkbox[name]').each(function() {
+            $(this).removeAttr('name');
+            toppingRemoved++;
+        });
 
-				// CRITICAL: Remove WooCommerce default fields again (in case they were re-added)
-				var wcFieldsRemoved = 0;
-				$('select[name="upsell_ids[]"], select[name="crosssell_ids[]"]').each(function() {
-					$(this).remove();
-					wcFieldsRemoved++;
-				});
-				$('#linked_product_data input[name="upsell_ids[]"], #linked_product_data input[name="crosssell_ids[]"]').each(function() {
-					$(this).remove();
-					wcFieldsRemoved++;
-				});
+        // CRITICAL: Remove WooCommerce default fields again (in case they were re-added)
+        var wcFieldsRemoved = 0;
+        $('select[name="upsell_ids[]"], select[name="crosssell_ids[]"]').each(function() {
+            $(this).remove();
+            wcFieldsRemoved++;
+        });
+        $('#linked_product_data input[name="upsell_ids[]"], #linked_product_data input[name="crosssell_ids[]"]')
+            .each(function() {
+                $(this).remove();
+                wcFieldsRemoved++;
+            });
 
-				// Remove any previously added hidden fields (in case function runs multiple times)
-				$('input[name="upsell_ids[]"]').remove();
-				$('input[name="crosssell_ids[]"]').remove();
+        // Remove any previously added hidden fields (in case function runs multiple times)
+        $('input[name="upsell_ids[]"]').remove();
+        $('input[name="crosssell_ids[]"]').remove();
 
-				// Collect checked paired IDs
-				var pairedIds = [];
-				$('#paired_with_product_data .paired-product-checkbox:checked').each(function() {
-					var id = $(this).val();
-					if (id && pairedIds.indexOf(id) === -1) {  // Avoid duplicates
-						pairedIds.push(id);
-					}
-				});
+        // Collect checked paired IDs
+        var pairedIds = [];
+        $('#paired_with_product_data .paired-product-checkbox:checked').each(function() {
+            var id = $(this).val();
+            if (id && pairedIds.indexOf(id) === -1) { // Avoid duplicates
+                pairedIds.push(id);
+            }
+        });
 
-				// Collect checked topping IDs
-				var toppingIds = [];
-				$('#toppings_product_data .topping-product-checkbox:checked').each(function() {
-					var id = $(this).val();
-					if (id && toppingIds.indexOf(id) === -1) {  // Avoid duplicates
-						toppingIds.push(id);
-					}
-				});
+        // Collect checked topping IDs
+        var toppingIds = [];
+        $('#toppings_product_data .topping-product-checkbox:checked').each(function() {
+            var id = $(this).val();
+            if (id && toppingIds.indexOf(id) === -1) { // Avoid duplicates
+                toppingIds.push(id);
+            }
+        });
 
-				// Add hidden fields for paired products
-				var $form = $('#post');
-				pairedIds.forEach(function(id) {
-					$('<input>').attr({
-						type: 'hidden',
-						name: 'upsell_ids[]',
-						value: id
-					}).appendTo($form);
-				});
+        // Add hidden fields for paired products
+        var $form = $('#post');
+        pairedIds.forEach(function(id) {
+            $('<input>').attr({
+                type: 'hidden',
+                name: 'upsell_ids[]',
+                value: id
+            }).appendTo($form);
+        });
 
-				// Add hidden fields for toppings
-				toppingIds.forEach(function(id) {
-					$('<input>').attr({
-						type: 'hidden',
-						name: 'crosssell_ids[]',
-						value: id
-					}).appendTo($form);
-				});
-			}
+        // Add hidden fields for toppings
+        toppingIds.forEach(function(id) {
+            $('<input>').attr({
+                type: 'hidden',
+                name: 'crosssell_ids[]',
+                value: id
+            }).appendTo($form);
+        });
+    }
 
-			// Add hidden fields on form submit (checkboxes won't submit because they have no 'name')
-			$('#post').on('submit', function(e) {
-				addHiddenFieldsForSubmit();
-			});
-		});
-	</script>
-	<?php
+    // Add hidden fields on form submit (checkboxes won't submit because they have no 'name')
+    $('#post').on('submit', function(e) {
+        addHiddenFieldsForSubmit();
+    });
+});
+</script>
+<?php
 }
 
 // Change "VAT" label to include tax rate on order received page
