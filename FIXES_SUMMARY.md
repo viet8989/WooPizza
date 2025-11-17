@@ -1,6 +1,29 @@
 # Product Lightbox - Size Selection & Subtotal Fix
 
-## CRITICAL FIXES (Latest)
+## CRITICAL FIXES (Latest - Session 2)
+
+### Fix 4: Manual Variation Handler Not Executing
+**Problem:** The manual variation handler was never attached because:
+- `setupVariationForm()` was only called at page load (line 1690)
+- At page load, the lightbox doesn't exist yet, so `$('.variations_form')` returns empty
+- The `mfpOpen` event handler (lines 1694-1702) was commented out
+- Result: Handler never attached, subtotal never updates
+
+**Fix Applied:**
+- **Uncommented `mfpOpen` event handler** (line 1694-1707)
+- Now calls `setupVariationForm()` when lightbox actually opens
+- Added logging to track: `mfpOpen`, `mfpOpen_setup`, `setupVariationForm_start`
+- Added detailed logging in `setDefaultVariation()` function
+- This ensures manual handler gets attached to the actual form when it exists
+
+### Fix 5: Improved Logging Throughout
+**Changes:**
+- Line 1573: Added `setupVariationForm_start` log
+- Line 1586: Added `isAlreadyInitialized` check in logs
+- Line 1695-1707: Added `mfpOpen` and `mfpOpen_setup` logs
+- Line 1712-1741: Converted all console.log to writeLogServer in `setDefaultVariation()`
+
+## CRITICAL FIXES (Session 1)
 
 ### Fix 1: Malformed if-else Structure (Line 1591-1640)
 **Problem:** Duplicate else blocks and syntax errors preventing variation handler from running
@@ -116,16 +139,53 @@ setTimeout(() => {
 **Paired Mode:**
 - Should show correct half prices, not "+0"
 
+## Complete Flow After Fix
+
+**When Lightbox Opens:**
+1. `mfpOpen` event fires → logs `{"event":"mfpOpen"}`
+2. After 100ms delay → logs `{"event":"mfpOpen_setup"}`
+3. Calls `setupVariationForm()` → logs `{"event":"setupVariationForm_start","formFound":1}`
+4. Checks if already initialized → logs `{"event":"setup_variation_form","isAlreadyInitialized":false,"hasWcScript":false}`
+5. WC script not found → logs `{"event":"wc_script_not_loaded"}`
+6. Checks variation data → logs `{"event":"variations_data_check","hasData":true,"dataLength":3}`
+7. Attaches manual handler → logs `{"event":"attaching_manual_handler"}`
+8. After 500ms → calls `setDefaultVariation()`
+9. Sets S button selected → logs `{"event":"setDefaultVariation_called"}`, `{"event":"setDefault_changeTriggered","value":"S"}`
+10. Manual handler catches change → logs `{"event":"manual_handler_fired","selectedValue":"S"}`
+11. Updates price → logs `{"event":"manual_price_update","price":250000}`
+12. Calls `updateSubtotal()` → updates display
+
+**When User Changes to Size M:**
+1. Select value changes to M
+2. Change event fires
+3. Manual handler catches → logs `{"event":"manual_handler_fired","selectedValue":"M"}`
+4. Finds matching variation → logs `{"event":"manual_price_update","price":300000}`
+5. Calls `updateSubtotal()` → `#sub_total` text updates to "300.000 ₫"
+
+**When User Changes to Size L:**
+1. Select value changes to L
+2. Change event fires
+3. Manual handler catches → logs `{"event":"manual_handler_fired","selectedValue":"L"}`
+4. Finds matching variation → logs `{"event":"manual_price_update","price":350000}`
+5. Calls `updateSubtotal()` → `#sub_total` text updates to "350.000 ₫"
+
 ## Expected Logs (After Fix)
 
 After uploading the fixed file and running the test, you should see these logs in [custom-debug.log](wp-content/custom-debug.log):
 
 **On Lightbox Open:**
 ```json
-{"event":"setup_variation_form","hasWcScript":false}
+{"event":"mfpOpen","message":"Lightbox opened"}
+{"event":"mfpOpen_setup","message":"Calling setupVariationForm"}
+{"event":"setupVariationForm_start","formFound":1}
+{"event":"setup_variation_form","isAlreadyInitialized":false,"hasWcScript":false}
 {"event":"wc_script_not_loaded","message":"Using manual variation handler"}
 {"event":"variations_data_check","hasData":true,"dataLength":3}
 {"event":"attaching_manual_handler","selector":".variation-select-hidden"}
+{"event":"setDefaultVariation_called"}
+{"event":"setDefault_changeTriggered","value":"S"}
+{"event":"manual_handler_fired","selectedValue":"S"}
+{"event":"manual_price_update","price":250000,"variation_id":xxx}
 ```
 
 **When Size M is Selected:**
