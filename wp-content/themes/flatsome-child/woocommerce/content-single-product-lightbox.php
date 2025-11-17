@@ -1521,6 +1521,7 @@ do_action( 'wc_quick_view_after_single_product' );
 
 		// Variation Change Handler
 		function initVariationHandler() {
+			debugger;
 			// Prevent multiple attachments
 			if (window.variationHandlerAttached) {
 				return;
@@ -1716,7 +1717,7 @@ do_action( 'wc_quick_view_after_single_product' );
 			// Try to setup immediately (in case lightbox already open)
 			setupVariationForm();
 			setTimeout(setDefaultVariation, 500);
-			
+
 
 			// // Also try when lightbox opens (MagnificPopup event with delay)
 			// $(document).on('mfpOpen', function() {
