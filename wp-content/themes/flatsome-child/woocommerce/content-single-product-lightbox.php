@@ -1325,7 +1325,7 @@ do_action( 'wc_quick_view_after_single_product' );
 		function getCurrentProductPrice() {
 			// Use mainProductPrice which is updated by found_variation event
 			// This is more reliable than reading from DOM
-			console.log('[DEBUG] getCurrentProductPrice called, mainProductPrice:', mainProductPrice, 'basePrice:', config.basePrice);
+			if (typeof writeLogServer === 'function') writeLogServer({event: 'getCurrentProductPrice', mainProductPrice: mainProductPrice, basePrice: config.basePrice}, 'info');
 			if (mainProductPrice && mainProductPrice > 0) {
 				return mainProductPrice;
 			}
@@ -1336,7 +1336,7 @@ do_action( 'wc_quick_view_after_single_product' );
 		// Subtotal Calculation
 		function updateSubtotal() {
 			let subtotal = 0;
-			console.log('[DEBUG] updateSubtotal called, getCurrentProductPrice():', getCurrentProductPrice());
+			if (typeof writeLogServer === 'function') writeLogServer({event: 'updateSubtotal_called', currentPrice: getCurrentProductPrice()}, 'info');
 			let canAddToCart = true;
 
 			// Check if paired mode is active
@@ -1527,6 +1527,7 @@ do_action( 'wc_quick_view_after_single_product' );
 			}
 			window.variationHandlerAttached = true;
 
+			if (typeof writeLogServer === 'function') writeLogServer({event: 'initVariationHandler_called', attached: window.variationHandlerAttached}, 'info');
 			// Attach event handler to document (works even if lightbox not loaded yet)
 			$(document).on('click', '.variation-button', function(e) {
 				e.preventDefault();
@@ -1534,6 +1535,7 @@ do_action( 'wc_quick_view_after_single_product' );
 				const $button = $(this);
 				const value = $button.data('value');
 				const attribute = $button.data('attribute');
+				if (typeof writeLogServer === 'function') writeLogServer({event: 'button_click', value: value, attribute: attribute}, 'info');
 
 				// Remove selected class from sibling buttons
 				$button.siblings('.variation-button').removeClass('selected');
@@ -1548,6 +1550,7 @@ do_action( 'wc_quick_view_after_single_product' );
 					const selectName = 'attribute_' + attribute;
 					const $hiddenSelect = $('select[name="' + selectName + '"]');
 					$hiddenSelect.val(value).trigger('change');
+					if (typeof writeLogServer === 'function') writeLogServer({event: 'button_select_value_set', selectName: selectName, value: value, selectFound: .length}, 'info');
 				} else {
 					$button.removeClass('selected');
 
@@ -1590,6 +1593,67 @@ do_action( 'wc_quick_view_after_single_product' );
 								$variationsForm.trigger('check_variations');
 							}, 300);
 						}
+				} else {
+						// WooCommerce variation script not loaded - use manual handler
+						if (typeof writeLogServer === 'function') writeLogServer({event: 'wc_script_not_loaded'}, 'info');
+						const variationsData = $variationsForm.data('product_variations');
+						if (variationsData && variationsData.length) {
+							// Attach change handler to hidden select
+							$variationsForm.find('.variation-select-hidden').on('change', function() {
+								const selectedValue = $(this).val();
+								if (!selectedValue) return;
+								// Find matching variation
+								for (let i = 0; i < variationsData.length; i++) {
+									const v = variationsData[i];
+									if (!v.attributes) continue;
+									// Simple match: check if any attribute matches selected value
+									for (let attr in v.attributes) {
+										if (v.attributes[attr] && v.attributes[attr].toLowerCase() === selectedValue.toLowerCase()) {
+											// Match found - update price
+											mainProductPrice = parseFloat(v.display_price);
+											if (typeof writeLogServer === 'function') writeLogServer({event: 'manual_price_update', price: mainProductPrice}, 'info');
+											updateSubtotal();
+											return;
+										}
+									}
+								}
+							});
+						}
+					}
+					else {
+						// WooCommerce variation script not loaded - use manual handler
+						if (typeof writeLogServer === 'function') writeLogServer({event: 'wc_script_not_loaded', message: 'Using manual variation handler'}, 'info');
+						// Parse variation data
+						const variationsData = .data('product_variations');
+						if (variationsData) {
+							// Manual variation change handler
+							.find('.variation-select-hidden').on('change', function() {
+								const  = ;
+								const selectedValue = .val();
+								if (!selectedValue) return;
+								// Find matching variation
+								for (let i = 0; i < variationsData.length; i++) {
+									const variation = variationsData[i];
+									const attrs = variation.attributes || {};
+									// Check if this variation matches
+									let matches = true;
+									for (let attrKey in attrs) {
+										if (attrs[attrKey] && attrs[attrKey].toLowerCase() !== selectedValue.toLowerCase()) {
+											matches = false;
+											break;
+										}
+									}
+									if (matches && variation.is_in_stock) {
+										// Found matching variation - update price
+										mainProductPrice = parseFloat(variation.display_price);
+										if (typeof writeLogServer === 'function') writeLogServer({event: 'manual_variation_found', price: mainProductPrice, variation_id: variation.variation_id}, 'info');
+										updateSubtotal();
+										break;
+									}
+								}
+							});
+						}
+					}
 					}
 
 					// Attach WooCommerce event listeners (only once globally)
@@ -1598,13 +1662,11 @@ do_action( 'wc_quick_view_after_single_product' );
 
 						// Use event delegation on document to avoid duplicates
 						$(document).on('found_variation', '.variations_form', function(event, variation) {
-							console.log('[DEBUG] found_variation event fired!', variation);
-							console.log('[DEBUG] found_variation event fired!', variation);
 							// Update main product price
+							if (typeof writeLogServer === 'function') writeLogServer({event: 'found_variation', display_price: variation.display_price, attributes: variation.attributes}, 'info');
 							mainProductPrice = parseFloat(variation.display_price);
-
-							console.log('[DEBUG] mainProductPrice updated to:', mainProductPrice);
 							console.log('[DEBUG] mainProductPrice updated to:
+							if (typeof writeLogServer === 'function') writeLogServer({event: 'mainProductPrice_updated', mainProductPrice: mainProductPrice}, 'info');
 							// Update button visual selection based on variation attributes
 							if (variation.attributes) {
 								Object.keys(variation.attributes).forEach(function(attrKey) {

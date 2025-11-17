@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html><body>
+<script>
+// Direct test - force cache bypass
+window.location.href = 'https://terravivapizza.com';
+setTimeout(function() {
+  // Open lightbox
+  document.querySelectorAll('a.quick-view')[0].click();
+  
+  setTimeout(function() {
+    // DIRECTLY set select value
+    const select = document.querySelector('.variation-select-hidden');
+    console.log('Select found:', select, 'Value:', select ? select.value : 'N/A');
+    if (select) {
+      select.value = 'M';
+      jQuery(select).trigger('change');
+      jQuery('.variations_form').trigger('check_variations');
+    }
+  }, 3000);
+}, 1000);
+</script>
+</body></html>

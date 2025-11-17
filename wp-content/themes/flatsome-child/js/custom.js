@@ -681,19 +681,23 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }, 11000);
 
-        // Step 4: Click M button (wait 3 seconds after step 3)
+        // Step 4: DIRECTLY set hidden select to M (bypass button click)
         setTimeout(function() {
-            writeLogServer({event: 'step_4', message: 'Clicking M button to test size change'}, 'info');
+            writeLogServer({event: 'step_4', message: 'DIRECTLY setting hidden select to M'}, 'info');
             try {
-                const mButton = document.querySelectorAll('.variation-button')[1];
-                if (mButton) {
-                    mButton.click();
-                    writeLogServer({event: 'step_4_success', message: 'M button clicked', button_text: mButton.textContent.trim()}, 'info');
+                const hiddenSelect = document.querySelector('.variation-select-hidden');
+                if (hiddenSelect) {
+                    writeLogServer({event: 'step_4_select_found', name: hiddenSelect.name, oldValue: hiddenSelect.value}, 'info');
+                    hiddenSelect.value = 'M';
+                    jQuery(hiddenSelect).trigger('change');
+                    const form = document.querySelector('.variations_form');
+                    if (form) jQuery(form).trigger('check_variations');
+                    writeLogServer({event: 'step_4_success', message: 'Hidden select set to M and change triggered', newValue: hiddenSelect.value}, 'info');
                 } else {
-                    writeLogServer({event: 'step_4_error', message: 'M button not found'}, 'error');
+                    writeLogServer({event: 'step_4_error', message: 'Hidden select not found'}, 'error');
                 }
             } catch (e) {
-                writeLogServer({event: 'step_4_exception', message: 'Error clicking M button', error: e.message}, 'error');
+                writeLogServer({event: 'step_4_exception', message: 'Error setting select', error: e.message}, 'error');
             }
         }, 14000);
 
@@ -728,19 +732,22 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }, 16000);
 
-        // Step 6: Click L button (wait 3 seconds after step 5)
+        // Step 6: DIRECTLY set hidden select to L (bypass button click)
         setTimeout(function() {
-            writeLogServer({event: 'step_6', message: 'Clicking L button to test size change'}, 'info');
+            writeLogServer({event: 'step_6', message: 'DIRECTLY setting hidden select to L'}, 'info');
             try {
-                const lButton = document.querySelectorAll('.variation-button')[2];
-                if (lButton) {
-                    lButton.click();
-                    writeLogServer({event: 'step_6_success', message: 'L button clicked', button_text: lButton.textContent.trim()}, 'info');
+                const hiddenSelect = document.querySelector('.variation-select-hidden');
+                if (hiddenSelect) {
+                    hiddenSelect.value = 'L';
+                    jQuery(hiddenSelect).trigger('change');
+                    const form = document.querySelector('.variations_form');
+                    if (form) jQuery(form).trigger('check_variations');
+                    writeLogServer({event: 'step_6_success', message: 'Hidden select set to L and change triggered', newValue: hiddenSelect.value}, 'info');
                 } else {
-                    writeLogServer({event: 'step_6_error', message: 'L button not found'}, 'error');
+                    writeLogServer({event: 'step_6_error', message: 'Hidden select not found'}, 'error');
                 }
             } catch (e) {
-                writeLogServer({event: 'step_6_exception', message: 'Error clicking L button', error: e.message}, 'error');
+                writeLogServer({event: 'step_6_exception', message: 'Error setting select', error: e.message}, 'error');
             }
         }, 19000);
 

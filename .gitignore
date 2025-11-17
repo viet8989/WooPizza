@@ -1,6 +1,9 @@
 # Log files
 *.log
 
+# Plugins WordPress
+wp-content/plugins/
+
 # WordPress debug log
 wp-content/debug.log
 
@@ -15,6 +18,7 @@ error_log
 Thumbs.db
 
 # IDE files
+.claude/
 .vscode/
 .idea/
 *.swp
