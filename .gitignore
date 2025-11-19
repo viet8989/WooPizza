@@ -2,7 +2,7 @@
 *.log
 
 # Plugins WordPress
-wp-content/plugins/
+# wp-content/plugins/
 
 # WordPress debug log
 wp-content/debug.log

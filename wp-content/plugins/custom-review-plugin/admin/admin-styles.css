@@ -1,0 +1,188 @@
+/**
+ * Admin styles for Custom Review Plugin
+ */
+
+.crp-review-form .form-table th {
+    width: 200px;
+    padding: 15px 10px 15px 0;
+}
+
+.crp-review-form .form-table td {
+    padding: 15px 10px;
+}
+
+.crp-review-form .regular-text {
+    width: 100%;
+    max-width: 500px;
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+.crp-review-form .large-text {
+    width: 100%;
+    max-width: 700px;
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+.crp-review-form .small-text {
+    width: 80px;
+    padding: 8px 12px;
+    font-size: 14px;
+}
+
+.crp-review-form select {
+    padding: 6px 10px;
+    font-size: 14px;
+    min-width: 200px;
+}
+
+.crp-review-form textarea {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.crp-review-form .description {
+    font-size: 13px;
+    color: #646970;
+    margin-top: 5px;
+}
+
+/* Status badges */
+.status-approved {
+    color: #46b450;
+    font-weight: 600;
+    background: #ecf7ed;
+    padding: 4px 10px;
+    border-radius: 3px;
+    display: inline-block;
+}
+
+.status-pending {
+    color: #f0b432;
+    font-weight: 600;
+    background: #fff8e5;
+    padding: 4px 10px;
+    border-radius: 3px;
+    display: inline-block;
+}
+
+.status-rejected {
+    color: #dc3232;
+    font-weight: 600;
+    background: #fef0f0;
+    padding: 4px 10px;
+    border-radius: 3px;
+    display: inline-block;
+}
+
+.review-status {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.review-status:hover {
+    opacity: 0.8;
+    transform: scale(1.05);
+}
+
+/* Status changer select */
+.status-changer {
+    padding: 4px 8px;
+    font-size: 13px;
+    min-width: 120px;
+}
+
+/* Reviews table styling */
+.wp-list-table td,
+.wp-list-table th {
+    vertical-align: middle;
+}
+
+.wp-list-table td strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.wp-list-table td small {
+    color: #646970;
+    font-size: 13px;
+}
+
+/* Button spacing */
+.wp-list-table .button {
+    margin-right: 5px;
+}
+
+/* Checkbox column */
+.check-column {
+    width: 2.2em;
+    padding: 11px 0 0 3px;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 782px) {
+    .crp-review-form .regular-text,
+    .crp-review-form .large-text {
+        max-width: 100%;
+    }
+
+    .wp-list-table td small {
+        display: block;
+        margin-top: 4px;
+    }
+}
+
+/* Admin notices styling */
+.notice.crp-notice {
+    border-left-width: 4px;
+    border-left-style: solid;
+    padding: 12px;
+    margin: 20px 0 15px;
+}
+
+.notice.crp-notice p {
+    margin: 0.5em 0;
+    padding: 2px;
+}
+
+/* Bulk actions */
+.tablenav .actions {
+    padding: 2px 8px 0 0;
+}
+
+.tablenav select {
+    max-width: 200px;
+}
+
+/* Filter tabs */
+.subsubsub {
+    margin: 0 0 15px;
+}
+
+.subsubsub li {
+    display: inline-block;
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+}
+
+.subsubsub a {
+    text-decoration: none;
+    line-height: 2;
+}
+
+.subsubsub a .count {
+    color: #646970;
+    font-weight: 400;
+}
+
+.subsubsub a.current {
+    font-weight: 600;
+    color: #000;
+}
+
+.subsubsub a.current .count {
+    color: #000;
+}
