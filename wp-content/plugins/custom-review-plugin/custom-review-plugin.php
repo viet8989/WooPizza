@@ -246,13 +246,14 @@ function crvp_admin_enqueue_scripts($hook) {
 add_action('admin_enqueue_scripts', 'crvp_admin_enqueue_scripts');
 
 /**
- * Shortcode to display reviews
- * Usage: [customer_reviews limit="10" status="approved"]
+ * Shortcode to display reviews in a slider
+ * Usage: [customer_reviews limit="10" status="approved" columns="4"]
  */
 function crvp_customer_reviews_shortcode($atts) {
     $atts = shortcode_atts(array(
         'limit' => -1,
-        'status' => 'approved'
+        'status' => 'approved',
+        'columns' => 4
     ), $atts, 'customer_reviews');
 
     global $wpdb;
@@ -270,30 +271,54 @@ function crvp_customer_reviews_shortcode($atts) {
         return '<p class="no-reviews">' . __('No reviews found.', 'custom-review-plugin') . '</p>';
     }
 
+    // Generate unique ID for this slider instance
+    $slider_id = 'crp-slider-' . uniqid();
+
     ob_start();
     ?>
-    <div class="crp-reviews-container">
+    <div class="crp-reviews-container" id="<?php echo $slider_id; ?>">
         <style>
             .crp-reviews-container {
                 font-family: "Bricolage Grotesque", sans-serif;
                 max-width: 100%;
                 margin: 0 auto;
+                position: relative;
+                padding: 0 50px;
+            }
+
+            .crp-slider-wrapper {
+                overflow: hidden;
+                position: relative;
+            }
+
+            .crp-slider-track {
+                display: flex;
+                gap: 20px;
+                transition: transform 0.3s ease-in-out;
             }
 
             .crp-review-item {
                 background: #fff;
-                padding: 20px;
-                border-bottom: 1px solid #e0e0e0;
+                padding: 25px;
+                border: 1px solid #e0e0e0;
+                border-radius: 10px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                flex: 0 0 calc((100% - 60px) / 4);
+                min-height: 400px;
+                display: flex;
+                flex-direction: column;
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
             }
 
-            .crp-review-item:last-child {
-                border-bottom: none;
+            .crp-review-item:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 4px 16px rgba(0,0,0,0.12);
             }
 
             .crp-review-header {
                 display: flex;
-                align-items: flex-start;
-                gap: 15px;
+                align-items: center;
+                gap: 12px;
                 margin-bottom: 15px;
             }
 
@@ -308,35 +333,43 @@ function crvp_customer_reviews_shortcode($atts) {
 
             .crp-reviewer-info {
                 flex: 1;
+                min-width: 0;
             }
 
             .crp-reviewer-name {
-                font-size: 18px;
+                font-size: 16px;
                 font-weight: 600;
                 color: #000;
                 margin: 0 0 4px 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
             }
 
             .crp-reviewer-location {
-                font-size: 14px;
+                font-size: 13px;
                 color: #636363;
-                margin: 0 0 4px 0;
+                margin: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
             }
 
             .crp-reviewer-contributions {
-                font-size: 13px;
+                font-size: 12px;
                 color: #636363;
+                margin: 2px 0 0 0;
             }
 
             .crp-rating-stars {
                 display: flex;
-                gap: 3px;
-                margin-bottom: 10px;
+                gap: 4px;
+                margin-bottom: 12px;
             }
 
             .crp-star {
-                width: 24px;
-                height: 24px;
+                width: 20px;
+                height: 20px;
                 border-radius: 50%;
                 display: inline-block;
             }
@@ -350,107 +383,340 @@ function crvp_customer_reviews_shortcode($atts) {
             }
 
             .crp-review-title {
-                font-size: 20px;
+                font-size: 18px;
                 font-weight: 700;
                 color: #000;
-                margin: 10px 0;
+                margin: 0 0 10px 0;
                 line-height: 1.3;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                min-height: 48px;
             }
 
             .crp-review-meta {
-                font-size: 14px;
+                font-size: 13px;
                 color: #636363;
                 margin-bottom: 12px;
             }
 
             .crp-review-content {
-                font-size: 16px;
+                font-size: 14px;
                 color: #000;
                 line-height: 1.6;
                 margin-bottom: 15px;
+                flex: 1;
+                display: -webkit-box;
+                -webkit-line-clamp: 5;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
             }
 
             .crp-review-footer {
-                font-size: 13px;
+                font-size: 12px;
                 color: #8a8a8a;
-                line-height: 1.5;
-            }
-
-            .crp-review-source {
-                margin-top: 10px;
-                padding-top: 10px;
+                line-height: 1.4;
+                margin-top: auto;
+                padding-top: 15px;
                 border-top: 1px solid #f0f0f0;
             }
 
-            @media (max-width: 768px) {
-                .crp-review-header {
-                    flex-direction: column;
-                }
+            /* Slider Navigation */
+            .crp-slider-nav {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 30px;
+                height: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                z-index: 10;
+                transition: all 0.3s ease;
+                color: #CD0000;
+                font-size: 20px;
+                font-weight: bold;
+            }
 
-                .crp-review-title {
+            .crp-slider-nav:hover {
+                background: #CD0000;
+                color: #fff;
+                transform: translateY(-50%) scale(1.1);
+            }
+
+            /* .crp-slider-nav.disabled {
+                opacity: 0.3;
+                cursor: not-allowed;
+                pointer-events: none;
+            } */
+
+            .crp-slider-nav.disabled {
+                display: none;
+            }
+
+            .crp-slider-prev {
+                left: 0;
+            }
+
+            .crp-slider-next {
+                right: 0;
+            }
+
+            /* Slider Dots */
+            .crp-slider-dots {
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+                margin-top: 30px;
+            }
+
+            .crp-slider-dot {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background: #ddd;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+
+            .crp-slider-dot.active {
+                background: #CD0000;
+                transform: scale(1.2);
+            }
+
+            .crp-slider-dot:hover {
+                background: #a00000;
+            }
+
+            /* Responsive Design */
+            @media (max-width: 1200px) {
+                .crp-review-item {
+                    flex: 0 0 calc((100% - 40px) / 3);
+                }
+            }
+
+            @media (max-width: 992px) {
+                .crp-review-item {
+                    flex: 0 0 calc((100% - 20px) / 2);
+                }
+                .crp-reviews-container {
+                    padding: 0 40px;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .crp-review-item {
+                    flex: 0 0 100%;
+                    min-height: 350px;
+                }
+                .crp-reviews-container {
+                    padding: 0 35px;
+                }
+                .crp-slider-nav {
+                    width: 35px;
+                    height: 35px;
                     font-size: 18px;
                 }
-
+                .crp-review-title {
+                    font-size: 16px;
+                }
                 .crp-review-content {
-                    font-size: 15px;
+                    font-size: 13px;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .crp-reviews-container {
+                    padding: 0 30px;
+                }
+                .crp-slider-nav {
+                    width: 30px;
+                    height: 30px;
+                    font-size: 16px;
                 }
             }
         </style>
 
-        <?php foreach ($reviews as $review): ?>
-            <div class="crp-review-item">
-                <div class="crp-review-header">
-                    <?php if (!empty($review->reviewer_avatar)): ?>
-                        <img src="<?php echo esc_url($review->reviewer_avatar); ?>"
-                             alt="<?php echo esc_attr($review->reviewer_name); ?>"
-                             class="crp-reviewer-avatar">
-                    <?php else: ?>
-                        <div class="crp-reviewer-avatar" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
-                    <?php endif; ?>
+        <!-- Slider Navigation -->
+        <div class="crp-slider-prev crp-slider-nav" onclick="crvpSlideReviews('<?php echo $slider_id; ?>', -1)">
+            <svg viewBox="0 0 100 100"><path d="M 10,50 L 60,100 L 70,90 L 30,50  L 70,10 L 60,0 Z" class="arrow"></path></svg>
+        </div>
+        <div class="crp-slider-next crp-slider-nav" onclick="crvpSlideReviews('<?php echo $slider_id; ?>', 1)">
+            <svg viewBox="0 0 100 100"><path d="M 10,50 L 60,100 L 70,90 L 30,50  L 70,10 L 60,0 Z" class="arrow" transform="translate(100, 100) rotate(180) "></path></svg>
+        </div>
 
-                    <div class="crp-reviewer-info">
-                        <h3 class="crp-reviewer-name"><?php echo esc_html($review->reviewer_name); ?></h3>
-                        <?php if (!empty($review->reviewer_location)): ?>
-                            <p class="crp-reviewer-location"><?php echo esc_html($review->reviewer_location); ?></p>
-                        <?php endif; ?>
-                        <?php if ($review->contributions > 0): ?>
-                            <p class="crp-reviewer-contributions"><?php echo esc_html($review->contributions); ?> đóng góp</p>
-                        <?php endif; ?>
-                    </div>
-                </div>
+        <!-- Slider Wrapper -->
+        <div class="crp-slider-wrapper">
+            <div class="crp-slider-track">
+                <?php foreach ($reviews as $review): ?>
+                    <div class="crp-review-item">
+                        <div class="crp-review-header">
+                            <?php if (!empty($review->reviewer_avatar)): ?>
+                                <img src="<?php echo esc_url($review->reviewer_avatar); ?>"
+                                     alt="<?php echo esc_attr($review->reviewer_name); ?>"
+                                     class="crp-reviewer-avatar">
+                            <?php else: ?>
+                                <div class="crp-reviewer-avatar" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                            <?php endif; ?>
 
-                <div class="crp-rating-stars">
-                    <?php for ($i = 1; $i <= 5; $i++): ?>
-                        <span class="crp-star <?php echo $i <= $review->rating ? 'filled' : 'empty'; ?>"></span>
-                    <?php endfor; ?>
-                </div>
-
-                <h4 class="crp-review-title"><?php echo esc_html($review->review_title); ?></h4>
-
-                <p class="crp-review-meta">
-                    <?php
-                    $date = date_create($review->review_date);
-                    echo 'thg ' . $date->format('n') . ' ' . $date->format('Y');
-                    ?>
-                    <?php if (!empty($review->reviewer_type)): ?>
-                        • <?php echo esc_html($review->reviewer_type); ?>
-                    <?php endif; ?>
-                </p>
-
-                <div class="crp-review-content">
-                    <?php echo wp_kses_post(nl2br($review->review_content)); ?>
-                </div>
-
-                <div class="crp-review-footer">
-                    <p>Đã viết vào <?php echo date('d', strtotime($review->review_date)); ?> tháng <?php echo date('n', strtotime($review->review_date)); ?>, <?php echo date('Y', strtotime($review->review_date)); ?></p>
-                    <!-- <?php if (!empty($review->source) && $review->source != 'manual'): ?>
-                        <div class="crp-review-source">
-                            <p>Đánh giá này là ý kiến chủ quan của thành viên <?php echo esc_html($review->source); ?> chứ không phải của Terravivapizza thực hiện kiểm tra đánh giá.</p>
+                            <div class="crp-reviewer-info">
+                                <h3 class="crp-reviewer-name"><?php echo esc_html($review->reviewer_name); ?></h3>
+                                <?php if (!empty($review->reviewer_location)): ?>
+                                    <p class="crp-reviewer-location"><?php echo esc_html($review->reviewer_location); ?></p>
+                                <?php endif; ?>
+                                <?php if ($review->contributions > 0): ?>
+                                    <p class="crp-reviewer-contributions"><?php echo esc_html($review->contributions); ?> đóng góp</p>
+                                <?php endif; ?>
+                            </div>
                         </div>
-                    <?php endif; ?> -->
-                </div>
+
+                        <div class="crp-rating-stars">
+                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                                <span class="crp-star <?php echo $i <= $review->rating ? 'filled' : 'empty'; ?>"></span>
+                            <?php endfor; ?>
+                        </div>
+
+                        <h4 class="crp-review-title"><?php echo esc_html($review->review_title); ?></h4>
+
+                        <p class="crp-review-meta">
+                            <?php
+                            $date = date_create($review->review_date);
+                            echo 'thg ' . $date->format('n') . ' ' . $date->format('Y');
+                            ?>
+                            <?php if (!empty($review->reviewer_type)): ?>
+                                • <?php echo esc_html($review->reviewer_type); ?>
+                            <?php endif; ?>
+                        </p>
+
+                        <div class="crp-review-content">
+                            <?php echo wp_kses_post(nl2br($review->review_content)); ?>
+                        </div>
+
+                        <div class="crp-review-footer">
+                            <p>Đã viết vào <?php echo date('d', strtotime($review->review_date)); ?> tháng <?php echo date('n', strtotime($review->review_date)); ?>, <?php echo date('Y', strtotime($review->review_date)); ?></p>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
             </div>
-        <?php endforeach; ?>
+        </div>
+
+        <!-- Slider Dots -->
+        <div class="crp-slider-dots" id="<?php echo $slider_id; ?>-dots"></div>
+
+        <script>
+        (function() {
+            var sliderId = '<?php echo $slider_id; ?>';
+            var container = document.getElementById(sliderId);
+            var track = container.querySelector('.crp-slider-track');
+            var items = track.querySelectorAll('.crp-review-item');
+            var prevBtn = container.querySelector('.crp-slider-prev');
+            var nextBtn = container.querySelector('.crp-slider-next');
+            var dotsContainer = document.getElementById(sliderId + '-dots');
+
+            var currentIndex = 0;
+            var itemsPerSlide = 4;
+            var totalSlides = Math.ceil(items.length / itemsPerSlide);
+
+            // Adjust items per slide based on screen width
+            function updateItemsPerSlide() {
+                var width = window.innerWidth;
+                if (width <= 768) {
+                    itemsPerSlide = 1;
+                } else if (width <= 992) {
+                    itemsPerSlide = 2;
+                } else if (width <= 1200) {
+                    itemsPerSlide = 3;
+                } else {
+                    itemsPerSlide = 4;
+                }
+                totalSlides = Math.ceil(items.length / itemsPerSlide);
+                currentIndex = Math.min(currentIndex, totalSlides - 1);
+                updateSlider();
+                createDots();
+            }
+
+            // Create navigation dots
+            function createDots() {
+                dotsContainer.innerHTML = '';
+                for (var i = 0; i < totalSlides; i++) {
+                    var dot = document.createElement('div');
+                    dot.className = 'crp-slider-dot' + (i === currentIndex ? ' active' : '');
+                    dot.setAttribute('data-index', i);
+                    dot.onclick = function() {
+                        currentIndex = parseInt(this.getAttribute('data-index'));
+                        updateSlider();
+                    };
+                    dotsContainer.appendChild(dot);
+                }
+            }
+
+            // Update slider position
+            function updateSlider() {
+                var slideWidth = 100 / itemsPerSlide;
+                var translateX = -currentIndex * 100;
+                track.style.transform = 'translateX(' + translateX + '%)';
+
+                // Update navigation buttons
+                prevBtn.classList.toggle('disabled', currentIndex === 0);
+                nextBtn.classList.toggle('disabled', currentIndex >= totalSlides - 1);
+
+                // Update dots
+                var dots = dotsContainer.querySelectorAll('.crp-slider-dot');
+                dots.forEach(function(dot, index) {
+                    dot.classList.toggle('active', index === currentIndex);
+                });
+            }
+
+            // Slide function
+            window.crvpSlideReviews = function(id, direction) {
+                if (id !== sliderId) return;
+
+                currentIndex += direction;
+                if (currentIndex < 0) currentIndex = 0;
+                if (currentIndex >= totalSlides) currentIndex = totalSlides - 1;
+
+                updateSlider();
+            };
+
+            // Auto-slide every 5 seconds
+            var autoSlideInterval = setInterval(function() {
+                if (currentIndex >= totalSlides - 1) {
+                    currentIndex = 0;
+                } else {
+                    currentIndex++;
+                }
+                updateSlider();
+            }, 5000);
+
+            // Pause auto-slide on hover
+            container.addEventListener('mouseenter', function() {
+                clearInterval(autoSlideInterval);
+            });
+
+            container.addEventListener('mouseleave', function() {
+                autoSlideInterval = setInterval(function() {
+                    if (currentIndex >= totalSlides - 1) {
+                        currentIndex = 0;
+                    } else {
+                        currentIndex++;
+                    }
+                    updateSlider();
+                }, 5000);
+            });
+
+            // Handle window resize
+            var resizeTimeout;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(updateItemsPerSlide, 250);
+            });
+
+            // Initialize
+            updateItemsPerSlide();
+        })();
+        </script>
     </div>
     <?php
     return ob_get_clean();

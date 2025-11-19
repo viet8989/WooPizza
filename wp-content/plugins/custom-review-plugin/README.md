@@ -88,7 +88,7 @@ After activation, you'll see a new "Reviews" menu in WordPress Admin with a star
 
 #### Using the Shortcode
 
-Add reviews to any page or post using the shortcode:
+Add reviews to any page or post using the shortcode. Reviews are displayed in a beautiful **4-column responsive slider** with auto-slide functionality!
 
 ```
 [customer_reviews]
@@ -98,7 +98,7 @@ Add reviews to any page or post using the shortcode:
 
 **Show limited number of reviews:**
 ```
-[customer_reviews limit="5"]
+[customer_reviews limit="8"]
 ```
 
 **Show pending reviews (default is approved only):**
@@ -106,10 +106,34 @@ Add reviews to any page or post using the shortcode:
 [customer_reviews status="pending"]
 ```
 
+**Change number of columns (default is 4):**
+```
+[customer_reviews columns="3"]
+```
+
 **Combine attributes:**
 ```
-[customer_reviews limit="10" status="approved"]
+[customer_reviews limit="12" status="approved" columns="4"]
 ```
+
+#### Slider Features
+
+✨ **Automatic Responsive Behavior:**
+- Desktop (>1200px): 4 columns
+- Laptop (992px-1200px): 3 columns
+- Tablet (768px-992px): 2 columns
+- Mobile (<768px): 1 column
+
+✨ **Interactive Controls:**
+- Previous/Next arrow buttons
+- Navigation dots at the bottom
+- Auto-slide every 5 seconds
+- Pause on hover
+- Smooth animations
+
+✨ **Touch-Friendly:**
+- Responsive on all screen sizes
+- Mobile-optimized navigation
 
 #### Where to Add the Shortcode
 
@@ -132,16 +156,27 @@ In your theme file (e.g., `page-home.php`), add:
 
 ## Frontend Layout
 
-The shortcode displays reviews matching the image you provided:
+The shortcode displays reviews in a beautiful **slider with 4 columns**:
 
-- **5-star rating** with filled (green) and empty (light green) circles
-- **Review title** in bold
+### Card Design
+Each review card features:
+- **Circular avatar** (50px) with gradient fallback
+- **Reviewer name** and location at the top
+- **5-star rating** with filled (green #00A86B) and empty (light green #C8E6C9) circles
+- **Review title** in bold (max 2 lines with ellipsis)
 - **Date and reviewer type** (e.g., "thg 3 2025 • Couples")
-- **Review content** with proper line breaks
-- **Reviewer info** with circular avatar, name, location, and contribution count
-- **Footer text** with Vietnamese formatting
-- **Source attribution** if from Tripadvisor/Google/etc.
-- **Horizontal separator** between reviews
+- **Review content** (max 5 lines with ellipsis)
+- **Footer text** with Vietnamese date formatting
+- **Card hover effect** - elevates with shadow on hover
+- **Clean white background** with subtle border and shadow
+
+### Slider Features
+- **4 columns on desktop** (automatically adjusts to 3/2/1 on smaller screens)
+- **Left/Right arrow navigation** with red accent color (#CD0000)
+- **Dot navigation** at the bottom for quick page jumping
+- **Auto-slide** every 5 seconds (pauses on hover)
+- **Smooth transitions** between slides
+- **Fully responsive** layout
 
 ## Styling
 
