@@ -109,7 +109,7 @@ function ajax_get_product_toppings() {
 	$cross_sell_ids = array_map( 'intval', $_POST['cross_sell_ids'] );
 
 	// Get topping categories
-	$parent_category_id = 25;
+	$parent_category_id = 15;
 	$topping_categories = get_terms( array(
 		'taxonomy'   => 'product_cat',
 		'parent'     => $parent_category_id,
@@ -223,8 +223,8 @@ function add_pizza_and_topping_admin_menus() {
 	// Add submenu for Add New Other Product
 	add_submenu_page(
 		'edit-other-products',
-		__( 'Add New Product', 'flatsome' ),
-		__( 'Add New Product', 'flatsome' ),
+		__( 'Add New Other Product', 'flatsome' ),
+		__( 'Add New Other Product', 'flatsome' ),
 		'edit_products',
 		'post-new.php?post_type=product&product_type=other'
 	);
@@ -314,31 +314,6 @@ function enqueue_woocommerce_admin_assets_for_custom_pages( $hook ) {
 	wp_enqueue_style( 'common' );
 	wp_enqueue_style( 'wp-admin' );
 	wp_enqueue_style( 'forms' );
-	
-	/**
-	 * Override parent theme `flatsome-theme-woocommerce-js` with child theme version.
-	 * This deregisters the parent script and registers the child copy under the same handle
-	 * so dependencies remain intact.
-	 */
-	add_action( 'wp_enqueue_scripts', function() {
-		// If parent registered the handle, remove it.
-		if ( wp_script_is( 'flatsome-theme-woocommerce-js', 'registered' ) ) {
-			wp_dequeue_script( 'flatsome-theme-woocommerce-js' );
-			wp_deregister_script( 'flatsome-theme-woocommerce-js' );
-		}
-
-		$child_path = get_stylesheet_directory() . '/assets/js/woocommerce.js';
-		if ( file_exists( $child_path ) ) {
-			wp_register_script(
-				'flatsome-theme-woocommerce-js',
-				get_stylesheet_directory_uri() . '/assets/js/woocommerce.js',
-				array( 'flatsome-js', 'woocommerce' ),
-				filemtime( $child_path ),
-				true
-			);
-			wp_enqueue_script( 'flatsome-theme-woocommerce-js' );
-		}
-	}, 120 );
 }
 
 // Display Pizza products page
@@ -349,7 +324,7 @@ function display_pizza_products_page() {
     <h1 class="wp-heading-inline"><?php esc_html_e( 'Pizzas', 'flatsome' ); ?></h1>
     <a href="<?php echo esc_url( admin_url( 'post-new.php?post_type=product&product_type=pizza' ) ); ?>"
         class="page-title-action">
-        <?php esc_html_e( 'Add New', 'flatsome' ); ?>
+        <?php esc_html_e( 'Add New Pizza', 'flatsome' ); ?>
     </a>
     <hr class="wp-header-end">
     <?php
@@ -1314,8 +1289,21 @@ jQuery(document).ready(function($) {
 });
 </script>
 <?php
-	
 	if ( isset( $_GET['product_type'] ) ) {
+		?>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    $('#woocommerce-product-data span.woocommerce-product-type-tip').hide();
+    $('#woocommerce-product-data label.show_if_simple.tips.has-checkbox').hide();
+	$('#general_product_data p.form-field._tax_status_field').hide();
+	$('#general_product_data p.form-field._tax_class_field').hide();
+    $('#woocommerce-product-data li.shipping_options').hide();
+    // $('#woocommerce-product-data li.shipping_options.shipping_tab.hide_if_virtual.hide_if_grouped.hide_if_external').hide();
+	// $('#woocommerce-product-data li.shipping_options.shipping_tab.hide_if_virtual.hide_if_grouped.hide_if_external.active').hide();
+    $('#woocommerce-product-data li.marketplace-suggestions_options.marketplace-suggestions_tab').hide();
+});
+</script>
+<?php
 		// Only apply when product_type=pizza parameter is in the URL
 		if ( $_GET['product_type'] === 'pizza' ) {
 			// Get all child categories of category 17
@@ -1331,7 +1319,7 @@ jQuery(document).ready(function($) {
 			} else {
 				$child_categories[] = 17; // Include parent category as well
 			}
-			?>
+?>
 <script type="text/javascript">
 jQuery(document).ready(function($) {
     // Hide all categories except its children of category 17 (pizza)
@@ -1346,10 +1334,17 @@ jQuery(document).ready(function($) {
         }
     });
     $('.wp-heading-inline').text('Add New Pizza');
-    $('#woocommerce-product-data .product_data_tabs li.attribute_options').show();
-    $('#woocommerce-product-data .postbox-header h2').first().text('Pizza data');
-    // // Hide category 15 (topping) and all its children
-    // $('#in-product_cat-15-1').hide();
+
+    // Set Product Type = Variable Product by default for new pizzas
+    // $('#product-type').val('variable').trigger('change');
+    // // Hide the product type selector wrapper and show only "Pizza data" text
+    // $('#woocommerce-product-data .postbox-header h2 .product-data-wrapper').hide();
+    // $('#woocommerce-product-data .postbox-header h2').first().contents().filter(function() {
+    // 	return this.nodeType === 3; // Text nodes only
+    // }).remove();
+    // $('#woocommerce-product-data .postbox-header h2').first().prepend('Pizza data');
+    // $('#woocommerce-product-data .postbox-header h2').first().text('Pizza data');
+
     $('#product_cat-tabs li.tabs a').text('Pizza categories');
     // Remove "Most Used" tab
     $('#product_cat-tabs li.hide-if-no-js').remove();
@@ -1357,7 +1352,7 @@ jQuery(document).ready(function($) {
 });
 </script>
 <?php
-		}else if ( $_GET['product_type'] === 'topping' ) {
+		} else if ( $_GET['product_type'] === 'topping' ) {
 			// Get all child categories of category 15
 			$child_categories = get_terms( array(
 				'taxonomy' => 'product_cat',
@@ -1371,7 +1366,7 @@ jQuery(document).ready(function($) {
 			} else {
 				$child_categories[] = 15; // Include parent category as well
 			}
-			?>
+?>
 <script type="text/javascript">
 jQuery(document).ready(function($) {
     // Hide all categories except its children of category 15 (topping)
@@ -1391,6 +1386,50 @@ jQuery(document).ready(function($) {
     $('#woocommerce-product-data .product_data_tabs li.attribute_options').hide();
     // $('#in-product_cat-15-1 label').first().hide();
     $('#product_cat-tabs li.tabs a').text('Topping categories');
+    // Remove "Most Used" tab
+    $('#product_cat-tabs li.hide-if-no-js').remove();
+    $('#product_cat-pop').remove();
+});
+</script>
+<?php
+		}else if ( $_GET['product_type'] === 'other' ) {
+			$parent_categories = [15, 17]; // Define parent IDs once
+			$child_categories = [];
+			// Loop through each parent ID and merge the results
+			foreach ( $parent_categories as $parent_id ) {
+				$children = get_terms( array(
+					'taxonomy'   => 'product_cat',
+					'parent'   => $parent_id,
+					'hide_empty' => false,
+					'fields'     => 'ids',
+				) );
+				// Merge the results, ensuring it's not a WP_Error
+				if ( ! is_wp_error( $children ) ) {
+					$child_categories = array_merge( $child_categories, $children );
+				}
+			}
+			// Merge the child IDs and the parent IDs, then remove any duplicate IDs
+			$final_categories = array_unique( array_merge( $child_categories, $parent_categories ) );
+?>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    // Hide all categories of topping(15) and pizza(17) and their children
+    $('#product_catchecklist li').each(function() {
+        var $checkbox = $(this).find('input[type="checkbox"]');
+        if ($checkbox.length) {
+            var catId = parseInt($checkbox.val());
+            var childCatIds = <?php echo json_encode( $final_categories ); ?>;
+            if (childCatIds.indexOf(catId) > -1) {
+                $(this).hide();
+            }
+        }
+    });
+    $('.wp-heading-inline').text('Add New Other Product');
+    // $('#woocommerce-product-data .postbox-header h2').first().text('Topping data');
+    $('#woocommerce-product-data .product_data_tabs li.linked_product_options').hide();
+    // $('#woocommerce-product-data .product_data_tabs li.attribute_options').hide();
+    // $('#in-product_cat-15-1 label').first().hide();
+    $('#product_cat-tabs li.tabs a').text('Other Categories');
     // Remove "Most Used" tab
     $('#product_cat-tabs li.hide-if-no-js').remove();
     $('#product_cat-pop').remove();
