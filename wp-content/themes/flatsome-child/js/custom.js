@@ -140,21 +140,24 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
+        function removeSelectedCategories() {
+            document.querySelectorAll('.box-category .box-text .box-text-inner').forEach(function(box) {
+                box.classList.remove('selected');
+            });
+            document.querySelectorAll('.box-category img').forEach(function(box) {
+                box.classList.remove('selected');
+            });
+        }
+
         const categoryLinks = document.querySelectorAll('.product-category a');
         // Found category links: 
 
         categoryLinks.forEach(function(link) {
             link.addEventListener('click', function(event) {
                 event.preventDefault(); // Prevent default link behavior
-            // Category clicked
+                // Category clicked
 
-                // Remove .selected class from all categories
-                document.querySelectorAll('.box-category .box-text .box-text-inner').forEach(function(box) {
-                    box.classList.remove('selected');
-                });
-                document.querySelectorAll('.box-category img').forEach(function(box) {
-                    box.classList.remove('selected');
-                });
+                removeSelectedCategories();
 
                 // Add .selected class to clicked category
                 // The link is inside .col-inner, find .box-text-inner within the same container
@@ -212,6 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const isHomePage = pathname === '/' || pathname === '' || pathname === '/home' || pathname === '/index.php';
 
     if (isHomePage) {
+        removeSelectedCategories();
         // Reset to PIZZA when loading home page (before DOM manipulation)
         sessionStorage.setItem('selectedCategory', 'PIZZA');
         // Home page loaded - Set default category to PIZZA
@@ -224,6 +228,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 const categoryName = this.textContent.trim();
                 // Redirect to delivery page with category parameter
                 window.location.href = window.location.origin + '/delivery?category=' + encodeURIComponent(categoryName);
+                if(categoryName === 'PIZZA') {
+                    const boxTextInner = this.querySelector('.box-text .box-text-inner');
+                    if (boxTextInner) {
+                        boxTextInner.classList.add('selected');
+                    }
+                    const iconInner = this.querySelector('.box-category img');
+                    if (iconInner) {
+                        iconInner.classList.add('selected');
+                    }
+                }
             });
         });
 
