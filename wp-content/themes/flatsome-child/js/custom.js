@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const form = document.querySelector('.form-reservation');
             if (form) {
                 form.style.display = 'block';
+                document.querySelector('a#top-link').click();
             }
         });
     }
@@ -151,24 +152,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.querySelectorAll('.box-category .box-text .box-text-inner').forEach(function(box) {
                     box.classList.remove('selected');
                 });
+                document.querySelectorAll('.box-category img').forEach(function(box) {
+                    box.classList.remove('selected');
+                });
 
                 // Add .selected class to clicked category
                 // The link is inside .col-inner, find .box-text-inner within the same container
                 const colInner = this.closest('.col-inner');
-                // Found .col-inner: 
-
                 if (colInner) {
                     const boxTextInner = colInner.querySelector('.box-text .box-text-inner');
-                    // Found .box-text-inner: 
-
                     if (boxTextInner) {
                         boxTextInner.classList.add('selected');
-                        // Added .selected class to: 
-                    } else {
-                        console.warn('Could not find .box-text .box-text-inner inside .col-inner');
                     }
-                } else {
-                    console.warn('Could not find .col-inner parent. Link structure:'); 
+                    const iconInner = colInner.querySelector('.box-category img');
+                    if (iconInner) {
+                        iconInner.classList.add('selected');
+                    }
                 }
 
                 // Get text of clicked link
@@ -336,7 +335,8 @@ function fadeOutToGroupOpenMenu(hash, calledFrom = 'redirect') {
     // Determine offset based on where function was called from
     // 'home' = called from home page menu (90px)
     // 'redirect' = called after redirect from another page (120px)
-    const offset = calledFrom === 'home' ? 90 : 150;
+    // const offset = calledFrom === 'home' ? 90 : 150;
+    const offset = 0;
 
     // Wait for DOM/images to fully load before calculating position
     setTimeout(function() {

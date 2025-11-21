@@ -187,21 +187,20 @@ do_action( 'wc_quick_view_before_single_product' );
                 <?php do_action( 'woocommerce_before_variations_form' ); ?>
                 <div id="product-variations-section" class="product-variations-wrapper">
                     <?php foreach ( $attributes as $attribute_name => $options ) : ?>
-                    <div class="variation-attribute-group">
-                        <h3 class="variation-attribute-title"><?php echo wc_attribute_label( $attribute_name ); ?>:</h3>
+                        <h3 class="variation-attribute-title">Select <?php echo wc_attribute_label( $attribute_name ); ?>:</h3>
                         <div class="variation-buttons-container"
                             data-attribute="<?php echo esc_attr( sanitize_title( $attribute_name ) ); ?>">
                             <?php
-							// Create button-style options instead of dropdown
-							$attribute_slug = sanitize_title( $attribute_name );
-							$option_index = 0;
-							foreach ( $options as $option ) :
-								$option_slug = sanitize_title( $option );
-								// Set first option as selected by default
-								$is_first = ( $option_index === 0 );
-								$button_class = 'variation-button';
-								$option_index++;
-							?>
+                            // Create button-style options instead of dropdown
+                            $attribute_slug = sanitize_title( $attribute_name );
+                            $option_index = 0;
+                            foreach ( $options as $option ) :
+                                $option_slug = sanitize_title( $option );
+                                // Set first option as selected by default
+                                $is_first = ( $option_index === 0 );
+                                $button_class = 'variation-button';
+                                $option_index++;
+                            ?>
                             <button type="button" class="<?php echo esc_attr( $button_class ); ?>"
                                 data-value="<?php echo esc_attr( $option ); ?>"
                                 data-attribute="<?php echo esc_attr( $attribute_slug ); ?>">
@@ -216,17 +215,16 @@ do_action( 'wc_quick_view_before_single_product' );
                             style="display: none;">
                             <option value=""><?php esc_html_e( 'Choose an option', 'woocommerce' ); ?></option>
                             <?php
-							$option_index = 0;
-							foreach ( $options as $option ) :
-								// Set first option as selected by default
-								$is_first = ( $option_index === 0 );
-								$option_index++;
-							?>
+                            $option_index = 0;
+                            foreach ( $options as $option ) :
+                                // Set first option as selected by default
+                                $is_first = ( $option_index === 0 );
+                                $option_index++;
+                            ?>
                             <option value="<?php echo esc_attr( $option ); ?>" <?php selected( $is_first, true ); ?>>
                                 <?php echo esc_html( $option ); ?></option>
                             <?php endforeach; ?>
                         </select>
-                    </div>
                     <?php endforeach; ?>
                     <div class="reset_variations_alert screen-reader-text" role="alert" aria-live="polite"
                         aria-relevant="all"></div>
@@ -348,7 +346,7 @@ do_action( 'wc_quick_view_before_single_product' );
     <!-- Quantity & Add to Cart -->
     <?php if ( $product->is_type( 'variable' ) ) : ?>
     <!-- WooCommerce single variation container (uses standard WooCommerce hooks) -->
-    <div class="single_variation_wrap">
+    <div class="single_variation_wrap cart">
         <?php
 			/**
 			 * Hook: woocommerce_before_single_variation.
@@ -803,17 +801,12 @@ do_action( 'wc_quick_view_after_single_product' );
 /* Product Variation Section (Custom Button Style) */
 .product-variations-wrapper {
     padding: 0 20px;
-    margin-bottom: 20px;
-}
-
-.variation-attribute-group {
-    margin-bottom: 20px;
 }
 
 .variation-attribute-title {
     font-size: 16px;
     font-weight: bold;
-    margin: 0 0 12px 0;
+    margin: 10px 0 12px 0;
     color: #000;
 }
 
