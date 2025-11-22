@@ -140,15 +140,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        function removeSelectedCategories() {
-            document.querySelectorAll('.box-category .box-text .box-text-inner').forEach(function(box) {
-                box.classList.remove('selected');
-            });
-            document.querySelectorAll('.box-category img').forEach(function(box) {
-                box.classList.remove('selected');
-            });
-        }
-
         const categoryLinks = document.querySelectorAll('.product-category a');
         // Found category links: 
 
@@ -156,30 +147,9 @@ document.addEventListener('DOMContentLoaded', function() {
             link.addEventListener('click', function(event) {
                 event.preventDefault(); // Prevent default link behavior
                 // Category clicked
-
-                removeSelectedCategories();
-
-                // Add .selected class to clicked category
-                // The link is inside .col-inner, find .box-text-inner within the same container
-                const colInner = this.closest('.col-inner');
-                if (colInner) {
-                    const boxTextInner = colInner.querySelector('.box-text .box-text-inner');
-                    if (boxTextInner) {
-                        boxTextInner.classList.add('selected');
-                    }
-                    const iconInner = colInner.querySelector('.box-category img');
-                    if (iconInner) {
-                        iconInner.classList.add('selected');
-                    }
-                }
-
-                // Get text of clicked link
                 const categoryName = this.textContent.trim();
-                // Category name: 
-
-                // Save selected category to sessionStorage
                 sessionStorage.setItem('selectedCategory', categoryName);
-
+                setSelectedCategory(categoryName);
                 fadeOutToGroupCategory(categoryName);
             });
         });
@@ -215,7 +185,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const isHomePage = pathname === '/' || pathname === '' || pathname === '/home' || pathname === '/index.php';
 
     if (isHomePage) {
-        removeSelectedCategories();
         // Reset to PIZZA when loading home page (before DOM manipulation)
         sessionStorage.setItem('selectedCategory', 'PIZZA');
         // Home page loaded - Set default category to PIZZA
@@ -228,16 +197,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const categoryName = this.textContent.trim();
                 // Redirect to delivery page with category parameter
                 window.location.href = window.location.origin + '/delivery?category=' + encodeURIComponent(categoryName);
-                if(categoryName === 'PIZZA') {
-                    const boxTextInner = this.querySelector('.box-text .box-text-inner');
-                    if (boxTextInner) {
-                        boxTextInner.classList.add('selected');
-                    }
-                    const iconInner = this.querySelector('.box-category img');
-                    if (iconInner) {
-                        iconInner.classList.add('selected');
-                    }
-                }
             });
         });
 
@@ -297,36 +256,31 @@ function setSelectedCategory(categoryName) {
     document.querySelectorAll('.box-category .box-text .box-text-inner').forEach(function(box) {
         box.classList.remove('selected');
     });
+    document.querySelectorAll('.box-category img').forEach(function(box) {
+        box.classList.remove('selected');
+    });
 
     // Find and add .selected class to matching category
     const categoryLinks = document.querySelectorAll('.product-category a');
     // Looking through category links 
 
-    let found = false;
     categoryLinks.forEach(function(link) {
         const linkText = link.textContent.trim();
         if (linkText === categoryName) {
             // Found matching link: 
             const colInner = link.closest('.col-inner');
-            // colInner: 
-
             if (colInner) {
                 const boxTextInner = colInner.querySelector('.box-text .box-text-inner');
-                // boxTextInner: 
-
                 if (boxTextInner) {
                     boxTextInner.classList.add('selected');
-                    // Successfully added .selected class 
-                    found = true;
+                }
+                const iconInner = colInner.querySelector('.box-category img');
+                if (iconInner) {
+                    iconInner.classList.add('selected');
                 }
             }
         }
     });
-
-    if (!found) { 
-        console.warn('Could not find category:', categoryName); 
-        // Available categories: 
-    }
 }
 
 function fadeOutToGroupCategory(categoryName) {
