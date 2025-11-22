@@ -1,0 +1,756 @@
+Form rendered at 2025-10-23 13:26:25
+
+=== Get Available Stores at 2025-10-23 13:28:04 ===
+Date: 2025-10-28, Time: 20:27
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+
+=== Get Available Stores at 2025-10-23 13:28:41 ===
+Date: 2025-10-28, Time: 16:30
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✓ Store 649: Terraviva Ben Thanh - AVAILABLE
+Form rendered at 2025-10-23 13:37:14
+
+=== Get Available Stores at 2025-10-23 13:37:55 ===
+Date: 2025-10-28, Time: 17:30
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-10-23 13:38:23 ===
+Date: 2025-10-29, Time: 17:30
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-10-23 13:38:34 ===
+Date: 2025-10-29, Time: 18:30
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-10-23 13:38:41 ===
+Date: 2025-10-30, Time: 18:30
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-10-23 13:38:48 ===
+Date: 2025-10-30, Time: 10:30
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✓ Store 649: Terraviva Ben Thanh - AVAILABLE
+Available stores count: 1
+Form rendered at 2025-10-23 13:45:11
+
+=== Get Available Stores at 2025-10-23 13:45:50 ===
+Date: 2025-10-30, Time: 18:00
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-10-23 13:46:00 ===
+Date: 2025-10-30, Time: 09:00
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✓ Store 649: Terraviva Ben Thanh - AVAILABLE
+Available stores count: 1
+
+
+=== Reservation Submission at 2025-10-23 13:46:36 ===
+POST data: Array
+(
+    [reservation_date] => 2025-10-30
+    [start_time] => 09:00
+    [end_time] => 09:30
+    [party_size] => 7+
+    [store_id_radio] => 649
+    [store_id] => 649
+    [reservation_type] => Catering Room
+    [customer_name] => Viet
+    [customer_email] => hungviet150@gmail.com
+    [customer_phone] => 0986687269
+    [customer_message] => Test
+    [action] => crp_handle_reservation
+)
+
+Conflict check result: 0
+SUCCESS: Reservation saved. ID: 1
+Form rendered at 2025-10-24 02:44:28
+Form rendered at 2025-10-24 02:44:49
+Form rendered at 2025-10-24 02:45:00
+Form rendered at 2025-10-24 02:45:47
+Form rendered at 2025-10-24 02:45:52
+Form rendered at 2025-10-24 03:05:37
+
+=== Get Available Stores at 2025-10-24 03:06:44 ===
+Date: 2025-10-24, Time: 00:08
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+Form rendered at 2025-10-24 03:11:52
+
+=== Get Available Stores at 2025-10-24 03:12:08 ===
+Date: 2025-10-25, Time: 06:16
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-10-24 03:12:11 ===
+Date: 2025-10-25, Time: 18:16
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+Form rendered at 2025-10-24 03:19:46
+Form rendered at 2025-10-26 04:21:09
+Form rendered at 2025-10-26 04:25:45
+Form rendered at 2025-10-26 04:31:13
+Form rendered at 2025-10-26 04:33:02
+Form rendered at 2025-10-26 06:01:39
+Form rendered at 2025-10-26 06:32:20
+Form rendered at 2025-10-26 06:46:26
+Form rendered at 2025-10-26 06:54:24
+Form rendered at 2025-10-26 07:16:02
+Form rendered at 2025-10-26 07:16:09
+Form rendered at 2025-10-26 07:22:33
+Form rendered at 2025-10-26 08:15:41
+Form rendered at 2025-10-26 08:15:47
+Form rendered at 2025-10-26 11:10:05
+
+=== Get Available Stores at 2025-10-26 11:13:00 ===
+Date: 2025-10-27, Time: 18:10
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-10-26 11:15:22 ===
+Date: 2025-10-27, Time: 09:13
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✓ Store 649: Terraviva Ben Thanh - AVAILABLE
+Available stores count: 1
+Form rendered at 2025-10-26 13:00:49
+Form rendered at 2025-10-26 13:46:50
+Form rendered at 2025-10-26 15:45:31
+Form rendered at 2025-10-26 15:46:22
+Form rendered at 2025-10-26 23:41:06
+Form rendered at 2025-10-27 03:24:48
+Form rendered at 2025-10-27 03:24:49
+Form rendered at 2025-10-27 03:38:10
+
+=== Get Available Stores at 2025-10-27 03:39:01 ===
+Date: 2025-10-27, Time: 12:00
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✓ Store 649: Terraviva Ben Thanh - AVAILABLE
+Available stores count: 1
+
+=== Get Available Stores at 2025-10-27 03:39:28 ===
+Date: 2025-10-27, Time: 23:00
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-10-27 03:39:31 ===
+Date: 2025-10-27, Time: 12:00
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✓ Store 649: Terraviva Ben Thanh - AVAILABLE
+Available stores count: 1
+Form rendered at 2025-10-27 03:41:16
+
+=== Get Available Stores at 2025-10-27 03:41:31 ===
+Date: 2025-10-27, Time: 12:00
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✓ Store 649: Terraviva Ben Thanh - AVAILABLE
+Available stores count: 1
+Form rendered at 2025-10-27 13:24:48
+Form rendered at 2025-10-27 17:26:31
+Form rendered at 2025-10-29 07:04:08
+Form rendered at 2025-10-29 14:26:47
+Form rendered at 2025-10-29 14:29:56
+Form rendered at 2025-10-29 16:46:23
+Form rendered at 2025-10-29 16:46:31
+Form rendered at 2025-10-30 06:27:37
+Form rendered at 2025-10-30 06:31:47
+Form rendered at 2025-10-30 11:33:12
+Form rendered at 2025-10-30 23:46:52
+Form rendered at 2025-10-31 00:03:59
+Form rendered at 2025-10-31 00:06:47
+Form rendered at 2025-10-31 00:47:40
+Form rendered at 2025-10-31 10:04:13
+Form rendered at 2025-11-01 05:09:17
+Form rendered at 2025-11-01 07:34:29
+Form rendered at 2025-11-01 07:39:32
+Form rendered at 2025-11-01 08:58:51
+Form rendered at 2025-11-01 10:57:06
+Form rendered at 2025-11-02 03:32:43
+Form rendered at 2025-11-02 12:17:46
+Form rendered at 2025-11-02 12:35:34
+Form rendered at 2025-11-02 12:38:54
+Form rendered at 2025-11-03 08:55:49
+Form rendered at 2025-11-03 08:55:51
+
+=== Get Available Stores at 2025-11-03 08:58:20 ===
+Date: 2025-11-05, Time: 15:58
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✓ Store 649: Terraviva Ben Thanh - AVAILABLE
+Available stores count: 1
+
+=== Get Available Stores at 2025-11-03 08:58:24 ===
+Date: 2025-11-05, Time: 19:58
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-03 08:58:30 ===
+Date: 2025-11-05, Time: 19:45
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-03 08:58:43 ===
+Date: 2025-11-05, Time: 19:30
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-03 08:58:49 ===
+Date: 2025-11-05, Time: 19:43
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-03 08:58:50 ===
+Date: 2025-11-05, Time: 19:45
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-03 08:58:58 ===
+Date: 2025-11-05, Time: 19:30
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-03 08:59:32 ===
+Date: 2025-11-05, Time: 19:43
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-03 08:59:33 ===
+Date: 2025-11-05, Time: 19:45
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+Form rendered at 2025-11-03 11:38:24
+Form rendered at 2025-11-04 04:33:00
+Form rendered at 2025-11-04 04:33:43
+Form rendered at 2025-11-04 04:34:06
+Form rendered at 2025-11-04 05:45:21
+Form rendered at 2025-11-04 05:46:20
+Form rendered at 2025-11-04 08:23:45
+Form rendered at 2025-11-04 10:14:37
+Form rendered at 2025-11-04 13:59:24
+Form rendered at 2025-11-04 23:57:18
+Form rendered at 2025-11-05 06:29:57
+Form rendered at 2025-11-05 09:09:31
+Form rendered at 2025-11-05 09:58:08
+Form rendered at 2025-11-06 02:37:33
+Form rendered at 2025-11-07 08:36:56
+Form rendered at 2025-11-07 09:51:09
+Form rendered at 2025-11-07 09:57:36
+Form rendered at 2025-11-07 09:57:43
+Form rendered at 2025-11-07 09:58:17
+Form rendered at 2025-11-07 09:58:47
+Form rendered at 2025-11-07 12:41:15
+Form rendered at 2025-11-08 05:17:28
+Form rendered at 2025-11-10 01:45:48
+Form rendered at 2025-11-10 05:18:12
+Form rendered at 2025-11-10 07:58:56
+Form rendered at 2025-11-10 13:35:19
+Form rendered at 2025-11-10 13:36:53
+Form rendered at 2025-11-10 17:38:46
+Form rendered at 2025-11-11 09:09:39
+Form rendered at 2025-11-11 20:18:04
+Form rendered at 2025-11-11 21:44:55
+Form rendered at 2025-11-12 02:05:09
+Form rendered at 2025-11-12 05:52:07
+Form rendered at 2025-11-12 08:52:10
+Form rendered at 2025-11-12 10:03:07
+Form rendered at 2025-11-12 13:38:08
+Form rendered at 2025-11-12 21:20:58
+Form rendered at 2025-11-12 21:21:04
+Form rendered at 2025-11-13 07:52:56
+Form rendered at 2025-11-13 20:02:54
+Form rendered at 2025-11-14 07:16:01
+Form rendered at 2025-11-14 09:07:06
+Form rendered at 2025-11-14 09:08:36
+Form rendered at 2025-11-14 11:04:58
+
+=== Get Available Stores at 2025-11-14 11:34:57 ===
+Date: 2025-11-14, Time: 20:24
+
+=== Get Available Stores at 2025-11-14 11:34:57 ===
+Date: 2025-11-14, Time: 20:34
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-14 11:34:57 ===
+Date: 2025-11-14, Time: 18:34
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-14 11:35:01 ===
+Date: 2025-11-14, Time: 20:21
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-14 11:35:03 ===
+Date: 2025-11-14, Time: 20:30
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-14 11:35:13 ===
+Date: 2025-11-14, Time: 15:30
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✓ Store 649: Terraviva Ben Thanh - AVAILABLE
+Available stores count: 1
+
+=== Get Available Stores at 2025-11-14 11:35:15 ===
+Date: 2025-11-14, Time: 21:30
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-14 11:35:20 ===
+Date: 2025-11-14, Time: 21:31
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-14 11:35:25 ===
+Date: 2025-11-14, Time: 21:24
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-14 11:35:27 ===
+Date: 2025-11-14, Time: 21:17
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-14 11:35:29 ===
+Date: 2025-11-14, Time: 21:04
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-14 11:35:31 ===
+Date: 2025-11-14, Time: 21:00
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-14 11:35:42 ===
+Date: 2025-11-14, Time: 21:54
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-14 11:35:45 ===
+Date: 2025-11-14, Time: 21:42
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-14 11:35:50 ===
+Date: 2025-11-14, Time: 21:30
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-14 11:35:51 ===
+Date: 2025-11-14, Time: 20:30
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+Form rendered at 2025-11-14 11:57:55
+Form rendered at 2025-11-14 11:57:55
+Form rendered at 2025-11-14 14:04:40
+Form rendered at 2025-11-15 00:00:48
+Form rendered at 2025-11-15 02:34:48
+Form rendered at 2025-11-15 04:35:35
+Form rendered at 2025-11-15 22:48:27
+Form rendered at 2025-11-16 01:26:30
+Form rendered at 2025-11-17 14:36:49
+Form rendered at 2025-11-17 17:02:44
+Form rendered at 2025-11-17 17:03:51
+Form rendered at 2025-11-17 17:05:00
+Form rendered at 2025-11-17 17:05:20
+Form rendered at 2025-11-17 17:05:50
+Form rendered at 2025-11-17 17:18:58
+Form rendered at 2025-11-19 10:24:57
+Form rendered at 2025-11-19 11:24:46
+Form rendered at 2025-11-19 11:25:05
+Form rendered at 2025-11-19 12:03:57
+Form rendered at 2025-11-19 12:07:45
+Form rendered at 2025-11-19 12:08:40
+Form rendered at 2025-11-19 12:08:49
+Form rendered at 2025-11-19 12:10:40
+Form rendered at 2025-11-19 12:11:39
+Form rendered at 2025-11-19 13:36:04
+Form rendered at 2025-11-19 13:36:36
+Form rendered at 2025-11-19 13:36:48
+Form rendered at 2025-11-19 13:38:25
+Form rendered at 2025-11-19 13:51:47
+Form rendered at 2025-11-19 14:01:34
+Form rendered at 2025-11-19 14:15:43
+Form rendered at 2025-11-20 12:32:16
+Form rendered at 2025-11-20 12:33:05
+
+=== Get Available Stores at 2025-11-20 12:33:41 ===
+Date: 2025-11-22, Time: 21:00
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-20 12:33:52 ===
+Date: 2025-11-22, Time: 21:30
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-20 12:34:06 ===
+Date: 2025-11-22, Time: 20:30
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-20 12:34:21 ===
+Date: 2025-11-22, Time: 00:00
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-20 12:34:25 ===
+Date: 2025-11-22, Time: 20:00
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-20 12:34:33 ===
+Date: 2025-11-22, Time: 22:00
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-20 12:34:52 ===
+Date: 2025-11-23, Time: 22:00
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-20 12:34:57 ===
+Date: 2025-11-23, Time: 11:00
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-20 12:35:06 ===
+Date: 2025-11-23, Time: 20:00
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-20 12:35:16 ===
+Date: 2025-11-28, Time: 20:00
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-20 12:35:20 ===
+Date: 2025-11-28, Time: 22:00
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-20 12:35:30 ===
+Date: 2025-11-28, Time: 11:30
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✓ Store 649: Terraviva Ben Thanh - AVAILABLE
+Available stores count: 1
+
+=== Get Available Stores at 2025-11-20 12:36:43 ===
+Date: 2025-11-22, Time: 11:30
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-20 12:36:45 ===
+Date: 2025-11-22, Time: 18:30
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-20 12:37:00 ===
+Date: 2025-11-22, Time: 23:30
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-20 12:37:05 ===
+Date: 2025-11-22, Time: 21:30
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+Form rendered at 2025-11-20 12:37:10
+Form rendered at 2025-11-21 03:19:39
+Form rendered at 2025-11-21 04:00:36
+Form rendered at 2025-11-21 04:01:40
+
+=== Get Available Stores at 2025-11-21 04:03:16 ===
+Date: 2025-12-01, Time: 18:30
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-21 04:04:24 ===
+Date: 2025-12-02, Time: 18:30
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-21 04:04:34 ===
+Date: 2025-11-24, Time: 18:30
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+Form rendered at 2025-11-21 04:39:51
+Form rendered at 2025-11-21 11:15:35
+Form rendered at 2025-11-21 14:14:24
+
+=== Get Available Stores at 2025-11-21 14:14:53 ===
+Date: 2025-11-22, Time: 10:30
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+Form rendered at 2025-11-22 03:36:56
+Form rendered at 2025-11-22 03:37:16
+Form rendered at 2025-11-22 03:37:20
+
+=== Get Available Stores at 2025-11-22 03:37:33 ===
+Date: 2025-11-28, Time: 10:39
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+  ✓ Store 649: Terraviva Ben Thanh - AVAILABLE
+Available stores count: 1
+Form rendered at 2025-11-22 04:57:04
+Form rendered at 2025-11-22 05:12:09
+
+=== Get Available Stores at 2025-11-22 05:12:20 ===
+Date: 2025-11-23, Time: 11:30
+
+  === Checking Store 648 Availability ===
+    Date: 2025-11-23, Time: 11:30
+    Reservation hours data: Array
+(
+    [monday] => Array
+        (
+            [0] => 00:00,23:45
+        )
+
+    [tuesday] => Array
+        (
+            [0] => 00:00,23:45
+        )
+
+    [wednesday] => Array
+        (
+            [0] => 00:00,23:45
+        )
+
+    [thursday] => Array
+        (
+            [0] => 00:00,23:45
+        )
+
+    [friday] => Array
+        (
+            [0] => 00:00,23:45
+        )
+
+    [saturday] => Array
+        (
+            [0] => 00:00,23:45
+        )
+
+    [sunday] => Array
+        (
+            [0] => 00:00,23:45
+        )
+
+)
+
+    Day of week: sunday
+    Time slots for sunday: Array
+(
+    [0] => 00:00,23:45
+)
+
+    Reservation time parsed: 11:30
+    Checking slot: 00:00,23:45
+      Open: 00:00 -> PARSE_FAILED
+      Close: 23:45 -> PARSE_FAILED
+      ✗ Time parsing failed
+    ✗ RESULT: No matching time slot found
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+
+  === Checking Store 649 Availability ===
+    Date: 2025-11-23, Time: 11:30
+    Reservation hours data: Array
+(
+    [monday] => Array
+        (
+            [0] => 9:00 AM,5:00 PM
+        )
+
+    [tuesday] => Array
+        (
+            [0] => 9:00 AM,5:00 PM
+        )
+
+    [wednesday] => Array
+        (
+            [0] => 9:00 AM,5:00 PM
+        )
+
+    [thursday] => Array
+        (
+            [0] => 9:00 AM,5:00 PM
+        )
+
+    [friday] => Array
+        (
+            [0] => 9:00 AM,5:00 PM
+        )
+
+    [saturday] => Array
+        (
+        )
+
+    [sunday] => Array
+        (
+        )
+
+)
+
+    Day of week: sunday
+    ✗ RESULT: Store closed on sunday
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0
+
+=== Get Available Stores at 2025-11-22 05:12:27 ===
+Date: 2025-11-23, Time: 14:00
+
+  === Checking Store 648 Availability ===
+    Date: 2025-11-23, Time: 14:00
+    Reservation hours data: Array
+(
+    [monday] => Array
+        (
+            [0] => 00:00,23:45
+        )
+
+    [tuesday] => Array
+        (
+            [0] => 00:00,23:45
+        )
+
+    [wednesday] => Array
+        (
+            [0] => 00:00,23:45
+        )
+
+    [thursday] => Array
+        (
+            [0] => 00:00,23:45
+        )
+
+    [friday] => Array
+        (
+            [0] => 00:00,23:45
+        )
+
+    [saturday] => Array
+        (
+            [0] => 00:00,23:45
+        )
+
+    [sunday] => Array
+        (
+            [0] => 00:00,23:45
+        )
+
+)
+
+    Day of week: sunday
+    Time slots for sunday: Array
+(
+    [0] => 00:00,23:45
+)
+
+    Reservation time parsed: 14:00
+    Checking slot: 00:00,23:45
+      Open: 00:00 -> PARSE_FAILED
+      Close: 23:45 -> PARSE_FAILED
+      ✗ Time parsing failed
+    ✗ RESULT: No matching time slot found
+  ✗ Store 648: Terraviva An Phu - NOT AVAILABLE
+
+  === Checking Store 649 Availability ===
+    Date: 2025-11-23, Time: 14:00
+    Reservation hours data: Array
+(
+    [monday] => Array
+        (
+            [0] => 9:00 AM,5:00 PM
+        )
+
+    [tuesday] => Array
+        (
+            [0] => 9:00 AM,5:00 PM
+        )
+
+    [wednesday] => Array
+        (
+            [0] => 9:00 AM,5:00 PM
+        )
+
+    [thursday] => Array
+        (
+            [0] => 9:00 AM,5:00 PM
+        )
+
+    [friday] => Array
+        (
+            [0] => 9:00 AM,5:00 PM
+        )
+
+    [saturday] => Array
+        (
+        )
+
+    [sunday] => Array
+        (
+        )
+
+)
+
+    Day of week: sunday
+    ✗ RESULT: Store closed on sunday
+  ✗ Store 649: Terraviva Ben Thanh - NOT AVAILABLE
+Available stores count: 0

@@ -65,45 +65,85 @@ function crp_install_plugin()
 // Helper function to check if store is available for given datetime
 function crp_is_store_available($store_id, $reservation_date, $start_time)
 {
+    $debug_log = "\n  === Checking Store $store_id Availability ===\n";
+    $debug_log .= "    Date: $reservation_date, Time: $start_time\n";
+
     // Get reservation hours from postmeta
     $reservation_hours = get_post_meta($store_id, 'wpsl_reservation_hours', true);
 
+    $debug_log .= "    Reservation hours data: " . print_r($reservation_hours, true) . "\n";
+
     if (empty($reservation_hours)) {
+        $debug_log .= "    ✗ RESULT: No reservation hours set\n";
+        file_put_contents(plugin_dir_path(__FILE__) . 'debug_save.txt', $debug_log, FILE_APPEND);
         return false; // No reservation hours set
     }
 
     // Get day of week from reservation date
     $day_of_week = strtolower(date('l', strtotime($reservation_date))); // monday, tuesday, etc.
+    $debug_log .= "    Day of week: $day_of_week\n";
 
     // Check if store is open on this day
     if (!isset($reservation_hours[$day_of_week]) || empty($reservation_hours[$day_of_week])) {
+        $debug_log .= "    ✗ RESULT: Store closed on $day_of_week\n";
+        file_put_contents(plugin_dir_path(__FILE__) . 'debug_save.txt', $debug_log, FILE_APPEND);
         return false; // Store closed on this day
     }
 
     // Get time slots for this day
     $time_slots = $reservation_hours[$day_of_week];
+    $debug_log .= "    Time slots for $day_of_week: " . print_r($time_slots, true) . "\n";
 
     // Parse start time to compare (convert to 24h format)
     $reservation_time = DateTime::createFromFormat('H:i', $start_time);
+    $debug_log .= "    Reservation time parsed: " . ($reservation_time ? $reservation_time->format('H:i') : 'FAILED') . "\n";
 
     foreach ($time_slots as $slot) {
         if (empty($slot)) continue;
 
-        // Parse time range like "9:00 AM,5:00 PM"
-        $times = explode(',', $slot);
-        if (count($times) != 2) continue;
+        $debug_log .= "    Checking slot: $slot\n";
 
-        $open_time = DateTime::createFromFormat('g:i A', trim($times[0]));
-        $close_time = DateTime::createFromFormat('g:i A', trim($times[1]));
+        // Parse time range - supports both "9:00 AM,5:00 PM" and "00:00,23:45" formats
+        $times = explode(',', $slot);
+        if (count($times) != 2) {
+            $debug_log .= "      ✗ Invalid slot format (expected 2 times, got " . count($times) . ")\n";
+            continue;
+        }
+
+        $open_str = trim($times[0]);
+        $close_str = trim($times[1]);
+
+        // Try parsing as 12-hour format with AM/PM first (e.g., "9:00 AM")
+        $open_time = DateTime::createFromFormat('g:i A', $open_str);
+        $close_time = DateTime::createFromFormat('g:i A', $close_str);
+
+        // If that fails, try 24-hour format (e.g., "00:00" or "23:45")
+        if (!$open_time) {
+            $open_time = DateTime::createFromFormat('H:i', $open_str);
+        }
+        if (!$close_time) {
+            $close_time = DateTime::createFromFormat('H:i', $close_str);
+        }
+
+        $debug_log .= "      Open: $open_str -> " . ($open_time ? $open_time->format('H:i') : 'PARSE_FAILED') . "\n";
+        $debug_log .= "      Close: $close_str -> " . ($close_time ? $close_time->format('H:i') : 'PARSE_FAILED') . "\n";
 
         if ($open_time && $close_time && $reservation_time) {
             // Check if reservation time is within opening hours
             if ($reservation_time >= $open_time && $reservation_time <= $close_time) {
+                $debug_log .= "    ✓ RESULT: Time is within range!\n";
+                file_put_contents(plugin_dir_path(__FILE__) . 'debug_save.txt', $debug_log, FILE_APPEND);
                 return true;
+            } else {
+                $debug_log .= "      ✗ Time NOT in range ({$reservation_time->format('H:i')} not between {$open_time->format('H:i')} and {$close_time->format('H:i')})\n";
             }
+        } else {
+            $debug_log .= "      ✗ Time parsing failed\n";
         }
     }
 
+    $debug_log .= "    ✗ RESULT: No matching time slot found\n";
+    file_put_contents(plugin_dir_path(__FILE__) . 'debug_save.txt', $debug_log, FILE_APPEND);
     return false;
 }
 
@@ -175,11 +215,22 @@ function crp_render_reservation_form()
                 <label>Reservation Date & Time *</label>
                 <div class="form-flex">
                     <div class="form-date">
-                        <input type="date" name="reservation_date" id="reservation_date" required min="<?= date('Y-m-d') ?>">
+                        <input type="date" name="reservation_date" id="reservation_date" required>
                     </div>
                     <div class="form-time">
-                        <input type="time" name="start_time" id="start_time" required>
-                        <span id="end_time_display" style="margin-left: 10px; font-weight: bold;"></span>
+                        <select name="start_time" id="start_time" required>
+                            <option value="">Select time</option>
+                            <?php
+                            // Generate time slots from 10:00 AM to 11:00 PM in 30-minute intervals
+                            for ($hour = 10; $hour <= 23; $hour++) {
+                                foreach ([0, 30] as $minute) {
+                                    $time = sprintf('%02d:%02d', $hour, $minute);
+                                    echo '<option value="' . $time . '">' . $time . '</option>';
+                                }
+                            }
+                            ?>
+                        </select>
+                        <span id="end_time_display" style="display: none;"></span>
                         <input type="hidden" name="end_time" id="end_time">
                     </div>
                 </div>
@@ -252,6 +303,21 @@ function crp_render_reservation_form()
     <script>
         jQuery(document).ready(function($) {
             console.log('Reservation form loaded');
+
+            // Safari-specific fixes for date input
+            // Set min date via JavaScript (Safari doesn't like PHP-generated min attribute)
+            var today = new Date();
+            var todayString = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+            $('#reservation_date').attr('min', todayString);
+
+            // Ensure date input is enabled (Safari fix)
+            $('#reservation_date').prop('disabled', false).prop('readonly', false).removeAttr('disabled');
+
+            // Ensure time select is enabled
+            $('#start_time').prop('disabled', false).removeAttr('disabled');
+
+            console.log('Date input and time select enabled (Safari-compatible)');
+            console.log('Min date set to:', todayString);
 
             // Function to load available stores based on date/time
             function loadAvailableStores() {
@@ -534,13 +600,47 @@ function crp_render_reservation_form()
         .form-row input[type="tel"],
         .form-row input[type="date"],
         .form-row input[type="time"],
+        .form-row select,
         .form-row textarea {
             width: 100%;
-            padding: 12px;
             border: 1px solid #ddd;
             border-radius: 4px;
             font-size: 16px;
             box-sizing: border-box;
+        }
+
+        /* Safari-specific fixes for date input */
+        .form-row input[type="date"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-color: #fff;
+            cursor: pointer;
+        }
+
+        /* Ensure Safari shows the calendar icon */
+        .form-row input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            opacity: 1;
+        }
+
+        /* Style select dropdown (time selector) */
+        .form-row select {
+            cursor: pointer;
+            background-color: #fff;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D%2220%22%20height%3D%2220%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cpath%20d%3D%22M5%206l5%205%205-5%202%201-7%207-7-7%202-1z%22%20fill%3D%22%23555%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 12px;
+            padding-right: 35px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        .form-row select:focus {
+            outline: none;
+            border-color: #CD0000;
         }
 
         .form-row textarea {
