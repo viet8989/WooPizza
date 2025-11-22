@@ -44,7 +44,7 @@ When clicking 'plus' or 'minus' quantity buttons in mini cart, price fields upda
 ## Prerequisites
 
 ### 1. Python Scripts Setup
-Located at: `~/Documents/AutoUploadFTPbyGitStatus/`
+Located at: `~/Dropbox/AutoUploadFTPbyGitStatus/`
 
 - **auto_upload_ftp.py** - Upload modified files to production server
 - **auto_download_file.py** - Download specific files from production server
@@ -192,9 +192,9 @@ Wait 5 seconds.
 
 #### Step 7: Download Log Files (Terminal)
 ```bash
-cd /home/vietnhq/Documents/WooCommerce/WooPizza
-python3 ~/Documents/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/debug.log && \
-python3 ~/Documents/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/custom-debug.log
+cd ~/Dropbox/WooPizza
+python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/debug.log && \
+python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/custom-debug.log
 ```
 
 #### Step 8: Analyze Logs (Terminal/IDE)
@@ -221,18 +221,18 @@ Use the automated test script located at: `auto-test-mini-cart.js`
 4. Download logs from terminal:
 
 ```bash
-cd /home/vietnhq/Documents/WooCommerce/WooPizza
+cd ~/Dropbox/WooPizza
 sleep 35 && \
-python3 ~/Documents/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/debug.log && \
-python3 ~/Documents/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/custom-debug.log
+python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/debug.log && \
+python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/custom-debug.log
 ```
 
 **One-line command** (open browser + download logs after delay):
 ```bash
 open "https://terravivapizza.com?autotest=minicart" && \
 sleep 35 && \
-python3 ~/Documents/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/debug.log && \
-python3 ~/Documents/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/custom-debug.log
+python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/debug.log && \
+python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/custom-debug.log
 ```
 
 ---
@@ -279,10 +279,10 @@ foreach ($items as $index => $item) {
 
 ### Upload Modified PHP Files
 ```bash
-cd /home/vietnhq/Documents/WooCommerce/WooPizza
+cd ~/Dropbox/WooPizza
 
 # Upload all modified files (detected by git status)
-python3 ~/Documents/AutoUploadFTPbyGitStatus/auto_upload_ftp.py
+python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_upload_ftp.py
 
 # The script shows:
 # - Which files changed
@@ -305,8 +305,8 @@ nano wp-content/themes/flatsome-child/functions.php
 
 ### 2. Upload Changes
 ```bash
-cd /home/vietnhq/Documents/WooCommerce/WooPizza
-python3 ~/Documents/AutoUploadFTPbyGitStatus/auto_upload_ftp.py
+cd ~/Dropbox/WooPizza
+python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_upload_ftp.py
 ```
 
 ### 3. Run Automated Test
@@ -316,8 +316,8 @@ open "https://terravivapizza.com?autotest=minicart" && sleep 35
 
 ### 4. Download Logs
 ```bash
-python3 ~/Documents/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/debug.log && \
-python3 ~/Documents/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/custom-debug.log
+python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/debug.log && \
+python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/custom-debug.log
 ```
 
 ### 5. Analyze Results
@@ -485,13 +485,13 @@ chmod 644 wp-content/custom-debug.log
 **Check**:
 ```bash
 # Verify script exists
-ls -la ~/Documents/AutoUploadFTPbyGitStatus/auto_upload_ftp.py
+ls -la ~/Dropbox/AutoUploadFTPbyGitStatus/auto_upload_ftp.py
 
 # Check FTP config
-cat ~/Documents/AutoUploadFTPbyGitStatus/ftp_config.ini
+cat ~/Dropbox/AutoUploadFTPbyGitStatus/ftp_config.ini
 
 # Run with error output
-python3 ~/Documents/AutoUploadFTPbyGitStatus/auto_upload_ftp.py 2>&1
+python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_upload_ftp.py 2>&1
 ```
 
 ### Issue: Download Script Fails
@@ -502,7 +502,7 @@ python3 ~/Documents/AutoUploadFTPbyGitStatus/auto_upload_ftp.py 2>&1
 # Check in browser or FTP client
 
 # Try with verbose output
-python3 ~/Documents/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/debug.log -v
+python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/debug.log -v
 ```
 
 ---
@@ -514,8 +514,8 @@ python3 ~/Documents/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/d
 | **error_log()** | PHP server-side logging | `error_log('message');` |
 | **writeLogServer()** | JavaScript client-side logging | `writeLogServer(data, 'info');` |
 | **clearLogsServer()** | Clear both log files | `clearLogsServer();` |
-| **auto_upload_ftp.py** | Upload modified files | `python3 ~/Documents/AutoUploadFTPbyGitStatus/auto_upload_ftp.py` |
-| **auto_download_file.py** | Download specific file | `python3 ~/Documents/AutoUploadFTPbyGitStatus/auto_download_file.py /path/to/file` |
+| **auto_upload_ftp.py** | Upload modified files | `python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_upload_ftp.py` |
+| **auto_download_file.py** | Download specific file | `python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_download_file.py /path/to/file` |
 | **auto-test-mini-cart.js** | Automated browser test | Open `?autotest=minicart` |
 
 ---

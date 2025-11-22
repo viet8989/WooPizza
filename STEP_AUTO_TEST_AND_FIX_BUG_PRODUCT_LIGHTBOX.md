@@ -41,7 +41,7 @@
 ## Prerequisites
 
 ### 1. Python Scripts Setup
-Located at: `~/Documents/AutoUploadFTPbyGitStatus/`
+Located at: `~/Dropbox/AutoUploadFTPbyGitStatus/`
 
 - **auto_upload_ftp.py** - Upload modified files to production server
 - **auto_download_file.py** - Download specific files from production server

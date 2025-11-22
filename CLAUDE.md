@@ -133,6 +133,348 @@ wp rewrite flush
 **Modify menu behavior:**
 - Edit: `wp-content/themes/flatsome-child/js/custom.js`
 
+## Debugging & Testing Workflow
+
+### Key Features
+
+✅ **No MySQL/Database Commands Required**
+- No need to run `mysql` commands from terminal
+- No direct database queries like `SELECT * FROM wp_posts`
+- WordPress/WooCommerce functions handle all database operations internally
+- We just add `error_log()` to see what WordPress is doing
+
+✅ **Debug via PHP Code Logging**
+- Add `error_log()` statements in PHP files
+- View results in `wp-content/debug.log`
+- No need for database access or phpMyAdmin
+
+✅ **Auto Upload/Download via Python Scripts**
+- `auto_upload_ftp.py` - Uploads modified files to production
+- `auto_download_file.py` - Downloads log files from production
+- One command to sync changes with live server
+
+✅ **Client-Side Logging to Server**
+- `writeLogServer()` - JavaScript logs saved to server file
+- `clearLogsServer()` - Clear logs before testing
+- View browser events in `wp-content/custom-debug.log`
+
+✅ **Automated Testing**
+- URL parameter triggers auto-test scripts (e.g., `?autotest=minicart`)
+- Scripts run all test steps automatically
+- Wait for completion, download logs, analyze results
+
+### Prerequisites
+
+#### 1. Python Scripts Setup
+Located at: `~/Dropbox/AutoUploadFTPbyGitStatus/`
+
+- **auto_upload_ftp.py** - Upload modified files to production server
+- **auto_download_file.py** - Download specific files from production server
+- **ftp_config.ini** - FTP credentials configuration
+
+#### 2. Server-Side Logging Functions (PHP)
+These functions are available globally in WordPress:
+
+```php
+// Write logs to server
+error_log('Your debug message here');
+
+// For structured data
+error_log('Data: ' . print_r($data, true));
+```
+
+#### 3. Client-Side Logging Functions (JavaScript)
+These functions are available in the browser console:
+
+```javascript
+// Write client-side logs to server
+writeLogServer(data, logLevel);
+
+// Clear both log files
+clearLogsServer();
+```
+
+**Example**:
+```javascript
+writeLogServer({
+    event: 'button_clicked',
+    timestamp: new Date().toISOString(),
+    data: { id: 123, value: 'test' }
+}, 'info');
+```
+
+### Automated Testing Workflow
+
+#### General Testing Pattern
+
+**Step 1: Open Site**
+```bash
+open https://terravivapizza.com
+```
+
+**Step 2: Trigger Feature UI (Browser Console)**
+```javascript
+// Example: Open mini cart
+document.querySelectorAll('.header-nav.header-nav-main.nav.nav-right.nav-size-large.nav-spacing-xlarge.nav-uppercase li a')[0].click();
+```
+
+**Step 3: Clear Previous Logs (Browser Console)**
+```javascript
+clearLogsServer();
+```
+
+**Step 4: Log State Before Action (Browser Console)**
+```javascript
+const beforeData = {
+    event: 'before_action',
+    timestamp: new Date().toISOString(),
+    // Add relevant data to capture
+};
+writeLogServer(beforeData, 'info');
+```
+
+**Step 5: Trigger Action**
+Perform the action you want to test (click button, submit form, etc.)
+
+**Step 6: Log State After Action (Browser Console)**
+```javascript
+const afterData = {
+    event: 'after_action',
+    timestamp: new Date().toISOString(),
+    // Add relevant data to capture
+};
+writeLogServer(afterData, 'info');
+```
+
+**Step 7: Download Log Files (Terminal)**
+```bash
+cd ~/Dropbox/WooPizza
+python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/debug.log && \
+python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/custom-debug.log
+```
+
+**Step 8: Analyze Logs**
+```bash
+# Read server-side logs
+cat wp-content/debug.log
+
+# Read client-side logs
+cat wp-content/custom-debug.log
+```
+
+#### Automated Test Scripts
+
+Use URL parameters to trigger automated tests:
+- `?autotest=minicart` - Mini cart functionality
+- `?autotest=product-lightbox` - Product quick view
+- Add more as needed
+
+**One-line command** (open browser + download logs after delay):
+```bash
+open "https://terravivapizza.com?autotest=feature-name" && \
+sleep 35 && \
+python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/debug.log && \
+python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/custom-debug.log
+```
+
+### Debugging PHP Code (Server-Side)
+
+#### Add Debug Logging to PHP
+**Common locations**:
+- `wp-content/themes/flatsome-child/functions.php`
+- `wp-content/plugins/*/[plugin-file].php`
+
+**Example**:
+```php
+// Log simple message
+error_log('Processing cart item: ' . $cart_item_key);
+
+// Log structured data
+error_log('Cart item data: ' . print_r($cart_item, true));
+
+// Log variable values
+error_log('Price - Regular: ' . $regular_price . ', Current: ' . $current_price);
+
+// Log array with label
+error_log('Pizza halves data: ' . print_r($halves, true));
+```
+
+**Common debugging patterns**:
+```php
+// Before/after comparison
+error_log('BEFORE calculation - price: ' . $price);
+// ... calculation code ...
+error_log('AFTER calculation - price: ' . $price);
+
+// Conditional logging
+if ($is_paired_mode) {
+    error_log('PAIRED MODE - both halves present');
+} else {
+    error_log('WHOLE PIZZA MODE - single product');
+}
+
+// Loop debugging
+foreach ($items as $index => $item) {
+    error_log('Item ' . $index . ': ' . print_r($item, true));
+}
+```
+
+#### Upload Modified PHP Files
+```bash
+cd ~/Dropbox/WooPizza
+
+# Upload all modified files (detected by git status)
+python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_upload_ftp.py
+
+# The script shows:
+# - Which files changed
+# - Upload progress
+# - Success/failure status
+```
+
+### Complete Debug & Fix Cycle
+
+#### 1. Add Debug Logging
+Edit the PHP file where you suspect the issue:
+```bash
+# Example: Edit functions.php
+nano wp-content/themes/flatsome-child/functions.php
+
+# Add error_log() statements at key points
+```
+
+#### 2. Upload Changes
+```bash
+cd ~/Dropbox/WooPizza
+python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_upload_ftp.py
+```
+
+#### 3. Run Automated Test
+```bash
+# Use appropriate autotest parameter for your feature
+open "https://terravivapizza.com?autotest=feature-name" && sleep 35
+```
+
+#### 4. Download Logs
+```bash
+python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/debug.log && \
+python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/custom-debug.log
+```
+
+#### 5. Analyze Results
+```bash
+# View server logs
+cat wp-content/debug.log
+
+# View client logs
+cat wp-content/custom-debug.log
+
+# Or use grep to filter specific events
+grep "keyword" wp-content/debug.log
+grep "event_name" wp-content/custom-debug.log
+```
+
+#### 6. Fix Code
+Based on log analysis, edit the code:
+```bash
+nano wp-content/themes/flatsome-child/functions.php
+# Make fixes
+```
+
+#### 7. Test Fix
+Repeat steps 2-5 to verify the fix works.
+
+### Log File Locations
+
+#### Server Logs (PHP)
+**Path**: `wp-content/debug.log`
+
+**Content**: Server-side PHP operations
+- Cart calculations
+- Price modifications
+- Database queries
+- WooCommerce hooks execution
+
+**Format**:
+```
+[11-Nov-2025 13:13:46 UTC] Processing cart item: abc123
+[11-Nov-2025 13:13:46 UTC] Price: 150000
+```
+
+#### Client Logs (JavaScript)
+**Path**: `wp-content/custom-debug.log`
+
+**Content**: Browser-side JavaScript events
+- User interactions
+- AJAX responses
+- UI state before/after actions
+- Cart totals from DOM
+
+**Format**:
+```json
+[2025-11-11T13:13:46.000Z] [INFO] [https://terravivapizza.com] {"event":"before_action","data":"..."}
+```
+
+### Tips & Best Practices
+
+#### 1. Use Descriptive Log Messages
+```php
+// Bad
+error_log($price);
+
+// Good
+error_log('Unit price after toppings: ' . $price);
+```
+
+#### 2. Log Before and After Critical Operations
+```php
+error_log('BEFORE set_price: ' . $cart_item['data']->get_price());
+$cart_item['data']->set_price($new_price);
+error_log('AFTER set_price: ' . $cart_item['data']->get_price());
+```
+
+#### 3. Use Separators for Clarity
+```php
+error_log('========================================');
+error_log('Processing item: ' . $item_id);
+error_log('========================================');
+```
+
+#### 4. Clean Up Debug Logs After Fixing
+```bash
+# Remove old debug logging after fixing
+# Comment out or remove error_log() calls that are no longer needed
+```
+
+#### 5. Git Ignore Log Files
+Already configured in `.gitignore`:
+```
+wp-content/debug.log
+wp-content/custom-debug.log
+```
+
+### Quick Reference Commands
+
+```bash
+# Full automated test + download logs
+open "https://terravivapizza.com?autotest=feature-name" && \
+sleep 35 && \
+python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/debug.log && \
+python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_download_file.py /wp-content/custom-debug.log
+
+# Upload changes
+cd ~/Dropbox/WooPizza && \
+python3 ~/Dropbox/AutoUploadFTPbyGitStatus/auto_upload_ftp.py
+
+# View logs
+cat wp-content/debug.log
+cat wp-content/custom-debug.log
+
+# Search logs for specific events
+grep "keyword" wp-content/debug.log
+grep "price" wp-content/debug.log | grep -i "error"
+```
+
 ## Important Implementation Details
 
 ### Cart Item Uniqueness
