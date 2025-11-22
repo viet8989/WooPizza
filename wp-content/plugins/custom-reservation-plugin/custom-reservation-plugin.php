@@ -215,7 +215,7 @@ function crp_render_reservation_form()
                 <label>Reservation Date & Time *</label>
                 <div class="form-flex">
                     <div class="form-date">
-                        <input type="date" name="reservation_date" id="reservation_date" required>
+                        <input type="date" name="reservation_date" id="reservation_date" required value="<?= date('Y-m-d') ?>">
                     </div>
                     <div class="form-time">
                         <select name="start_time" id="start_time" required>
@@ -235,13 +235,16 @@ function crp_render_reservation_form()
                     </div>
                 </div>
                 <small style="color: #666;">Operating hours vary by store - select date & time to see available branches</small>
+                <div id="datetime-warning" style="display: none; margin-top: 10px; padding: 10px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; color: #856404;">
+                    <strong>⚠️ Warning:</strong> Selected date and time is in the past. Please choose a future date/time.
+                </div>
             </div>
 
             <div class="form-row">
                 <label>Party Size (Number of Guests) *</label>
                 <div class="quantity buttons_added">
                     <button type="button" class="minus button is-form" style="margin-right: 0">-</button>
-                    <input type="number" name="party_size" id="party-size-input" class="input-text qty text" value="4" min="1" max="20" step="1" required>
+                    <input type="number" name="party_size" id="party-size-input" class="input-text qty text" value="4" min="1" max="20" step="1" required readonly>
                     <button type="button" class="plus button is-form">+</button>
                 </div>
                 <small style="color: #666; padding-top: 10px;">Minimum 1 guest, Maximum 20 guests</small>
@@ -319,6 +322,33 @@ function crp_render_reservation_form()
             console.log('Date input and time select enabled (Safari-compatible)');
             console.log('Min date set to:', todayString);
 
+            // Function to validate if selected datetime is in the past
+            function validateDateTime() {
+                const reservationDate = $('#reservation_date').val();
+                const startTime = $('#start_time').val();
+
+                if (!reservationDate || !startTime) {
+                    $('#datetime-warning').hide();
+                    return true; // Not yet selected, so not invalid
+                }
+
+                // Create Date object from selected date and time
+                const selectedDateTime = new Date(reservationDate + ' ' + startTime);
+                const now = new Date();
+
+                // Check if selected datetime is in the past
+                if (selectedDateTime < now) {
+                    $('#datetime-warning').show();
+                    $('#branch-selection-section').hide();
+                    $('#store-id-selected').val('');
+                    console.log('⚠️ Warning: Selected datetime is in the past');
+                    return false;
+                } else {
+                    $('#datetime-warning').hide();
+                    return true;
+                }
+            }
+
             // Function to load available stores based on date/time
             function loadAvailableStores() {
                 const reservationDate = $('#reservation_date').val();
@@ -333,6 +363,12 @@ function crp_render_reservation_form()
                     // Hide branch selection section
                     $('#branch-selection-section').hide();
                     $('#store-id-selected').val('');
+                    return;
+                }
+
+                // Validate datetime is not in the past
+                if (!validateDateTime()) {
+                    console.log('⚠️ Cannot load branches - datetime is in the past');
                     return;
                 }
 
@@ -471,52 +507,55 @@ function crp_render_reservation_form()
                 loadAvailableStores();
             });
 
-            // Party size increment/decrement buttons (WooCommerce-style quantity selector)
-            $('.quantity .plus').on('click', function() {
+            // Party size increment/decrement buttons - Step 1 only
+            $('.quantity .plus').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
                 const input = $('#party-size-input');
                 let currentValue = parseInt(input.val()) || 4;
                 const maxValue = parseInt(input.attr('max')) || 20;
 
                 if (currentValue < maxValue) {
-                    currentValue++;
+                    currentValue = currentValue + 1; // Increment by exactly 1
                     input.val(currentValue);
                     console.log('Party size increased to:', currentValue);
                 }
+
+                return false;
             });
 
-            $('.quantity .minus').on('click', function() {
+            $('.quantity .minus').on('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
                 const input = $('#party-size-input');
                 let currentValue = parseInt(input.val()) || 4;
                 const minValue = parseInt(input.attr('min')) || 1;
 
                 if (currentValue > minValue) {
-                    currentValue--;
+                    currentValue = currentValue - 1; // Decrement by exactly 1
                     input.val(currentValue);
                     console.log('Party size decreased to:', currentValue);
                 }
+
+                return false;
             });
 
-            // Allow direct input change
-            $('#party-size-input').on('change', function() {
-                const input = $(this);
-                let value = parseInt(input.val()) || 4;
-                const minValue = parseInt(input.attr('min')) || 1;
-                const maxValue = parseInt(input.attr('max')) || 20;
-
-                // Enforce min/max constraints
-                if (value < minValue) value = minValue;
-                if (value > maxValue) value = maxValue;
-
-                input.val(value);
-                console.log('Party size set to:', value);
-            });
+            // Readonly input - users can only use plus/minus buttons
 
             // Form submission
             $('#crp-reservation-form').on('submit', function(e) {
                 e.preventDefault();
                 console.log('Form submitted');
 
-                const partySize = $('#party-size-selected').val();
+                // Validate datetime is not in the past
+                if (!validateDateTime()) {
+                    $('#crp-response').html('<div class="error-message">Cannot make reservation for past date/time. Please select a future date and time.</div>');
+                    return;
+                }
+
+                const partySize = $('#party-size-input').val();
                 const storeId = $('#store-id-selected').val();
 
                 if (!partySize) {
@@ -706,6 +745,16 @@ function crp_render_reservation_form()
             font-size: 15px;
         }
 
+        /* Party size input - readonly (users can only use +/- buttons) */
+        #party-size-input[readonly] {
+            cursor: default;
+            background-color: #fff;
+            color: #333;
+            font-weight: 600;
+            text-align: center;
+            pointer-events: none;
+        }
+
         .submit-btn {
             width: 100%;
             height: 60px;
@@ -842,11 +891,14 @@ function crp_handle_reservation()
         wp_send_json_error(['message' => 'Invalid time format.']);
     }
 
-    // Check if reservation date is in the past
-    if (strtotime($date) < strtotime(date('Y-m-d'))) {
-        $debug_log = "ERROR: Cannot book past dates\n";
+    // Check if reservation datetime is in the past
+    $reservation_datetime = strtotime($date . ' ' . $start_time);
+    $current_datetime = strtotime('now');
+
+    if ($reservation_datetime < $current_datetime) {
+        $debug_log = "ERROR: Cannot book past datetime - Selected: $date $start_time, Current: " . date('Y-m-d H:i') . "\n";
         file_put_contents(plugin_dir_path(__FILE__) . 'debug_save.txt', $debug_log, FILE_APPEND);
-        wp_send_json_error(['message' => 'Cannot make reservations for past dates.']);
+        wp_send_json_error(['message' => 'Cannot make reservations for past date/time. Please select a future date and time.']);
     }
 
     // Verify store is available for selected date/time
