@@ -29,7 +29,10 @@ A complete restaurant reservation system for WooPizza WordPress site, integrated
 
 ✓ **Admin Management Panel**:
 - View all reservations with filtering (All, Confirmed, Pending, Completed, Cancelled)
-- Update reservation status
+- **Edit reservations** - Modify customer details, date/time, party size, type, and status
+- **Admin notes** - Add internal notes to reservations (not visible to customers)
+- Update reservation status with quick action links
+- **Audit trail** - Track who last updated each reservation and when
 - View detailed reservation information including store details
 - Delete reservations
 - Manage branches via WP Store Locator
@@ -41,9 +44,12 @@ A complete restaurant reservation system for WooPizza WordPress site, integrated
 - ✅ Cross-browser date/time handling
 
 ✓ **Automatic Features**:
-- Email confirmation sent to customers with store details
+- Email notification sent to customers with store details
+- New reservations start with "pending" status for admin review
 - Time conflict checking (prevents double-booking)
 - 30-minute default reservation duration
+- Automatic timestamp tracking (created_at, updated_at)
+- User activity tracking (who made the last update)
 - Responsive design for all devices
 - AJAX form submission with loading states
 - Comprehensive logging for debugging
@@ -122,14 +128,51 @@ Customers can make reservations by:
 
 1. Go to **Reservations** → **All Reservations**
 2. Filter by status: All, Confirmed, Pending, Completed, Cancelled
-3. Click **View** to see full details
-4. Update status using action links
+3. Click **View** to see full details including:
+   - Customer information
+   - Reservation details
+   - Special requests from customer
+   - Admin notes (if any)
+   - Created timestamp
+   - Last updated timestamp and user (if modified)
+
+#### Edit Reservations
+
+1. Go to **Reservations** → **All Reservations**
+2. Click **Edit** on any reservation
+3. Edit form modal appears with all fields:
+   - Customer name, email, phone
+   - Reservation date and time
+   - Party size
+   - Reservation type
+   - Status (pending/confirmed/completed/cancelled)
+   - Customer's special requests
+   - Admin notes (internal use only)
+4. Click **Save Changes**
+5. System automatically tracks who made the edit and when
+
+#### Add Admin Notes
+
+1. Click **Edit** on a reservation
+2. Scroll to **Admin Notes** field
+3. Add internal notes such as:
+   - "Customer requested window seat"
+   - "Called to confirm - customer will arrive 10 minutes late"
+   - "VIP guest - prepare special welcome"
+   - "Dietary restrictions: gluten-free"
+4. Notes are only visible to admin staff, never shown to customers
+
+#### Update Status
+
+1. Use quick action links: **Confirm**, **Complete**, **Cancel**
+2. Or use **Edit** to change status manually
+3. Status changes are tracked with timestamp and user info
 
 #### Manage Branches
 
-1. Go to **Reservations** → **Branches**
-2. Add new branches using the form
-3. Edit or delete existing branches
+1. Go to **Store Locator** → **Stores** (WP Store Locator plugin)
+2. Add, edit, or delete store locations
+3. Configure operating hours in `wpsl_reservation_hours` custom field
 
 ## Database Tables
 
@@ -138,23 +181,26 @@ The plugin creates one custom table and integrates with WP Store Locator:
 1. **`wp_reservations`** - Stores all reservation data
    - `id` - Unique reservation ID
    - `customer_name`, `customer_email`, `customer_phone` - Customer contact info
-   - `customer_message` - Special requests/notes
+   - `customer_message` - Special requests/notes from customer
    - `reservation_date`, `start_time`, `end_time` - Reservation datetime
    - `time_slot` - Display format (e.g., "18:00 - 18:30")
    - `store_id` - WP Store Locator post ID (references wpsl_stores)
    - `party_size` - Number of guests (1-20)
    - `reservation_type` - Standard/VIP/Catering Room
-   - `status` - confirmed/pending/completed/cancelled
+   - `status` - pending/confirmed/completed/cancelled (default: pending)
+   - `admin_notes` - Internal notes for staff only (not visible to customers)
    - `created_at` - Timestamp when reservation was created
+   - `updated_at` - Timestamp when reservation was last modified
+   - `updated_by` - WordPress user ID of admin who last updated the record
 
 2. **WP Store Locator Integration** (uses existing tables):
    - Stores managed via WP Store Locator plugin
    - Operating hours stored in `wpsl_reservation_hours` postmeta
    - Store details (name, address, city) from wpsl_stores post type
 
-3. **Legacy Table** (deprecated, maintained for backward compatibility):
-   - `wp_reservation_branches` - No longer actively used
-   - Migration to WP Store Locator completed
+3. **Legacy Table** (deprecated, no longer created):
+   - `wp_reservation_branches` - Removed from installation script
+   - All branches now managed via WP Store Locator plugin
 
 ## Debugging
 
@@ -346,7 +392,30 @@ For issues or questions, check:
 
 ## Version History
 
-### v1.2 (Current) - November 2025
+### v1.3 (Current) - November 2025
+**New Features:**
+- ✅ **Edit Reservation Functionality** - Full edit modal to modify all reservation details
+- ✅ **Admin Notes Field** - Internal staff notes visible only in admin panel
+- ✅ **Audit Trail** - Track who updated reservations and when
+- ✅ **Updated Tracking** - `updated_at` and `updated_by` fields added to database
+- ✅ **Pending by Default** - New reservations save as "pending" for admin review
+- ✅ **Code Cleanup** - Removed deprecated `wp_reservation_branches` table code
+
+**Improved Email Notifications:**
+- Updated subject line to "Reservation Request Received"
+- Clarified that reservations are pending confirmation
+- Better messaging for customer expectations
+
+**Bug Fixes:**
+- Fixed default status (was "confirmed", now correctly "pending")
+- Improved email wording to reflect pending workflow
+
+**Database Changes:**
+- Added `admin_notes TEXT` field
+- Added `updated_at DATETIME` field with auto-update
+- Added `updated_by BIGINT` field to track admin user
+
+### v1.2 - November 2025
 **Major Updates:**
 - ✅ **Safari Compatibility Fix** - Replaced `<input type="time">` with dropdown select
 - ✅ **WP Store Locator Integration** - Dynamic branch loading from WP Store Locator plugin
@@ -386,4 +455,5 @@ For issues or questions, check:
 **For**: WooPizza Restaurant
 **Integration**: WP Store Locator plugin
 **Browser Compatibility**: Chrome, Safari, Firefox, Edge
-**Last Updated**: November 2025
+**Version**: 1.3
+**Last Updated**: November 22, 2025

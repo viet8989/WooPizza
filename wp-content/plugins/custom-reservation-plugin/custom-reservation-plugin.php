@@ -1,8 +1,8 @@
 <?php
 /*
 Plugin Name: Custom Reservation Plugin
-Description: Restaurant reservation system with branch selection, party size, date/time selection, and admin management.
-Version: 1.0
+Description: Restaurant reservation system with branch selection, party size, date/time selection, admin management, edit functionality, and audit trail.
+Version: 1.3
 Author: Duong
 */
 
@@ -928,7 +928,7 @@ function crp_handle_reservation()
         'store_id' => $store_id,
         'party_size' => $party_size,
         'reservation_type' => $reservation_type,
-        'status' => 'confirmed'
+        'status' => 'pending'
     ]);
 
     if ($wpdb->last_error) {
@@ -945,9 +945,10 @@ function crp_handle_reservation()
     $full_address = $store_address . ($store_city ? ', ' . $store_city : '');
 
     // Send confirmation email
-    $subject = 'Reservation Confirmation - WooPizza';
+    $subject = 'Reservation Request Received - WooPizza';
     $body = "Dear $name,\n\n";
-    $body .= "Thank you for your reservation at WooPizza!\n\n";
+    $body .= "Thank you for your reservation request at WooPizza!\n\n";
+    $body .= "Your reservation is currently pending confirmation. We will review it and get back to you shortly.\n\n";
     $body .= "Reservation Details:\n";
     $body .= "━━━━━━━━━━━━━━━━━━━━━━\n";
     $body .= "Date: $date\n";
@@ -971,8 +972,8 @@ function crp_handle_reservation()
     $headers = ['Content-Type: text/plain; charset=UTF-8'];
     wp_mail($email, $subject, $body, $headers);
 
-    $debug_log = "SUCCESS: Reservation saved. ID: " . $wpdb->insert_id . "\n";
+    $debug_log = "SUCCESS: Reservation saved. ID: " . $wpdb->insert_id . " (status: pending)\n";
     file_put_contents(plugin_dir_path(__FILE__) . 'debug_save.txt', $debug_log, FILE_APPEND);
 
-    wp_send_json_success(['message' => 'Reservation successful! A confirmation email has been sent to ' . $email]);
+    wp_send_json_success(['message' => 'Reservation request submitted successfully! We will review your request and send you a confirmation email at ' . $email]);
 }
