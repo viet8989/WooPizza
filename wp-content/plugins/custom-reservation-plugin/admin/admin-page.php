@@ -33,12 +33,43 @@ function crp_reservations_page()
     global $wpdb;
     $table = $wpdb->prefix . 'reservations';
 
+    // Handle edit update
+    if (isset($_POST['edit_reservation']) && isset($_POST['reservation_id'])) {
+        $reservation_id = intval($_POST['reservation_id']);
+        $current_user_id = get_current_user_id();
+
+        $update_data = [
+            'customer_name' => sanitize_text_field($_POST['customer_name']),
+            'customer_email' => sanitize_email($_POST['customer_email']),
+            'customer_phone' => sanitize_text_field($_POST['customer_phone']),
+            'customer_message' => sanitize_textarea_field($_POST['customer_message']),
+            'reservation_date' => sanitize_text_field($_POST['reservation_date']),
+            'start_time' => sanitize_text_field($_POST['start_time']),
+            'end_time' => sanitize_text_field($_POST['end_time']),
+            'party_size' => sanitize_text_field($_POST['party_size']),
+            'reservation_type' => sanitize_text_field($_POST['reservation_type']),
+            'status' => sanitize_text_field($_POST['status']),
+            'admin_notes' => sanitize_textarea_field($_POST['admin_notes']),
+            'updated_by' => $current_user_id
+        ];
+
+        // Update time_slot
+        $update_data['time_slot'] = $update_data['start_time'] . ' - ' . $update_data['end_time'];
+
+        $wpdb->update($table, $update_data, ['id' => $reservation_id]);
+        echo "<div class='notice notice-success'><p>Reservation #$reservation_id updated successfully.</p></div>";
+    }
+
     // Handle status update
     if (isset($_GET['update_status']) && isset($_GET['reservation_id']) && isset($_GET['new_status'])) {
         $reservation_id = intval($_GET['reservation_id']);
         $new_status = sanitize_text_field($_GET['new_status']);
+        $current_user_id = get_current_user_id();
 
-        $wpdb->update($table, ['status' => $new_status], ['id' => $reservation_id]);
+        $wpdb->update($table, [
+            'status' => $new_status,
+            'updated_by' => $current_user_id
+        ], ['id' => $reservation_id]);
         echo "<div class='notice notice-success'><p>Reservation status updated to: $new_status</p></div>";
     }
 
@@ -160,6 +191,9 @@ function crp_reservations_page()
                                     <span class="view">
                                         <a href="#" onclick="showReservationDetails(<?= $r->id ?>); return false;">View</a> |
                                     </span>
+                                    <span class="edit">
+                                        <a href="#" onclick="showEditReservation(<?= $r->id ?>); return false;">Edit</a> |
+                                    </span>
                                     <?php if ($r->status != 'confirmed'): ?>
                                         <span class="confirm">
                                             <a href="?page=crp_reservations&update_status=1&reservation_id=<?= $r->id ?>&new_status=confirmed">Confirm</a> |
@@ -230,11 +264,112 @@ function crp_reservations_page()
                                             <td><?= nl2br(esc_html($r->customer_message)) ?></td>
                                         </tr>
                                         <?php endif; ?>
+                                        <?php if ($r->admin_notes): ?>
+                                        <tr>
+                                            <th>Admin Notes:</th>
+                                            <td style="background: #fff3cd; padding: 10px; border-radius: 4px;"><?= nl2br(esc_html($r->admin_notes)) ?></td>
+                                        </tr>
+                                        <?php endif; ?>
                                         <tr>
                                             <th>Created At:</th>
                                             <td><?= date('Y-m-d H:i:s', strtotime($r->created_at)) ?></td>
                                         </tr>
+                                        <?php if (isset($r->updated_at) && $r->updated_at != $r->created_at): ?>
+                                        <tr>
+                                            <th>Last Updated:</th>
+                                            <td>
+                                                <strong style="color: #d63638;"><?= date('Y-m-d H:i:s', strtotime($r->updated_at)) ?></strong>
+                                                <?php if (isset($r->updated_by) && $r->updated_by > 0): ?>
+                                                    <?php $updated_user = get_userdata($r->updated_by); ?>
+                                                    <?php if ($updated_user): ?>
+                                                        <br>
+                                                        <small style="color: #666;">
+                                                            by <strong><?= esc_html($updated_user->display_name) ?></strong>
+                                                            (<?= esc_html($updated_user->user_login) ?>)
+                                                        </small>
+                                                    <?php endif; ?>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                        <?php endif; ?>
                                     </table>
+                                </div>
+
+                                <!-- Hidden edit form for modal -->
+                                <div id="reservation-edit-<?= $r->id ?>" style="display: none;">
+                                    <h3>Edit Reservation #<?= $r->id ?></h3>
+                                    <form method="post" action="">
+                                        <input type="hidden" name="edit_reservation" value="1">
+                                        <input type="hidden" name="reservation_id" value="<?= $r->id ?>">
+
+                                        <table class="form-table">
+                                            <tr>
+                                                <th><label for="edit_customer_name_<?= $r->id ?>">Customer Name *</label></th>
+                                                <td><input type="text" id="edit_customer_name_<?= $r->id ?>" name="customer_name" value="<?= esc_attr($r->customer_name) ?>" class="regular-text" required></td>
+                                            </tr>
+                                            <tr>
+                                                <th><label for="edit_customer_email_<?= $r->id ?>">Email *</label></th>
+                                                <td><input type="email" id="edit_customer_email_<?= $r->id ?>" name="customer_email" value="<?= esc_attr($r->customer_email) ?>" class="regular-text" required></td>
+                                            </tr>
+                                            <tr>
+                                                <th><label for="edit_customer_phone_<?= $r->id ?>">Phone *</label></th>
+                                                <td><input type="text" id="edit_customer_phone_<?= $r->id ?>" name="customer_phone" value="<?= esc_attr($r->customer_phone) ?>" class="regular-text" required></td>
+                                            </tr>
+                                            <tr>
+                                                <th><label for="edit_reservation_date_<?= $r->id ?>">Reservation Date *</label></th>
+                                                <td><input type="date" id="edit_reservation_date_<?= $r->id ?>" name="reservation_date" value="<?= esc_attr($r->reservation_date) ?>" required></td>
+                                            </tr>
+                                            <tr>
+                                                <th><label for="edit_start_time_<?= $r->id ?>">Start Time *</label></th>
+                                                <td><input type="time" id="edit_start_time_<?= $r->id ?>" name="start_time" value="<?= esc_attr($r->start_time) ?>" required></td>
+                                            </tr>
+                                            <tr>
+                                                <th><label for="edit_end_time_<?= $r->id ?>">End Time *</label></th>
+                                                <td><input type="time" id="edit_end_time_<?= $r->id ?>" name="end_time" value="<?= esc_attr($r->end_time) ?>" required></td>
+                                            </tr>
+                                            <tr>
+                                                <th><label for="edit_party_size_<?= $r->id ?>">Party Size *</label></th>
+                                                <td><input type="number" id="edit_party_size_<?= $r->id ?>" name="party_size" value="<?= esc_attr($r->party_size) ?>" min="1" max="20" required></td>
+                                            </tr>
+                                            <tr>
+                                                <th><label for="edit_reservation_type_<?= $r->id ?>">Reservation Type *</label></th>
+                                                <td>
+                                                    <select id="edit_reservation_type_<?= $r->id ?>" name="reservation_type" required>
+                                                        <option value="Standard Reservation" <?= $r->reservation_type == 'Standard Reservation' ? 'selected' : '' ?>>Standard Reservation</option>
+                                                        <option value="VIP Reservation" <?= $r->reservation_type == 'VIP Reservation' ? 'selected' : '' ?>>VIP Reservation</option>
+                                                        <option value="Catering Room" <?= $r->reservation_type == 'Catering Room' ? 'selected' : '' ?>>Catering Room</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th><label for="edit_status_<?= $r->id ?>">Status *</label></th>
+                                                <td>
+                                                    <select id="edit_status_<?= $r->id ?>" name="status" required>
+                                                        <option value="pending" <?= $r->status == 'pending' ? 'selected' : '' ?>>Pending</option>
+                                                        <option value="confirmed" <?= $r->status == 'confirmed' ? 'selected' : '' ?>>Confirmed</option>
+                                                        <option value="completed" <?= $r->status == 'completed' ? 'selected' : '' ?>>Completed</option>
+                                                        <option value="cancelled" <?= $r->status == 'cancelled' ? 'selected' : '' ?>>Cancelled</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th><label for="edit_customer_message_<?= $r->id ?>">Special Requests</label></th>
+                                                <td><textarea id="edit_customer_message_<?= $r->id ?>" name="customer_message" rows="3" class="large-text"><?= esc_textarea($r->customer_message) ?></textarea></td>
+                                            </tr>
+                                            <tr>
+                                                <th><label for="edit_admin_notes_<?= $r->id ?>">Admin Notes</label></th>
+                                                <td>
+                                                    <textarea id="edit_admin_notes_<?= $r->id ?>" name="admin_notes" rows="4" class="large-text" placeholder="Internal notes for staff only..."><?= esc_textarea($r->admin_notes) ?></textarea>
+                                                    <p class="description">These notes are only visible to administrators and will not be shown to customers.</p>
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                        <p class="submit">
+                                            <button type="submit" class="button button-primary">Save Changes</button>
+                                            <button type="button" class="button" onclick="this.closest('div').parentElement.remove()">Cancel</button>
+                                        </p>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
@@ -256,6 +391,28 @@ function crp_reservations_page()
             var modalContent = document.createElement('div');
             modalContent.style.cssText = 'background: white; padding: 30px; border-radius: 8px; max-width: 600px; max-height: 80vh; overflow-y: auto; position: relative;';
             modalContent.innerHTML = content + '<br><button onclick="this.closest(\'div\').parentElement.remove()" style="margin-top: 20px;" class="button button-primary">Close</button>';
+
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            };
+        }
+
+        function showEditReservation(id) {
+            var content = document.getElementById('reservation-edit-' + id).innerHTML;
+            console.log('Showing edit form for reservation ID:', id);
+
+            // Create modal
+            var modal = document.createElement('div');
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100000; display: flex; align-items: center; justify-content: center; overflow-y: auto; padding: 20px;';
+
+            var modalContent = document.createElement('div');
+            modalContent.style.cssText = 'background: white; padding: 30px; border-radius: 8px; max-width: 700px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; margin: auto;';
+            modalContent.innerHTML = content;
 
             modal.appendChild(modalContent);
             document.body.appendChild(modal);

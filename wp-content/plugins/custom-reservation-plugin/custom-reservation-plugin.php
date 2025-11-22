@@ -17,19 +17,10 @@ function crp_install_plugin()
     global $wpdb;
     $charset_collate = $wpdb->get_charset_collate();
     $reservations_table = $wpdb->prefix . 'reservations';
-    $branches_table = $wpdb->prefix . 'reservation_branches';
 
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
-    // Create branches table
-    dbDelta("CREATE TABLE $branches_table (
-        id mediumint(9) NOT NULL AUTO_INCREMENT,
-        name varchar(255) NOT NULL,
-        address varchar(255) NOT NULL,
-        PRIMARY KEY  (id)
-    ) $charset_collate;");
-
-    // Create reservations table (branch_id now stores wpsl_stores post ID)
+    // Create reservations table (store_id references WP Store Locator post ID)
     dbDelta("CREATE TABLE $reservations_table (
         id mediumint(9) NOT NULL AUTO_INCREMENT,
         customer_name varchar(255) NOT NULL,
@@ -44,22 +35,15 @@ function crp_install_plugin()
         party_size varchar(10) NOT NULL,
         reservation_type varchar(50) NOT NULL,
         status varchar(20) DEFAULT 'pending' NOT NULL,
+        admin_notes text,
         created_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
+        updated_by bigint(20) DEFAULT NULL COMMENT 'WordPress user ID who last updated',
         PRIMARY KEY  (id)
     ) $charset_collate;");
 
-    // Insert default branches if table is empty
-    $count = $wpdb->get_var("SELECT COUNT(*) FROM $branches_table");
-    if ($count == 0) {
-        $wpdb->insert($branches_table, [
-            'name' => 'WooPizza Quận 1',
-            'address' => '123 Nguyễn Huệ, Quận 1, TP.HCM'
-        ]);
-        $wpdb->insert($branches_table, [
-            'name' => 'WooPizza Quận 3',
-            'address' => '456 Võ Văn Tần, Quận 3, TP.HCM'
-        ]);
-    }
+    // Note: Branches are managed via WP Store Locator plugin
+    // No separate branches table is needed
 }
 
 // Helper function to check if store is available for given datetime
