@@ -434,6 +434,233 @@ blockquote, dl, figure, form, ol, p, pre, ul {
 	border-width: 1px;
 }
 
+/* Checkout Sidebar Styling - Match Mini Cart Layout */
+.checkout-sidebar.sm-touch-scroll {
+	background: #fff !important;
+}
+
+.checkout-sidebar.sm-touch-scroll #order_review_heading {
+	font-size: 20px !important;
+	font-weight: 700 !important;
+	color: #000 !important;
+	margin-bottom: 20px !important;
+	padding-bottom: 12px !important;
+	border-bottom: 2px solid #f0f0f0 !important;
+}
+
+.checkout-sidebar.sm-touch-scroll .woocommerce-checkout-review-order-items {
+	list-style: none !important;
+	padding: 0 !important;
+	margin: 0 0 20px 0 !important;
+}
+
+.checkout-sidebar.sm-touch-scroll .checkout-cart-item {
+	position: relative !important;
+	padding: 10px !important;
+	margin-bottom: 10px !important;
+	background-color: #fff !important;
+	border-radius: 5px !important;
+	overflow: visible !important;
+}
+
+.checkout-sidebar.sm-touch-scroll .checkout-title-wrapper {
+	display: flex !important;
+	align-items: center !important;
+	gap: 8px !important;
+	margin-bottom: 12px !important;
+	line-height: 1.4 !important;
+	white-space: normal !important;
+}
+
+.checkout-sidebar.sm-touch-scroll .checkout-product-title {
+	font-size: 16px !important;
+	font-weight: 700 !important;
+	margin: 0 !important;
+	line-height: 1.4 !important;
+	color: #000 !important;
+	display: inline !important;
+}
+
+.checkout-sidebar.sm-touch-scroll .checkout-item-content {
+	display: flex !important;
+	gap: 12px !important;
+	align-items: center !important;
+	width: 100% !important;
+	flex-direction: row !important;
+}
+
+.checkout-sidebar.sm-touch-scroll .checkout-item-image {
+	flex: 0 0 90px !important;
+	width: 90px !important;
+	max-width: 90px !important;
+	display: block !important;
+}
+
+.checkout-sidebar.sm-touch-scroll .checkout-item-image img {
+	width: 100% !important;
+	max-width: 90px !important;
+	height: auto !important;
+	border-radius: 6px !important;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+	display: block !important;
+}
+
+.checkout-sidebar.sm-touch-scroll .checkout-item-details {
+	flex: 1 !important;
+	min-width: 0 !important;
+}
+
+.checkout-sidebar.sm-touch-scroll .checkout-quantity-price-row {
+	display: flex !important;
+	justify-content: space-between !important;
+	align-items: center !important;
+	margin-top: 12px !important;
+	padding-top: 8px !important;
+	border-top: 1px solid #f0f0f0 !important;
+}
+
+.checkout-sidebar.sm-touch-scroll .checkout-line-total {
+	font-size: 16px !important;
+	font-weight: 700 !important;
+	color: #000 !important;
+}
+
+.checkout-sidebar.sm-touch-scroll .checkout-totals-breakdown {
+	margin: 15px 0 !important;
+	padding: 0 !important;
+}
+
+.checkout-sidebar.sm-touch-scroll .checkout-totals-breakdown .totals-row {
+	display: flex !important;
+	justify-content: space-between !important;
+	align-items: center !important;
+	padding: 8px 0 !important;
+	font-size: 18px !important;
+	color: #666 !important;
+}
+
+.checkout-sidebar.sm-touch-scroll .checkout-totals-breakdown .total-row {
+	border-top: 2px solid #000 !important;
+	padding-top: 12px !important;
+	margin-top: 8px !important;
+	font-size: 18px !important;
+	color: #000 !important;
+}
+
+.checkout-sidebar.sm-touch-scroll .checkout-totals-breakdown .total-row .totals-value {
+	color: #cd0000 !important;
+	font-weight: 700 !important;
+	font-size: 18px !important;
+}
+
+/* Payment Methods in Checkout Sidebar */
+.checkout-sidebar.sm-touch-scroll #payment {
+	background: transparent !important;
+	border: none !important;
+	margin-top: 20px !important;
+}
+
+.checkout-sidebar.sm-touch-scroll #payment .payment_methods {
+	list-style: none !important;
+	padding: 0 !important;
+	margin: 0 0 15px 0 !important;
+}
+
+.checkout-sidebar.sm-touch-scroll #payment .payment_methods li {
+	background: #f8f8f8 !important;
+	border: 1px solid #ddd !important;
+	border-radius: 6px !important;
+	padding: 12px 15px !important;
+	margin-bottom: 8px !important;
+}
+
+.checkout-sidebar.sm-touch-scroll #payment .payment_methods li.payment_method_selected {
+	background: #fff !important;
+	border-color: #cd0000 !important;
+}
+
+.checkout-sidebar.sm-touch-scroll #payment .payment_methods li label {
+	font-weight: 600 !important;
+	color: #000 !important;
+	cursor: pointer !important;
+}
+
+.checkout-sidebar.sm-touch-scroll #payment .payment_box {
+	background: #f9f9f9 !important;
+	border-radius: 4px !important;
+	padding: 12px !important;
+	margin-top: 10px !important;
+}
+
+/* Place Order Button */
+.checkout-sidebar.sm-touch-scroll #place_order,
+.checkout-sidebar.sm-touch-scroll .woocommerce-checkout #place_order {
+	width: 100% !important;
+	background-color: #cd0000 !important;
+	color: #fff !important;
+	border: none !important;
+	border-radius: 6px !important;
+	padding: 16px 20px !important;
+	font-size: 16px !important;
+	font-weight: 700 !important;
+	cursor: pointer !important;
+	transition: all 0.3s ease !important;
+	text-transform: uppercase !important;
+	letter-spacing: 0.5px !important;
+}
+
+.checkout-sidebar.sm-touch-scroll #place_order:hover,
+.checkout-sidebar.sm-touch-scroll .woocommerce-checkout #place_order:hover {
+	background-color: #a00000 !important;
+	transform: translateY(-2px) !important;
+	box-shadow: 0 4px 12px rgba(205, 0, 0, 0.3) !important;
+}
+
+/* Terms and Conditions */
+.checkout-sidebar.sm-touch-scroll .woocommerce-terms-and-conditions-wrapper {
+	margin: 15px 0 !important;
+	font-size: 14px !important;
+}
+
+.checkout-sidebar.sm-touch-scroll .woocommerce-privacy-policy-text {
+	font-size: 13px !important;
+	color: #666 !important;
+	margin-top: 10px !important;
+}
+
+/* Responsive Checkout Sidebar - Mobile */
+@media (max-width: 768px) {
+	.checkout-sidebar.sm-touch-scroll .checkout-item-content {
+		flex-direction: column !important;
+		align-items: flex-start !important;
+	}
+
+	.checkout-sidebar.sm-touch-scroll .checkout-item-image {
+		flex: 0 0 auto !important;
+		width: 100% !important;
+		max-width: 100% !important;
+		margin-bottom: 12px !important;
+	}
+
+	.checkout-sidebar.sm-touch-scroll .checkout-item-image img {
+		max-width: 120px !important;
+		margin: 0 auto !important;
+		display: block !important;
+	}
+
+	.checkout-sidebar.sm-touch-scroll .checkout-totals-breakdown .totals-row {
+		font-size: 16px !important;
+	}
+
+	.checkout-sidebar.sm-touch-scroll .checkout-totals-breakdown .total-row {
+		font-size: 16px !important;
+	}
+
+	.checkout-sidebar.sm-touch-scroll .checkout-totals-breakdown .total-row .totals-value {
+		font-size: 16px !important;
+	}
+}
+
 .tab-des .col-inner{
 	display: flex;
     justify-content: space-between;
