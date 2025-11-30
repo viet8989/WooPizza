@@ -679,14 +679,14 @@ jQuery( document ).ready( function( $ ) {
     }
 
     /**
-     * Round the coordinate to 15 digits after the comma.
+     * Round the coordinate to 6 digits after the comma.
      *
      * @since	1.0.0
      * @param   {string} coordinate   The coordinate
      * @returns {number} roundedCoord The rounded coordinate
      */
     function roundCoordinate( coordinate ) {
-        var roundedCoord, decimals = 15;
+        var roundedCoord, decimals = 6;
 
         roundedCoord = Math.round( coordinate * Math.pow( 10, decimals ) ) / Math.pow( 10, decimals );
 

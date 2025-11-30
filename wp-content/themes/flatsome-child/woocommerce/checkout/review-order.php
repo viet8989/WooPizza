@@ -343,6 +343,40 @@ defined( 'ABSPATH' ) || exit;
 		</div>
 		<?php endif; ?>
 
+		<?php
+		// Custom Shipping/Pickup Fee Row
+		$delivery_method = isset($_POST['selected_delivery_method']) ? sanitize_text_field($_POST['selected_delivery_method']) : 'delivery';
+		$selected_store = isset($_POST['selected_store']) ? sanitize_text_field($_POST['selected_store']) : '';
+		$selected_ward = isset($_POST['billing_address_2']) ? sanitize_text_field($_POST['billing_address_2']) : '';
+
+		if ($delivery_method === 'pickup') {
+			// PICKUP - Always 0 fee
+			?>
+			<div class="totals-row shipping-fee-row">
+				<span class="totals-label">Pickup</span>
+				<span class="totals-value"><?php echo wc_price(0); ?></span>
+			</div>
+			<?php
+		} else {
+			// DELIVERY - Get fee from shipping fees table
+			$shipping_fee = 0;
+			if (!empty($selected_store) && !empty($selected_ward)) {
+				$shipping_fees = get_option('hcm_shipping_fees', array());
+				$fee_key = $selected_store . '_' . $selected_ward;
+
+				if (isset($shipping_fees[$fee_key]) && isset($shipping_fees[$fee_key]['fee'])) {
+					$shipping_fee = floatval($shipping_fees[$fee_key]['fee']);
+				}
+			}
+			?>
+			<div class="totals-row shipping-fee-row">
+				<span class="totals-label">Shipping Fee</span>
+				<span class="totals-value"><?php echo wc_price($shipping_fee); ?></span>
+			</div>
+			<?php
+		}
+		?>
+
 		<div class="totals-row total-row">
 			<span class="totals-label"><strong>Total</strong></span>
 			<span class="totals-value"><strong><?php echo WC()->cart->get_total(); ?></strong></span>

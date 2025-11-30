@@ -225,13 +225,13 @@ if ( !class_exists( 'WPSL_Geocode' ) ) {
          * @return array $latlng The formatted latlng
          */
 		public function format_latlng( $latlng ) {
-
+            
             foreach ( $latlng as $key => $value ) {
-                if ( strlen( substr( strrchr( $value, '.' ), 1 ) ) > 15 ) {
-                    $latlng[$key] = round( $value, 15 );
+                if ( strlen( substr( strrchr( $value, '.' ), 1 ) ) > 6 ) {
+                    $latlng[$key] = round( $value, 6 );
                 }
             }
-
+            
             return $latlng;
         }
 

@@ -58,10 +58,92 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 	</div>
 </div>
 
+<!-- Store Locator Section -->
+<div class="store-locator-section" style="margin-bottom: 30px;">
+	<h3>Chọn cửa hàng</h3>
+	<div id="available-stores-list" class="available-stores">
+		<p class="loading-stores">Đang tải danh sách cửa hàng...</p>
+	</div>
+</div>
+
+<style>
+.available-stores {
+	background: #f8f8f8;
+	padding: 20px;
+	border-radius: 8px;
+}
+
+.available-stores .loading-stores {
+	text-align: center;
+	color: #999;
+	padding: 20px;
+}
+
+.available-stores .store-item {
+	background: white;
+	border: 2px solid #e0e0e0;
+	border-radius: 8px;
+	padding: 15px;
+	margin-bottom: 10px;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	position: relative;
+}
+
+.available-stores .store-item:hover {
+	border-color: #c44569;
+	background: #fff5f7;
+	transform: translateX(5px);
+}
+
+.available-stores .store-item.selected {
+	border-color: #c44569;
+	background: #fff5f7;
+	box-shadow: 0 4px 16px rgba(196, 69, 105, 0.2);
+}
+
+.available-stores .store-item input[type="radio"] {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.available-stores .store-name {
+	font-weight: 600;
+	font-size: 16px;
+	color: #333;
+	margin-bottom: 5px;
+}
+
+.available-stores .store-item.selected .store-name {
+	color: #c44569;
+}
+
+.available-stores .store-address {
+	font-size: 14px;
+	color: #666;
+	margin-bottom: 5px;
+}
+
+.available-stores .store-hours {
+	font-size: 13px;
+	color: #28a745;
+	font-weight: 500;
+}
+
+.available-stores .no-stores {
+	text-align: center;
+	padding: 30px;
+	color: #999;
+}
+</style>
+
 <form name="checkout" method="post" class="checkout woocommerce-checkout" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" enctype="multipart/form-data" aria-label="<?php echo esc_attr__( 'Checkout', 'woocommerce' ); ?>">
 
 	<!-- Hidden field to store delivery method -->
 	<input type="hidden" name="selected_delivery_method" id="selected_delivery_method" value="delivery">
+	<!-- Hidden field for store category filter (43=DELIVERY, 42=PICKUP) -->
+	<input type="hidden" id="wpsl-category-filter" name="wpsl-category" value="43">
 
 	<div class="row pt-0">
 		<div class="large-7 col">
@@ -218,26 +300,163 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
+	var selectedStoreId = null;
+
+	// Function to load available stores
+	function loadAvailableStores(method) {
+		// Category IDs: 42=PICKUP, 43=DELIVERY
+		var categoryId = (method === 'pickup') ? '42' : '43';
+		var categoryName = (method === 'pickup') ? 'PICKUP' : 'DELIVERY';
+
+		console.log('Loading stores for: ' + categoryName + ' (ID: ' + categoryId + ') at ' + new Date().toLocaleTimeString());
+
+		// Show loading message
+		$('#available-stores-list').html('<p class="loading-stores">Đang tải danh sách cửa hàng...</p>');
+
+		// Make AJAX request to get stores
+		$.ajax({
+			url: '<?php echo admin_url('admin-ajax.php'); ?>',
+			type: 'GET',
+			data: {
+				action: 'store_search',
+				filter: categoryId,
+				autoload: 1
+			},
+			success: function(response) {
+				displayStores(response, categoryName);
+			},
+			error: function() {
+				$('#available-stores-list').html('<p class="no-stores">Không thể tải danh sách cửa hàng. Vui lòng thử lại.</p>');
+			}
+		});
+	}
+
+	// Function to display stores
+	function displayStores(stores, categoryName) {
+		var html = '';
+
+		if (!stores || stores.length === 0) {
+			html = '<p class="no-stores">Hiện không có cửa hàng nào đang mở cửa cho ' + categoryName + '.</p>';
+		} else {
+			stores.forEach(function(store, index) {
+				var isSelected = (index === 0 && !selectedStoreId) || (store.id == selectedStoreId);
+				var selectedClass = isSelected ? 'selected' : '';
+
+				if (isSelected) {
+					selectedStoreId = store.id;
+				}
+
+				html += '<div class="store-item ' + selectedClass + '" data-store-id="' + store.id + '">';
+				html += '  <input type="radio" name="selected_store" value="' + store.id + '" ' + (isSelected ? 'checked' : '') + '>';
+				html += '  <div class="store-name">' + store.store + '</div>';
+				html += '  <div class="store-address">' + store.address + ', ' + store.city + '</div>';
+				if (store.hours) {
+					html += '  <div class="store-hours">🕒 Đang mở cửa</div>';
+				}
+				html += '</div>';
+			});
+		}
+
+		$('#available-stores-list').html(html);
+
+		// Handle store selection
+		$('.store-item').on('click', function() {
+			var storeId = $(this).data('store-id');
+			selectedStoreId = storeId;
+
+			$('.store-item').removeClass('selected');
+			$(this).addClass('selected');
+			$(this).find('input[type="radio"]').prop('checked', true);
+
+			console.log('Store selected: ' + storeId);
+
+			// Load available wards for this store
+			loadStoreWards(storeId);
+		});
+
+		// Load wards for the first selected store
+		if (selectedStoreId) {
+			loadStoreWards(selectedStoreId);
+		}
+	}
+
+	// Function to load available wards for selected store
+	function loadStoreWards(storeId) {
+		console.log('Loading wards for store: ' + storeId);
+
+		$.ajax({
+			url: '<?php echo admin_url('admin-ajax.php'); ?>',
+			type: 'GET',
+			data: {
+				action: 'get_store_wards',
+				store_id: storeId
+			},
+			success: function(response) {
+				if (response.success && response.data.wards) {
+					updateWardDropdown(response.data.wards);
+				} else {
+					console.error('Failed to load wards:', response);
+				}
+			},
+			error: function(xhr, status, error) {
+				console.error('AJAX error loading wards:', error);
+			}
+		});
+	}
+
+	// Function to update ward dropdown with available wards
+	function updateWardDropdown(wards) {
+		var $wardSelect = $('#billing_address_2');
+
+		if ($wardSelect.length === 0) {
+			console.warn('Ward dropdown not found');
+			return;
+		}
+
+		// Clear existing options except the first placeholder
+		$wardSelect.find('option:not(:first)').remove();
+
+		// Add new ward options
+		wards.forEach(function(ward) {
+			$wardSelect.append(
+				$('<option></option>')
+					.attr('value', ward.id)
+					.text(ward.name)
+			);
+		});
+
+		// Trigger change event to update WooCommerce
+		$wardSelect.trigger('change');
+
+		console.log('Ward dropdown updated with ' + wards.length + ' wards');
+	}
+
 	// Handle delivery method change
 	$('input[name="delivery_method"]').on('change', function() {
 		var method = $(this).val();
+
+		// Update shipping label
 		if (method === 'pickup') {
 			$('.shipping__table th').text('Local pickup');
 		} else {
-			// Set shipping method to flat rate (or your default shipping method)
-			$('.shipping__table th').text('Shipping');	
+			$('.shipping__table th').text('Shipping');
 		}
 
 		// Update hidden field
 		$('#selected_delivery_method').val(method);
 
+		// Load stores for the selected method
+		loadAvailableStores(method);
+
 		// Update shipping method
 		$(document.body).trigger('update_checkout');
 	});
 
-	// Set initial state
-	$('input[name="delivery_method"]').eq(0).click();
-	// var initialCategory = (initialMethod === 'pickup') ? 'PICKUP' : 'DELIVERY';
+	// Set initial state to DELIVERY and load stores
+	setTimeout(function() {
+		$('input[name="delivery_method"][value="delivery"]').prop('checked', true);
+		loadAvailableStores('delivery');
+	}, 500);
 });
 </script>
 

@@ -51,7 +51,8 @@ if ( $wpsl_settings['radius_dropdown'] || $wpsl_settings['results_dropdown']  ) 
 }
 
 // Category filter (hidden, controlled by delivery method selection)
-$output .= '<input type="hidden" id="wpsl-category-filter" name="wpsl-category" value="DELIVERY" />' . "\r\n";
+// Category IDs: 42=PICKUP, 43=DELIVERY
+$output .= '<input type="hidden" id="wpsl-category-filter" name="wpsl-category" value="43" />' . "\r\n";
 
 $output .= '<div class="wpsl-search-btn-wrap"><input id="wpsl-search-btn" type="submit" value="' . esc_attr( $wpsl->i18n->get_translation( 'search_btn_label', __( 'Search', 'wpsl' ) ) ) . '"></div>' . "\r\n";
 
