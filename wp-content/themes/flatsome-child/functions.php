@@ -43,7 +43,7 @@ add_filter( 'xmlrpc_enabled', '__return_false' );
 
 function enqueue_custom_js()
 {
-    wp_enqueue_script('custom-js', get_stylesheet_directory_uri() . '/js/custom.js', array(), '1.0.1', true);
+    wp_enqueue_script('custom-js', get_stylesheet_directory_uri() . '/js/custom.js', array(), '1.0.4', true);
 
     // Localize script to provide AJAX URL for all users (logged in or not)
     wp_localize_script('custom-js', 'customJsParams', array(
@@ -2298,6 +2298,9 @@ jQuery(document).ready(function($) {
 // Change "VAT" label to include tax rate on order received page
 add_filter( 'woocommerce_get_order_item_totals', 'customize_vat_label_with_rate', 10, 3 );
 function customize_vat_label_with_rate( $total_rows, $order, $tax_display ) {
+	// Debug: Log all keys in total_rows
+	error_log('Order Item Totals Keys: ' . print_r(array_keys($total_rows), true));
+
 	// Find any tax-related keys (they can be dynamic like 'vn-vat-1', 'tax', etc.)
 	$found_tax_keys = array();
 	foreach ( $total_rows as $key => $row ) {
@@ -2344,7 +2347,168 @@ function customize_vat_label_with_rate( $total_rows, $order, $tax_display ) {
 		}
 	}
 
-	return $total_rows;
+	// Reorder rows: Subtotal -> VAT -> Shipping Fee -> Total -> Payment method
+	$new_order = array();
+	$shipping_row = null;
+	$fee_rows = array();
+	$vat_rows = array();
+	$total_row = null;
+	$payment_row = null;
+
+	foreach ( $total_rows as $key => $row ) {
+		if ( $key === 'cart_subtotal' ) {
+			$new_order[$key] = $row;
+		} elseif ( stripos( $key, 'tax' ) !== false || stripos( $key, 'vat' ) !== false ) {
+			$vat_rows[$key] = $row;
+		} elseif ( $key === 'shipping' ) {
+			$shipping_row = array( $key => $row );
+		} elseif ( stripos( $key, 'fee' ) !== false ) {
+			// Capture fee rows (like "Shipping Fee" from cart fees)
+			$fee_rows[$key] = $row;
+		} elseif ( $key === 'order_total' ) {
+			$total_row = array( $key => $row );
+		} elseif ( $key === 'payment_method' ) {
+			$payment_row = array( $key => $row );
+		} else {
+			$new_order[$key] = $row;
+		}
+	}
+
+	// Add VAT rows
+	if ( !empty( $vat_rows ) ) {
+		$new_order = array_merge( $new_order, $vat_rows );
+	}
+
+	// Add Fee rows (Shipping Fee from cart fees)
+	if ( !empty( $fee_rows ) ) {
+		$new_order = array_merge( $new_order, $fee_rows );
+	} else {
+		// If no fee rows in totals, check order fees and add them manually
+		$order_fees = $order->get_fees();
+		error_log('Order Fees Count: ' . count($order_fees));
+
+		$has_valid_fee = false;
+		if ( !empty( $order_fees ) ) {
+			foreach ( $order_fees as $fee ) {
+				$fee_total = $fee->get_total();
+				error_log('Fee: ' . $fee->get_name() . ' = ' . $fee_total);
+
+				// If fee is 0, use fallback calculation
+				if ( $fee_total == 0 && stripos($fee->get_name(), 'shipping') !== false ) {
+					// Calculate from metadata
+					$selected_store = $order->get_meta('_selected_store');
+					$selected_ward = $order->get_meta('_billing_city');
+					$delivery_method = $order->get_meta('_delivery_method');
+
+					error_log('Zero fee detected - Store: ' . $selected_store . ', Ward: ' . $selected_ward . ', Method: ' . $delivery_method);
+
+					if ( $delivery_method === 'delivery' && !empty($selected_store) && !empty($selected_ward) ) {
+						$shipping_fees = get_option('hcm_shipping_fees', array());
+						$fee_key = $selected_store . '_' . $selected_ward;
+
+						if ( isset($shipping_fees[$fee_key]) && isset($shipping_fees[$fee_key]['fee']) ) {
+							$fee_total = floatval($shipping_fees[$fee_key]['fee']);
+							error_log('Recalculated shipping fee: ' . $fee_total);
+						}
+					}
+				}
+
+				$new_order['fee_' . $fee->get_id()] = array(
+					'label' => esc_html( $fee->get_name() ) . ':',
+					'value' => wc_price( $fee_total, array( 'currency' => $order->get_currency() ) ),
+				);
+				$has_valid_fee = true;
+			}
+		}
+
+		if ( !$has_valid_fee ) {
+			// Fallback: Calculate shipping fee from order metadata
+			$selected_store = $order->get_meta('_selected_store');
+			$selected_ward = $order->get_meta('_billing_city');
+			$delivery_method = $order->get_meta('_delivery_method');
+
+			error_log('Fallback - Store: ' . $selected_store . ', Ward: ' . $selected_ward . ', Method: ' . $delivery_method);
+
+			if ( $delivery_method === 'delivery' && !empty($selected_store) && !empty($selected_ward) ) {
+				$shipping_fees = get_option('hcm_shipping_fees', array());
+				$fee_key = $selected_store . '_' . $selected_ward;
+
+				if ( isset($shipping_fees[$fee_key]) && isset($shipping_fees[$fee_key]['fee']) ) {
+					$shipping_fee = floatval($shipping_fees[$fee_key]['fee']);
+					error_log('Calculated shipping fee: ' . $shipping_fee);
+
+					$new_order['shipping_fee'] = array(
+						'label' => __('Shipping Fee', 'wp-store-shipping') . ':',
+						'value' => wc_price( $shipping_fee, array( 'currency' => $order->get_currency() ) ),
+					);
+				}
+			}
+		}
+	}
+
+	// Add Total
+	if ( $total_row ) {
+		$new_order = array_merge( $new_order, $total_row );
+	}
+
+	// Add Payment method
+	if ( $payment_row ) {
+		$new_order = array_merge( $new_order, $payment_row );
+	}
+
+	return $new_order;
+}
+
+// Format billing and shipping address to show ward name instead of ward ID
+add_filter( 'woocommerce_order_formatted_billing_address', 'custom_format_billing_address', 10, 2 );
+add_filter( 'woocommerce_order_formatted_shipping_address', 'custom_format_shipping_address', 10, 2 );
+
+function custom_format_billing_address( $address, $order ) {
+	return custom_format_address_with_ward_name( $address, $order, 'billing' );
+}
+
+function custom_format_shipping_address( $address, $order ) {
+	return custom_format_address_with_ward_name( $address, $order, 'shipping' );
+}
+
+function custom_format_address_with_ward_name( $address, $order, $type ) {
+	// Include ward data
+	$xa_phuong_file = plugin_dir_path( __FILE__ ) . '../../plugins/wp-store-shipping/cities/xa_phuong_thitran.php';
+	if ( file_exists( $xa_phuong_file ) ) {
+		include $xa_phuong_file;
+	}
+
+	// Get ward ID from order meta
+	$ward_id = $order->get_meta( '_' . $type . '_city' );
+
+	if ( empty( $ward_id ) && $type === 'billing' ) {
+		// Fallback to billing_city field
+		$ward_id = $order->get_billing_city();
+	} elseif ( empty( $ward_id ) && $type === 'shipping' ) {
+		// Fallback to shipping_city field
+		$ward_id = $order->get_shipping_city();
+	}
+
+	// Find ward name from ward ID
+	$ward_name = '';
+	if ( !empty( $ward_id ) && isset( $xa_phuong_thitran ) ) {
+		foreach ( $xa_phuong_thitran as $ward_data ) {
+			if ( isset( $ward_data['xaid'] ) && $ward_data['xaid'] == $ward_id ) {
+				$ward_name = $ward_data['name'];
+				break;
+			}
+		}
+	}
+
+	// Replace ward ID with ward name in city field
+	if ( !empty( $ward_name ) ) {
+		$address['city'] = $ward_name;
+	}
+
+	// Remove postcode (700000) from display
+	unset( $address['postcode'] );
+
+	return $address;
 }
 
 // Filter product search: exclude toppings from upsells, include ONLY toppings for cross-sells
@@ -2812,72 +2976,6 @@ function update_mini_cart_quantity_handler() {
 		'total' => $total_html,
 		'cart_details' => $cart_details
 	) );
-}
-
-/**
- * Customize WooCommerce Checkout Fields
- */
-
-// Remove billing_postcode from checkout fields
-add_filter( 'woocommerce_checkout_fields', 'my_hide_billing_postcode', 20 );
-function my_hide_billing_postcode( $fields ) {
-    if ( isset( $fields['billing']['billing_postcode'] ) ) {
-        unset( $fields['billing']['billing_postcode'] );
-    }
-    return $fields;
-}
-
-// Remove Last Name fields from checkout (billing and shipping)
-add_filter( 'woocommerce_checkout_fields', 'my_hide_last_name_fields', 20 );
-function my_hide_last_name_fields( $fields ) {
-	// Remove billing last name
-	if ( isset( $fields['billing']['billing_last_name'] ) ) {
-		unset( $fields['billing']['billing_last_name'] );
-	}
-
-	// Remove shipping last name
-	if ( isset( $fields['shipping']['shipping_last_name'] ) ) {
-		unset( $fields['shipping']['shipping_last_name'] );
-	}
-
-	return $fields;
-}
-
-// Customize checkout labels and requirements
-add_filter( 'woocommerce_checkout_fields', 'customize_checkout_labels_and_requirements', 20 );
-function customize_checkout_labels_and_requirements( $fields ) {
-	// Change 'First name' to 'Full name'
-	if ( isset( $fields['billing']['billing_first_name'] ) ) {
-		$fields['billing']['billing_first_name']['label'] = __( 'Full name', 'flatsome' );
-		$fields['billing']['billing_first_name']['placeholder'] = __( 'Full name', 'flatsome' );
-	}
-
-	// Make phone required and change label from 'Phone (optional)' to 'Phone'
-	if ( isset( $fields['billing']['billing_phone'] ) ) {
-		$fields['billing']['billing_phone']['label']    = __( 'Phone', 'flatsome' );
-		$fields['billing']['billing_phone']['required'] = true;
-		$fields['billing']['billing_phone']['placeholder'] = __( 'Phone', 'flatsome' );
-	}
-
-	// Move billing_city above billing_address_1 and set to readonly with default value
-	if ( isset( $fields['billing']['billing_city'] ) ) {
-		// Set priority to be before address_1 (address_1 default priority is 50)
-		$fields['billing']['billing_city']['priority'] = 30;
-
-		// Set default value
-		$fields['billing']['billing_city']['default'] = 'Ho Chi Minh';
-
-		// Make it readonly
-		$fields['billing']['billing_city']['custom_attributes'] = array(
-			'readonly' => 'readonly'
-		);
-
-		// Optional: Update label and placeholder
-		$fields['billing']['billing_city']['label'] = __( 'City', 'flatsome' );
-		$fields['billing']['billing_city']['placeholder'] = '';
-	}
-
-	return $fields;
 }
 
 /**

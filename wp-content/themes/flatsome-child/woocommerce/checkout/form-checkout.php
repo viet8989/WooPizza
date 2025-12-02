@@ -29,42 +29,7 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 
 ?>
 
-<!-- Delivery Method Selection -->
-<div class="delivery-method-selection" style="margin-bottom: 30px;">
-	<h3>Chọn phương thức nhận hàng</h3>
-	<div class="delivery-options" style="display: flex; gap: 20px; margin-top: 15px;">
-		<label class="delivery-option" style="flex: 1; cursor: pointer;">
-			<input type="radio" name="delivery_method" value="delivery" id="delivery_delivery">
-			<span class="delivery-icon">
-				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<path d="M16 3H1V16H16V3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-					<path d="M16 8H20L23 11V16H16V8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-					<circle cx="5.5" cy="19.5" r="2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-					<circle cx="18.5" cy="19.5" r="2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-				</svg>
-			</span>
-			<span class="delivery-text" style="font-weight: 600;">DELIVERY - Giao hàng tận nơi</span>
-		</label>
-		<label class="delivery-option" style="flex: 1; cursor: pointer;">
-			<input type="radio" name="delivery_method" value="pickup" id="delivery_pickup">
-			<span class="delivery-icon">
-				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-					<path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-					<path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-				</svg>
-			</span>
-			<span class="delivery-text" style="font-weight: 600;">PICKUP - Đến lấy tại cửa hàng</span>
-		</label>
-	</div>
-</div>
 
-<!-- Store Locator Section -->
-<div class="store-locator-section" style="margin-bottom: 30px;">
-	<h3>Chọn cửa hàng</h3>
-	<div id="available-stores-list" class="available-stores">
-		<p class="loading-stores">Đang tải danh sách cửa hàng...</p>
-	</div>
-</div>
 
 <style>
 .available-stores {
@@ -136,6 +101,11 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 	padding: 30px;
 	color: #999;
 }
+
+/* Hide WooCommerce default shipping methods table since we use custom selection */
+.shipping-row .shipping__table {
+	display: none !important;
+}
 </style>
 
 <form name="checkout" method="post" class="checkout woocommerce-checkout" action="<?php echo esc_url( wc_get_checkout_url() ); ?>" enctype="multipart/form-data" aria-label="<?php echo esc_attr__( 'Checkout', 'woocommerce' ); ?>">
@@ -147,6 +117,43 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 
 	<div class="row pt-0">
 		<div class="large-7 col">
+			<!-- Delivery Method Selection -->
+			<div class="delivery-method-selection" style="margin-bottom: 30px;">
+				<h3>Chọn phương thức nhận hàng</h3>
+				<div class="delivery-options" style="display: flex; gap: 20px; margin-top: 15px;">
+					<label class="delivery-option" style="flex: 1; cursor: pointer;">
+						<input type="radio" name="delivery_method" value="delivery" id="delivery_delivery">
+						<span class="delivery-icon">
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M16 3H1V16H16V3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+								<path d="M16 8H20L23 11V16H16V8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+								<circle cx="5.5" cy="19.5" r="2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+								<circle cx="18.5" cy="19.5" r="2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+							</svg>
+						</span>
+						<span class="delivery-text" style="font-weight: 600;">DELIVERY - Giao hàng tận nơi</span>
+					</label>
+					<label class="delivery-option" style="flex: 1; cursor: pointer;">
+						<input type="radio" name="delivery_method" value="pickup" id="delivery_pickup">
+						<span class="delivery-icon">
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+								<path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+							</svg>
+						</span>
+						<span class="delivery-text" style="font-weight: 600;">PICKUP - Đến lấy tại cửa hàng</span>
+					</label>
+				</div>
+			</div>
+
+			<!-- Store Locator Section -->
+			<div class="store-locator-section" style="margin-bottom: 30px;">
+				<h3>Chọn cửa hàng</h3>
+				<div id="available-stores-list" class="available-stores">
+					<p class="loading-stores">Đang tải danh sách cửa hàng...</p>
+				</div>
+			</div>
+
 			<?php if ( $checkout->get_checkout_fields() ) : ?>
 
 				<?php do_action( 'woocommerce_checkout_before_customer_details' ); ?>
@@ -301,6 +308,7 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 <script type="text/javascript">
 jQuery(document).ready(function($) {
 	var selectedStoreId = null;
+	var loadedWards = []; // Store loaded wards to persist across checkout updates
 
 	// Function to load available stores
 	function loadAvailableStores(method) {
@@ -333,6 +341,7 @@ jQuery(document).ready(function($) {
 
 	// Function to display stores
 	function displayStores(stores, categoryName) {
+		console.log('📍 displayStores() called - Category: ' + categoryName + ', Stores: ' + (stores ? stores.length : 0));
 		var html = '';
 
 		if (!stores || stores.length === 0) {
@@ -344,6 +353,7 @@ jQuery(document).ready(function($) {
 
 				if (isSelected) {
 					selectedStoreId = store.id;
+					console.log('📍 Auto-selected store: ' + store.id + ' (' + store.store + ')');
 				}
 
 				html += '<div class="store-item ' + selectedClass + '" data-store-id="' + store.id + '">';
@@ -358,6 +368,7 @@ jQuery(document).ready(function($) {
 		}
 
 		$('#available-stores-list').html(html);
+		console.log('📍 Stores HTML rendered');
 
 		// Handle store selection
 		$('.store-item').on('click', function() {
@@ -368,7 +379,7 @@ jQuery(document).ready(function($) {
 			$(this).addClass('selected');
 			$(this).find('input[type="radio"]').prop('checked', true);
 
-			console.log('Store selected: ' + storeId);
+			console.log('📍 Store clicked: ' + storeId);
 
 			// Load available wards for this store
 			loadStoreWards(storeId);
@@ -376,13 +387,18 @@ jQuery(document).ready(function($) {
 
 		// Load wards for the first selected store
 		if (selectedStoreId) {
+			console.log('📍 About to load wards for selected store: ' + selectedStoreId);
 			loadStoreWards(selectedStoreId);
+		} else {
+			console.log('📍 No store selected, skipping ward loading');
 		}
 	}
 
 	// Function to load available wards for selected store
 	function loadStoreWards(storeId) {
-		console.log('Loading wards for store: ' + storeId);
+		console.log('🔄 loadStoreWards() called - Store ID: ' + storeId);
+		console.log('🔄 Making AJAX request to: <?php echo admin_url('admin-ajax.php'); ?>');
+		console.log('🔄 AJAX data: action=get_store_wards, store_id=' + storeId);
 
 		$.ajax({
 			url: '<?php echo admin_url('admin-ajax.php'); ?>',
@@ -391,27 +407,37 @@ jQuery(document).ready(function($) {
 				action: 'get_store_wards',
 				store_id: storeId
 			},
+			beforeSend: function() {
+				console.log('🔄 AJAX request sent...');
+			},
 			success: function(response) {
+				console.log('✅ AJAX response received:', response);
 				if (response.success && response.data.wards) {
+					console.log('✅ Wards data found:', response.data.wards.length + ' wards');
 					updateWardDropdown(response.data.wards);
 				} else {
-					console.error('Failed to load wards:', response);
+					console.error('❌ Failed to load wards:', response);
 				}
 			},
 			error: function(xhr, status, error) {
-				console.error('AJAX error loading wards:', error);
+				console.error('❌ AJAX error loading wards:', error);
+				console.error('❌ XHR:', xhr);
+				console.error('❌ Status:', status);
 			}
 		});
 	}
 
 	// Function to update ward dropdown with available wards
 	function updateWardDropdown(wards) {
-		var $wardSelect = $('#billing_address_2');
+		var $wardSelect = $('#billing_city');
 
 		if ($wardSelect.length === 0) {
 			console.warn('Ward dropdown not found');
 			return;
 		}
+
+		// Store wards globally to restore after WooCommerce updates
+		loadedWards = wards;
 
 		// Clear existing options except the first placeholder
 		$wardSelect.find('option:not(:first)').remove();
@@ -422,13 +448,85 @@ jQuery(document).ready(function($) {
 				$('<option></option>')
 					.attr('value', ward.id)
 					.text(ward.name)
+					.data('fee', ward.fee)
 			);
 		});
+
+		// Don't auto-select - let user choose manually
+		console.log('Loaded ' + wards.length + ' ward(s) for selection');
 
 		// Trigger change event to update WooCommerce
 		$wardSelect.trigger('change');
 
 		console.log('Ward dropdown updated with ' + wards.length + ' wards');
+	}
+
+	// Function to update shipping fee display
+	function updateShippingFeeDisplay() {
+		var deliveryMethod = $('input[name="delivery_method"]:checked').val();
+		var $feeRow = $('.shipping-fee-row');
+
+		if ($feeRow.length === 0) {
+			console.log('Shipping fee row not found');
+			return;
+		}
+
+		var $feeLabel = $feeRow.find('.totals-label');
+		var $feeValue = $feeRow.find('.totals-value');
+		var fee = 0;
+
+		if (deliveryMethod === 'pickup') {
+			// PICKUP - Show "Pickup" with 0 fee
+			$feeLabel.text('Pickup');
+			$feeValue.html('<span class="woocommerce-Price-amount amount"><bdi>0&nbsp;<span class="woocommerce-Price-currencySymbol">₫</span></bdi></span>');
+			console.log('Updated to Pickup mode');
+			fee = 0;
+		} else {
+			// DELIVERY - Show "Shipping Fee" with calculated fee
+			$feeLabel.text('Shipping Fee');
+
+			var selectedWard = $('#billing_city').val();
+			var selectedWardOption = $('#billing_city option:selected');
+			fee = selectedWardOption.data('fee') || 0;
+
+			console.log('Ward selected:', selectedWard, 'Fee:', fee);
+
+			// Format fee as Vietnamese currency
+			var formattedFee = new Intl.NumberFormat('vi-VN').format(fee);
+			$feeValue.html('<span class="woocommerce-Price-amount amount"><bdi>' + formattedFee + '&nbsp;<span class="woocommerce-Price-currencySymbol">₫</span></bdi></span>');
+			console.log('Updated to Delivery mode, fee:', formattedFee);
+		}
+
+		// Update the Total to include the fee
+		updateTotalDisplay(fee);
+	}
+
+	// Function to update Total display to include shipping fee
+	function updateTotalDisplay(shippingFee) {
+		var $totalRow = $('.total-row');
+		var $totalValue = $totalRow.find('.totals-value strong');
+
+		if ($totalValue.length === 0) {
+			console.log('Total row not found');
+			return;
+		}
+
+		// Get subtotal (cart contents without tax or fees)
+		var $subtotalRow = $('.totals-row:not(.shipping-fee-row):not(.total-row)').first();
+		var subtotalText = $subtotalRow.find('.totals-value').text().replace(/[^\d]/g, '');
+		var subtotal = parseInt(subtotalText) || 0;
+
+		// Calculate tax (8% VAT)
+		var tax = Math.round(subtotal * 0.08);
+
+		// Calculate new total: subtotal + tax + shipping fee
+		var newTotal = subtotal + tax + shippingFee;
+
+		console.log('Total update - Subtotal:', subtotal, 'Tax (8%):', tax, 'Fee:', shippingFee, 'New Total:', newTotal);
+
+		// Format and update total
+		var formattedTotal = new Intl.NumberFormat('vi-VN').format(newTotal);
+		$totalValue.html('<span class="woocommerce-Price-amount amount"><bdi>' + formattedTotal + '&nbsp;<span class="woocommerce-Price-currencySymbol">₫</span></bdi></span>');
 	}
 
 	// Handle delivery method change
@@ -445,18 +543,127 @@ jQuery(document).ready(function($) {
 		// Update hidden field
 		$('#selected_delivery_method').val(method);
 
+		// Update field requirements based on delivery method
+		if (method === 'pickup') {
+			// PICKUP: Ward and address are not required
+			$('#billing_city').prop('required', false).removeClass('validate-required');
+			$('#billing_address_1').prop('required', false).removeClass('validate-required');
+			$('#billing_city_field').removeClass('validate-required');
+			$('#billing_address_1_field').removeClass('validate-required');
+		} else {
+			// DELIVERY: Ward and address are required
+			$('#billing_city').prop('required', true).addClass('validate-required');
+			$('#billing_address_1').prop('required', true).addClass('validate-required');
+			$('#billing_city_field').addClass('validate-required');
+			$('#billing_address_1_field').addClass('validate-required');
+		}
+
 		// Load stores for the selected method
 		loadAvailableStores(method);
 
-		// Update shipping method
+		// Update shipping fee display immediately
+		updateShippingFeeDisplay();
+
+		// Trigger WooCommerce to recalculate fees and totals
 		$(document.body).trigger('update_checkout');
+	});
+
+	// Handle ward/commune change
+	$(document).on('change', '#billing_city', function() {
+		// Update shipping fee display immediately
+		updateShippingFeeDisplay();
+
+		// Trigger checkout update to recalculate fees
+		$(document.body).trigger('update_checkout');
+	});
+
+	// Update shipping fee display after WooCommerce updates
+	// Also restore ward options that were cleared by WooCommerce re-rendering
+	$(document.body).on('updated_checkout', function() {
+		console.log('🔄 WooCommerce updated_checkout fired');
+
+		// Restore previously loaded wards if any
+		if (loadedWards.length > 0) {
+			console.log('🔄 Restoring ' + loadedWards.length + ' wards after checkout update');
+			var $wardSelect = $('#billing_city');
+			var selectedWard = $wardSelect.val(); // Save current selection
+
+			// Clear and repopulate
+			$wardSelect.find('option:not(:first)').remove();
+			loadedWards.forEach(function(ward) {
+				$wardSelect.append(
+					$('<option></option>')
+						.attr('value', ward.id)
+						.text(ward.name)
+						.data('fee', ward.fee)
+				);
+			});
+
+			// Restore previous selection if any (don't auto-select)
+			if (selectedWard) {
+				$wardSelect.val(selectedWard);
+			}
+		}
+
+		// Enable billing_state to ensure it's included in form submission
+		$('#billing_state').prop('disabled', false);
+
+		updateShippingFeeDisplay();
 	});
 
 	// Set initial state to DELIVERY and load stores
 	setTimeout(function() {
 		$('input[name="delivery_method"][value="delivery"]').prop('checked', true);
+		// Enable billing_state immediately so it's never disabled during form submission
+		$('#billing_state').prop('disabled', false);
+
+		// Trigger change event on pre-filled billing fields to update WooCommerce validation
+		// This ensures pre-filled values from logged-in users are recognized
+		$('#billing_address_1').trigger('change');
+		$('#billing_last_name').trigger('change');
+		$('#billing_phone').trigger('change');
+		$('#billing_email').trigger('change');
+
 		loadAvailableStores('delivery');
 	}, 500);
+
+	// Load wards for pre-selected store after stores are loaded
+	setTimeout(function() {
+		var preSelectedStore = $('input[name="selected_store"]:checked').val();
+		console.log('Checking for pre-selected store:', preSelectedStore);
+		if (preSelectedStore) {
+			console.log('Loading wards for pre-selected store:', preSelectedStore);
+			loadStoreWards(preSelectedStore);
+		} else {
+			console.log('No pre-selected store found');
+		}
+	}, 2000);
+
+	// Validate and prepare form before submission
+	$('form.checkout').on('checkout_place_order', function() {
+		// Enable billing_state before form submission so value gets sent
+		$('#billing_state').prop('disabled', false);
+
+		// Validate store selection
+		var selectedStore = $('input[name="selected_store"]:checked').val();
+		if (!selectedStore) {
+			alert('Please select a store.');
+			return false;
+		}
+
+		// Validate ward selection for delivery method
+		var deliveryMethod = $('input[name="delivery_method"]:checked').val();
+		if (deliveryMethod === 'delivery') {
+			var selectedWard = $('#billing_city').val();
+			if (!selectedWard) {
+				alert('Please select a Ward/Commune.');
+				return false;
+			}
+		}
+
+		console.log('Form validation passed - Store:', selectedStore, 'Method:', deliveryMethod);
+		return true;
+	});
 });
 </script>
 

@@ -97,6 +97,8 @@ if ( !class_exists( 'WPSL_Frontend' ) ) {
 
             global $wpsl_settings;
 
+            error_log('AJAX store_search called - Filter: ' . (isset($_GET['filter']) ? $_GET['filter'] : 'none'));
+
             /*
              * Check if auto loading the locations on page load is enabled.
              *

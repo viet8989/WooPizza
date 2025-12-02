@@ -59,6 +59,19 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 // Add filter to show only currently open stores
                 add_filter('wpsl_store_data', array($this, 'filter_stores_by_opening_hours'), 10, 1);
 
+                // Register custom shipping method
+                add_filter('woocommerce_shipping_methods', array($this, 'register_store_shipping_method'));
+                add_action('woocommerce_shipping_init', array($this, 'init_store_shipping_method'));
+
+                // Ensure shipping packages are available
+                add_filter('woocommerce_cart_shipping_packages', array($this, 'add_shipping_package'));
+
+                // Add shipping/pickup fee to cart
+                add_action('woocommerce_cart_calculate_fees', array($this, 'add_shipping_pickup_fee'));
+
+                // Enable payment methods
+                add_filter('woocommerce_available_payment_gateways', array($this, 'enable_payment_gateways'));
+
                 error_log('WP Store Shipping Functions: Hooks registered');
             }
 
@@ -75,14 +88,37 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 
                 WC()->customer->set_shipping_country('VN');
 
-                // Prepare ward/commune options
+                // Prepare ward/commune options - Start with only placeholder
+                // Wards will be loaded dynamically via JavaScript based on selected store
                 $ward_options = array('' => __('Select Ward/Commune', 'wp-store-shipping'));
-                if (!empty($xa_phuong_thitran)) {
-                    foreach ($xa_phuong_thitran as $ward) {
-                        if (isset($ward['xaid']) && isset($ward['name'])) {
-                            $ward_options[$ward['xaid']] = $ward['name'];
-                        }
-                    }
+
+                // Remove billing last name
+                if (isset($fields['billing']['billing_first_name'])) {
+                    unset($fields['billing']['billing_first_name']);
+                }
+
+                // Set billing country to Vietnam (VN) as hidden field - WooCommerce requires this
+                $fields['billing']['billing_country'] = array(
+                    'type' => 'hidden',
+                    'default' => 'VN',
+                    'class' => array('update_totals_on_change'),
+                );
+
+                // Remove billing company
+                if (isset($fields['billing']['billing_company'])) {
+                    unset($fields['billing']['billing_company']);
+                }
+
+                // Set billing postcode to default value as hidden field
+                $fields['billing']['billing_postcode'] = array(
+                    'type' => 'hidden',
+                    'default' => '70000',
+                    'class' => array('update_totals_on_change'),
+                );
+
+                // Remove billing_address_2
+                if (isset($fields['billing']['billing_address_2'])) {
+                    unset($fields['billing']['billing_address_2']);
                 }
 
                 // Billing fields
@@ -98,6 +134,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 if (isset($fields['billing']['billing_phone'])) {
                     $fields['billing']['billing_phone']['class'] = array('form-row-first');
                     $fields['billing']['billing_phone']['placeholder'] = __('Type your phone', 'wp-store-shipping');
+                    $fields['billing']['billing_phone']['required'] = true;
                     $fields['billing']['billing_phone']['priority'] = 20;
                 }
 
@@ -107,98 +144,49 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                     $fields['billing']['billing_email']['priority'] = 21;
                 }
 
-                // // Province/City field - Hidden, always HOCHIMINH
-                // $fields['billing']['billing_state'] = array(
-                //     'label' => __('Thành phố Hồ Chí Minh', 'wp-store-shipping'),
-                //     'required' => true,
-                //     'type' => 'text',
-                //     'class' => array('form-row-wide'),
-                //     'default' => 'HOCHIMINH',
-                //     'custom_attributes' => array(
-                //         'readonly' => 'readonly',
-                //         'style' => 'display:none;'
-                //     ),
-                //     'priority' => 30
-                // );
+                // Province/City field - Always HOCHIMINH, display Vietnamese name
+                $state_code = 'HOCHIMINH';
+                $state_name = isset($tinh_thanhpho[$state_code]) ? $tinh_thanhpho[$state_code] : $state_code;
 
-                // Ward/Commune field
-                $fields['billing']['billing_address_2'] = array(
-                    'label' => __('Ward/Commune', 'wp-store-shipping'),
+                $fields['billing']['billing_state'] = array(
+                    'label' => __('Province/City', 'wp-store-shipping'),
                     'required' => true,
                     'type' => 'select',
-                    'class' => array('form-row-wide'),
-                    'placeholder' => _x('Select Ward/Commune', 'placeholder', 'wp-store-shipping'),
-                    'options' => $ward_options,
-                    'priority' => 40
-                );
-
-                // Street address
-                $fields['billing']['billing_address_1']['placeholder'] = _x('Ex: No. 20, 90 Alley', 'placeholder', 'wp-store-shipping');
-                $fields['billing']['billing_address_1']['class'] = array('form-row-wide');
-                $fields['billing']['billing_address_1']['priority'] = 60;
-
-                // Remove unnecessary billing fields
-                unset($fields['billing']['billing_first_name']);
-                unset($fields['billing']['billing_country']);
-                unset($fields['billing']['billing_company']);
-
-                // Shipping fields
-                $fields['shipping']['shipping_last_name'] = array(
-                    'label' => __('Recipient full name', 'wp-store-shipping'),
-                    'placeholder' => _x('Recipient full name', 'placeholder', 'wp-store-shipping'),
-                    'required' => true,
                     'class' => array('form-row-first'),
-                    'clear' => true,
-                    'priority' => 10
-                );
-
-                $fields['shipping']['shipping_phone'] = array(
-                    'label' => __('Recipient phone', 'wp-store-shipping'),
-                    'placeholder' => _x('Recipient phone', 'placeholder', 'wp-store-shipping'),
-                    'required' => false,
-                    'class' => array('form-row-last'),
-                    'clear' => true,
-                    'priority' => 20
-                );
-
-                // Province/City field - Hidden, always HOCHIMINH
-                $fields['shipping']['shipping_state'] = array(
-                    'label' => __('Thành phố Hồ Chí Minh', 'wp-store-shipping'),
-                    'required' => true,
-                    'type' => 'text',
-                    'class' => array('form-row-wide'),
-                    'default' => 'HOCHIMINH',
+                    'options' => array($state_code => $state_name),
+                    'default' => $state_code,
                     'custom_attributes' => array(
-                        'readonly' => 'readonly',
-                        'style' => 'display:none;'
+                        'disabled' => 'disabled',
                     ),
-                    'priority' => 30
+                    'priority' => 22
                 );
+
+                // Check delivery method to determine if ward and address are required
+                // For pickup orders, these fields are not required
+                $delivery_method = isset($_POST['delivery_method']) ? sanitize_text_field($_POST['delivery_method']) : 'delivery';
+                $is_pickup = ($delivery_method === 'pickup');
 
                 // Ward/Commune field
-                $fields['shipping']['shipping_address_2'] = array(
+                $fields['billing']['billing_city'] = array(
                     'label' => __('Ward/Commune', 'wp-store-shipping'),
-                    'required' => true,
+                    'required' => !$is_pickup, // Not required for pickup
                     'type' => 'select',
-                    'class' => array('form-row-wide'),
+                    'class' => array('form-row-last'),
                     'placeholder' => _x('Select Ward/Commune', 'placeholder', 'wp-store-shipping'),
                     'options' => $ward_options,
-                    'priority' => 40
+                    'priority' => 23
                 );
 
-                // Street address
-                $fields['shipping']['shipping_address_1']['placeholder'] = _x('Ex: No. 20, 90 Alley', 'placeholder', 'wp-store-shipping');
-                $fields['shipping']['shipping_address_1']['class'] = array('form-row-wide');
-                $fields['shipping']['shipping_address_1']['priority'] = 60;
-
-                // Remove unnecessary shipping fields
-                unset($fields['shipping']['shipping_first_name']);
-                unset($fields['shipping']['shipping_country']);
-                unset($fields['shipping']['shipping_company']);
+                // Street address (House number, street name)
+                $fields['billing']['billing_address_1']['label'] = __('House Number, Street Name', 'wp-store-shipping');
+                $fields['billing']['billing_address_1']['placeholder'] = _x('Ex: 194 Le Thanh Ton', 'placeholder', 'wp-store-shipping');
+                $fields['billing']['billing_address_1']['required'] = !$is_pickup; // Not required for pickup
+                $fields['billing']['billing_address_1']['class'] = array('form-row-wide');
+                $fields['billing']['billing_address_1']['priority'] = 24;
 
                 // Sort fields by priority
                 uasort($fields['billing'], array($this, 'sort_fields_by_order'));
-                uasort($fields['shipping'], array($this, 'sort_fields_by_order'));
+                // uasort($fields['shipping'], array($this, 'sort_fields_by_order'));
 
                 return apply_filters('devvn_checkout_fields', $fields);
             }
@@ -271,7 +259,10 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 
                 $store_id = isset($_GET['store_id']) ? sanitize_text_field($_GET['store_id']) : '';
 
+                error_log('AJAX get_store_wards called - Store ID: ' . $store_id);
+
                 if (empty($store_id)) {
+                    error_log('AJAX get_store_wards - ERROR: Store ID is empty');
                     wp_send_json_error(array('message' => 'Store ID is required'));
                     wp_die();
                 }
@@ -279,6 +270,8 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 // Get all shipping fees for this store
                 $shipping_fees = get_option('hcm_shipping_fees', array());
                 $available_wards = array();
+
+                error_log('AJAX get_store_wards - Total shipping fees: ' . count($shipping_fees));
 
                 foreach ($shipping_fees as $fee_key => $fee_data) {
                     // Fee key format: store_id_ward_id
@@ -298,6 +291,8 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                         }
                     }
                 }
+
+                error_log('AJAX get_store_wards - Found ' . count($available_wards) . ' wards for store ' . $store_id);
 
                 wp_send_json_success(array('wards' => $available_wards));
                 wp_die();
@@ -334,6 +329,107 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 error_log('WP Store Shipping: Filtered stores (' . strtoupper($hours_type) . ') - Total: ' . count($store_data) . ', Open now: ' . count($filtered_stores) . ' at ' . date('l Hi'));
 
                 return $filtered_stores;
+            }
+
+            // Add shipping/pickup fee to cart
+            function add_shipping_pickup_fee()
+            {
+                if (is_admin() && !defined('DOING_AJAX')) {
+                    return;
+                }
+
+                // Get delivery method from POST data
+                $delivery_method = isset($_POST['post_data']) ? $_POST['post_data'] : '';
+                parse_str($delivery_method, $post_data);
+
+                // Get custom delivery fields
+                $selected_method = isset($post_data['selected_delivery_method']) ? $post_data['selected_delivery_method'] : 'delivery';
+
+                // Try to get selected_store from multiple sources
+                $selected_store = '';
+                if (isset($post_data['selected_store'])) {
+                    $selected_store = sanitize_text_field($post_data['selected_store']);
+                } elseif (isset($_POST['selected_store'])) {
+                    $selected_store = sanitize_text_field($_POST['selected_store']);
+                } elseif (WC()->session) {
+                    // Fallback to session data
+                    $selected_store = WC()->session->get('selected_store');
+                }
+
+                // Store in session for future use
+                if (!empty($selected_store) && WC()->session) {
+                    WC()->session->set('selected_store', $selected_store);
+                }
+
+                // Try to get billing_city from both post_data and direct POST
+                $selected_ward = '';
+                if (isset($post_data['billing_city'])) {
+                    $selected_ward = sanitize_text_field($post_data['billing_city']);
+                } elseif (isset($_POST['billing_city'])) {
+                    $selected_ward = sanitize_text_field($_POST['billing_city']);
+                }
+
+                if ($selected_method === 'pickup') {
+                    // PICKUP - Add 0 fee
+                    WC()->cart->add_fee(__('Pickup', 'wp-store-shipping'), 0);
+                } else {
+                    // DELIVERY - Calculate shipping fee
+                    $shipping_fee = 0;
+
+                    error_log('Calculate Shipping Fee - Store: ' . $selected_store . ', Ward: ' . $selected_ward);
+
+                    if (!empty($selected_store) && !empty($selected_ward)) {
+                        $shipping_fees = get_option('hcm_shipping_fees', array());
+                        $fee_key = $selected_store . '_' . $selected_ward;
+
+                        error_log('Fee Key: ' . $fee_key);
+
+                        if (isset($shipping_fees[$fee_key]) && isset($shipping_fees[$fee_key]['fee'])) {
+                            $shipping_fee = floatval($shipping_fees[$fee_key]['fee']);
+                            error_log('Shipping Fee Found: ' . $shipping_fee);
+                        } else {
+                            error_log('No shipping fee found for key: ' . $fee_key);
+                        }
+                    } else {
+                        error_log('Store or Ward is empty - cannot calculate fee');
+                    }
+
+                    error_log('Adding fee to cart: ' . $shipping_fee);
+                    WC()->cart->add_fee(__('Shipping Fee', 'wp-store-shipping'), $shipping_fee);
+                }
+            }
+
+            // Initialize custom shipping method class
+            function init_store_shipping_method()
+            {
+                if (!class_exists('WC_Store_Shipping_Method')) {
+                    require_once plugin_dir_path(__FILE__) . 'class-wc-store-shipping-method.php';
+                }
+            }
+
+            // Register custom shipping method
+            function register_store_shipping_method($methods)
+            {
+                $methods['store_shipping'] = 'WC_Store_Shipping_Method';
+                return $methods;
+            }
+
+            // Add shipping package to ensure WooCommerce recognizes shipping
+            function add_shipping_package($packages)
+            {
+                if (empty($packages)) {
+                    $packages = WC()->cart->get_shipping_packages();
+                }
+                return $packages;
+            }
+
+            // Enable payment gateways for checkout
+            function enable_payment_gateways($available_gateways)
+            {
+                // Ensure payment gateways are available
+                // This function simply returns all available gateways without filtering
+                error_log('WP Store Shipping - Available payment gateways: ' . print_r(array_keys($available_gateways), true));
+                return $available_gateways;
             }
 
             // Check if a store is currently open
@@ -649,6 +745,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                 </script>
                 <?php
             }
+
         }
 
         // Initialize the plugin

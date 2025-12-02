@@ -758,4 +758,100 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 'info');
         }, 24000);
     }
+
+    // Auto-test checkout form state (only run when URL has ?autotest=checkout parameter)
+    if (urlParams.get('autotest') === 'checkout') {
+        // Step 1: Clear logs after 2 seconds
+        setTimeout(function() {
+            if (typeof clearLogsServer === 'function') {
+                clearLogsServer();
+            }
+        }, 2000);
+
+        // Step 2: Log at 3 seconds
+        setTimeout(function() {
+            if (typeof writeLogServer !== 'function') return;
+            writeLogServer({
+                event: 'autotest_step_2_at_3s',
+                timestamp: new Date().toISOString(),
+                stores_count: document.querySelectorAll('.store-item').length,
+                selected_store: document.querySelector('input[name="selected_store"]:checked') ? document.querySelector('input[name="selected_store"]:checked').value : null,
+                ward_options_count: document.querySelectorAll('#billing_city option').length
+            }, 'info');
+        }, 3000);
+
+        // Step 3: Log at 4 seconds
+        setTimeout(function() {
+            if (typeof writeLogServer !== 'function') return;
+            writeLogServer({
+                event: 'autotest_step_3_at_4s',
+                timestamp: new Date().toISOString(),
+                selected_store: document.querySelector('input[name="selected_store"]:checked') ? document.querySelector('input[name="selected_store"]:checked').value : null,
+                ward_options_count: document.querySelectorAll('#billing_city option').length
+            }, 'info');
+        }, 4000);
+
+        // Step 4: Log at 5 seconds
+        setTimeout(function() {
+            if (typeof writeLogServer !== 'function') return;
+            writeLogServer({
+                event: 'autotest_step_4_at_5s',
+                timestamp: new Date().toISOString(),
+                selected_store: document.querySelector('input[name="selected_store"]:checked') ? document.querySelector('input[name="selected_store"]:checked').value : null,
+                ward_options_count: document.querySelectorAll('#billing_city option').length
+            }, 'info');
+        }, 5000);
+
+        // Step 5: Log at 7 seconds
+        setTimeout(function() {
+            if (typeof writeLogServer !== 'function') return;
+            const wardOpts7s = Array.from(document.querySelectorAll('#billing_city option')).map(opt => ({
+                value: opt.value,
+                text: opt.text
+            }));
+            writeLogServer({
+                event: 'autotest_step_5_at_7s',
+                timestamp: new Date().toISOString(),
+                selected_store: document.querySelector('input[name="selected_store"]:checked') ? document.querySelector('input[name="selected_store"]:checked').value : null,
+                ward_options_count: document.querySelectorAll('#billing_city option').length,
+                ward_options: wardOpts7s
+            }, 'info');
+        }, 7000);
+
+        // Step 6: Log final form state after 10 seconds
+        setTimeout(function() {
+            if (typeof writeLogServer !== 'function') {
+                console.error('writeLogServer not available');
+                return;
+            }
+
+            try {
+                const wardOptions = Array.from(document.querySelectorAll('#billing_city option')).map(opt => ({
+                    value: opt.value,
+                    text: opt.text
+                }));
+
+                const formData = {
+                    event: 'checkout_form_state_final',
+                    timestamp: new Date().toISOString(),
+                    full_name: document.getElementById('billing_last_name') ? document.getElementById('billing_last_name').value : 'N/A',
+                    phone: document.getElementById('billing_phone') ? document.getElementById('billing_phone').value : 'N/A',
+                    email: document.getElementById('billing_email') ? document.getElementById('billing_email').value : 'N/A',
+                    province: document.getElementById('billing_state') ? document.getElementById('billing_state').value : 'N/A',
+                    ward: document.getElementById('billing_city') ? document.getElementById('billing_city').value : 'N/A',
+                    ward_options_count: document.querySelectorAll('#billing_city option').length,
+                    ward_options: wardOptions,
+                    house_street: document.getElementById('billing_address_1') ? document.getElementById('billing_address_1').value : 'N/A',
+                    delivery_method: document.querySelector('input[name="delivery_method"]:checked') ? document.querySelector('input[name="delivery_method"]:checked').value : 'N/A',
+                    selected_store: document.querySelector('input[name="selected_store"]:checked') ? document.querySelector('input[name="selected_store"]:checked').value : 'N/A',
+                    shipping_method: document.querySelector('input[name="shipping_method[0]"]:checked') ? document.querySelector('input[name="shipping_method[0]"]:checked').value : 'N/A',
+                    message: 'Form state logged - ready for manual submit test'
+                };
+                writeLogServer(formData, 'info');
+                console.log('✅ Form state logged to server - you can now manually submit');
+            } catch (e) {
+                writeLogServer({event: 'error', message: 'Error logging form state', error: e.message}, 'error');
+            }
+        }, 10000);
+    }
 });

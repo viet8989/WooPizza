@@ -319,13 +319,6 @@ defined( 'ABSPATH' ) || exit;
 			<span class="totals-value"><?php echo WC()->cart->get_cart_subtotal(); ?></span>
 		</div>
 
-		<?php if ( WC()->cart->needs_shipping() && WC()->cart->show_shipping() ) : ?>
-		<div class="totals-row shipping-row">
-			<span class="totals-label">Shipping</span>
-			<span class="totals-value"><?php wc_cart_totals_shipping_html(); ?></span>
-		</div>
-		<?php endif; ?>
-
 		<?php if ( wc_tax_enabled() && ! WC()->cart->display_prices_including_tax() ) : ?>
 		<div class="totals-row tax-row">
 			<?php
@@ -344,10 +337,10 @@ defined( 'ABSPATH' ) || exit;
 		<?php endif; ?>
 
 		<?php
-		// Custom Shipping/Pickup Fee Row
+		// Custom Shipping/Pickup Fee Row - Replaces WooCommerce default shipping display
 		$delivery_method = isset($_POST['selected_delivery_method']) ? sanitize_text_field($_POST['selected_delivery_method']) : 'delivery';
 		$selected_store = isset($_POST['selected_store']) ? sanitize_text_field($_POST['selected_store']) : '';
-		$selected_ward = isset($_POST['billing_address_2']) ? sanitize_text_field($_POST['billing_address_2']) : '';
+		$selected_ward = isset($_POST['billing_city']) ? sanitize_text_field($_POST['billing_city']) : '';
 
 		if ($delivery_method === 'pickup') {
 			// PICKUP - Always 0 fee
@@ -379,7 +372,23 @@ defined( 'ABSPATH' ) || exit;
 
 		<div class="totals-row total-row">
 			<span class="totals-label"><strong>Total</strong></span>
-			<span class="totals-value"><strong><?php echo WC()->cart->get_total(); ?></strong></span>
+			<span class="totals-value"><strong><?php
+				// Calculate total including fees
+				$cart_total = WC()->cart->get_cart_contents_total();
+				$cart_tax = WC()->cart->get_cart_contents_tax();
+				$fee_total = WC()->cart->get_fee_total();
+				$fee_tax = WC()->cart->get_fee_tax();
+				$total = $cart_total + $cart_tax + $fee_total + $fee_tax;
+
+				error_log('REVIEW ORDER - Total Calculation:');
+				error_log('  Cart total: ' . $cart_total);
+				error_log('  Cart tax: ' . $cart_tax);
+				error_log('  Fee total: ' . $fee_total);
+				error_log('  Fee tax: ' . $fee_tax);
+				error_log('  TOTAL: ' . $total);
+
+				echo wc_price($total);
+			?></strong></span>
 		</div>
 	</div>
 
