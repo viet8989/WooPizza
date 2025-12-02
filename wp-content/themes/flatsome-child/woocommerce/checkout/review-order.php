@@ -62,40 +62,8 @@ defined( 'ABSPATH' ) || exit;
 					}
 					?>
 
-					<div class="checkout-title-wrapper">
-						<?php if ( $is_paired ) : ?>
-							<?php echo $paired_icon; ?>
-						<?php endif; ?>
-
-						<?php
-						// Get base product price
-						$base_price = $_product->get_regular_price();
-						if ( empty( $base_price ) ) {
-							$base_price = $_product->get_price();
-						}
-						$base_price_formatted = wc_price( $base_price );
-						?>
-
-						<?php if ( empty( $product_permalink ) ) : ?>
-							<h3 class="checkout-product-title">
-								<?php echo $display_title; ?>
-								<?php if ( !$is_paired ) : ?>
-									<span class="product-base-price" style="float: right;"><?php echo $base_price_formatted; ?></span>
-								<?php endif; ?>
-							</h3>
-						<?php else : ?>
-							<a href="<?php echo esc_url( $product_permalink ); ?>">
-								<h3 class="checkout-product-title">
-									<?php echo $display_title; ?>
-									<?php if ( !$is_paired ) : ?>
-										<span class="product-base-price" style="float: right;"><?php echo $base_price_formatted; ?></span>
-									<?php endif; ?>
-								</h3>
-							</a>
-						<?php endif; ?>
-					</div>
-
-					<div class="checkout-item-content">
+					<!-- Line 1: Image + Name + Base Price -->
+					<div class="checkout-first-row">
 						<div class="checkout-item-image">
 							<?php if ( empty( $product_permalink ) ) : ?>
 								<?php echo $thumbnail; ?>
@@ -106,7 +74,44 @@ defined( 'ABSPATH' ) || exit;
 							<?php endif; ?>
 						</div>
 
-						<div class="checkout-item-details">
+						<div class="checkout-name-price">
+							<div class="checkout-title-wrapper">
+								<?php if ( $is_paired ) : ?>
+									<?php echo $paired_icon; ?>
+								<?php endif; ?>
+
+								<?php
+								// Get base product price
+								$base_price = $_product->get_regular_price();
+								if ( empty( $base_price ) ) {
+									$base_price = $_product->get_price();
+								}
+								$base_price_formatted = wc_price( $base_price );
+								?>
+
+								<?php if ( empty( $product_permalink ) ) : ?>
+									<h3 class="checkout-product-title">
+										<?php echo $display_title; ?>
+									</h3>
+								<?php else : ?>
+									<a href="<?php echo esc_url( $product_permalink ); ?>">
+										<h3 class="checkout-product-title">
+											<?php echo $display_title; ?>
+										</h3>
+									</a>
+								<?php endif; ?>
+							</div>
+
+							<?php if ( !$is_paired ) : ?>
+								<div class="checkout-base-price">
+									<?php echo $base_price_formatted; ?>
+								</div>
+							<?php endif; ?>
+						</div>
+					</div>
+
+					<!-- Pizza customization details -->
+					<div class="checkout-item-details">
 					<?php
 					// Display extra toppings (whole pizza)
 					if ( isset( $cart_item['extra_topping_options'] ) && ! empty( $cart_item['extra_topping_options'] ) ) {
@@ -176,7 +181,7 @@ defined( 'ABSPATH' ) || exit;
 								$right_price = isset( $right['price'] ) ? wc_price( $right['price'] ) : '';
 
 								echo '<div class="pizza-half-section">';
-								echo '<div class="pizza-half-title">1/2' . $right_name . '<span style="float: right;">' . $right_price . '</span></div>';
+								echo '<div class="pizza-half-title">1/2 ' . $right_name . '<span style="float: right;">' . $right_price . '</span></div>';
 
 								// Display right half toppings
 								if ( isset( $right['toppings'] ) && ! empty( $right['toppings'] ) ) {
@@ -289,14 +294,13 @@ defined( 'ABSPATH' ) || exit;
 							$line_total = $calculated_price * $cart_item['quantity'];
 							$line_total_formatted = wc_price( $line_total );
 							?>
+					</div><!-- .checkout-item-details -->
 
-						</div>
-					</div>
-
-					<!-- Quantity and Price Row -->
+					<!-- Line 2: Price × Quantity = Total -->
 					<div class="checkout-quantity-price-row">
 						<div class="checkout-quantity-display">
-							<span class="qty-label">Qty:</span>
+							<span class="unit-price"><?php echo $unit_price_formatted; ?></span>
+							<span class="qty-separator">×</span>
 							<span class="qty-value"><?php echo esc_html( $cart_item['quantity'] ); ?></span>
 						</div>
 						<div class="checkout-line-total">
@@ -466,24 +470,23 @@ a:hover .checkout-product-title {
 	color: #dc0000 !important;
 }
 
-/* Two Column Layout - Image Left, Details Right */
-.checkout-item-content {
+/* Line 1: Image + Name + Price Layout */
+.checkout-first-row {
 	display: flex !important;
 	gap: 12px !important;
-	align-items: center !important;
+	align-items: flex-start !important;
 	width: 100% !important;
-	flex-direction: row !important;
+	margin-bottom: 8px !important;
 }
 
-.checkout-item-image {
+.checkout-first-row .checkout-item-image {
 	flex: 0 0 90px !important;
 	width: 90px !important;
 	max-width: 90px !important;
 	display: block !important;
-	order: 0 !important;
 }
 
-.checkout-item-image img {
+.checkout-first-row .checkout-item-image img {
 	width: 100% !important;
 	max-width: 90px !important;
 	height: auto !important;
@@ -492,10 +495,26 @@ a:hover .checkout-product-title {
 	display: block !important;
 }
 
-.checkout-item-details {
+.checkout-name-price {
 	flex: 1 !important;
+	display: flex !important;
+	justify-content: space-between !important;
+	align-items: flex-start !important;
 	min-width: 0 !important;
-	order: 1 !important;
+}
+
+.checkout-base-price {
+	font-size: 16px !important;
+	font-weight: 700 !important;
+	color: #000 !important;
+	white-space: nowrap !important;
+	margin-left: 8px !important;
+}
+
+/* Pizza Details Section (below image+name) */
+.checkout-item-details {
+	width: 100% !important;
+	padding-left: 0 !important;
 }
 
 /* Pizza Half Section Styling */
@@ -619,14 +638,21 @@ a:hover .checkout-product-title {
 .checkout-quantity-display {
 	display: flex !important;
 	align-items: center !important;
-	gap: 8px !important;
+	gap: 6px !important;
 	font-size: 14px !important;
 	font-weight: 600 !important;
-	color: #666 !important;
+	color: #000 !important;
 }
 
-.checkout-quantity-display .qty-label {
+.checkout-quantity-display .unit-price {
+	color: #000 !important;
+	font-weight: 600 !important;
+}
+
+.checkout-quantity-display .qty-separator {
 	color: #666 !important;
+	font-weight: 400 !important;
+	margin: 0 2px !important;
 }
 
 .checkout-quantity-display .qty-value {
