@@ -708,13 +708,27 @@ add_action( 'admin_init', 'wp_child_add_wpsl_post_caps_to_shop_manager', 20 );
 // Save custom options to cart item data
 add_filter( 'woocommerce_add_cart_item_data', 'save_custom_pizza_options_to_cart', 10, 3 );
 function save_custom_pizza_options_to_cart( $cart_item_data, $product_id, $variation_id ) {
+	error_log('========================================');
+	error_log('SAVE CUSTOM PIZZA OPTIONS - START');
+	error_log('Product ID: ' . $product_id);
+	error_log('Variation ID: ' . $variation_id);
+	error_log('All POST keys: ' . implode(', ', array_keys($_POST)));
+
 	// Handle extra topping options (cheese + cold cuts)
 	if ( isset( $_POST['extra_topping_options'] ) && ! empty( $_POST['extra_topping_options'] ) ) {
+		error_log('extra_topping_options FOUND in POST');
+		error_log('Raw value: ' . $_POST['extra_topping_options']);
 		$topping_options = json_decode( stripslashes( $_POST['extra_topping_options'] ), true );
+		error_log('Decoded: ' . print_r($topping_options, true));
 
 		if ( is_array( $topping_options ) && ! empty( $topping_options ) ) {
 			$cart_item_data['extra_topping_options'] = $topping_options;
+			error_log('Successfully added to cart_item_data');
+		} else {
+			error_log('ERROR: Decoded value is not a valid array');
 		}
+	} else {
+		error_log('extra_topping_options NOT FOUND in POST');
 	}
 
 	// Handle pizza halves (new structure)
@@ -739,7 +753,31 @@ function save_custom_pizza_options_to_cart( $cart_item_data, $product_id, $varia
 	if ( isset( $_POST['special_request'] ) && ! empty( trim( $_POST['special_request'] ) ) ) {
 		$special_request = sanitize_textarea_field( $_POST['special_request'] );
 		$cart_item_data['special_request'] = $special_request;
+		error_log('special_request FOUND and added');
 	}
+
+	// Generate unique key to prevent WooCommerce from merging items with different configurations
+	// This ensures items with different sizes, toppings, or special requests are treated as separate cart items
+	if ( ! empty( $cart_item_data ) ) {
+		$unique_data = array(
+			'product_id' => $product_id,
+			'variation_id' => $variation_id,
+			'data' => $cart_item_data
+		);
+		$unique_key = md5( serialize( $unique_data ) );
+		$cart_item_data['unique_key'] = $unique_key;
+		error_log('Generated unique_key: ' . $unique_key);
+	}
+
+	error_log('========================================');
+	error_log('FINAL cart_item_data keys: ' . implode(', ', array_keys($cart_item_data)));
+	if (isset($cart_item_data['extra_topping_options'])) {
+		error_log('extra_topping_options in final data: YES (' . count($cart_item_data['extra_topping_options']) . ' items)');
+	} else {
+		error_log('extra_topping_options in final data: NO');
+	}
+	error_log('SAVE CUSTOM PIZZA OPTIONS - END');
+	error_log('========================================');
 
 	return $cart_item_data;
 }

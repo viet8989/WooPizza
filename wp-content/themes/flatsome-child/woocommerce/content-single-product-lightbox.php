@@ -19,6 +19,11 @@ $product_price = $product->get_price();
 $product_id    = $product->get_id();
 $upsell_ids    = $product->get_upsell_ids();
 $has_upsells   = ! empty( $upsell_ids );
+
+// Check if product is in PIZZA category
+$product_categories = wp_get_post_terms( $product_id, 'product_cat', array( 'fields' => 'names' ) );
+$is_pizza = in_array( 'PIZZA', $product_categories, true );
+
 do_action( 'wc_quick_view_before_single_product' );
 ?>
 
@@ -34,7 +39,7 @@ do_action( 'wc_quick_view_before_single_product' );
 
                 <!-- Pizza Size Selection -->
                 <div class="pizza-size-options">
-                    <div class="size-button-group">
+                    <div class="size-button-group" <?php echo ! $is_pizza ? 'style="display: none !important;"' : ''; ?>>
                         <button id="btn-whole" class="size-option active" data-size="whole" type="button">
                             <img src="<?php echo esc_url( get_site_url() . '/wp-content/uploads/images/pizza-icon-white.png' ); ?>"
                                 alt="<?php esc_attr_e( 'Whole pizza', 'flatsome' ); ?>" class="size-icon">
@@ -72,6 +77,7 @@ do_action( 'wc_quick_view_before_single_product' );
 						?>
 
                         <h3 class="pizza-title"><?php the_title(); ?></h3>
+                        <div class="pizza-price"><?php echo wp_kses_post( wc_price( $product_price ) ); ?></div>
 
                         <div class="pizza-description">
                             <?php
@@ -241,11 +247,11 @@ do_action( 'wc_quick_view_before_single_product' );
 				if ( ! empty( $whole_toppings ) ) :
 				?>
                     <h3 class="topping-tab-whole">Whole Pizza Upgrade</h3>
+                    <div class="extra-options-section">
                     <?php
 					foreach ( $whole_toppings as $category_id => $topping_category ) :
 						if ( ! empty( $topping_category['products'] ) ) :
 				?>
-                    <div class="extra-options-section">
                         <h4 class="extra-options-title"><?php echo esc_html( $topping_category['category_name'] ); ?>:
                         </h4>
                         <div class="checkbox-group">
@@ -262,10 +268,12 @@ do_action( 'wc_quick_view_before_single_product' );
                             </label>
                             <?php endforeach; ?>
                         </div>
-                    </div>
                     <?php
 						endif;
 					endforeach;
+				?>
+                    </div>
+                    <?php
 				endif;
 				?>
                 </div>
@@ -283,10 +291,12 @@ do_action( 'wc_quick_view_before_single_product' );
                         <?php
 					// Reuse whole_toppings for left half (same as main product)
 					if ( ! empty( $whole_toppings ) ) :
+					?>
+                        <div class="extra-options-section">
+                        <?php
 						foreach ( $whole_toppings as $category_id => $topping_category ) :
 							if ( ! empty( $topping_category['products'] ) ) :
 					?>
-                        <div class="extra-options-section">
                             <h4 class="extra-options-title">
                                 <?php echo esc_html( $topping_category['category_name'] ); ?>:</h4>
                             <div class="checkbox-group">
@@ -303,10 +313,12 @@ do_action( 'wc_quick_view_before_single_product' );
                                 </label>
                                 <?php endforeach; ?>
                             </div>
-                        </div>
                         <?php
 							endif;
 						endforeach;
+					?>
+                        </div>
+                        <?php
 					endif;
 					?>
                     </div>
@@ -569,6 +581,13 @@ do_action( 'wc_quick_view_after_single_product' );
     font-size: 24px;
     margin: 0 0 10px 0;
     font-weight: bold;
+}
+
+.pizza-price {
+    font-size: 20px;
+    font-weight: bold;
+    color: #dc0000;
+    margin-bottom: 10px;
 }
 
 .pizza-description {
@@ -871,6 +890,10 @@ do_action( 'wc_quick_view_after_single_product' );
     margin-bottom: 12px;
 }
 
+.extra-options-title:not(:first-child) {
+    margin-top: 20px;
+}
+
 .checkbox-group {
     display: flex;
     flex-direction: column;
@@ -1031,6 +1054,8 @@ do_action( 'wc_quick_view_after_single_product' );
 
         // Global variable for main product price (updated when variation changes)
         let mainProductPrice = <?php echo esc_js( $product_price ); ?>;
+        const initialProductPrice = <?php echo esc_js( $product_price ); ?>;
+        const initialPriceHtml = '<?php echo addslashes( wc_price( $product_price ) ); ?>';
         const mainProductId = <?php echo esc_js( $product_id ); ?>;
 
         // Configuration
@@ -1207,13 +1232,12 @@ do_action( 'wc_quick_view_after_single_product' );
                 success: function(response) {
                     if (response.success && response.data.toppings) {
                         const toppings = response.data.toppings;
-                        let html = '';
+                        let html = '<div class="extra-options-section">';
 
                         // Build HTML for each topping category
                         Object.keys(toppings).forEach(function(categoryId) {
                             const category = toppings[categoryId];
                             if (category.products && category.products.length > 0) {
-                                html += '<div class="extra-options-section">';
                                 html += '<h4 class="extra-options-title">' + category
                                     .category_name + ':</h4>';
                                 html += '<div class="checkbox-group">';
@@ -1235,9 +1259,11 @@ do_action( 'wc_quick_view_after_single_product' );
                                     html += '</label>';
                                 });
 
-                                html += '</div></div>';
+                                html += '</div>';
                             }
                         });
+
+                        html += '</div>';
 
                         if (html) {
                             $rightToppings.html(html);
@@ -1412,7 +1438,117 @@ do_action( 'wc_quick_view_after_single_product' );
             // Ensure single binding for topping checkboxes: remove any plain and namespaced handlers first
             $(document).off('change', '.topping-checkbox').off('change.toppingCheckbox',
                     '.topping-checkbox')
-                .on('change.toppingCheckbox', '.topping-checkbox', updateSubtotal);
+                .on('change.toppingCheckbox', '.topping-checkbox', function() {
+                    updateSubtotal();
+                    // Also update hidden inputs immediately when toppings change
+                    updateHiddenInputs();
+                });
+        }
+
+        // Function to update hidden inputs with current selections
+        function updateHiddenInputs() {
+            console.log('=== updateHiddenInputs() called ===');
+
+            // Remove old hidden inputs
+            $('input[name="extra_topping_options"]').remove();
+            $('input[name="pizza_halves"]').remove();
+            $('input[name="paired_products"]').remove();
+            $('input[name="special_request"]').remove();
+
+            // Find the form
+            let $form = $('.variations_form');
+            if (!$form.length) {
+                $form = $('form.cart');
+            }
+            if (!$form.length) {
+                console.error('ERROR: No form found!');
+                return; // No form found
+            }
+            console.log('Form found:', $form.attr('class'));
+
+            const isPairedMode = $('#btn-paired').hasClass('active');
+            let pizzaHalves = null;
+            let wholeToppings = [];
+
+            if (isPairedMode) {
+                // Paired mode
+                let leftToppings = [];
+                let rightToppings = [];
+
+                $('.left-topping:checked').each(function() {
+                    leftToppings.push({
+                        name: $(this).val(),
+                        price: parseFloat($(this).data('price')),
+                        product_id: parseInt($(this).data('product-id'))
+                    });
+                });
+
+                $('.right-topping:checked').each(function() {
+                    rightToppings.push({
+                        name: $(this).val(),
+                        price: parseFloat($(this).data('price')),
+                        product_id: parseInt($(this).data('product-id'))
+                    });
+                });
+
+                if (selectedLeftHalf || selectedRightHalf) {
+                    pizzaHalves = {
+                        left_half: {
+                            ...selectedLeftHalf,
+                            toppings: leftToppings
+                        },
+                        right_half: {
+                            ...selectedRightHalf,
+                            toppings: rightToppings
+                        }
+                    };
+                }
+            } else {
+                // Whole pizza mode
+                $('.whole-topping:checked').each(function() {
+                    wholeToppings.push({
+                        name: $(this).val(),
+                        price: parseFloat($(this).data('price')),
+                        product_id: parseInt($(this).data('product-id'))
+                    });
+                });
+            }
+
+            // Add hidden inputs to form
+            if (!isPairedMode && wholeToppings.length > 0) {
+                console.log('Adding extra_topping_options input with', wholeToppings.length, 'toppings');
+                console.log('JSON:', JSON.stringify(wholeToppings));
+                $('<input>')
+                    .attr('type', 'hidden')
+                    .attr('name', 'extra_topping_options')
+                    .val(JSON.stringify(wholeToppings))
+                    .appendTo($form);
+                console.log('Input added to form');
+            } else {
+                console.log('No toppings to add (isPairedMode:', isPairedMode, ', toppings:', wholeToppings.length, ')');
+            }
+
+            if (pizzaHalves) {
+                console.log('Adding pizza_halves input');
+                $('<input>')
+                    .attr('type', 'hidden')
+                    .attr('name', 'pizza_halves')
+                    .val(JSON.stringify(pizzaHalves))
+                    .appendTo($form);
+            }
+
+            // Special request
+            const specialRequest = $('#special-request').val().trim();
+            if (specialRequest) {
+                console.log('Adding special_request input');
+                $('<input>')
+                    .attr('type', 'hidden')
+                    .attr('name', 'special_request')
+                    .val(specialRequest)
+                    .appendTo($form);
+            }
+
+            console.log('=== updateHiddenInputs() complete ===');
         }
 
         // Add to Cart Handler
@@ -1422,96 +1558,55 @@ do_action( 'wc_quick_view_after_single_product' );
                     'click.addToCart', 'form.cart button[type="submit"], .single_add_to_cart_button')
                 .on('click.addToCart', 'form.cart button[type="submit"], .single_add_to_cart_button',
                     function(e) {
-                        // Check if paired mode is active
-                        const isPairedMode = $('#btn-paired').hasClass('active');
-                        let pizzaHalves = null;
-                        let leftToppings = [];
-                        let rightToppings = [];
-                        let wholeToppings = [];
+                        console.log('=== ADD TO CART BUTTON CLICKED ===');
+                        // Update hidden inputs one final time before submission
+                        updateHiddenInputs();
+                        console.log('About to check form inputs...');
 
-                        if (isPairedMode) {
-                            // Paired mode: gather left and right toppings separately
-                            $('.left-topping:checked').each(function() {
-                                const $checkbox = $(this);
-                                leftToppings.push({
-                                    name: $checkbox.val(),
-                                    price: parseFloat($checkbox.data('price')),
-                                    product_id: parseInt($checkbox.data('product-id'))
-                                });
-                            });
+                        // Debug: Show all hidden inputs in the form
+                        const $form = $('.variations_form').length ? $('.variations_form') : $('form.cart');
+                        console.log('Hidden inputs in form:');
+                        $form.find('input[type="hidden"]').each(function() {
+                            const name = $(this).attr('name');
+                            const val = $(this).val();
+                            if (name === 'extra_topping_options' || name === 'pizza_halves' || name === 'special_request') {
+                                console.log('  -', name, '=', val?.substring(0, 100));
+                            }
+                        });
 
-                            $('.right-topping:checked').each(function() {
-                                const $checkbox = $(this);
-                                rightToppings.push({
-                                    name: $checkbox.val(),
-                                    price: parseFloat($checkbox.data('price')),
-                                    product_id: parseInt($checkbox.data('product-id'))
-                                });
-                            });
+                        // Check if this is a variation form and validate variation selection
+                        const $variationForm = $(this).closest('.variations_form');
+                        if ($variationForm.length > 0) {
+                            const $variationIdInput = $variationForm.find('input[name="variation_id"]');
+                            const variationId = $variationIdInput.val();
 
-                            // Add toppings to halves
-                            pizzaHalves = {
-                                left_half: {
-                                    ...selectedLeftHalf,
-                                    toppings: leftToppings
-                                },
-                                right_half: {
-                                    ...selectedRightHalf,
-                                    toppings: rightToppings
-                                }
-                            };
-                        } else {
-                            // Whole pizza mode: gather whole pizza toppings
-                            $('.whole-topping:checked').each(function() {
-                                const $checkbox = $(this);
-                                wholeToppings.push({
-                                    name: $checkbox.val(),
-                                    price: parseFloat($checkbox.data('price')),
-                                    product_id: parseInt($checkbox.data('product-id'))
-                                });
-                            });
+                            // If variation ID is empty or 0, prevent submission and show warning
+                            if (!variationId || variationId === '0' || variationId === 0) {
+                                console.error('BLOCKING SUBMISSION: No variation selected');
+                                alert('Please select a size before adding to cart.');
+                                e.preventDefault();
+                                e.stopPropagation();
+                                return false;
+                            }
                         }
 
-                        // Get special request text
-                        const specialRequest = $('#special-request').val().trim();
+                        console.log('=== ALLOWING FORM TO SUBMIT ===');
 
-                        // Remove existing hidden inputs to avoid duplicates
-                        $('input[name="extra_topping_options"]').remove();
-                        $('input[name="pizza_halves"]').remove();
-                        $('input[name="paired_products"]').remove(); // Keep for backward compatibility
-                        $('input[name="special_request"]').remove();
+                        // Listen for the AJAX response to close lightbox
+                        $(document).one('added_to_cart', function() {
+                            console.log('Product added to cart - closing lightbox');
+                            setTimeout(function() {
+                                $.magnificPopup.close();
+                            }, 100);
+                        });
 
-                        // Find the form
-                        const $form = $(this).closest('form.cart');
-                        const $target = $form.length ? $form : $('body');
+                        // Fallback: close after 2 seconds if event doesn't fire
+                        setTimeout(function() {
+                            console.log('Fallback: Closing lightbox after timeout');
+                            $.magnificPopup.close();
+                        }, 2000);
 
-                        // Add hidden inputs with JSON data
-                        if (!isPairedMode && wholeToppings.length > 0) {
-                            // Whole pizza toppings
-                            $('<input>')
-                                .attr('type', 'hidden')
-                                .attr('name', 'extra_topping_options')
-                                .val(JSON.stringify(wholeToppings))
-                                .appendTo($target);
-                        }
-
-                        if (pizzaHalves) {
-                            // Paired pizza with halves and their toppings
-                            $('<input>')
-                                .attr('type', 'hidden')
-                                .attr('name', 'pizza_halves')
-                                .val(JSON.stringify(pizzaHalves))
-                                .appendTo($target);
-                        }
-
-                        // Add special request if provided
-                        if (specialRequest) {
-                            $('<input>')
-                                .attr('type', 'hidden')
-                                .attr('name', 'special_request')
-                                .val(specialRequest)
-                                .appendTo($target);
-                        }
+                        // Don't prevent default - let the form submit naturally
                     });
         }
 
@@ -1574,6 +1669,44 @@ do_action( 'wc_quick_view_after_single_product' );
                     });
 
                     $variationsForm.trigger('check_variations');
+
+                    // Manually update price since found_variation event doesn't always fire
+                    if (!wasSelected && value) {
+                        setTimeout(function() {
+                            const variationsData = $variationsForm.data('product_variations');
+                            if (variationsData && variationsData.length) {
+                                // Find variation matching the selected value
+                                const matchingVariation = variationsData.find(function(v) {
+                                    if (!v.attributes) return false;
+                                    for (let attr in v.attributes) {
+                                        if (v.attributes[attr] && v.attributes[attr].toLowerCase() === value.toLowerCase()) {
+                                            return true;
+                                        }
+                                    }
+                                    return false;
+                                });
+
+                                if (matchingVariation) {
+                                    // Update price display
+                                    mainProductPrice = parseFloat(matchingVariation.display_price);
+                                    console.log('Button click - Updated mainProductPrice to:', mainProductPrice);
+
+                                    if (matchingVariation.price_html) {
+                                        $('.pizza-price').html(matchingVariation.price_html);
+                                    } else {
+                                        const formatter = new Intl.NumberFormat('vi-VN', {
+                                            style: 'currency',
+                                            currency: 'VND'
+                                        });
+                                        $('.pizza-price').html(formatter.format(matchingVariation.display_price));
+                                    }
+
+                                    // Update subtotal
+                                    updateSubtotal();
+                                }
+                            }
+                        }, 100);
+                    }
                 }
             });
 
@@ -1603,7 +1736,9 @@ do_action( 'wc_quick_view_after_single_product' );
                             // Trigger WooCommerce to check for the pre-selected variation (set in PHP)
                             // Use delay to ensure form is fully initialized
                             setTimeout(function() {
-                                $variationsForm.trigger('check_variations');
+                                // First, set the default variation (select first size button)
+                                // This will trigger check_variations internally, which will fire found_variation event
+                                setDefaultVariation();
                             }, 300);
                         }
 
@@ -1655,8 +1790,27 @@ do_action( 'wc_quick_view_after_single_product' );
                         // Use event delegation on document to avoid duplicates
                         $(document).on('found_variation', '.variations_form', function(event,
                             variation) {
+                            console.log('=== VARIATION FOUND ===');
+                            console.log('Variation:', variation);
+                            console.log('Display price:', variation.display_price);
+                            console.log('Price HTML:', variation.price_html);
+
                             // Update main product price
                             mainProductPrice = parseFloat(variation.display_price);
+
+                            // Update displayed price in the pizza info section
+                            if (variation.price_html) {
+                                console.log('Updating .pizza-price with:', variation.price_html);
+                                $('.pizza-price').html(variation.price_html);
+                            } else {
+                                console.log('No price_html, using display_price');
+                                const formatter = new Intl.NumberFormat('vi-VN', {
+                                    style: 'currency',
+                                    currency: 'VND'
+                                });
+                                $('.pizza-price').html(formatter.format(variation.display_price));
+                            }
+
                             // Update button visual selection based on variation attributes
                             if (variation.attributes) {
                                 Object.keys(variation.attributes).forEach(function(attrKey) {
@@ -1692,6 +1846,11 @@ do_action( 'wc_quick_view_after_single_product' );
                             if ($select.length && !$select.val()) {
                                 $('.variation-button').removeClass('selected');
                             }
+
+                            // Restore original product price
+                            mainProductPrice = initialProductPrice;
+                            $('.pizza-price').html(initialPriceHtml);
+
                             // Update subtotal when variation is reset
                             updateSubtotal();
                         });
@@ -1722,7 +1881,9 @@ do_action( 'wc_quick_view_after_single_product' );
 
         // Function to set default variation (first option) - defined at global scope
         function setDefaultVariation() {
+            console.log('=== setDefaultVariation called ===');
             const $firstButton = $('.variation-button').first();
+            console.log('First button found:', $firstButton.length);
 
             if ($firstButton.length) {
                 // Remove selected class from all buttons first, then add to first button
@@ -1732,11 +1893,15 @@ do_action( 'wc_quick_view_after_single_product' );
                 // Update the hidden select
                 const value = $firstButton.data('value');
                 const attribute = $firstButton.data('attribute');
+                console.log('Button value:', value, 'attribute:', attribute);
+
                 const selectName = 'attribute_' + attribute;
                 const $hiddenSelect = $('select[name="' + selectName + '"]');
+                console.log('Hidden select found:', $hiddenSelect.length, 'name:', selectName);
 
                 if ($hiddenSelect.length) {
                     $hiddenSelect.val(value);
+                    console.log('Set select value to:', value);
 
                     // Trigger change event on the select to notify WooCommerce/manual handler
                     $hiddenSelect.trigger('change');
@@ -1744,9 +1909,57 @@ do_action( 'wc_quick_view_after_single_product' );
                     // Trigger WooCommerce to check variations
                     const $variationsForm = $('.variations_form');
                     if ($variationsForm.length) {
+                        console.log('Triggering check_variations');
                         $variationsForm.trigger('check_variations');
+
+                        // Manually find and trigger variation update for price display
+                        // Since WooCommerce found_variation event doesn't always fire on initial load
+                        setTimeout(function() {
+                            const variationsData = $variationsForm.data('product_variations');
+                            console.log('Variations data:', variationsData);
+
+                            if (variationsData && variationsData.length) {
+                                // Find variation matching the selected value
+                                const matchingVariation = variationsData.find(function(v) {
+                                    if (!v.attributes) return false;
+                                    for (let attr in v.attributes) {
+                                        if (v.attributes[attr] && v.attributes[attr].toLowerCase() === value.toLowerCase()) {
+                                            return true;
+                                        }
+                                    }
+                                    return false;
+                                });
+
+                                console.log('Matching variation:', matchingVariation);
+
+                                if (matchingVariation) {
+                                    // Update price display
+                                    mainProductPrice = parseFloat(matchingVariation.display_price);
+                                    console.log('Updated mainProductPrice to:', mainProductPrice);
+
+                                    if (matchingVariation.price_html) {
+                                        $('.pizza-price').html(matchingVariation.price_html);
+                                        console.log('Updated .pizza-price with price_html');
+                                    } else {
+                                        const formatter = new Intl.NumberFormat('vi-VN', {
+                                            style: 'currency',
+                                            currency: 'VND'
+                                        });
+                                        $('.pizza-price').html(formatter.format(matchingVariation.display_price));
+                                        console.log('Updated .pizza-price with formatted price');
+                                    }
+
+                                    // Update subtotal
+                                    updateSubtotal();
+                                }
+                            }
+                        }, 200);
                     }
+                } else {
+                    console.log('ERROR: Hidden select not found!');
                 }
+            } else {
+                console.log('ERROR: No variation buttons found!');
             }
         }
 

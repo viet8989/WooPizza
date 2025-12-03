@@ -19,21 +19,27 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <?php if ( WC()->cart && ! WC()->cart->is_empty() ) : ?>
-
-	<ul class="woocommerce-checkout-review-order-items cart_list product_list_widget">
+	
+	<ul class="woocommerce-mini-cart cart_list product_list_widget <?php echo esc_attr( $args['list_class'] ); ?>">
 		<?php
-		do_action( 'woocommerce_review_order_before_cart_contents' );
+		do_action( 'woocommerce_before_mini_cart_contents' );
 
 		foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 			$_product   = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
 			$product_id = apply_filters( 'woocommerce_cart_item_product_id', $cart_item['product_id'], $cart_item, $cart_item_key );
 
-			if ( $_product && $_product->exists() && $cart_item['quantity'] > 0 && apply_filters( 'woocommerce_checkout_cart_item_visible', true, $cart_item, $cart_item_key ) ) {
+			if ( $_product && $_product->exists() && $cart_item['quantity'] > 0 && apply_filters( 'woocommerce_widget_cart_item_visible', true, $cart_item, $cart_item_key ) ) {
+				/**
+				 * This filter is documented in woocommerce/templates/cart/cart.php.
+				 *
+				 * @since 2.1.0
+				 */
 				$product_name      = apply_filters( 'woocommerce_cart_item_name', $_product->get_name(), $cart_item, $cart_item_key );
 				$thumbnail         = apply_filters( 'woocommerce_cart_item_thumbnail', $_product->get_image(), $cart_item, $cart_item_key );
+				$product_price     = apply_filters( 'woocommerce_cart_item_price', WC()->cart->get_product_price( $_product ), $cart_item, $cart_item_key );
 				$product_permalink = apply_filters( 'woocommerce_cart_item_permalink', $_product->is_visible() ? $_product->get_permalink( $cart_item ) : '', $cart_item, $cart_item_key );
 				?>
-				<li class="woocommerce-checkout-review-order-item checkout-cart-item">
+				<li class="woocommerce-mini-cart-item <?php echo esc_attr( apply_filters( 'woocommerce_mini_cart_item_class', 'mini_cart_item', $cart_item, $cart_item_key ) ); ?>">
 
 					<?php
 					// Check if this is a paired pizza order
@@ -62,57 +68,54 @@ defined( 'ABSPATH' ) || exit;
 					}
 					?>
 
-					<!-- Line 1: Image + Name + Base Price -->
-					<div class="checkout-first-row">
-						<div class="checkout-item-image">
+					<div class="mini-cart-title-wrapper">
+						<?php if ( $is_paired ) : ?>
+							<?php echo $paired_icon; ?>
+						<?php endif; ?>
+
+						<?php
+						// Get base product price (regular price without modifications)
+						$base_price = $_product->get_regular_price();
+						if ( empty( $base_price ) ) {
+							$base_price = $_product->get_price();
+						}
+						$base_price_formatted = wc_price( $base_price );
+						?>
+
+						<?php if ( empty( $product_permalink ) ) : ?>
+							<h3 class="mini-cart-product-title">
+								<?php echo $display_title; // Already escaped above ?>
+								<?php if ( !$is_paired ) : ?>
+									<span class="product-base-price" style="float: right;"><?php echo $base_price_formatted; ?></span>
+								<?php endif; ?>
+							</h3>
+						<?php else : ?>
+							<a href="<?php echo esc_url( $product_permalink ); ?>">
+								<h3 class="mini-cart-product-title">
+									<?php echo $display_title; // Already escaped above ?>
+									<?php if ( !$is_paired ) : ?>
+										<span class="product-base-price" style="float: right;"><?php echo $base_price_formatted; ?></span>
+									<?php endif; ?>
+								</h3>
+							</a>
+						<?php endif; ?>
+					</div>
+
+					<div class="mini-cart-item-content">
+						<div class="mini-cart-item-image">
 							<?php if ( empty( $product_permalink ) ) : ?>
-								<?php echo $thumbnail; ?>
+								<?php echo $thumbnail; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							<?php else : ?>
 								<a href="<?php echo esc_url( $product_permalink ); ?>">
-									<?php echo $thumbnail; ?>
+									<?php echo $thumbnail; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 								</a>
 							<?php endif; ?>
 						</div>
 
-						<div class="checkout-name-price">
-							<div class="checkout-title-wrapper">
-								<?php if ( $is_paired ) : ?>
-									<?php echo $paired_icon; ?>
-								<?php endif; ?>
-
-								<?php
-								// Get base product price
-								$base_price = $_product->get_regular_price();
-								if ( empty( $base_price ) ) {
-									$base_price = $_product->get_price();
-								}
-								$base_price_formatted = wc_price( $base_price );
-								?>
-
-								<?php if ( empty( $product_permalink ) ) : ?>
-									<h3 class="checkout-product-title">
-										<?php echo $display_title; ?>
-									</h3>
-								<?php else : ?>
-									<a href="<?php echo esc_url( $product_permalink ); ?>">
-										<h3 class="checkout-product-title">
-											<?php echo $display_title; ?>
-										</h3>
-									</a>
-								<?php endif; ?>
-							</div>
-
-							<?php if ( !$is_paired ) : ?>
-								<div class="checkout-base-price">
-									<?php echo $base_price_formatted; ?>
-								</div>
-							<?php endif; ?>
-						</div>
-					</div>
-
-					<!-- Pizza customization details -->
-					<div class="checkout-item-details">
+						<div class="mini-cart-item-details">
 					<?php
+					// Custom Pizza Options Display (inline logic instead of filter)
+
 					// Display extra toppings (whole pizza)
 					if ( isset( $cart_item['extra_topping_options'] ) && ! empty( $cart_item['extra_topping_options'] ) ) {
 						$topping_index = 0;
@@ -142,6 +145,7 @@ defined( 'ABSPATH' ) || exit;
 						if ( isset( $halves['left_half'] ) && ! empty( $halves['left_half'] ) ) {
 							$left = $halves['left_half'];
 							if ( isset( $left['name'] ) ) {
+								// Display pizza name and price
 								$left_name = esc_html( $left['name'] );
 								$left_price = isset( $left['price'] ) ? wc_price( $left['price'] ) : '';
 
@@ -177,11 +181,12 @@ defined( 'ABSPATH' ) || exit;
 						if ( isset( $halves['right_half'] ) && ! empty( $halves['right_half'] ) ) {
 							$right = $halves['right_half'];
 							if ( isset( $right['name'] ) ) {
+								// Display pizza name and price
 								$right_name = esc_html( $right['name'] );
 								$right_price = isset( $right['price'] ) ? wc_price( $right['price'] ) : '';
 
 								echo '<div class="pizza-half-section">';
-								echo '<div class="pizza-half-title">1/2 ' . $right_name . '<span style="float: right;">' . $right_price . '</span></div>';
+								echo '<div class="pizza-half-title">1/2' . $right_name . '<span style="float: right;">' . $right_price . '</span></div>';
 
 								// Display right half toppings
 								if ( isset( $right['toppings'] ) && ! empty( $right['toppings'] ) ) {
@@ -235,19 +240,24 @@ defined( 'ABSPATH' ) || exit;
 					?>
 
 							<?php
-							// Calculate the correct price including all customizations
+							// Manually calculate the correct price including all customizations
 							$calculated_price = 0;
 
 							// Check if paired pizza mode
 							if ( isset( $cart_item['pizza_halves'] ) && ! empty( $cart_item['pizza_halves'] ) ) {
 								$halves = $cart_item['pizza_halves'];
+
+								// Check if right half has a product (true paired pizza) or is empty (single half = whole pizza)
 								$has_right_half = isset( $halves['right_half']['product_id'] ) && ! empty( $halves['right_half']['product_id'] );
 
 								if ( $has_right_half ) {
-									// TRUE PAIRED MODE
+									// TRUE PAIRED MODE - two different halves
+									// Add left half price
 									if ( isset( $halves['left_half']['price'] ) ) {
 										$calculated_price += floatval( $halves['left_half']['price'] );
 									}
+
+									// Add left half toppings
 									if ( isset( $halves['left_half']['toppings'] ) && ! empty( $halves['left_half']['toppings'] ) ) {
 										foreach ( $halves['left_half']['toppings'] as $topping ) {
 											if ( isset( $topping['price'] ) ) {
@@ -255,9 +265,13 @@ defined( 'ABSPATH' ) || exit;
 											}
 										}
 									}
+
+									// Add right half price
 									if ( isset( $halves['right_half']['price'] ) ) {
 										$calculated_price += floatval( $halves['right_half']['price'] );
 									}
+
+									// Add right half toppings
 									if ( isset( $halves['right_half']['toppings'] ) && ! empty( $halves['right_half']['toppings'] ) ) {
 										foreach ( $halves['right_half']['toppings'] as $topping ) {
 											if ( isset( $topping['price'] ) ) {
@@ -266,10 +280,13 @@ defined( 'ABSPATH' ) || exit;
 										}
 									}
 								} else {
-									// SINGLE HALF MODE - treat as WHOLE pizza
+									// SINGLE HALF MODE - right half is empty, treat as WHOLE pizza
+									// Double the left half price to get the full pizza price
 									if ( isset( $halves['left_half']['price'] ) ) {
 										$calculated_price += floatval( $halves['left_half']['price'] ) * 2;
 									}
+
+									// Add left half toppings (also double them for whole pizza)
 									if ( isset( $halves['left_half']['toppings'] ) && ! empty( $halves['left_half']['toppings'] ) ) {
 										foreach ( $halves['left_half']['toppings'] as $topping ) {
 											if ( isset( $topping['price'] ) ) {
@@ -279,8 +296,10 @@ defined( 'ABSPATH' ) || exit;
 									}
 								}
 							} else {
-								// Whole pizza mode
+								// Whole pizza mode - start with base price
 								$calculated_price = floatval( $_product->get_price() );
+
+								// Add whole pizza toppings
 								if ( isset( $cart_item['extra_topping_options'] ) && ! empty( $cart_item['extra_topping_options'] ) ) {
 									foreach ( $cart_item['extra_topping_options'] as $topping ) {
 										if ( isset( $topping['price'] ) ) {
@@ -290,29 +309,38 @@ defined( 'ABSPATH' ) || exit;
 								}
 							}
 
+							// Format unit price (not total)
 							$unit_price_formatted = wc_price( $calculated_price );
 							$line_total = $calculated_price * $cart_item['quantity'];
 							$line_total_formatted = wc_price( $line_total );
 							?>
-					</div><!-- .checkout-item-details -->
 
-					<!-- Line 2: Price × Quantity = Total -->
-					<div class="checkout-quantity-price-row">
-						<div class="checkout-quantity-display">
-							<span class="unit-price"><?php echo $unit_price_formatted; ?></span>
-							<span class="qty-separator">×</span>
-							<span class="qty-value"><?php echo esc_html( $cart_item['quantity'] ); ?></span>
+
+						</div><!-- .mini-cart-item-details -->
+					</div><!-- .mini-cart-item-content -->
+					<!-- Quantity Controls and Price Row -->
+					<div class="mini-cart-quantity-price-row">
+						<div class="mini-cart-quantity-controls">
+							<button type="button" class="minus" data-cart-item-key="<?php echo esc_attr( $cart_item_key ); ?>">−</button>
+							<input type="number"
+									class="qty"
+									value="<?php echo esc_attr( $cart_item['quantity'] ); ?>"
+									min="1"
+									max="99"
+									data-cart-item-key="<?php echo esc_attr( $cart_item_key ); ?>"
+									readonly>
+							<button type="button" class="plus" data-cart-item-key="<?php echo esc_attr( $cart_item_key ); ?>">+</button>
 						</div>
-						<div class="checkout-line-total">
+						<div class="mini-cart-line-total">
 							<span class="amount"><?php echo $line_total_formatted; ?></span>
 						</div>
 					</div>
 				</li>
 				<?php
+				}
 			}
-		}
 
-		do_action( 'woocommerce_review_order_after_cart_contents' );
+		do_action( 'woocommerce_mini_cart_contents' );
 		?>
 	</ul>
 
@@ -743,5 +771,481 @@ a:hover .checkout-product-title {
 .checkout-totals-breakdown .shipping-row .totals-value .amount {
 	font-weight: 600 !important;
 	color: #000 !important;
+}
+/* Title Wrapper - Override Flatsome styles */
+.mini-cart-title-wrapper {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 12px;
+	line-height: 1.4;
+	white-space: normal;
+}
+
+.mini-cart-title-wrapper > a {
+	padding-top: 15px;
+	width: 100% !important;
+}
+
+/* Paired Pizza Icon */
+.paired-pizza-icon {
+	width: 22px;
+	height: 22px;
+	flex-shrink: 0;
+	vertical-align: middle;
+}
+
+/* Mini Cart Product Title */
+ul.product_list_widget li a:not(.remove) {
+	display: inline !important;
+	line-height: 1.4 !important;
+	margin-bottom: 0 !important;
+	overflow: visible !important;
+	text-overflow: clip !important;
+}
+
+.mini-cart-product-title {
+	font-size: 16px;
+	font-weight: 700;
+	margin: 0;
+	line-height: 1.4;
+	color: #000;
+	display: inline;
+}
+
+a .mini-cart-product-title {
+	color: #000;
+	transition: color 0.3s ease;
+}
+
+a:hover .mini-cart-product-title {
+	color: #dc0000;
+}
+
+/* Two Column Layout - Image Left, Details Right */
+.woocommerce-mini-cart .mini-cart-item-content,
+.widget_shopping_cart .mini-cart-item-content,
+.cart-sidebar .mini-cart-item-content,
+.off-canvas .mini-cart-item-content {
+	display: flex !important;
+	gap: 12px !important;
+	align-items: center !important;
+	width: 100% !important;
+	flex-direction: row !important;
+}
+
+.woocommerce-mini-cart .mini-cart-item-image,
+.widget_shopping_cart .mini-cart-item-image,
+.cart-sidebar .mini-cart-item-image,
+.off-canvas .mini-cart-item-image {
+	flex: 0 0 90px !important;
+	width: 90px !important;
+	max-width: 90px !important;
+	display: block !important;
+	order: 0 !important;
+}
+
+.woocommerce-mini-cart .mini-cart-item-image img,
+.widget_shopping_cart .mini-cart-item-image img,
+.cart-sidebar .mini-cart-item-image img,
+.off-canvas .mini-cart-item-image img {
+	width: 100% !important;
+	max-width: 90px !important;
+	height: auto !important;
+	border-radius: 6px !important;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+	display: block !important;
+}
+
+.woocommerce-mini-cart .mini-cart-item-details,
+.widget_shopping_cart .mini-cart-item-details,
+.cart-sidebar .mini-cart-item-details,
+.off-canvas .mini-cart-item-details {
+	flex: 1 !important;
+	min-width: 0 !important;
+	order: 1 !important;
+}
+
+/* Pizza Half Section Styling */
+.pizza-half-section {
+	margin: 8px 0 12px 0;
+	font-size: 14px;
+}
+
+.pizza-half-title {
+	font-weight: 700;
+	color: #000;
+	margin-bottom: 6px;
+	line-height: 1.5;
+	text-transform: uppercase;
+	font-size: 13px;
+	letter-spacing: 0.3px;
+}
+
+.pizza-half-title .amount {
+	color: #000;
+	font-weight: 700;
+}
+
+/* Pizza Topping Row Styling */
+.woocommerce-mini-cart .pizza-topping-row,
+.widget_shopping_cart .pizza-topping-row,
+.cart-sidebar .pizza-topping-row,
+.off-canvas .pizza-topping-row {
+	display: flex !important;
+	align-items: center !important;
+	margin: 3px 0 !important;
+	padding-left: 0 !important;
+	padding-right: 0 !important;
+	color: #555 !important;
+	line-height: 1.6 !important;
+	font-size: 13px !important;
+	width: 100% !important;
+	flex-wrap: nowrap !important;
+}
+
+.woocommerce-mini-cart .pizza-topping-row .topping-label,
+.widget_shopping_cart .pizza-topping-row .topping-label,
+.cart-sidebar .pizza-topping-row .topping-label,
+.off-canvas .pizza-topping-row .topping-label {
+	display: inline-block !important;
+	min-width: 35px !important;
+	max-width: 35px !important;
+	font-weight: 600 !important;
+	color: #000 !important;
+	flex-shrink: 0 !important;
+	flex-grow: 0 !important;
+}
+
+.woocommerce-mini-cart .pizza-topping-row .topping-label-spacer,
+.widget_shopping_cart .pizza-topping-row .topping-label-spacer,
+.cart-sidebar .pizza-topping-row .topping-label-spacer,
+.off-canvas .pizza-topping-row .topping-label-spacer {
+	display: inline-block !important;
+	min-width: 35px !important;
+	max-width: 35px !important;
+	flex-shrink: 0 !important;
+	flex-grow: 0 !important;
+}
+
+.woocommerce-mini-cart .pizza-topping-row .topping-details,
+.widget_shopping_cart .pizza-topping-row .topping-details,
+.cart-sidebar .pizza-topping-row .topping-details,
+.off-canvas .pizza-topping-row .topping-details {
+	flex: 1 !important;
+	display: flex !important;
+	justify-content: space-between !important;
+	align-items: center !important;
+	min-width: 0 !important;
+	gap: 8px !important;
+}
+
+.woocommerce-mini-cart .pizza-topping-row .topping-name,
+.widget_shopping_cart .pizza-topping-row .topping-name,
+.cart-sidebar .pizza-topping-row .topping-name,
+.off-canvas .pizza-topping-row .topping-name {
+	color: #555 !important;
+	flex: 1 !important;
+	white-space: nowrap !important;
+	overflow: hidden !important;
+	text-overflow: ellipsis !important;
+}
+
+.woocommerce-mini-cart .pizza-topping-row .topping-price,
+.widget_shopping_cart .pizza-topping-row .topping-price,
+.cart-sidebar .pizza-topping-row .topping-price,
+.off-canvas .pizza-topping-row .topping-price {
+	font-weight: 600 !important;
+	color: #000 !important;
+	flex-shrink: 0 !important;
+	white-space: nowrap !important;
+}
+
+.woocommerce-mini-cart .pizza-topping-row .topping-price .amount,
+.widget_shopping_cart .pizza-topping-row .topping-price .amount,
+.cart-sidebar .pizza-topping-row .topping-price .amount,
+.off-canvas .pizza-topping-row .topping-price .amount {
+	font-weight: 600 !important;
+	color: #000 !important;
+}
+
+/* Custom Pizza Options Display Styling (legacy) */
+.pizza-option-row {
+	display: flex;
+	margin: 8px 0;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.pizza-option-label {
+	flex: 0 0 auto;
+	min-width: 35px;
+	font-weight: 600;
+	color: #777;
+	padding-right: 10px;
+}
+
+.pizza-option-value {
+	flex: 1;
+	color: #555;
+}
+
+.pizza-option-value .amount {
+	font-weight: 600;
+	color: #000;
+}
+
+/* Quantity Controls and Price Row */
+.mini-cart-quantity-price-row {
+	display: flex !important;
+	justify-content: space-between !important;
+	align-items: center !important;
+	margin-top: 12px !important;
+	padding-top: 8px !important;
+}
+
+.mini-cart-quantity-controls {
+	display: flex !important;
+	align-items: center !important;
+	gap: 8px !important;
+}
+
+.mini-cart-quantity-controls button.minus {
+	margin-right: 0 !important;
+}
+
+.mini-cart-quantity-controls button.minus,
+.mini-cart-quantity-controls button.plus {
+	width: 32px !important;
+	height: 32px !important;
+	border-radius: 50% !important;
+	border: 1px solid #ddd !important;
+	background-color: #fff !important;
+	color: #333 !important;
+	font-size: 18px !important;
+	font-weight: 300 !important;
+	cursor: pointer !important;
+	transition: all 0.3s ease !important;
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	line-height: 1 !important;
+	padding: 0 !important;
+}
+
+.mini-cart-quantity-controls button.minus:hover,
+.mini-cart-quantity-controls button.plus:hover {
+	background-color: #cd0000 !important;
+	color: #fff !important;
+	border-color: #cd0000 !important;
+}
+
+.mini-cart-quantity-controls input.qty {
+	width: 35px !important;
+	height: 32px !important;
+	text-align: center !important;
+	border: 1px solid #ddd !important;
+	border-radius: 4px !important;
+	font-weight: 600 !important;
+	font-size: 15px !important;
+	padding: 0 !important;
+	margin: 0 0 16px 0 !important;
+}
+
+.mini-cart-line-total {
+	font-size: 16px !important;
+	font-weight: 700 !important;
+	color: #000 !important;
+}
+
+.mini-cart-line-total .amount {
+	color: #000 !important;
+	font-weight: 700 !important;
+}
+
+/* Edit/Delete Action Icons */
+.mini-cart-item-actions {
+	display: flex !important;
+	justify-content: flex-end !important;
+	gap: 6px !important;
+	margin-top: -35px !important;
+	margin-bottom: 10px !important;
+	position: relative !important;
+	z-index: 5 !important;
+}
+
+.mini-cart-item-actions a {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	width: 28px !important;
+	height: 28px !important;
+	border-radius: 4px !important;
+	background-color: #f5f5f5 !important;
+	color: #666 !important;
+	transition: all 0.3s ease !important;
+	text-decoration: none !important;
+	padding: 5px !important;
+}
+
+.mini-cart-item-actions a:hover {
+	background-color: #cd0000 !important;
+	color: #fff !important;
+}
+
+.mini-cart-item-actions svg {
+	width: 14px !important;
+	height: 14px !important;
+}
+
+.inner-padding {
+    padding: 20px !important;
+}
+
+/* Widget Shopping Cart Overrides - Force override Flatsome defaults */
+ul.product_list_widget li,
+.widget_shopping_cart ul.product_list_widget li,
+.cart-sidebar ul.product_list_widget li,
+.off-canvas ul.product_list_widget li {
+	position: relative !important;
+	padding: 10px !important;
+	min-height: 0 !important;
+	overflow: visible !important;
+	background-color: #fff;
+    border-radius: 5px;
+}
+
+.widget_shopping_cart ul.product_list_widget li h3 {
+	color: #000 !important;
+	font-weight: 700 !important;
+}
+
+ul.product_list_widget li img,
+.widget_shopping_cart ul.product_list_widget li img,
+.cart-sidebar ul.product_list_widget li img,
+.off-canvas ul.product_list_widget li img {
+	position: relative !important;
+	left: auto !important;
+	top: auto !important;
+	height: auto !important;
+	width: 100% !important;
+	object-fit: cover !important;
+}
+
+.widget_shopping_cart ul.product_list_widget li .quantity {
+	color: #000;
+	opacity: 1.0;
+	font-weight: 600;
+	font-size: 15px;
+	margin-top: 8px;
+	display: inline-block;
+}
+
+.widget_shopping_cart ul.product_list_widget li .quantity .amount {
+	font-weight: 700;
+	color: #000;
+}
+
+/* Mini Cart Total */
+.woocommerce-mini-cart__total .amount {
+	color: #cd0000;
+	font-weight: 700;
+	font-size: 18px;
+}
+
+/* Special Request Styling */
+.pizza-option-row:has(.pizza-option-label:contains("Special Request")) {
+	background-color: #f9f9f9;
+	padding: 8px;
+	border-radius: 4px;
+	margin-top: 10px;
+}
+
+/* Delivery Tabs */
+.mini-cart-delivery-tabs {
+	display: flex !important;
+	gap: 0 !important;
+	margin: 20px 0 15px 0 !important;
+	border-radius: 6px !important;
+	overflow: hidden !important;
+}
+
+.mini-cart-delivery-tabs .delivery-tab {
+	flex: 1 !important;
+	padding: 10px 20px !important;
+	background-color: #fff !important;
+	border: 1px solid #ddd !important;
+	color: #666 !important;
+	font-size: 14px !important;
+	font-weight: 600 !important;
+	cursor: pointer !important;
+	transition: all 0.3s ease !important;
+}
+
+.mini-cart-delivery-tabs .delivery-tab:first-child {
+	border-right: none !important;
+	border-radius: 6px 0 0 6px !important;
+}
+
+.mini-cart-delivery-tabs .delivery-tab:last-child {
+	border-radius: 0 6px 6px 0 !important;
+}
+
+.mini-cart-delivery-tabs .delivery-tab.active {
+	background-color: #cd0000 !important;
+	border-color: #cd0000 !important;
+	color: #fff !important;
+}
+
+.mini-cart-delivery-tabs .delivery-tab:hover:not(.active) {
+	background-color: #f5f5f5 !important;
+}
+
+/* Cart Totals Breakdown */
+.mini-cart-totals-breakdown {
+	margin: 15px 0 !important;
+	padding: 0 !important;
+}
+
+.mini-cart-totals-breakdown .totals-row {
+	display: flex !important;
+	justify-content: space-between !important;
+	align-items: center !important;
+	padding: 8px 0 !important;
+	font-size: 18px !important;
+	color: #666 !important;
+}
+
+.mini-cart-totals-breakdown .totals-row.total-row {
+	border-top: 2px solid #000 !important;
+	padding-top: 12px !important;
+	margin-top: 8px !important;
+	font-size: 18px !important;
+	color: #000 !important;
+}
+
+.mini-cart-totals-breakdown .totals-label {
+	font-weight: 600 !important;
+	color: #000 !important;
+}
+
+.mini-cart-totals-breakdown .total-row .totals-label {
+	font-weight: 700 !important;
+	font-size: 18px !important;
+}
+
+.mini-cart-totals-breakdown .totals-value {
+	font-weight: 600 !important;
+}
+
+.mini-cart-totals-breakdown .total-row .totals-value {
+	color: #cd0000 !important;
+	font-weight: 700 !important;
+	font-size: 18px !important;
+}
+
+.mini-cart-totals-breakdown .totals-value .amount {
+	font-weight: inherit !important;
+	color: inherit !important;
 }
 </style>
