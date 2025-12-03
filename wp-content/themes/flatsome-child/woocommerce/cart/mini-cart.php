@@ -135,34 +135,20 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 
 								// Display left half image
 								if ( $left_image ) {
-									if ( empty( $product_permalink ) ) : ?>
+									?>
 										<img width="150" height="150" src="<?php echo esc_url( $left_image ); ?>" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="<?php echo esc_attr( $left_name ); ?>" decoding="async" style="display: block; margin-bottom: 5px;">
-									<?php else : ?>
-										<a href="<?php echo esc_url( $product_permalink ); ?>">
-											<img width="150" height="150" src="<?php echo esc_url( $left_image ); ?>" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="<?php echo esc_attr( $left_name ); ?>" decoding="async" style="display: block; margin-bottom: 5px;">
-										</a>
-									<?php endif;
+									<?php
 								}
 
 								// Display right half image
 								if ( $right_image ) {
-									if ( empty( $product_permalink ) ) : ?>
+									?>
 										<img width="150" height="150" src="<?php echo esc_url( $right_image ); ?>" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="<?php echo esc_attr( $right_name ); ?>" decoding="async" style="display: block;">
-									<?php else : ?>
-										<a href="<?php echo esc_url( $product_permalink ); ?>">
-											<img width="150" height="150" src="<?php echo esc_url( $right_image ); ?>" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="<?php echo esc_attr( $right_name ); ?>" decoding="async" style="display: block;">
-										</a>
-									<?php endif;
+									<?php
 								}
 							} else {
 								// For non-paired pizzas, show normal thumbnail
-								if ( empty( $product_permalink ) ) : ?>
-									<?php echo $thumbnail; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-								<?php else : ?>
-									<a href="<?php echo esc_url( $product_permalink ); ?>">
-										<?php echo $thumbnail; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-									</a>
-								<?php endif;
+								<?php echo $thumbnail; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							}
 							?>
 						</div>
