@@ -39,301 +39,384 @@ if ( $show_downloads ) {
 	);
 }
 ?>
-<section class="woocommerce-order-details">
+<section class="woocommerce-order-details" style="margin-bottom: 20px;">
 	<?php do_action( 'woocommerce_order_details_before_order_table', $order ); ?>
 
 	<h2 class="woocommerce-order-details__title"><?php esc_html_e( 'Order details', 'woocommerce' ); ?></h2>
 
-	<ul class="woocommerce-order-details-items order_details cart_list product_list_widget">
-		<?php
-		do_action( 'woocommerce_order_details_before_order_table_items', $order );
+	<div class="checkout-sidebar sm-touch-scroll">
+		<ul class="woocommerce-mini-cart cart_list product_list_widget">
+			<?php
+			do_action( 'woocommerce_order_details_before_order_table_items', $order );
 
-		foreach ( $order_items as $item_id => $item ) {
-			$product = $item->get_product();
+			$item_index = 0;
+			foreach ( $order_items as $item_id => $item ) {
+				$product = $item->get_product();
 
-			if ( ! $product ) {
-				continue;
-			}
-
-			$product_id        = $product->get_id();
-			$product_name      = $item->get_name();
-			$quantity          = $item->get_quantity();
-			$thumbnail         = $product->get_image( 'thumbnail' );
-			$product_permalink = $product->is_visible() ? $product->get_permalink() : '';
-
-			// Get item metadata
-			$item_meta_data = $item->get_meta_data();
-			$pizza_halves = null;
-			$extra_toppings = array();
-			$special_request = '';
-
-			foreach ( $item_meta_data as $meta ) {
-				$key = $meta->key;
-				$value = $meta->value;
-
-				if ( $key === '_pizza_halves' && ! empty( $value ) ) {
-					$pizza_halves = maybe_unserialize( $value );
-				} elseif ( $key === '_extra_topping_options' && ! empty( $value ) ) {
-					$extra_toppings = maybe_unserialize( $value );
-				} elseif ( $key === '_special_request' && ! empty( $value ) ) {
-					$special_request = $value;
+				if ( ! $product ) {
+					continue;
 				}
-			}
 
-			// Check if paired pizza
-			$is_paired = false;
-			$paired_icon = '';
-			$display_title = $product_name;
+				$product_id        = $product->get_id();
+				$product_name      = $item->get_name();
+				$quantity          = $item->get_quantity();
+				$thumbnail         = $product->get_image( 'thumbnail' );
+				$product_permalink = $product->is_visible() ? $product->get_permalink() : '';
 
-			if ( $pizza_halves && ! empty( $pizza_halves ) ) {
-				$left_name = isset( $pizza_halves['left_half']['name'] ) ? $pizza_halves['left_half']['name'] : '';
-				$right_name = isset( $pizza_halves['right_half']['name'] ) ? $pizza_halves['right_half']['name'] : '';
+				// Get item metadata
+				$item_meta_data = $item->get_meta_data();
+				$pizza_halves = null;
+				$extra_toppings = array();
+				$special_request = '';
 
-				if ( $left_name && $right_name ) {
-					$is_paired = true;
-					$icon_url = get_site_url() . '/wp-content/uploads/2025/10/pizza_half_active.png';
-					$paired_icon = sprintf(
-						'<img src="%s" alt="Paired Pizza" class="paired-pizza-icon" style="width: 20px !important; height: 20px !important; margin-top: 5px !important;" />',
-						esc_url( $icon_url )
-					);
-					$display_title = sprintf(
-						'%s <strong style="color: red;">X</strong> %s',
-						esc_html( $left_name ),
-						esc_html( $right_name )
-					);
+				foreach ( $item_meta_data as $meta ) {
+					$key = $meta->key;
+					$value = $meta->value;
+
+					if ( $key === '_pizza_halves' && ! empty( $value ) ) {
+						$pizza_halves = maybe_unserialize( $value );
+					} elseif ( $key === '_extra_topping_options' && ! empty( $value ) ) {
+						$extra_toppings = maybe_unserialize( $value );
+					} elseif ( $key === '_special_request' && ! empty( $value ) ) {
+						$special_request = $value;
+					}
 				}
-			}
 
-			// Get base product price
-			$base_price = $product->get_regular_price();
-			if ( empty( $base_price ) ) {
-				$base_price = $product->get_price();
-			}
-			$base_price_formatted = wc_price( $base_price );
-			?>
-			<li class="woocommerce-order-details-item order-details-item">
+				// Check if paired pizza
+				$is_paired = false;
+				$paired_icon = '';
+				$display_title = $product_name;
 
-				<!-- Line 1: Image + Name + Base Price -->
-				<div class="order-details-first-row">
-					<div class="order-details-item-image">
+				if ( $pizza_halves && ! empty( $pizza_halves ) ) {
+					$left_name = isset( $pizza_halves['left_half']['name'] ) ? $pizza_halves['left_half']['name'] : '';
+					$right_name = isset( $pizza_halves['right_half']['name'] ) ? $pizza_halves['right_half']['name'] : '';
+
+					if ( $left_name && $right_name ) {
+						$is_paired = true;
+						$icon_url = get_site_url() . '/wp-content/uploads/2025/10/pizza_half_active.png';
+						$paired_icon = sprintf(
+							'<img src="%s" alt="Paired Pizza" class="paired-pizza-icon" style="width: 20px !important; height: 20px !important; margin-top: 5px !important;" />',
+							esc_url( $icon_url )
+						);
+						$display_title = sprintf(
+							'%s <strong style="color: red;">X</strong> %s',
+							esc_html( $left_name ),
+							esc_html( $right_name )
+						);
+					}
+				}
+
+				// Get base product price
+				$base_price = $product->get_regular_price();
+				if ( empty( $base_price ) ) {
+					$base_price = $product->get_price();
+				}
+				$base_price_formatted = wc_price( $base_price );
+
+				$border_style = ( $item_index === 0 ) ? ' style="border-top: 1px solid #fff !important;"' : '';
+				$item_index++;
+				?>
+				<li class="woocommerce-mini-cart-item mini_cart_item"<?php echo $border_style; ?>>
+
+					<div class="mini-cart-title-wrapper">
+						<?php if ( $is_paired ) : ?>
+							<?php echo $paired_icon; ?>
+						<?php endif; ?>
+
 						<?php if ( empty( $product_permalink ) ) : ?>
-							<?php echo $thumbnail; ?>
+							<h3 class="mini-cart-product-title">
+								<?php echo $display_title; // Already escaped above ?>
+								<?php if ( !$is_paired ) : ?>
+									<span class="product-base-price" style="float: right;"><?php echo $base_price_formatted; ?></span>
+								<?php endif; ?>
+							</h3>
 						<?php else : ?>
 							<a href="<?php echo esc_url( $product_permalink ); ?>">
-								<?php echo $thumbnail; ?>
+								<h3 class="mini-cart-product-title">
+									<?php echo $display_title; // Already escaped above ?>
+									<?php if ( !$is_paired ) : ?>
+										<span class="product-base-price" style="float: right;"><?php echo $base_price_formatted; ?></span>
+									<?php endif; ?>
+								</h3>
 							</a>
 						<?php endif; ?>
 					</div>
 
-					<div class="order-details-name-price">
-						<div class="order-details-title-wrapper">
-							<?php if ( $is_paired ) : ?>
-								<?php echo $paired_icon; ?>
-							<?php endif; ?>
+					<div class="mini-cart-item-content">
+						<div class="mini-cart-item-image">
+							<?php
+							// For paired pizzas, show both half images merged
+							if ( $is_paired && $pizza_halves ) {
+								$left_image = isset( $pizza_halves['left_half']['image'] ) ? $pizza_halves['left_half']['image'] : '';
+								$right_image = isset( $pizza_halves['right_half']['image'] ) ? $pizza_halves['right_half']['image'] : '';
+								$left_name = isset( $pizza_halves['left_half']['name'] ) ? $pizza_halves['left_half']['name'] : '';
+								$right_name = isset( $pizza_halves['right_half']['name'] ) ? $pizza_halves['right_half']['name'] : '';
 
-							<?php if ( empty( $product_permalink ) ) : ?>
-								<h3 class="order-details-product-title">
-									<?php echo $display_title; ?>
-								</h3>
-							<?php else : ?>
-								<a href="<?php echo esc_url( $product_permalink ); ?>">
-									<h3 class="order-details-product-title">
-										<?php echo $display_title; ?>
-									</h3>
-								</a>
-							<?php endif; ?>
-						</div>
-
-						<?php if ( ! $is_paired ) : ?>
-							<div class="order-details-base-price">
-								<?php echo $base_price_formatted; ?>
-							</div>
-						<?php endif; ?>
-					</div>
-				</div>
-
-				<!-- Pizza customization details -->
-				<div class="order-details-item-details">
-						<?php
-						// Display extra toppings (whole pizza)
-						if ( ! empty( $extra_toppings ) ) {
-							$topping_index = 0;
-							foreach ( $extra_toppings as $topping ) {
-								if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
-									echo '<div class="pizza-topping-row">';
-									if ( $topping_index === 0 ) {
-										echo '<span class="topping-label">Add</span>';
-									} else {
-										echo '<span class="topping-label-spacer"></span>';
-									}
-									echo '<span class="topping-details">';
-									echo '<span class="topping-name">' . esc_html( $topping['name'] ) . '</span> ';
-									echo '<span class="topping-price">' . wc_price( $topping['price'] ) . '</span>';
-									echo '</span>';
-									echo '</div>';
-									$topping_index++;
-								}
-							}
-						}
-
-						// Display pizza halves
-						if ( $pizza_halves && ! empty( $pizza_halves ) ) {
-							// Display left half
-							if ( isset( $pizza_halves['left_half'] ) && ! empty( $pizza_halves['left_half'] ) ) {
-								$left = $pizza_halves['left_half'];
-								if ( isset( $left['name'] ) ) {
-									$left_name = esc_html( $left['name'] );
-									$left_price = isset( $left['price'] ) ? wc_price( $left['price'] ) : '';
-
-									echo '<div class="pizza-half-section">';
-									echo '<div class="pizza-half-title">1/2 ' . $left_name . '<span style="float: right;">' . $left_price . '</span></div>';
-
-									// Display left half toppings
-									if ( isset( $left['toppings'] ) && ! empty( $left['toppings'] ) ) {
-										$topping_index = 0;
-										foreach ( $left['toppings'] as $topping ) {
-											if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
-												echo '<div class="pizza-topping-row">';
-												if ( $topping_index === 0 ) {
-													echo '<span class="topping-label">Add</span>';
-												} else {
-													echo '<span class="topping-label-spacer"></span>';
-												}
-												echo '<span class="topping-details">';
-												echo '<span class="topping-name">' . esc_html( $topping['name'] ) . '</span> ';
-												echo '<span class="topping-price">' . wc_price( $topping['price'] ) . '</span>';
-												echo '</span>';
-												echo '</div>';
-												$topping_index++;
-											}
-										}
-									}
-
-									echo '</div>';
-								}
-							}
-
-							// Display right half
-							if ( isset( $pizza_halves['right_half'] ) && ! empty( $pizza_halves['right_half'] ) ) {
-								$right = $pizza_halves['right_half'];
-								if ( isset( $right['name'] ) ) {
-									$right_name = esc_html( $right['name'] );
-									$right_price = isset( $right['price'] ) ? wc_price( $right['price'] ) : '';
-
-									echo '<div class="pizza-half-section">';
-									echo '<div class="pizza-half-title">1/2 ' . $right_name . '<span style="float: right;">' . $right_price . '</span></div>';
-
-									// Display right half toppings
-									if ( isset( $right['toppings'] ) && ! empty( $right['toppings'] ) ) {
-										$topping_index = 0;
-										foreach ( $right['toppings'] as $topping ) {
-											if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
-												echo '<div class="pizza-topping-row">';
-												if ( $topping_index === 0 ) {
-													echo '<span class="topping-label">Add</span>';
-												} else {
-													echo '<span class="topping-label-spacer"></span>';
-												}
-												echo '<span class="topping-details">';
-												echo '<span class="topping-name">' . esc_html( $topping['name'] ) . '</span> ';
-												echo '<span class="topping-price">' . wc_price( $topping['price'] ) . '</span>';
-												echo '</span>';
-												echo '</div>';
-												$topping_index++;
-											}
-										}
-									}
-
-									echo '</div>';
-								}
-							}
-						}
-
-						// Display special request
-						if ( ! empty( $special_request ) ) {
-							echo '<div class="pizza-option-row">';
-							echo '<div class="pizza-option-label">' . __( 'Special Request', 'flatsome' ) . ':</div>';
-							echo '<div class="pizza-option-value">' . esc_html( $special_request ) . '</div>';
-							echo '</div>';
-						}
-
-						// Calculate unit price
-						$calculated_price = 0;
-						if ( $pizza_halves && ! empty( $pizza_halves ) ) {
-							$has_right_half = isset( $pizza_halves['right_half']['product_id'] ) && ! empty( $pizza_halves['right_half']['product_id'] );
-
-							if ( $has_right_half ) {
-								// Paired mode
-								if ( isset( $pizza_halves['left_half']['price'] ) ) {
-									$calculated_price += floatval( $pizza_halves['left_half']['price'] );
-								}
-								if ( isset( $pizza_halves['left_half']['toppings'] ) ) {
-									foreach ( $pizza_halves['left_half']['toppings'] as $topping ) {
-										if ( isset( $topping['price'] ) ) {
-											$calculated_price += floatval( $topping['price'] );
-										}
-									}
-								}
-								if ( isset( $pizza_halves['right_half']['price'] ) ) {
-									$calculated_price += floatval( $pizza_halves['right_half']['price'] );
-								}
-								if ( isset( $pizza_halves['right_half']['toppings'] ) ) {
-									foreach ( $pizza_halves['right_half']['toppings'] as $topping ) {
-										if ( isset( $topping['price'] ) ) {
-											$calculated_price += floatval( $topping['price'] );
-										}
-									}
+								// Display merged half images (similar to lightbox)
+								if ( $left_image && $right_image ) {
+									?>
+										<div class="mini-cart-paired-image-container">
+											<div class="mini-cart-half-pizza-container" style="justify-content: right !important;">
+												<img src="<?php echo esc_url( $left_image ); ?>"
+													class="mini-cart-left-pizza-img"
+													alt="<?php echo esc_attr( $left_name ); ?>"
+													decoding="async">
+											</div>
+											<div class="mini-cart-half-pizza-container" style="justify-content: left !important;">
+												<img src="<?php echo esc_url( $right_image ); ?>"
+													class="mini-cart-right-pizza-img"
+													alt="<?php echo esc_attr( $right_name ); ?>"
+													decoding="async">
+											</div>
+										</div>
+									<?php
 								}
 							} else {
-								// Single half mode
-								if ( isset( $pizza_halves['left_half']['price'] ) ) {
-									$calculated_price += floatval( $pizza_halves['left_half']['price'] ) * 2;
+								// For non-paired pizzas, show normal thumbnail
+								echo $thumbnail; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							}
+							?>
+						</div>
+
+						<div class="mini-cart-item-details">
+					<?php
+					// Display extra toppings (whole pizza)
+					if ( ! empty( $extra_toppings ) ) {
+						$topping_index = 0;
+						foreach ( $extra_toppings as $topping ) {
+							if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
+								echo '<div class="pizza-topping-row">';
+								if ( $topping_index === 0 ) {
+									echo '<span class="topping-label">Add</span>';
+								} else {
+									echo '<span class="topping-label-spacer"></span>';
 								}
-								if ( isset( $pizza_halves['left_half']['toppings'] ) ) {
-									foreach ( $pizza_halves['left_half']['toppings'] as $topping ) {
-										if ( isset( $topping['price'] ) ) {
-											$calculated_price += floatval( $topping['price'] ) * 2;
+								echo '<span class="topping-details">';
+								echo '<span class="topping-name">' . esc_html( $topping['name'] ) . '</span> ';
+								echo '<span class="topping-price">' . wc_price( $topping['price'] ) . '</span>';
+								echo '</span>';
+								echo '</div>';
+								$topping_index++;
+							}
+						}
+					}
+
+					// Display pizza halves
+					if ( $pizza_halves && ! empty( $pizza_halves ) ) {
+						// Display left half
+						if ( isset( $pizza_halves['left_half'] ) && ! empty( $pizza_halves['left_half'] ) ) {
+							$left = $pizza_halves['left_half'];
+							if ( isset( $left['name'] ) ) {
+								$left_name = esc_html( $left['name'] );
+								$left_price = isset( $left['price'] ) ? wc_price( $left['price'] ) : '';
+
+								echo '<div class="pizza-half-section">';
+								echo '<div class="pizza-half-title">1/2 ' . $left_name . '<span style="float: right;">' . $left_price . '</span></div>';
+
+								// Display left half toppings
+								if ( isset( $left['toppings'] ) && ! empty( $left['toppings'] ) ) {
+									$topping_index = 0;
+									foreach ( $left['toppings'] as $topping ) {
+										if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
+											echo '<div class="pizza-topping-row">';
+											if ( $topping_index === 0 ) {
+												echo '<span class="topping-label">Add</span>';
+											} else {
+												echo '<span class="topping-label-spacer"></span>';
+											}
+											echo '<span class="topping-details">';
+											echo '<span class="topping-name">' . esc_html( $topping['name'] ) . '</span> ';
+											echo '<span class="topping-price">' . wc_price( $topping['price'] ) . '</span>';
+											echo '</span>';
+											echo '</div>';
+											$topping_index++;
 										}
 									}
 								}
+
+								echo '</div>';
 							}
-						} else {
-							// Whole pizza
-							$calculated_price = floatval( $product->get_price() );
-							if ( ! empty( $extra_toppings ) ) {
-								foreach ( $extra_toppings as $topping ) {
+						}
+
+						// Display right half
+						if ( isset( $pizza_halves['right_half'] ) && ! empty( $pizza_halves['right_half'] ) ) {
+							$right = $pizza_halves['right_half'];
+							if ( isset( $right['name'] ) ) {
+								$right_name = esc_html( $right['name'] );
+								$right_price = isset( $right['price'] ) ? wc_price( $right['price'] ) : '';
+
+								echo '<div class="pizza-half-section">';
+								echo '<div class="pizza-half-title">1/2 ' . $right_name . '<span style="float: right;">' . $right_price . '</span></div>';
+
+								// Display right half toppings
+								if ( isset( $right['toppings'] ) && ! empty( $right['toppings'] ) ) {
+									$topping_index = 0;
+									foreach ( $right['toppings'] as $topping ) {
+										if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
+											echo '<div class="pizza-topping-row">';
+											if ( $topping_index === 0 ) {
+												echo '<span class="topping-label">Add</span>';
+											} else {
+												echo '<span class="topping-label-spacer"></span>';
+											}
+											echo '<span class="topping-details">';
+											echo '<span class="topping-name">' . esc_html( $topping['name'] ) . '</span> ';
+											echo '<span class="topping-price">' . wc_price( $topping['price'] ) . '</span>';
+											echo '</span>';
+											echo '</div>';
+											$topping_index++;
+										}
+									}
+								}
+
+								echo '</div>';
+							}
+						}
+					}
+
+					// Display special request
+					if ( ! empty( $special_request ) ) {
+						echo '<div class="pizza-option-row">';
+						echo '<div class="pizza-option-label">' . __( 'Special Request', 'flatsome' ) . ':</div>';
+						echo '<div class="pizza-option-value">' . esc_html( $special_request ) . '</div>';
+						echo '</div>';
+					}
+
+					// Calculate unit price
+					$calculated_price = 0;
+					if ( $pizza_halves && ! empty( $pizza_halves ) ) {
+						$has_right_half = isset( $pizza_halves['right_half']['product_id'] ) && ! empty( $pizza_halves['right_half']['product_id'] );
+
+						if ( $has_right_half ) {
+							// Paired mode
+							if ( isset( $pizza_halves['left_half']['price'] ) ) {
+								$calculated_price += floatval( $pizza_halves['left_half']['price'] );
+							}
+							if ( isset( $pizza_halves['left_half']['toppings'] ) ) {
+								foreach ( $pizza_halves['left_half']['toppings'] as $topping ) {
 									if ( isset( $topping['price'] ) ) {
 										$calculated_price += floatval( $topping['price'] );
 									}
 								}
 							}
+							if ( isset( $pizza_halves['right_half']['price'] ) ) {
+								$calculated_price += floatval( $pizza_halves['right_half']['price'] );
+							}
+							if ( isset( $pizza_halves['right_half']['toppings'] ) ) {
+								foreach ( $pizza_halves['right_half']['toppings'] as $topping ) {
+									if ( isset( $topping['price'] ) ) {
+										$calculated_price += floatval( $topping['price'] );
+									}
+								}
+							}
+						} else {
+							// Single half mode
+							if ( isset( $pizza_halves['left_half']['price'] ) ) {
+								$calculated_price += floatval( $pizza_halves['left_half']['price'] ) * 2;
+							}
+							if ( isset( $pizza_halves['left_half']['toppings'] ) ) {
+								foreach ( $pizza_halves['left_half']['toppings'] as $topping ) {
+									if ( isset( $topping['price'] ) ) {
+										$calculated_price += floatval( $topping['price'] ) * 2;
+									}
+								}
+							}
 						}
+					} else {
+						// Whole pizza
+						$calculated_price = floatval( $product->get_price() );
+						if ( ! empty( $extra_toppings ) ) {
+							foreach ( $extra_toppings as $topping ) {
+								if ( isset( $topping['price'] ) ) {
+									$calculated_price += floatval( $topping['price'] );
+								}
+							}
+						}
+					}
 
-						$unit_price_formatted = wc_price( $calculated_price );
-						$line_total = $calculated_price * $quantity;
-						$line_total_formatted = wc_price( $line_total );
-						?>
-				</div><!-- .order-details-item-details -->
+					$unit_price_formatted = wc_price( $calculated_price );
+					$line_total = $calculated_price * $quantity;
+					$line_total_formatted = wc_price( $line_total );
+					?>
+				</div><!-- .mini-cart-item-details -->
+					</div><!-- .mini-cart-item-content -->
 
-				<!-- Line 2: Price × Quantity = Total -->
-				<div class="order-details-quantity-price-row">
-					<div class="order-details-quantity-display">
-						<span class="unit-price"><?php echo $unit_price_formatted; ?></span>
-						<span class="qty-separator">×</span>
-						<span class="qty-value"><?php echo esc_html( $quantity ); ?></span>
+					<!-- Quantity Controls and Price Row -->
+					<div class="mini-cart-quantity-price-row">
+						<div class="mini-cart-quantity-display">
+							<?php echo $unit_price_formatted . ' x ' . $quantity; ?>
+						</div>
+						<div class="mini-cart-line-total">
+							<span class="amount"><?php echo $line_total_formatted; ?></span>
+						</div>
 					</div>
-					<div class="order-details-line-total">
-						<span class="amount"><?php echo $line_total_formatted; ?></span>
-					</div>
-				</div>
-			</li>
+				</li>
+				<?php
+			}
+
+			do_action( 'woocommerce_order_details_after_order_table_items', $order );
+			?>
+		</ul>
+
+		<!-- Cart Totals Breakdown -->
+		<div class="checkout-totals-breakdown">
+		<div class="totals-row subtotal-row">
+			<span class="totals-label">Subtotal</span>
+			<span class="totals-value"><?php echo wc_price( $order->get_subtotal() ); ?></span>
+		</div>			<?php if ( wc_tax_enabled() && ! $order->get_prices_include_tax() ) : ?>
+			<div class="totals-row tax-row">
+				<?php
+					$tax_label = WC()->countries->tax_or_vat();
+				?>
+				<span class="totals-label"><?php echo esc_html( $tax_label ); ?></span>
+				<span class="totals-value"><?php echo wc_price( $order->get_total_tax() ); ?></span>
+			</div>
+			<?php endif; ?>
+
 			<?php
-		}
+			// Custom Shipping/Pickup Fee Row - Replaces WooCommerce default shipping display
+			$delivery_method = isset($_POST['selected_delivery_method']) ? sanitize_text_field($_POST['selected_delivery_method']) : 'delivery';
+			$selected_store = isset($_POST['selected_store']) ? sanitize_text_field($_POST['selected_store']) : '';
+			$selected_ward = isset($_POST['billing_city']) ? sanitize_text_field($_POST['billing_city']) : '';
 
-		do_action( 'woocommerce_order_details_after_order_table_items', $order );
-		?>
-	</ul>
+			if ($delivery_method === 'pickup') {
+				// PICKUP - Always 0 fee
+				?>
+				<div class="totals-row shipping-fee-row">
+					<span class="totals-label">Pickup</span>
+					<span class="totals-value"><?php echo wc_price(0); ?></span>
+				</div>
+				<?php
+			} else {
+				// DELIVERY - Get fee from shipping fees table
+				$shipping_fee = 0;
+				if (!empty($selected_store) && !empty($selected_ward)) {
+					$shipping_fees = get_option('hcm_shipping_fees', array());
+					$fee_key = $selected_store . '_' . $selected_ward;
 
+					if (isset($shipping_fees[$fee_key]) && isset($shipping_fees[$fee_key]['fee'])) {
+						$shipping_fee = floatval($shipping_fees[$fee_key]['fee']);
+					}
+				}
+				?>
+				<div class="totals-row shipping-fee-row">
+					<span class="totals-label">Shipping Fee</span>
+					<span class="totals-value"><?php echo wc_price($shipping_fee); ?></span>
+				</div>
+				<?php
+			}
+			?>
+
+			<div class="totals-row total-row">
+				<span class="totals-label"><strong>Total</strong></span>
+				<span class="totals-value"><strong><?php
+					// Get order total
+					$total = $order->get_total();
+					echo wc_price( $total );
+				?></strong></span>
+			</div>
+		</div>
+	</div>
 	<?php do_action( 'woocommerce_order_details_after_order_table', $order ); ?>
 </section>
 
@@ -352,117 +435,11 @@ if ( $show_customer_details ) {
 ?>
 
 <style>
-/* Order Details Items - List Layout (like mini-cart) */
-.woocommerce-order-details-items {
-	list-style: none !important;
-	padding: 0 !important;
-	margin: 0 0 20px 0 !important;
-}
 
-.order-details-item {
-	position: relative !important;
-	padding: 10px !important;
-	margin-bottom: 10px !important;
-	background-color: #fff !important;
-	border-radius: 5px !important;
-	overflow: visible !important;
-}
-
-/* Title Wrapper */
-.order-details-title-wrapper {
-	display: flex !important;
-	align-items: center !important;
-	gap: 8px !important;
-	margin-bottom: 12px !important;
-	line-height: 1.4 !important;
-	white-space: normal !important;
-}
-
-.order-details-title-wrapper > a {
-	padding-top: 15px !important;
-	width: 100% !important;
-}
-
-/* Paired Pizza Icon */
-.order-details-title-wrapper .paired-pizza-icon {
-	width: 22px !important;
-	height: 22px !important;
-	flex-shrink: 0 !important;
-	vertical-align: middle !important;
-}
-
-/* Order Details Product Title */
-.order-details-item a:not(.remove) {
-	display: inline !important;
-	line-height: 1.4 !important;
-	margin-bottom: 0 !important;
-	overflow: visible !important;
-	text-overflow: clip !important;
-}
-
-.order-details-product-title {
-	font-size: 16px !important;
-	font-weight: 700 !important;
-	margin: 0 !important;
-	line-height: 1.4 !important;
-	color: #000 !important;
-	display: inline !important;
-}
-
-a .order-details-product-title {
-	color: #000 !important;
-	transition: color 0.3s ease !important;
-}
-
-a:hover .order-details-product-title {
-	color: #dc0000 !important;
-}
-
-/* Line 1: Image + Name + Price Layout */
-.order-details-first-row {
-	display: flex !important;
-	gap: 12px !important;
-	align-items: flex-start !important;
-	width: 100% !important;
-	margin-bottom: 8px !important;
-}
-
-.order-details-first-row .order-details-item-image {
-	flex: 0 0 90px !important;
-	width: 90px !important;
-	max-width: 90px !important;
-	display: block !important;
-}
-
-.order-details-first-row .order-details-item-image img {
-	width: 100% !important;
-	max-width: 90px !important;
-	height: auto !important;
-	border-radius: 6px !important;
-	box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
-	display: block !important;
-}
-
-.order-details-name-price {
-	flex: 1 !important;
-	display: flex !important;
-	justify-content: space-between !important;
-	align-items: flex-start !important;
-	min-width: 0 !important;
-}
-
-.order-details-base-price {
-	font-size: 16px !important;
-	font-weight: 700 !important;
-	color: #000 !important;
-	white-space: nowrap !important;
-	margin-left: 8px !important;
-}
-
-/* Pizza Details Section (below image+name) */
-.order-details-item-details {
-	width: 100% !important;
-	padding-left: 0 !important;
+.checkout-sidebar.sm-touch-scroll {
+	border: 1px solid #d3d7d3;
+    border-radius: 10px;
+    padding: 20px;
 }
 
 /* Pizza Half Section Styling */
@@ -484,67 +461,6 @@ a:hover .order-details-product-title {
 .pizza-half-title .amount {
 	color: #000 !important;
 	font-weight: 700 !important;
-}
-
-/* Pizza Topping Row Styling */
-.order-details-item .pizza-topping-row {
-	display: flex !important;
-	align-items: center !important;
-	margin: 3px 0 !important;
-	padding-left: 0 !important;
-	padding-right: 0 !important;
-	color: #555 !important;
-	line-height: 1.6 !important;
-	font-size: 13px !important;
-	width: 100% !important;
-	flex-wrap: nowrap !important;
-}
-
-.order-details-item .pizza-topping-row .topping-label {
-	display: inline-block !important;
-	min-width: 35px !important;
-	max-width: 35px !important;
-	font-weight: 600 !important;
-	color: #000 !important;
-	flex-shrink: 0 !important;
-	flex-grow: 0 !important;
-}
-
-.order-details-item .pizza-topping-row .topping-label-spacer {
-	display: inline-block !important;
-	min-width: 35px !important;
-	max-width: 35px !important;
-	flex-shrink: 0 !important;
-	flex-grow: 0 !important;
-}
-
-.order-details-item .pizza-topping-row .topping-details {
-	flex: 1 !important;
-	display: flex !important;
-	justify-content: space-between !important;
-	align-items: center !important;
-	min-width: 0 !important;
-	gap: 8px !important;
-}
-
-.order-details-item .pizza-topping-row .topping-name {
-	color: #555 !important;
-	flex: 1 !important;
-	white-space: nowrap !important;
-	overflow: hidden !important;
-	text-overflow: ellipsis !important;
-}
-
-.order-details-item .pizza-topping-row .topping-price {
-	font-weight: 600 !important;
-	color: #000 !important;
-	flex-shrink: 0 !important;
-	white-space: nowrap !important;
-}
-
-.order-details-item .pizza-topping-row .topping-price .amount {
-	font-weight: 600 !important;
-	color: #000 !important;
 }
 
 /* Custom Pizza Options Display Styling (legacy) */
@@ -573,8 +489,301 @@ a:hover .order-details-product-title {
 	color: #000 !important;
 }
 
-/* Price × Quantity Row */
-.order-details-quantity-price-row {
+.checkout-line-total {
+	font-size: 16px !important;
+	font-weight: 700 !important;
+	color: #000 !important;
+}
+
+.checkout-line-total .amount {
+	color: #000 !important;
+	font-weight: 700 !important;
+}
+
+/* Cart Totals Breakdown */
+.checkout-totals-breakdown {
+	margin: 15px 0 !important;
+	padding: 0 !important;
+}
+
+.checkout-totals-breakdown .totals-row {
+	display: flex !important;
+	justify-content: space-between !important;
+	align-items: center !important;
+	padding: 8px 0 !important;
+	font-size: 18px !important;
+	color: #666 !important;
+}
+
+.checkout-totals-breakdown .totals-row.total-row {
+	border-top: 2px solid #000 !important;
+	padding-top: 12px !important;
+	margin-top: 8px !important;
+	font-size: 18px !important;
+	color: #000 !important;
+}
+
+.checkout-totals-breakdown .totals-label {
+	font-weight: 600 !important;
+	color: #000 !important;
+}
+
+.checkout-totals-breakdown .total-row .totals-label {
+	font-weight: 700 !important;
+	font-size: 18px !important;
+}
+
+.checkout-totals-breakdown .totals-value {
+	font-weight: 600 !important;
+}
+
+.checkout-totals-breakdown .total-row .totals-value {
+	color: #cd0000 !important;
+	font-weight: 700 !important;
+	font-size: 18px !important;
+}
+
+.checkout-totals-breakdown .totals-value .amount {
+	font-weight: inherit !important;
+	color: inherit !important;
+}
+
+/* Shipping row special styling */
+.checkout-totals-breakdown .shipping-row .totals-value {
+	color: #666 !important;
+}
+
+.checkout-totals-breakdown .shipping-row .totals-value ul {
+	list-style: none !important;
+	padding: 0 !important;
+	margin: 0 !important;
+}
+
+.checkout-totals-breakdown .shipping-row .totals-value li {
+	margin: 0 !important;
+}
+
+.checkout-totals-breakdown .shipping-row .totals-value label {
+	font-weight: 600 !important;
+	color: #000 !important;
+	display: inline !important;
+}
+
+.checkout-totals-breakdown .shipping-row .totals-value .amount {
+	font-weight: 600 !important;
+	color: #000 !important;
+}
+/* Title Wrapper - Override Flatsome styles */
+.mini-cart-title-wrapper {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 12px;
+	line-height: 1.4;
+	white-space: normal;
+}
+
+.mini-cart-title-wrapper > a {
+	padding-top: 15px;
+	width: 100% !important;
+}
+
+/* Paired Pizza Icon */
+.paired-pizza-icon {
+	width: 22px;
+	height: 22px;
+	flex-shrink: 0;
+	vertical-align: middle;
+}
+
+/* Mini Cart Product Title */
+ul.product_list_widget li a:not(.remove) {
+	display: inline !important;
+	line-height: 1.4 !important;
+	margin-bottom: 0 !important;
+	overflow: visible !important;
+	text-overflow: clip !important;
+}
+
+.mini-cart-product-title {
+	font-size: 16px;
+	font-weight: 700;
+	margin: 0;
+	line-height: 1.4;
+	color: #000;
+	display: inline;
+}
+
+a .mini-cart-product-title {
+	color: #000;
+	transition: color 0.3s ease;
+}
+
+a:hover .mini-cart-product-title {
+	color: #dc0000;
+}
+
+/* Two Column Layout - Image Left, Details Right */
+.woocommerce-mini-cart .mini-cart-item-content {
+	display: flex !important;
+	gap: 12px !important;
+	align-items: center !important;
+	width: 100% !important;
+	flex-direction: row !important;
+}
+
+.woocommerce-mini-cart .mini-cart-item-image {
+	flex: 0 0 90px !important;
+	width: 90px !important;
+	max-width: 90px !important;
+	display: block !important;
+	order: 0 !important;
+}
+
+.woocommerce-mini-cart .mini-cart-item-image img {
+	width: 100% !important;
+	max-width: 90px !important;
+	height: auto !important;
+	border-radius: 6px !important;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+	display: block !important;
+}
+
+/* Paired Pizza Image Container */
+.mini-cart-paired-image-container {
+	display: flex !important;
+	width: 90px !important;
+	height: 90px !important;
+	overflow: hidden !important;
+	border-radius: 6px !important;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+}
+
+.mini-cart-half-pizza-container {
+	width: 50% !important;
+	height: 90px !important;
+	overflow: hidden !important;
+	background: #f0f0f0 !important;
+	display: flex !important;
+	align-items: center !important;
+}
+
+.woocommerce-mini-cart .mini-cart-item-details {
+	flex: 1 !important;
+	min-width: 0 !important;
+	order: 1 !important;
+}
+
+/* Pizza Half Section Styling */
+.pizza-half-section {
+	margin: 8px 0 12px 0;
+	font-size: 14px;
+}
+
+.pizza-half-title {
+	font-weight: 700;
+	color: #000;
+	margin-bottom: 6px;
+	line-height: 1.5;
+	text-transform: uppercase;
+	font-size: 13px;
+	letter-spacing: 0.3px;
+}
+
+.pizza-half-title .amount {
+	color: #000;
+	font-weight: 700;
+}
+
+/* Pizza Topping Row Styling */
+.woocommerce-mini-cart .pizza-topping-row {
+	display: flex !important;
+	align-items: center !important;
+	margin: 3px 0 !important;
+	padding-left: 0 !important;
+	padding-right: 0 !important;
+	color: #555 !important;
+	line-height: 1.6 !important;
+	font-size: 13px !important;
+	width: 100% !important;
+	flex-wrap: nowrap !important;
+}
+
+.woocommerce-mini-cart .pizza-topping-row .topping-label {
+	display: inline-block !important;
+	min-width: 35px !important;
+	max-width: 35px !important;
+	font-weight: 600 !important;
+	color: #000 !important;
+	flex-shrink: 0 !important;
+	flex-grow: 0 !important;
+}
+
+.woocommerce-mini-cart .pizza-topping-row .topping-label-spacer {
+	display: inline-block !important;
+	min-width: 35px !important;
+	max-width: 35px !important;
+	flex-shrink: 0 !important;
+	flex-grow: 0 !important;
+}
+
+.woocommerce-mini-cart .pizza-topping-row .topping-details {
+	flex: 1 !important;
+	display: flex !important;
+	justify-content: space-between !important;
+	align-items: center !important;
+	min-width: 0 !important;
+	gap: 8px !important;
+}
+
+.woocommerce-mini-cart .pizza-topping-row .topping-name {
+	color: #555 !important;
+	flex: 1 !important;
+	white-space: nowrap !important;
+	overflow: hidden !important;
+	text-overflow: ellipsis !important;
+}
+
+.woocommerce-mini-cart .pizza-topping-row .topping-price {
+	font-weight: 600 !important;
+	color: #000 !important;
+	flex-shrink: 0 !important;
+	white-space: nowrap !important;
+}
+
+.woocommerce-mini-cart .pizza-topping-row .topping-price .amount {
+	font-weight: 600 !important;
+	color: #000 !important;
+}
+
+/* Custom Pizza Options Display Styling (legacy) */
+.pizza-option-row {
+	display: flex;
+	margin: 8px 0;
+	font-size: 13px;
+	line-height: 1.6;
+}
+
+.pizza-option-label {
+	flex: 0 0 auto;
+	min-width: 35px;
+	font-weight: 600;
+	color: #777;
+	padding-right: 10px;
+}
+
+.pizza-option-value {
+	flex: 1;
+	color: #555;
+}
+
+.pizza-option-value .amount {
+	font-weight: 600;
+	color: #000;
+}
+
+/* Quantity Controls and Price Row */
+.mini-cart-quantity-price-row {
 	display: flex !important;
 	justify-content: space-between !important;
 	align-items: center !important;
@@ -583,39 +792,226 @@ a:hover .order-details-product-title {
 	border-top: 1px solid #f0f0f0 !important;
 }
 
-.order-details-quantity-display {
-	display: flex !important;
-	align-items: center !important;
-	gap: 6px !important;
-	font-size: 14px !important;
-	font-weight: 600 !important;
-	color: #000 !important;
-}
-
-.order-details-quantity-display .unit-price {
-	color: #000 !important;
-	font-weight: 600 !important;
-}
-
-.order-details-quantity-display .qty-separator {
-	color: #666 !important;
-	font-weight: 400 !important;
-	margin: 0 2px !important;
-}
-
-.order-details-quantity-display .qty-value {
-	color: #000 !important;
-	font-weight: 700 !important;
-}
-
-.order-details-line-total {
+.mini-cart-line-total {
 	font-size: 16px !important;
 	font-weight: 700 !important;
 	color: #000 !important;
 }
 
-.order-details-line-total .amount {
+.mini-cart-line-total .amount {
 	color: #000 !important;
 	font-weight: 700 !important;
+}
+
+/* Edit/Delete Action Icons */
+.mini-cart-item-actions {
+	display: flex !important;
+	justify-content: flex-end !important;
+	gap: 6px !important;
+	margin-top: -35px !important;
+	margin-bottom: 10px !important;
+	position: relative !important;
+	z-index: 5 !important;
+}
+
+.mini-cart-item-actions a {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	width: 28px !important;
+	height: 28px !important;
+	border-radius: 4px !important;
+	background-color: #f5f5f5 !important;
+	color: #666 !important;
+	transition: all 0.3s ease !important;
+	text-decoration: none !important;
+	padding: 5px !important;
+}
+
+.mini-cart-item-actions a:hover {
+	background-color: #cd0000 !important;
+	color: #fff !important;
+}
+
+.mini-cart-item-actions svg {
+	width: 14px !important;
+	height: 14px !important;
+}
+
+.inner-padding {
+    padding: 20px !important;
+}
+
+/* Widget Shopping Cart Overrides - Force override Flatsome defaults */
+ul.product_list_widget li {
+	position: relative !important;
+	padding: 10px !important;
+	min-height: 0 !important;
+	overflow: visible !important;
+	background-color: #fff;
+    margin-top: 10px;
+    border-top: 1px solid #000 !important;
+}
+
+.widget_shopping_cart ul.product_list_widget li h3 {
+	color: #000 !important;
+	font-weight: 700 !important;
+}
+
+ul.product_list_widget li img {
+	position: relative !important;
+	left: auto !important;
+	top: auto !important;
+	height: auto !important;
+	width: 100% !important;
+	object-fit: cover !important;
+}
+
+/* Override for paired pizza images - must come AFTER generic rules */
+ul.product_list_widget li .mini-cart-left-pizza-img {
+	position: static !important;
+	left: 0 !important;
+	top: 0 !important;
+	width: 200% !important;
+	height: 90px !important;
+	min-height: 90px !important;
+	object-fit: cover !important;
+	object-position: right center !important;
+	transform: translateX(50%) !important;
+	display: block !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
+}
+
+ul.product_list_widget li .mini-cart-right-pizza-img {
+	position: static !important;
+	left: 0 !important;
+	top: 0 !important;
+	width: 200% !important;
+	height: 90px !important;
+	min-height: 90px !important;
+	object-fit: cover !important;
+	object-position: left center !important;
+	transform: translateX(-50%) !important;
+	display: block !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
+}
+
+.widget_shopping_cart ul.product_list_widget li .quantity {
+	color: #000;
+	opacity: 1.0;
+	font-weight: 600;
+	font-size: 15px;
+	margin-top: 8px;
+	display: inline-block;
+}
+
+.widget_shopping_cart ul.product_list_widget li .quantity .amount {
+	font-weight: 700;
+	color: #000;
+}
+
+/* Mini Cart Total */
+.woocommerce-mini-cart__total .amount {
+	color: #cd0000;
+	font-weight: 700;
+	font-size: 18px;
+}
+
+/* Special Request Styling */
+.pizza-option-row:has(.pizza-option-label:contains("Special Request")) {
+	background-color: #f9f9f9;
+	padding: 8px;
+	border-radius: 4px;
+	margin-top: 10px;
+}
+
+/* Delivery Tabs */
+.mini-cart-delivery-tabs {
+	display: flex !important;
+	gap: 0 !important;
+	margin: 20px 0 15px 0 !important;
+	border-radius: 6px !important;
+	overflow: hidden !important;
+}
+
+.mini-cart-delivery-tabs .delivery-tab {
+	flex: 1 !important;
+	padding: 10px 20px !important;
+	background-color: #fff !important;
+	border: 1px solid #ddd !important;
+	color: #666 !important;
+	font-size: 14px !important;
+	font-weight: 600 !important;
+	cursor: pointer !important;
+	transition: all 0.3s ease !important;
+}
+
+.mini-cart-delivery-tabs .delivery-tab:first-child {
+	border-right: none !important;
+	border-radius: 6px 0 0 6px !important;
+}
+
+.mini-cart-delivery-tabs .delivery-tab:last-child {
+	border-radius: 0 6px 6px 0 !important;
+}
+
+.mini-cart-delivery-tabs .delivery-tab.active {
+	background-color: #cd0000 !important;
+	border-color: #cd0000 !important;
+	color: #fff !important;
+}
+
+.mini-cart-delivery-tabs .delivery-tab:hover:not(.active) {
+	background-color: #f5f5f5 !important;
+}
+
+/* Cart Totals Breakdown */
+.mini-cart-totals-breakdown {
+	margin: 15px 0 !important;
+	padding: 0 !important;
+}
+
+.mini-cart-totals-breakdown .totals-row {
+	display: flex !important;
+	justify-content: space-between !important;
+	align-items: center !important;
+	padding: 8px 0 !important;
+	font-size: 18px !important;
+	color: #666 !important;
+}
+
+.mini-cart-totals-breakdown .totals-row.total-row {
+	border-top: 2px solid #000 !important;
+	padding-top: 12px !important;
+	margin-top: 8px !important;
+	font-size: 18px !important;
+	color: #000 !important;
+}
+
+.mini-cart-totals-breakdown .totals-label {
+	font-weight: 600 !important;
+	color: #000 !important;
+}
+
+.mini-cart-totals-breakdown .total-row .totals-label {
+	font-weight: 700 !important;
+	font-size: 18px !important;
+}
+
+.mini-cart-totals-breakdown .totals-value {
+	font-weight: 600 !important;
+}
+
+.mini-cart-totals-breakdown .total-row .totals-value {
+	color: #cd0000 !important;
+	font-weight: 700 !important;
+	font-size: 18px !important;
+}
+
+.mini-cart-totals-breakdown .totals-value .amount {
+	font-weight: inherit !important;
+	color: inherit !important;
 }
 </style>

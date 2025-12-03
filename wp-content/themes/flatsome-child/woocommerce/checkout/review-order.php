@@ -434,13 +434,6 @@ defined( 'ABSPATH' ) || exit;
 				$fee_tax = WC()->cart->get_fee_tax();
 				$total = $cart_total + $cart_tax + $fee_total + $fee_tax;
 
-				error_log('REVIEW ORDER - Total Calculation:');
-				error_log('  Cart total: ' . $cart_total);
-				error_log('  Cart tax: ' . $cart_tax);
-				error_log('  Fee total: ' . $fee_total);
-				error_log('  Fee tax: ' . $fee_tax);
-				error_log('  TOTAL: ' . $total);
-
 				echo wc_price($total);
 			?></strong></span>
 		</div>
@@ -453,72 +446,6 @@ defined( 'ABSPATH' ) || exit;
 <?php endif; ?>
 
 <style>
-
-/* Checkout Review Order Items - List Layout (like mini-cart) */
-.woocommerce-checkout-review-order-items {
-	list-style: none !important;
-	padding: 0 !important;
-	margin: 0 0 20px 0 !important;
-}
-
-.checkout-cart-item {
-	position: relative !important;
-	padding: 10px !important;
-	margin-bottom: 10px !important;
-	background-color: #fff !important;
-	border-radius: 5px !important;
-	overflow: visible !important;
-}
-
-/* Title Wrapper - Override Flatsome styles */
-.checkout-title-wrapper {
-	display: flex !important;
-	align-items: center !important;
-	gap: 8px !important;
-	margin-bottom: 12px !important;
-	line-height: 1.4 !important;
-	white-space: normal !important;
-}
-
-.checkout-title-wrapper > a {
-	padding-top: 15px !important;
-	width: 100% !important;
-}
-
-/* Paired Pizza Icon */
-.checkout-title-wrapper .paired-pizza-icon {
-	width: 22px !important;
-	height: 22px !important;
-	flex-shrink: 0 !important;
-	vertical-align: middle !important;
-}
-
-/* Checkout Product Title */
-.checkout-cart-item a:not(.remove) {
-	display: inline !important;
-	line-height: 1.4 !important;
-	margin-bottom: 0 !important;
-	overflow: visible !important;
-	text-overflow: clip !important;
-}
-
-.checkout-product-title {
-	font-size: 16px !important;
-	font-weight: 700 !important;
-	margin: 0 !important;
-	line-height: 1.4 !important;
-	color: #000 !important;
-	display: inline !important;
-}
-
-a .checkout-product-title {
-	color: #000 !important;
-	transition: color 0.3s ease !important;
-}
-
-a:hover .checkout-product-title {
-	color: #dc0000 !important;
-}
 
 /* Pizza Half Section Styling */
 .pizza-half-section {
@@ -539,67 +466,6 @@ a:hover .checkout-product-title {
 .pizza-half-title .amount {
 	color: #000 !important;
 	font-weight: 700 !important;
-}
-
-/* Pizza Topping Row Styling */
-.checkout-cart-item .pizza-topping-row {
-	display: flex !important;
-	align-items: center !important;
-	margin: 3px 0 !important;
-	padding-left: 0 !important;
-	padding-right: 0 !important;
-	color: #555 !important;
-	line-height: 1.6 !important;
-	font-size: 13px !important;
-	width: 100% !important;
-	flex-wrap: nowrap !important;
-}
-
-.checkout-cart-item .pizza-topping-row .topping-label {
-	display: inline-block !important;
-	min-width: 35px !important;
-	max-width: 35px !important;
-	font-weight: 600 !important;
-	color: #000 !important;
-	flex-shrink: 0 !important;
-	flex-grow: 0 !important;
-}
-
-.checkout-cart-item .pizza-topping-row .topping-label-spacer {
-	display: inline-block !important;
-	min-width: 35px !important;
-	max-width: 35px !important;
-	flex-shrink: 0 !important;
-	flex-grow: 0 !important;
-}
-
-.checkout-cart-item .pizza-topping-row .topping-details {
-	flex: 1 !important;
-	display: flex !important;
-	justify-content: space-between !important;
-	align-items: center !important;
-	min-width: 0 !important;
-	gap: 8px !important;
-}
-
-.checkout-cart-item .pizza-topping-row .topping-name {
-	color: #555 !important;
-	flex: 1 !important;
-	white-space: nowrap !important;
-	overflow: hidden !important;
-	text-overflow: ellipsis !important;
-}
-
-.checkout-cart-item .pizza-topping-row .topping-price {
-	font-weight: 600 !important;
-	color: #000 !important;
-	flex-shrink: 0 !important;
-	white-space: nowrap !important;
-}
-
-.checkout-cart-item .pizza-topping-row .topping-price .amount {
-	font-weight: 600 !important;
-	color: #000 !important;
 }
 
 /* Custom Pizza Options Display Styling (legacy) */
@@ -626,41 +492,6 @@ a:hover .checkout-product-title {
 .pizza-option-value .amount {
 	font-weight: 600 !important;
 	color: #000 !important;
-}
-
-/* Quantity and Price Row */
-.checkout-quantity-price-row {
-	display: flex !important;
-	justify-content: space-between !important;
-	align-items: center !important;
-	margin-top: 12px !important;
-	padding-top: 8px !important;
-	border-top: 1px solid #f0f0f0 !important;
-}
-
-.checkout-quantity-display {
-	display: flex !important;
-	align-items: center !important;
-	gap: 6px !important;
-	font-size: 14px !important;
-	font-weight: 600 !important;
-	color: #000 !important;
-}
-
-.checkout-quantity-display .unit-price {
-	color: #000 !important;
-	font-weight: 600 !important;
-}
-
-.checkout-quantity-display .qty-separator {
-	color: #666 !important;
-	font-weight: 400 !important;
-	margin: 0 2px !important;
-}
-
-.checkout-quantity-display .qty-value {
-	color: #000 !important;
-	font-weight: 700 !important;
 }
 
 .checkout-line-total {
