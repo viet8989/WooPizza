@@ -36,6 +36,8 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 	background: #f8f8f8;
 	padding: 20px;
 	border-radius: 8px;
+	display: flex;
+	gap: 20px;
 }
 
 .available-stores .loading-stores {
@@ -53,6 +55,7 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 	cursor: pointer;
 	transition: all 0.3s ease;
 	position: relative;
+	flex: 1;
 }
 
 .available-stores .store-item:hover {
@@ -315,8 +318,6 @@ jQuery(document).ready(function($) {
 		var categoryId = (method === 'pickup') ? '42' : '43';
 		var categoryName = (method === 'pickup') ? 'PICKUP' : 'DELIVERY';
 
-		console.log('Loading stores for: ' + categoryName + ' (ID: ' + categoryId + ') at ' + new Date().toLocaleTimeString());
-
 		// Show loading message
 		$('#available-stores-list').html('<p class="loading-stores">Đang tải danh sách cửa hàng...</p>');
 
@@ -340,7 +341,6 @@ jQuery(document).ready(function($) {
 
 	// Function to display stores
 	function displayStores(stores, categoryName) {
-		console.log('📍 displayStores() called - Category: ' + categoryName + ', Stores: ' + (stores ? stores.length : 0));
 		var html = '';
 
 		if (!stores || stores.length === 0) {
@@ -352,7 +352,6 @@ jQuery(document).ready(function($) {
 
 				if (isSelected) {
 					selectedStoreId = store.id;
-					console.log('📍 Auto-selected store: ' + store.id + ' (' + store.store + ')');
 				}
 
 				html += '<div class="store-item ' + selectedClass + '" data-store-id="' + store.id + '">';
@@ -367,7 +366,6 @@ jQuery(document).ready(function($) {
 		}
 
 		$('#available-stores-list').html(html);
-		console.log('📍 Stores HTML rendered');
 
 		// Handle store selection
 		$('.store-item').on('click', function() {
@@ -378,26 +376,18 @@ jQuery(document).ready(function($) {
 			$(this).addClass('selected');
 			$(this).find('input[type="radio"]').prop('checked', true);
 
-			console.log('📍 Store clicked: ' + storeId);
-
 			// Load available wards for this store
 			loadStoreWards(storeId);
 		});
 
 		// Load wards for the first selected store
 		if (selectedStoreId) {
-			console.log('📍 About to load wards for selected store: ' + selectedStoreId);
 			loadStoreWards(selectedStoreId);
-		} else {
-			console.log('📍 No store selected, skipping ward loading');
 		}
 	}
 
 	// Function to load available wards for selected store
 	function loadStoreWards(storeId) {
-		console.log('🔄 loadStoreWards() called - Store ID: ' + storeId);
-		console.log('🔄 Making AJAX request to: <?php echo admin_url('admin-ajax.php'); ?>');
-		console.log('🔄 AJAX data: action=get_store_wards, store_id=' + storeId);
 
 		$.ajax({
 			url: '<?php echo admin_url('admin-ajax.php'); ?>',
@@ -407,15 +397,10 @@ jQuery(document).ready(function($) {
 				store_id: storeId
 			},
 			beforeSend: function() {
-				console.log('🔄 AJAX request sent...');
 			},
 			success: function(response) {
-				console.log('✅ AJAX response received:', response);
 				if (response.success && response.data.wards) {
-					console.log('✅ Wards data found:', response.data.wards.length + ' wards');
 					updateWardDropdown(response.data.wards);
-				} else {
-					console.error('❌ Failed to load wards:', response);
 				}
 			},
 			error: function(xhr, status, error) {
@@ -451,13 +436,8 @@ jQuery(document).ready(function($) {
 			);
 		});
 
-		// Don't auto-select - let user choose manually
-		console.log('Loaded ' + wards.length + ' ward(s) for selection');
-
 		// Trigger change event to update WooCommerce
 		$wardSelect.trigger('change');
-
-		console.log('Ward dropdown updated with ' + wards.length + ' wards');
 	}
 
 	// Function to update shipping fee display
@@ -466,7 +446,6 @@ jQuery(document).ready(function($) {
 		var $feeRow = $('.shipping-fee-row');
 
 		if ($feeRow.length === 0) {
-			console.log('Shipping fee row not found');
 			return;
 		}
 
@@ -478,7 +457,6 @@ jQuery(document).ready(function($) {
 			// PICKUP - Show "Pickup" with 0 fee
 			$feeLabel.text('Pickup');
 			$feeValue.html('<span class="woocommerce-Price-amount amount"><bdi>0&nbsp;<span class="woocommerce-Price-currencySymbol">₫</span></bdi></span>');
-			console.log('Updated to Pickup mode');
 			fee = 0;
 		} else {
 			// DELIVERY - Show "Shipping Fee" with calculated fee
@@ -488,12 +466,9 @@ jQuery(document).ready(function($) {
 			var selectedWardOption = $('#billing_city option:selected');
 			fee = selectedWardOption.data('fee') || 0;
 
-			console.log('Ward selected:', selectedWard, 'Fee:', fee);
-
 			// Format fee as Vietnamese currency
 			var formattedFee = new Intl.NumberFormat('vi-VN').format(fee);
 			$feeValue.html('<span class="woocommerce-Price-amount amount"><bdi>' + formattedFee + '&nbsp;<span class="woocommerce-Price-currencySymbol">₫</span></bdi></span>');
-			console.log('Updated to Delivery mode, fee:', formattedFee);
 		}
 
 		// Update the Total to include the fee
@@ -506,7 +481,6 @@ jQuery(document).ready(function($) {
 		var $totalValue = $totalRow.find('.totals-value strong');
 
 		if ($totalValue.length === 0) {
-			console.log('Total row not found');
 			return;
 		}
 
@@ -520,8 +494,6 @@ jQuery(document).ready(function($) {
 
 		// Calculate new total: subtotal + tax + shipping fee
 		var newTotal = subtotal + tax + shippingFee;
-
-		console.log('Total update - Subtotal:', subtotal, 'Tax (8%):', tax, 'Fee:', shippingFee, 'New Total:', newTotal);
 
 		// Format and update total
 		var formattedTotal = new Intl.NumberFormat('vi-VN').format(newTotal);
@@ -579,11 +551,9 @@ jQuery(document).ready(function($) {
 	// Update shipping fee display after WooCommerce updates
 	// Also restore ward options that were cleared by WooCommerce re-rendering
 	$(document.body).on('updated_checkout', function() {
-		console.log('🔄 WooCommerce updated_checkout fired');
 
 		// Restore previously loaded wards if any
 		if (loadedWards.length > 0) {
-			console.log('🔄 Restoring ' + loadedWards.length + ' wards after checkout update');
 			var $wardSelect = $('#billing_city');
 			var selectedWard = $wardSelect.val(); // Save current selection
 
@@ -629,12 +599,8 @@ jQuery(document).ready(function($) {
 	// Load wards for pre-selected store after stores are loaded
 	setTimeout(function() {
 		var preSelectedStore = $('input[name="selected_store"]:checked').val();
-		console.log('Checking for pre-selected store:', preSelectedStore);
 		if (preSelectedStore) {
-			console.log('Loading wards for pre-selected store:', preSelectedStore);
 			loadStoreWards(preSelectedStore);
-		} else {
-			console.log('No pre-selected store found');
 		}
 	}, 2000);
 
@@ -659,8 +625,6 @@ jQuery(document).ready(function($) {
 				return false;
 			}
 		}
-
-		console.log('Form validation passed - Store:', selectedStore, 'Method:', deliveryMethod);
 		return true;
 	});
 });
