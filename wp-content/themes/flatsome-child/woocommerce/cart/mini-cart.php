@@ -165,12 +165,9 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 
 					// Display extra toppings (whole pizza)
 					if ( isset( $cart_item['extra_topping_options'] ) && ! empty( $cart_item['extra_topping_options'] ) ) {
-						error_log('Mini-cart: Found extra_topping_options with ' . count($cart_item['extra_topping_options']) . ' items');
 						$topping_index = 0;
 						foreach ( $cart_item['extra_topping_options'] as $topping ) {
-							error_log('Topping: ' . print_r($topping, true));
 							if ( isset( $topping['name'] ) && isset( $topping['price'] ) ) {
-								error_log('Displaying topping: ' . $topping['name']);
 								echo '<div class="pizza-topping-row">';
 								if ( $topping_index === 0 ) {
 									echo '<span class="topping-label">Add</span>';

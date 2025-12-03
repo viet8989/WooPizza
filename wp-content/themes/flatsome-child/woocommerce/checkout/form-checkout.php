@@ -148,7 +148,7 @@ if ( ! $checkout->is_registration_enabled() && $checkout->is_registration_requir
 
 			<!-- Store Locator Section -->
 			<div class="store-locator-section" style="margin-bottom: 30px;">
-				<h3>Chọn cửa hàng</h3>
+				<h3 style="margin-left: 20px">Chọn cửa hàng</h3>
 				<div id="available-stores-list" class="available-stores">
 					<p class="loading-stores">Đang tải danh sách cửa hàng...</p>
 				</div>
