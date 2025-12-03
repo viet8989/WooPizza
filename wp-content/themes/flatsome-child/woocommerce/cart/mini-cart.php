@@ -125,7 +125,7 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 					<div class="mini-cart-item-content">
 						<div class="mini-cart-item-image">
 							<?php
-							// For paired pizzas, show both half images
+							// For paired pizzas, show both half images merged
 							if ( $is_paired && isset( $cart_item['pizza_halves'] ) ) {
 								$halves = $cart_item['pizza_halves'];
 								$left_image = isset( $halves['left_half']['image'] ) ? $halves['left_half']['image'] : '';
@@ -133,27 +133,33 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 								$left_name = isset( $halves['left_half']['name'] ) ? $halves['left_half']['name'] : '';
 								$right_name = isset( $halves['right_half']['name'] ) ? $halves['right_half']['name'] : '';
 
-								// Display left half image
-								if ( $left_image ) {
+								// Display merged half images (similar to lightbox)
+								if ( $left_image && $right_image ) {
 									?>
-										<img width="150" height="150" src="<?php echo esc_url( $left_image ); ?>" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="<?php echo esc_attr( $left_name ); ?>" decoding="async" style="display: block; margin-bottom: 5px;">
-									<?php
-								}
-
-								// Display right half image
-								if ( $right_image ) {
-									?>
-										<img width="150" height="150" src="<?php echo esc_url( $right_image ); ?>" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="<?php echo esc_attr( $right_name ); ?>" decoding="async" style="display: block;">
+										<div class="mini-cart-paired-image-container">
+											<div class="mini-cart-half-pizza-container" style="justify-content: right !important;">
+												<img src="<?php echo esc_url( $left_image ); ?>"
+													 class="mini-cart-left-pizza-img"
+													 alt="<?php echo esc_attr( $left_name ); ?>"
+													 decoding="async">
+											</div>
+											<div class="mini-cart-half-pizza-container" style="justify-content: left !important;">
+												<img src="<?php echo esc_url( $right_image ); ?>"
+													 class="mini-cart-right-pizza-img"
+													 alt="<?php echo esc_attr( $right_name ); ?>"
+													 decoding="async">
+											</div>
+										</div>
 									<?php
 								}
 							} else {
 								// For non-paired pizzas, show normal thumbnail
-								<?php echo $thumbnail; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+								echo $thumbnail; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 							}
 							?>
 						</div>
 
-						<div class="mini-cart-item-details" style="min-height: 100%;">
+						<div class="mini-cart-item-details">
 					<?php
 					// Custom Pizza Options Display (inline logic instead of filter)
 
@@ -575,6 +581,49 @@ a:hover .mini-cart-product-title {
 	display: block !important;
 }
 
+/* Paired Pizza Image Container */
+.mini-cart-paired-image-container {
+	display: flex !important;
+	width: 90px !important;
+	height: 90px !important;
+	overflow: hidden !important;
+	border-radius: 6px !important;
+	box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+}
+
+.mini-cart-half-pizza-container {
+	width: 50% !important;
+	height: 90px !important;
+	overflow: hidden !important;
+	background: #f0f0f0 !important;
+	display: flex !important;
+	align-items: center !important;
+}
+
+.mini-cart-left-pizza-img {
+	width: 200% !important;
+	height: 90px !important;
+	min-height: 90px !important;
+	object-fit: cover !important;
+	object-position: right center !important;
+	transform: translateX(50%) !important;
+	display: block !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
+}
+
+.mini-cart-right-pizza-img {
+	width: 200% !important;
+	height: 90px !important;
+	min-height: 90px !important;
+	object-fit: cover !important;
+	object-position: left center !important;
+	transform: translateX(-50%) !important;
+	display: block !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
+}
+
 .woocommerce-mini-cart .mini-cart-item-details,
 .widget_shopping_cart .mini-cart-item-details,
 .cart-sidebar .mini-cart-item-details,
@@ -849,6 +898,23 @@ ul.product_list_widget li img,
 	height: auto !important;
 	width: 100% !important;
 	object-fit: cover !important;
+}
+
+/* Override for paired pizza images - must come AFTER generic rules */
+ul.product_list_widget li .mini-cart-left-pizza-img,
+.widget_shopping_cart ul.product_list_widget li .mini-cart-left-pizza-img,
+.cart-sidebar ul.product_list_widget li .mini-cart-left-pizza-img,
+.off-canvas ul.product_list_widget li .mini-cart-left-pizza-img,
+ul.product_list_widget li .mini-cart-right-pizza-img,
+.widget_shopping_cart ul.product_list_widget li .mini-cart-right-pizza-img,
+.cart-sidebar ul.product_list_widget li .mini-cart-right-pizza-img,
+.off-canvas ul.product_list_widget li .mini-cart-right-pizza-img {
+	position: static !important;
+	left: 0 !important;
+	top: 0 !important;
+	width: 200% !important;
+	height: 90px !important;
+	min-height: 90px !important;
 }
 
 .widget_shopping_cart ul.product_list_widget li .quantity {
