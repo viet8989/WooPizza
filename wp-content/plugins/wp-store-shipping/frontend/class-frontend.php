@@ -65,6 +65,7 @@ if ( !class_exists( 'WPSL_Frontend' ) ) {
             add_shortcode( 'wpsl_address',         array( $this, 'show_store_address' ) );
             add_shortcode( 'wpsl_hours',           array( $this, 'show_opening_hours' ) );
             add_shortcode( 'wpsl_map',             array( $this, 'show_store_map' ) );
+            add_shortcode( 'wpsl_stores_with_map', array( $this, 'show_stores_with_map' ) );
         }
 
         /**
@@ -1949,6 +1950,300 @@ if ( !class_exists( 'WPSL_Frontend' ) ) {
             ));
 
             return $settings;
+        }
+
+        /**
+         * Handle the [wpsl_stores_with_map] shortcode.
+         * Displays stores list on left (3 columns) with scrollable container,
+         * and OpenStreetMap using Leaflet on right (9 columns).
+         *
+         * @since 1.0.1
+         * @param  array  $atts   Shortcode attributes
+         * @return string $output The HTML for stores list and map
+         */
+        public function show_stores_with_map( $atts ) {
+            global $wpsl_settings;
+
+            $atts = shortcode_atts( array(
+                'category'   => '',
+                'map_height' => '600',
+                'list_height' => '600',
+                'zoom'       => 12
+            ), $atts );
+
+            // Get all published stores
+            $args = array(
+                'post_type'      => 'wpsl_stores',
+                'post_status'    => 'publish',
+                'posts_per_page' => -1,
+                'orderby'        => 'title',
+                'order'          => 'ASC'
+            );
+
+            // Add category filter if specified
+            if ( !empty( $atts['category'] ) ) {
+                $args['tax_query'] = array(
+                    array(
+                        'taxonomy' => 'wpsl_store_category',
+                        'field'    => 'slug',
+                        'terms'    => explode( ',', sanitize_text_field( $atts['category'] ) )
+                    )
+                );
+            }
+
+            $stores = get_posts( $args );
+
+            if ( empty( $stores ) ) {
+                return '<p>' . __( 'No stores found.', 'wpsl' ) . '</p>';
+            }
+
+            // Collect store data
+            $store_data = array();
+            foreach ( $stores as $store ) {
+                $lat = get_post_meta( $store->ID, 'wpsl_lat', true );
+                $lng = get_post_meta( $store->ID, 'wpsl_lng', true );
+
+                if ( !empty( $lat ) && !empty( $lng ) && is_numeric( $lat ) && is_numeric( $lng ) ) {
+                    $store_data[] = array(
+                        'id'       => $store->ID,
+                        'title'    => get_the_title( $store->ID ),
+                        'address'  => get_post_meta( $store->ID, 'wpsl_address', true ),
+                        'address2' => get_post_meta( $store->ID, 'wpsl_address2', true ),
+                        'city'     => get_post_meta( $store->ID, 'wpsl_city', true ),
+                        'state'    => get_post_meta( $store->ID, 'wpsl_state', true ),
+                        'zip'      => get_post_meta( $store->ID, 'wpsl_zip', true ),
+                        'country'  => get_post_meta( $store->ID, 'wpsl_country', true ),
+                        'phone'    => get_post_meta( $store->ID, 'wpsl_phone', true ),
+                        'email'    => get_post_meta( $store->ID, 'wpsl_email', true ),
+                        'url'      => get_post_meta( $store->ID, 'wpsl_url', true ),
+                        'lat'      => $lat,
+                        'lng'      => $lng
+                    );
+                }
+            }
+
+            if ( empty( $store_data ) ) {
+                return '<p>' . __( 'No stores with valid coordinates found.', 'wpsl' ) . '</p>';
+            }
+
+            // Calculate center point (average of all coordinates)
+            $center_lat = array_sum( array_column( $store_data, 'lat' ) ) / count( $store_data );
+            $center_lng = array_sum( array_column( $store_data, 'lng' ) ) / count( $store_data );
+
+            // Generate unique ID for this instance
+            $map_id = 'wpsl-leaflet-map-' . uniqid();
+            $list_id = 'wpsl-store-list-' . uniqid();
+
+            // Enqueue Leaflet CSS and JS
+            wp_enqueue_style(
+                'leaflet-css',
+                'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+                array(),
+                '1.9.4'
+            );
+            wp_enqueue_script(
+                'leaflet-js',
+                'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+                array(),
+                '1.9.4',
+                true
+            );
+
+            // Build HTML output
+            ob_start();
+            ?>
+            <div class="wpsl-stores-with-map-container">
+                <style>
+                    .wpsl-stores-with-map-container {
+                        display: flex;
+                        gap: 20px;
+                        margin: 0;
+                    }
+                    .wpsl-store-list-wrapper {
+                        flex: 0 0 300px;
+                        width: 300px;
+                    }
+                    .wpsl-store-list {
+                        max-height: <?php echo esc_attr( $atts['list_height'] ); ?>px;
+                        overflow-y: auto;
+                        border: 1px solid #ddd;
+                        border-radius: 4px;
+                        background: #fff;
+                    }
+                    .wpsl-store-item {
+                        padding: 15px;
+                        border-bottom: 1px solid #eee;
+                        cursor: pointer;
+                        transition: background-color 0.3s;
+                    }
+                    .wpsl-store-item:hover,
+                    .wpsl-store-item.active {
+                        background-color: #f0f0f0;
+                    }
+                    .wpsl-store-item:last-child {
+                        border-bottom: none;
+                    }
+                    .wpsl-store-title {
+                        font-weight: bold;
+                        font-size: 16px;
+                        margin-bottom: 8px;
+                        color: #333;
+                    }
+                    .wpsl-store-address {
+                        font-size: 14px;
+                        color: #666;
+                        line-height: 1.5;
+                    }
+                    .wpsl-store-phone {
+                        font-size: 14px;
+                        color: #2271b1;
+                        margin-top: 5px;
+                    }
+                    .wpsl-map-wrapper {
+                        flex: 1;
+                    }
+                    .wpsl-leaflet-map {
+                        height: <?php echo esc_attr( $atts['map_height'] ); ?>px;
+                        border: 1px solid #ddd;
+                        border-radius: 4px;
+                    }
+                    @media (max-width: 768px) {
+                        .wpsl-stores-with-map-container {
+                            flex-direction: column;
+                        }
+                        .wpsl-store-list-wrapper {
+                            flex: none;
+                            width: 100%;
+                        }
+                        .wpsl-store-list {
+                            max-height: 300px;
+                        }
+                    }
+                </style>
+
+                <div class="wpsl-store-list-wrapper">
+                    <div class="wpsl-store-list" id="<?php echo esc_attr( $list_id ); ?>">
+                        <?php foreach ( $store_data as $index => $store ): ?>
+                            <div class="wpsl-store-item" data-index="<?php echo esc_attr( $index ); ?>"
+                                 data-lat="<?php echo esc_attr( $store['lat'] ); ?>"
+                                 data-lng="<?php echo esc_attr( $store['lng'] ); ?>">
+                                <div class="wpsl-store-title"><?php echo esc_html( $store['title'] ); ?></div>
+                                <div class="wpsl-store-address">
+                                    <?php
+                                    if ( !empty( $store['address'] ) ) {
+                                        echo esc_html( $store['address'] );
+                                        if ( !empty( $store['address2'] ) ) {
+                                            echo ', ' . esc_html( $store['address2'] );
+                                        }
+                                        echo '<br>';
+                                    }
+                                    if ( !empty( $store['city'] ) ) {
+                                        echo esc_html( $store['city'] );
+                                    }
+                                    if ( !empty( $store['state'] ) ) {
+                                        echo ', ' . esc_html( $store['state'] );
+                                    }
+                                    if ( !empty( $store['zip'] ) ) {
+                                        echo ' ' . esc_html( $store['zip'] );
+                                    }
+                                    ?>
+                                </div>
+                                <?php if ( !empty( $store['phone'] ) ): ?>
+                                    <div class="wpsl-store-phone">
+                                        <a href="tel:<?php echo esc_attr( $store['phone'] ); ?>">
+                                            <?php echo esc_html( $store['phone'] ); ?>
+                                        </a>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <div class="wpsl-map-wrapper">
+                    <div id="<?php echo esc_attr( $map_id ); ?>" class="wpsl-leaflet-map"></div>
+                </div>
+            </div>
+
+            <script>
+            jQuery(document).ready(function($) {
+                // Initialize map
+                var map = L.map('<?php echo esc_js( $map_id ); ?>').setView(
+                    [<?php echo esc_js( $center_lat ); ?>, <?php echo esc_js( $center_lng ); ?>],
+                    <?php echo esc_js( $atts['zoom'] ); ?>
+                );
+
+                // Add OpenStreetMap tile layer
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                    maxZoom: 19
+                }).addTo(map);
+
+                // Store markers
+                var markers = [];
+                var storeData = <?php echo json_encode( $store_data ); ?>;
+
+                // Add markers for each store
+                storeData.forEach(function(store, index) {
+                    var marker = L.marker([store.lat, store.lng]).addTo(map);
+
+                    // Create popup content
+                    var popupContent = '<div class="wpsl-popup">' +
+                        '<strong>' + store.title + '</strong><br>';
+
+                    if (store.address) {
+                        popupContent += store.address;
+                        if (store.address2) {
+                            popupContent += ', ' + store.address2;
+                        }
+                        popupContent += '<br>';
+                    }
+
+                    if (store.city) {
+                        popupContent += store.city;
+                    }
+                    if (store.state) {
+                        popupContent += ', ' + store.state;
+                    }
+                    if (store.zip) {
+                        popupContent += ' ' + store.zip;
+                    }
+
+                    if (store.phone) {
+                        popupContent += '<br><a href="tel:' + store.phone + '">' + store.phone + '</a>';
+                    }
+
+                    popupContent += '</div>';
+
+                    marker.bindPopup(popupContent);
+                    markers.push(marker);
+                });
+
+                // Fit map to show all markers
+                if (markers.length > 0) {
+                    var group = new L.featureGroup(markers);
+                    map.fitBounds(group.getBounds().pad(0.1));
+                }
+
+                // Handle store item clicks
+                $('#<?php echo esc_js( $list_id ); ?> .wpsl-store-item').on('click', function() {
+                    var index = $(this).data('index');
+                    var lat = parseFloat($(this).data('lat'));
+                    var lng = parseFloat($(this).data('lng'));
+
+                    // Highlight selected item
+                    $('#<?php echo esc_js( $list_id ); ?> .wpsl-store-item').removeClass('active');
+                    $(this).addClass('active');
+
+                    // Pan to marker and open popup
+                    map.setView([lat, lng], 15);
+                    markers[index].openPopup();
+                });
+            });
+            </script>
+            <?php
+
+            return ob_get_clean();
         }
     }
 }
