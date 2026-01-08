@@ -27,7 +27,7 @@ $has_upsells = ! empty( $upsell_ids );
 ?>
 
 <?php if ( $price_html = $product->get_price_html() ) : ?>
-	<span class="price" style="float: left">From <?php echo $price_html; ?></span>
+	<span class="price" style="float: left"><?php echo $price_html; ?></span>
 	<?php if ( $has_upsells ) : ?>
 		<?php do_action( 'flatsome_product_box_actions' ); ?>
 	<?php endif; ?>

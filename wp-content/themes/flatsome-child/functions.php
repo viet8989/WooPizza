@@ -61,6 +61,20 @@ add_filter('woocommerce_currency_symbol', function ($currency_symbol, $currency)
 }, 10, 2);
 
 /**
+ * Modify variable product price HTML to show only minimum price
+ * Changes "From {minPrice} – {maxPrice}" to just show the minimum price
+ */
+add_filter('woocommerce_variable_price_html', function($price_html, $product) {
+    // Get the minimum price
+    $min_price = $product->get_variation_price('min', true);
+
+    // Format the minimum price
+    $price_html = wc_price($min_price);
+
+    return $price_html;
+}, 10, 2);
+
+/**
  * Override WooCommerce category link opening tag template function
  * Original source: wc-template-functions.php line 1260-1272
  */
