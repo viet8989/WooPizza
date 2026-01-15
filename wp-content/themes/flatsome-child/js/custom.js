@@ -1,8 +1,8 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
 
     const button = document.querySelector('.button-reservation');
     if (button) {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
             const terms = document.querySelector('.terms-condition-text');
             if (terms) {
                 terms.style.display = 'none';
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const body = document.body;
 
     if (menuButton && menuOpen) {
-        menuButton.addEventListener('click', function() {
+        menuButton.addEventListener('click', function () {
             menuOpen.classList.add('show');
             header.classList.add('show-menu');
             // body.classList.add('hidden-show');
@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     if (menuClose && menuOpen) {
-        menuClose.addEventListener('click', function() {
+        menuClose.addEventListener('click', function () {
             menuOpen.classList.add('hide');
             body.classList.remove('hidden-show');
             menuOpen.classList.remove('show'); // Xóa class show nếu có
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
             let placeholder = null;
 
             // Calculate position after page fully loads
-            const initSticky = function() {
+            const initSticky = function () {
                 originalTop = categorySection.getBoundingClientRect().top + window.pageYOffset;
             };
 
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 window.addEventListener('load', initSticky);
             }
 
-            window.addEventListener('scroll', function() {
+            window.addEventListener('scroll', function () {
                 const scrollY = window.pageYOffset;
 
                 if (scrollY >= originalTop - stickyOffset && !isSticky) {
@@ -143,8 +143,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const categoryLinks = document.querySelectorAll('.product-category a');
         // Found category links: 
 
-        categoryLinks.forEach(function(link) {
-            link.addEventListener('click', function(event) {
+        categoryLinks.forEach(function (link) {
+            link.addEventListener('click', function (event) {
                 event.preventDefault(); // Prevent default link behavior
                 // Category clicked
                 const categoryName = this.textContent.trim();
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
             sessionStorage.setItem('selectedCategory', categoryName);
 
             // Use setTimeout to ensure DOM is fully loaded
-            setTimeout(function() {
+            setTimeout(function () {
                 fadeOutToGroupCategory(categoryName);
 
                 // Set selected class for the category
@@ -190,8 +190,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Home page loaded - Set default category to PIZZA
 
         const categoryLinks = document.querySelectorAll('.product-category a');
-        categoryLinks.forEach(function(link) {
-            link.addEventListener('click', function(event) {
+        categoryLinks.forEach(function (link) {
+            link.addEventListener('click', function (event) {
                 event.preventDefault(); // Prevent default link behavior
                 // get text of clicked link
                 const categoryName = this.textContent.trim();
@@ -204,25 +204,32 @@ document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
         const tabParam = urlParams.get('tab');
         if (tabParam) {
-            // Wait longer for DOM/images to load before scrolling
-            setTimeout(function() {
-                fadeOutToGroupOpenMenu(tabParam, 'redirect'); // Called after redirect from another page
-            }, 1000);
+            // Use window.load event to ensure page is fully loaded before scrolling
+            if (document.readyState === 'complete') {
+                // Page already loaded
+                fadeOutToGroupOpenMenu('#' + tabParam, 'redirect');
+            } else {
+                // Wait for page load
+                window.addEventListener('load', function onTabLoad() {
+                    window.removeEventListener('load', onTabLoad);
+                    fadeOutToGroupOpenMenu('#' + tabParam, 'redirect'); // Called after redirect from another page
+                });
+            }
         }
 
         // Set visual selected state for PIZZA after DOM loads
-        setTimeout(function() {
+        setTimeout(function () {
             setSelectedCategory('PIZZA');
         }, 300);
     }
 
     // Header menu links - ONLY in the menu overlay, not in tab content
     const menuOpenLinks = document.querySelectorAll('.menu-open .ux-menu > .ux-menu-link a');
-        // Found menu links: 
+    // Found menu links: 
 
-    menuOpenLinks.forEach(function(link) {
-        link.addEventListener('click', function(event) {
-                // Menu link clicked: 
+    menuOpenLinks.forEach(function (link) {
+        link.addEventListener('click', function (event) {
+            // Menu link clicked: 
             event.preventDefault();
 
             if (menuClose) {
@@ -242,7 +249,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Calling fadeOutToGroupOpenMenu with: 
                 fadeOutToGroupOpenMenu(href, 'home'); // Called from home page
             } else {
-                window.location.href = window.location.origin + '?tab=' + href.replace('#', '');
+                // Extract just the tab name from the href (handles both "#tab_name" and full URLs like "https://site.com/#tab_name")
+                const hashIndex = href.indexOf('#');
+                const tabName = hashIndex !== -1 ? href.substring(hashIndex + 1) : href.replace('#', '');
+                window.location.href = window.location.origin + '?tab=' + tabName;
             }
         });
     });
@@ -253,10 +263,10 @@ function setSelectedCategory(categoryName) {
     // setSelectedCategory called with: 
 
     // Remove .selected class from all categories
-    document.querySelectorAll('.box-category .box-text .box-text-inner').forEach(function(box) {
+    document.querySelectorAll('.box-category .box-text .box-text-inner').forEach(function (box) {
         box.classList.remove('selected');
     });
-    document.querySelectorAll('.box-category img').forEach(function(box) {
+    document.querySelectorAll('.box-category img').forEach(function (box) {
         box.classList.remove('selected');
     });
 
@@ -264,7 +274,7 @@ function setSelectedCategory(categoryName) {
     const categoryLinks = document.querySelectorAll('.product-category a');
     // Looking through category links 
 
-    categoryLinks.forEach(function(link) {
+    categoryLinks.forEach(function (link) {
         const linkText = link.textContent.trim();
         if (linkText === categoryName) {
             // Found matching link: 
@@ -285,7 +295,7 @@ function setSelectedCategory(categoryName) {
 
 function fadeOutToGroupCategory(categoryName) {
     const productTitles = document.querySelectorAll('div.section-content.relative .row.align-middle .col-inner h3');
-    productTitles.forEach(function(title) {
+    productTitles.forEach(function (title) {
         if (title.textContent.trim() === categoryName) {
             // Scroll to the category section with margin offset 260px            
             const offset = 260;
@@ -302,37 +312,80 @@ function fadeOutToGroupOpenMenu(hash, calledFrom = 'redirect') {
 
     // Determine offset based on where function was called from
     // 'home' = called from home page menu (90px)
-    // 'redirect' = called after redirect from another page (120px)
-    // const offset = calledFrom === 'home' ? 90 : 150;
-    const offset = 0;
+    // 'redirect' = called after redirect from another page (needs more time for page to load)
+    const offset = 90;
 
-    // Wait for DOM/images to fully load before calculating position
-    setTimeout(function() {
+    // Different timing strategy based on call origin
+    const initialDelay = calledFrom === 'redirect' ? 500 : 300;
+    const scrollCompleteDelay = calledFrom === 'redirect' ? 800 : 500;
+
+    console.log('fadeOutToGroupOpenMenu called:', { hash: cleanHash, calledFrom, initialDelay, scrollCompleteDelay });
+
+    // Helper function to perform the scroll and tab click
+    function performScrollAndClick() {
         const item = document.querySelector('.tabbed-content.tab-service');
         if (!item) {
             console.warn('Tab container .tabbed-content.tab-service not found');
-            return;
+            return false;
         }
 
         // Scroll with offset based on call origin
         const target = item.getBoundingClientRect().top + window.scrollY - offset;
         const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        console.log('Scrolling to tab container:', { target, offset, currentScrollY: window.scrollY });
         window.scrollTo({ top: target, behavior: prefersReduced ? 'auto' : 'smooth' });
 
         // Wait for scroll to complete, then click the tab
-        setTimeout(function() {
+        setTimeout(function () {
             // Find the tab link within .tabbed-content only
             const tabLink = document.querySelector('.tabbed-content.tab-service a[href="#' + cleanHash + '"]');
 
             if (tabLink) {
                 console.log('Clicking tab:', cleanHash, '| Offset:', offset + 'px');
                 tabLink.click();
+
+                // For redirect scenario, scroll again after tab content is rendered
+                if (calledFrom === 'redirect') {
+                    setTimeout(function () {
+                        const updatedItem = document.querySelector('.tabbed-content.tab-service');
+                        if (updatedItem) {
+                            const updatedTarget = updatedItem.getBoundingClientRect().top + window.scrollY - offset;
+                            window.scrollTo({ top: updatedTarget, behavior: prefersReduced ? 'auto' : 'smooth' });
+                            console.log('Re-scrolled after tab click:', { updatedTarget });
+                        }
+                    }, 300);
+                }
             } else {
                 console.warn('Tab link not found for:', cleanHash);
                 console.log('Available tabs:', Array.from(document.querySelectorAll('.tabbed-content.tab-service a[role="tab"]')).map(a => a.getAttribute('href')));
             }
-        }, 500);
-    }, 300);
+        }, scrollCompleteDelay);
+
+        return true;
+    }
+
+    // For redirect scenario, wait longer for page to stabilize
+    if (calledFrom === 'redirect') {
+        // Wait for images to load before calculating position
+        if (document.readyState === 'complete') {
+            // Page already loaded, use requestAnimationFrame for better timing
+            requestAnimationFrame(function () {
+                setTimeout(performScrollAndClick, initialDelay);
+            });
+        } else {
+            // Wait for page load event
+            window.addEventListener('load', function onLoad() {
+                window.removeEventListener('load', onLoad);
+                requestAnimationFrame(function () {
+                    setTimeout(performScrollAndClick, initialDelay);
+                });
+            });
+        }
+    } else {
+        // For home page scenario, execute with shorter delay
+        setTimeout(performScrollAndClick, initialDelay);
+    }
 }
 
 /**
@@ -365,17 +418,17 @@ function writeLogServer(data, logLevel = 'info') {
         },
         body: new URLSearchParams(logData)
     })
-    .then(response => response.json())
-    .then(result => {
-        if (result.success) {
-            console.log('Log written to server:', result.data);
-        } else {
-            console.error('Failed to write log:', result.data);
-        }
-    })
-    .catch(error => {
-        console.error('Error writing log to server:', error);
-    });
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                console.log('Log written to server:', result.data);
+            } else {
+                console.error('Failed to write log:', result.data);
+            }
+        })
+        .catch(error => {
+            console.error('Error writing log to server:', error);
+        });
 }
 
 /**
@@ -405,27 +458,27 @@ function clearLogsServer() {
         },
         body: new URLSearchParams(requestData)
     })
-    .then(response => response.json())
-    .then(result => {
-        if (result.success) {
-                        // Logs cleared successfully 
-        } else {
-            console.error('❌ Failed to clear logs:', result.data);
-        }
-    })
-    .catch(error => {
-        console.error('Error clearing logs:', error);
-    });
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                // Logs cleared successfully 
+            } else {
+                console.error('❌ Failed to clear logs:', result.data);
+            }
+        })
+        .catch(error => {
+            console.error('Error clearing logs:', error);
+        });
 }
 
 // Auto-test mini cart bug (only run when URL has ?autotest=minicart parameter)
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('autotest') === 'minicart') {
         // Starting automated mini cart bug testing... 
 
         // Step 1: Open mini cart (wait 2 seconds for page load)
-        setTimeout(function() {
+        setTimeout(function () {
             // Step 1: Opening mini cart... 
             try {
                 const cartIcon = document.querySelectorAll('.header-nav.header-nav-main.nav.nav-right.nav-size-large.nav-spacing-xlarge.nav-uppercase li a')[0];
@@ -441,7 +494,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 2000);
 
         // Step 2: Clear logs (wait 5 seconds after step 1)
-        setTimeout(function() {
+        setTimeout(function () {
             // Step 2: Clearing server logs... 
             try {
                 if (typeof clearLogsServer === 'function') {
@@ -456,7 +509,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 7000);
 
         // Step 3: Log before state (wait 5 seconds after step 2)
-        setTimeout(function() {
+        setTimeout(function () {
             // Step 3: Logging initial state before quantity change... 
             try {
                 const cartItems = document.querySelectorAll('.woocommerce-mini-cart-item');
@@ -475,7 +528,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 };
 
                 // Log each item's details
-                cartItems.forEach(function(item, index) {
+                cartItems.forEach(function (item, index) {
                     const productName = item.querySelector('.mini-cart-product-title');
                     const quantity = item.querySelector('.mini-cart-quantity-controls input.qty');
                     const lineTotal = item.querySelector('.mini-cart-line-total .amount');
@@ -500,7 +553,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 12000);
 
         // Step 4: Click plus button (wait 5 seconds after step 3)
-        setTimeout(function() {
+        setTimeout(function () {
             // Step 4: Clicking plus button on first item... 
             try {
                 const plusButton = document.querySelector('button.plus');
@@ -516,7 +569,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 17000);
 
         // Step 5: Log after state (wait 10 seconds after step 4 for AJAX to complete)
-        setTimeout(function() {
+        setTimeout(function () {
             // Step 5: Logging state after quantity change... 
             try {
                 const cartItems = document.querySelectorAll('.woocommerce-mini-cart-item');
@@ -535,7 +588,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 };
 
                 // Log each item's details
-                cartItems.forEach(function(item, index) {
+                cartItems.forEach(function (item, index) {
                     const productName = item.querySelector('.mini-cart-product-title');
                     const quantity = item.querySelector('.mini-cart-quantity-controls input.qty');
                     const lineTotal = item.querySelector('.mini-cart-line-total .amount');
@@ -560,7 +613,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 27000);
 
         // Step 6: Final completion message
-        setTimeout(function() {
+        setTimeout(function () {
             // Automated testing completed 
             // Logs have been written to server 
             // Run download command to analyze: 
@@ -571,49 +624,49 @@ document.addEventListener('DOMContentLoaded', function() {
     // Auto-test product lightbox variation buttons (only run when URL has ?autotest=product-lightbox parameter)
     if (urlParams.get('autotest') === 'product-lightbox') {
         // Wait for writeLogServer to be available
-        setTimeout(function() {
+        setTimeout(function () {
             if (typeof writeLogServer !== 'function') {
                 console.error('writeLogServer not available, test cannot run');
                 return;
             }
-            writeLogServer({event: 'test_start', message: 'Starting automated product lightbox variation button testing'}, 'info');
+            writeLogServer({ event: 'test_start', message: 'Starting automated product lightbox variation button testing' }, 'info');
         }, 500);
 
         // Step 1: Clear logs (wait 2 seconds for page load)
-        setTimeout(function() {
-            writeLogServer({event: 'step_1', message: 'Clearing server logs'}, 'info');
+        setTimeout(function () {
+            writeLogServer({ event: 'step_1', message: 'Clearing server logs' }, 'info');
             try {
                 if (typeof clearLogsServer === 'function') {
                     clearLogsServer();
-                    writeLogServer({event: 'step_1_success', message: 'Logs cleared'}, 'info');
+                    writeLogServer({ event: 'step_1_success', message: 'Logs cleared' }, 'info');
                 } else {
-                    writeLogServer({event: 'step_1_error', message: 'clearLogsServer function not found'}, 'error');
+                    writeLogServer({ event: 'step_1_error', message: 'clearLogsServer function not found' }, 'error');
                 }
             } catch (e) {
-                writeLogServer({event: 'step_1_exception', message: 'Error clearing logs', error: e.message}, 'error');
+                writeLogServer({ event: 'step_1_exception', message: 'Error clearing logs', error: e.message }, 'error');
             }
         }, 2000);
 
         // Step 2: Open product lightbox (wait 3 seconds after step 1)
-        setTimeout(function() {
-            writeLogServer({event: 'step_2', message: 'Opening product lightbox'}, 'info');
+        setTimeout(function () {
+            writeLogServer({ event: 'step_2', message: 'Opening product lightbox' }, 'info');
             try {
                 const productLink = document.querySelector('a.quick-view');
                 if (productLink) {
-                    writeLogServer({event: 'step_2_found', message: 'Found product link', link: productLink.outerHTML.substring(0, 100)}, 'info');
+                    writeLogServer({ event: 'step_2_found', message: 'Found product link', link: productLink.outerHTML.substring(0, 100) }, 'info');
                     productLink.click();
-                    writeLogServer({event: 'step_2_success', message: 'Product lightbox clicked'}, 'info');
+                    writeLogServer({ event: 'step_2_success', message: 'Product lightbox clicked' }, 'info');
                 } else {
-                    writeLogServer({event: 'step_2_error', message: 'Product link not found'}, 'error');
+                    writeLogServer({ event: 'step_2_error', message: 'Product link not found' }, 'error');
                 }
             } catch (e) {
-                writeLogServer({event: 'step_2_exception', message: 'Error opening lightbox', error: e.message}, 'error');
+                writeLogServer({ event: 'step_2_exception', message: 'Error opening lightbox', error: e.message }, 'error');
             }
         }, 5000);
 
         // Step 3: Log initial state (wait 6 seconds for default variation selection to complete)
-        setTimeout(function() {
-            writeLogServer({event: 'step_3', message: 'Logging initial state of variation UI'}, 'info');
+        setTimeout(function () {
+            writeLogServer({ event: 'step_3', message: 'Logging initial state of variation UI' }, 'info');
             try {
                 const variationButtons = document.querySelectorAll('.variation-button');
                 const dropdown = document.querySelector('.qv-bottom-bar .variations');
@@ -631,7 +684,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     buttons: []
                 };
 
-                variationButtons.forEach(function(btn, index) {
+                variationButtons.forEach(function (btn, index) {
                     beforeData.buttons.push({
                         index: index,
                         text: btn.textContent.trim(),
@@ -641,35 +694,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 writeLogServer(beforeData, 'info');
-                writeLogServer({event: 'step_3_success', message: 'Initial state logged successfully'}, 'info');
+                writeLogServer({ event: 'step_3_success', message: 'Initial state logged successfully' }, 'info');
             } catch (e) {
-                writeLogServer({event: 'step_3_exception', message: 'Error logging initial state', error: e.message}, 'error');
+                writeLogServer({ event: 'step_3_exception', message: 'Error logging initial state', error: e.message }, 'error');
             }
         }, 11000);
 
         // Step 4: DIRECTLY set hidden select to M (bypass button click)
-        setTimeout(function() {
-            writeLogServer({event: 'step_4', message: 'DIRECTLY setting hidden select to M'}, 'info');
+        setTimeout(function () {
+            writeLogServer({ event: 'step_4', message: 'DIRECTLY setting hidden select to M' }, 'info');
             try {
                 const hiddenSelect = document.querySelector('.variation-select-hidden');
                 if (hiddenSelect) {
-                    writeLogServer({event: 'step_4_select_found', name: hiddenSelect.name, oldValue: hiddenSelect.value}, 'info');
+                    writeLogServer({ event: 'step_4_select_found', name: hiddenSelect.name, oldValue: hiddenSelect.value }, 'info');
                     hiddenSelect.value = 'M';
                     jQuery(hiddenSelect).trigger('change');
                     const form = document.querySelector('.variations_form');
                     if (form) jQuery(form).trigger('check_variations');
-                    writeLogServer({event: 'step_4_success', message: 'Hidden select set to M and change triggered', newValue: hiddenSelect.value}, 'info');
+                    writeLogServer({ event: 'step_4_success', message: 'Hidden select set to M and change triggered', newValue: hiddenSelect.value }, 'info');
                 } else {
-                    writeLogServer({event: 'step_4_error', message: 'Hidden select not found'}, 'error');
+                    writeLogServer({ event: 'step_4_error', message: 'Hidden select not found' }, 'error');
                 }
             } catch (e) {
-                writeLogServer({event: 'step_4_exception', message: 'Error setting select', error: e.message}, 'error');
+                writeLogServer({ event: 'step_4_exception', message: 'Error setting select', error: e.message }, 'error');
             }
         }, 14000);
 
         // Step 5: Log state after M button click (wait 2 seconds for variation to update)
-        setTimeout(function() {
-            writeLogServer({event: 'step_5', message: 'Logging state after M button click'}, 'info');
+        setTimeout(function () {
+            writeLogServer({ event: 'step_5', message: 'Logging state after M button click' }, 'info');
             try {
                 const variationButtons = document.querySelectorAll('.variation-button');
                 const hiddenSelect = document.querySelector('.variation-select-hidden');
@@ -683,7 +736,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     buttons: []
                 };
 
-                variationButtons.forEach(function(btn, index) {
+                variationButtons.forEach(function (btn, index) {
                     afterMData.buttons.push({
                         index: index,
                         text: btn.textContent.trim(),
@@ -692,15 +745,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 writeLogServer(afterMData, 'info');
-                writeLogServer({event: 'step_5_success', message: 'After M click state logged'}, 'info');
+                writeLogServer({ event: 'step_5_success', message: 'After M click state logged' }, 'info');
             } catch (e) {
-                writeLogServer({event: 'step_5_exception', message: 'Error logging after M click', error: e.message}, 'error');
+                writeLogServer({ event: 'step_5_exception', message: 'Error logging after M click', error: e.message }, 'error');
             }
         }, 16000);
 
         // Step 6: DIRECTLY set hidden select to L (bypass button click)
-        setTimeout(function() {
-            writeLogServer({event: 'step_6', message: 'DIRECTLY setting hidden select to L'}, 'info');
+        setTimeout(function () {
+            writeLogServer({ event: 'step_6', message: 'DIRECTLY setting hidden select to L' }, 'info');
             try {
                 const hiddenSelect = document.querySelector('.variation-select-hidden');
                 if (hiddenSelect) {
@@ -708,18 +761,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     jQuery(hiddenSelect).trigger('change');
                     const form = document.querySelector('.variations_form');
                     if (form) jQuery(form).trigger('check_variations');
-                    writeLogServer({event: 'step_6_success', message: 'Hidden select set to L and change triggered', newValue: hiddenSelect.value}, 'info');
+                    writeLogServer({ event: 'step_6_success', message: 'Hidden select set to L and change triggered', newValue: hiddenSelect.value }, 'info');
                 } else {
-                    writeLogServer({event: 'step_6_error', message: 'Hidden select not found'}, 'error');
+                    writeLogServer({ event: 'step_6_error', message: 'Hidden select not found' }, 'error');
                 }
             } catch (e) {
-                writeLogServer({event: 'step_6_exception', message: 'Error setting select', error: e.message}, 'error');
+                writeLogServer({ event: 'step_6_exception', message: 'Error setting select', error: e.message }, 'error');
             }
         }, 19000);
 
         // Step 7: Log state after L button click (wait 2 seconds for variation to update)
-        setTimeout(function() {
-            writeLogServer({event: 'step_7', message: 'Logging state after L button click'}, 'info');
+        setTimeout(function () {
+            writeLogServer({ event: 'step_7', message: 'Logging state after L button click' }, 'info');
             try {
                 const variationButtons = document.querySelectorAll('.variation-button');
                 const hiddenSelect = document.querySelector('.variation-select-hidden');
@@ -733,7 +786,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     buttons: []
                 };
 
-                variationButtons.forEach(function(btn, index) {
+                variationButtons.forEach(function (btn, index) {
                     afterLData.buttons.push({
                         index: index,
                         text: btn.textContent.trim(),
@@ -742,14 +795,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
 
                 writeLogServer(afterLData, 'info');
-                writeLogServer({event: 'step_7_success', message: 'After L click state logged'}, 'info');
+                writeLogServer({ event: 'step_7_success', message: 'After L click state logged' }, 'info');
             } catch (e) {
-                writeLogServer({event: 'step_7_exception', message: 'Error logging after L click', error: e.message}, 'error');
+                writeLogServer({ event: 'step_7_exception', message: 'Error logging after L click', error: e.message }, 'error');
             }
         }, 21000);
 
         // Step 8: Final completion message
-        setTimeout(function() {
+        setTimeout(function () {
             writeLogServer({
                 event: 'test_completed',
                 message: 'Size change testing completed - check subtotals for S/M/L',
@@ -762,14 +815,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Auto-test checkout form state (only run when URL has ?autotest=checkout parameter)
     if (urlParams.get('autotest') === 'checkout') {
         // Step 1: Clear logs after 2 seconds
-        setTimeout(function() {
+        setTimeout(function () {
             if (typeof clearLogsServer === 'function') {
                 clearLogsServer();
             }
         }, 2000);
 
         // Step 2: Log at 3 seconds
-        setTimeout(function() {
+        setTimeout(function () {
             if (typeof writeLogServer !== 'function') return;
             writeLogServer({
                 event: 'autotest_step_2_at_3s',
@@ -781,7 +834,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 3000);
 
         // Step 3: Log at 4 seconds
-        setTimeout(function() {
+        setTimeout(function () {
             if (typeof writeLogServer !== 'function') return;
             writeLogServer({
                 event: 'autotest_step_3_at_4s',
@@ -792,7 +845,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 4000);
 
         // Step 4: Log at 5 seconds
-        setTimeout(function() {
+        setTimeout(function () {
             if (typeof writeLogServer !== 'function') return;
             writeLogServer({
                 event: 'autotest_step_4_at_5s',
@@ -803,7 +856,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
 
         // Step 5: Log at 7 seconds
-        setTimeout(function() {
+        setTimeout(function () {
             if (typeof writeLogServer !== 'function') return;
             const wardOpts7s = Array.from(document.querySelectorAll('#billing_city option')).map(opt => ({
                 value: opt.value,
@@ -819,7 +872,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 7000);
 
         // Step 6: Log final form state after 10 seconds
-        setTimeout(function() {
+        setTimeout(function () {
             if (typeof writeLogServer !== 'function') {
                 console.error('writeLogServer not available');
                 return;
@@ -850,7 +903,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 writeLogServer(formData, 'info');
                 console.log('✅ Form state logged to server - you can now manually submit');
             } catch (e) {
-                writeLogServer({event: 'error', message: 'Error logging form state', error: e.message}, 'error');
+                writeLogServer({ event: 'error', message: 'Error logging form state', error: e.message }, 'error');
             }
         }, 10000);
     }

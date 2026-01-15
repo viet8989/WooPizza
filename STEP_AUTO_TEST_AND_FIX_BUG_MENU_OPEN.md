@@ -1,8 +1,10 @@
-# Mini Cart Debugging Workflow - Complete Template
+# Menu Open Debugging Workflow - Complete Template
 
 ## Bug Description
-When clicking 'plus' or 'minus' quantity buttons in mini cart, price fields update incorrectly (item total, subtotal, tax, etc.)
-
+Fix bug function fadeOutToGroupOpenMenu() in file wp-content/themes/flatsome-child/js/custom.js
+This function is called when clicking on menu items in the header.
+It just right when current page is Home page and screen scrolled over html element of document.querySelector('.tabbed-content.tab-service').
+But when click on menu items from other pages(need redirect to home page, after fadeOutToGroupOpenMenu(...)), it doesn't work.
 ---
 
 ## Key Features (Reusable for Other Tasks)
@@ -100,11 +102,11 @@ open https://terravivapizza.com
 ```
 Wait 5 seconds for page load.
 
-#### Step 2: Open Mini Cart (Browser Console)
+#### Step 2: Open Menu (Browser Console)
 ```javascript
-document.querySelectorAll('.header-nav.header-nav-main.nav.nav-right.nav-size-large.nav-spacing-xlarge.nav-uppercase li a')[0].click();
+document.querySelector('.menu-button').click();
 ```
-Wait 5 seconds for mini cart to appear.
+Wait 5 seconds for menu to appear.
 
 #### Step 3: Clear Previous Logs (Browser Console)
 ```javascript
@@ -112,55 +114,14 @@ clearLogsServer();
 ```
 Wait 5 seconds for logs to clear.
 
-#### Step 4: Log State Before Action (Browser Console)
+#### Step 4: Click menu item [Branch] (Browser Console)
 ```javascript
-// Log initial state before quantity change
-const cartItems = document.querySelectorAll('.woocommerce-mini-cart-item');
-const subtotal = document.querySelector('.mini-cart-totals-breakdown .subtotal-row .totals-value');
-const tax = document.querySelector('.mini-cart-totals-breakdown .tax-row .totals-value');
-const total = document.querySelector('.mini-cart-totals-breakdown .total-row .totals-value');
-
-const beforeData = {
-    event: 'before_quantity_change',
-    timestamp: new Date().toISOString(),
-    cart_items_count: cartItems.length,
-    subtotal: subtotal ? subtotal.textContent.trim() : 'N/A',
-    tax: tax ? tax.textContent.trim() : 'N/A',
-    total: total ? total.textContent.trim() : 'N/A',
-    items: []
-};
-
-// Log each item's details
-cartItems.forEach(function(item, index) {
-    const productName = item.querySelector('.mini-cart-product-title');
-    const quantity = item.querySelector('.mini-cart-quantity-controls input.qty');
-    const lineTotal = item.querySelector('.mini-cart-line-total .amount');
-
-    beforeData.items.push({
-        index: index,
-        product: productName ? productName.textContent.trim() : 'Unknown',
-        quantity: quantity ? quantity.value : 'N/A',
-        line_total: lineTotal ? lineTotal.textContent.trim() : 'N/A'
-    });
-});
-
-writeLogServer(beforeData, 'info');
-```
-Wait 5 seconds.
-
-#### Step 5: Trigger Action (Browser Console)
-```javascript
-// Click plus button on first item
-document.querySelector('button.plus').click();
-
-// OR click minus button
-// document.querySelector('button.minus').click();
+document.querySelector('a[href="https://terravivapizza.com/#tab_branch"]').click();
 ```
 Wait 10 seconds for AJAX to complete and UI to update.
 
-#### Step 6: Log State After Action (Browser Console)
+#### Step 5: Log State After Action (Browser Console)
 ```javascript
-// Log state after quantity change (same as step 4 but different event name)
 const cartItems = document.querySelectorAll('.woocommerce-mini-cart-item');
 const subtotal = document.querySelector('.mini-cart-totals-breakdown .subtotal-row .totals-value');
 const tax = document.querySelector('.mini-cart-totals-breakdown .tax-row .totals-value');

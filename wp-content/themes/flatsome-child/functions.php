@@ -43,7 +43,7 @@ add_filter( 'xmlrpc_enabled', '__return_false' );
 
 function enqueue_custom_js()
 {
-    wp_enqueue_script('custom-js', get_stylesheet_directory_uri() . '/js/custom.js', array(), '1.0.4', true);
+    wp_enqueue_script('custom-js', get_stylesheet_directory_uri() . '/js/custom.js', array(), '1.0.5', true);
 
     // Localize script to provide AJAX URL for all users (logged in or not)
     wp_localize_script('custom-js', 'customJsParams', array(
