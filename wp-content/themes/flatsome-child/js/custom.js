@@ -319,8 +319,6 @@ function fadeOutToGroupOpenMenu(hash, calledFrom = 'redirect') {
     const initialDelay = calledFrom === 'redirect' ? 500 : 300;
     const scrollCompleteDelay = calledFrom === 'redirect' ? 800 : 500;
 
-    console.log('fadeOutToGroupOpenMenu called:', { hash: cleanHash, calledFrom, initialDelay, scrollCompleteDelay });
-
     // Helper function to perform the scroll and tab click
     function performScrollAndClick() {
         const item = document.querySelector('.tabbed-content.tab-service');
@@ -333,7 +331,6 @@ function fadeOutToGroupOpenMenu(hash, calledFrom = 'redirect') {
         const target = item.getBoundingClientRect().top + window.scrollY - offset;
         const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        console.log('Scrolling to tab container:', { target, offset, currentScrollY: window.scrollY });
         window.scrollTo({ top: target, behavior: prefersReduced ? 'auto' : 'smooth' });
 
         // Wait for scroll to complete, then click the tab
@@ -342,7 +339,6 @@ function fadeOutToGroupOpenMenu(hash, calledFrom = 'redirect') {
             const tabLink = document.querySelector('.tabbed-content.tab-service a[href="#' + cleanHash + '"]');
 
             if (tabLink) {
-                console.log('Clicking tab:', cleanHash, '| Offset:', offset + 'px');
                 tabLink.click();
 
                 // For redirect scenario, scroll again after tab content is rendered
@@ -352,13 +348,11 @@ function fadeOutToGroupOpenMenu(hash, calledFrom = 'redirect') {
                         if (updatedItem) {
                             const updatedTarget = updatedItem.getBoundingClientRect().top + window.scrollY - offset;
                             window.scrollTo({ top: updatedTarget, behavior: prefersReduced ? 'auto' : 'smooth' });
-                            console.log('Re-scrolled after tab click:', { updatedTarget });
                         }
                     }, 300);
                 }
             } else {
                 console.warn('Tab link not found for:', cleanHash);
-                console.log('Available tabs:', Array.from(document.querySelectorAll('.tabbed-content.tab-service a[role="tab"]')).map(a => a.getAttribute('href')));
             }
         }, scrollCompleteDelay);
 
@@ -421,7 +415,6 @@ function writeLogServer(data, logLevel = 'info') {
         .then(response => response.json())
         .then(result => {
             if (result.success) {
-                console.log('Log written to server:', result.data);
             } else {
                 console.error('Failed to write log:', result.data);
             }
@@ -901,7 +894,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     message: 'Form state logged - ready for manual submit test'
                 };
                 writeLogServer(formData, 'info');
-                console.log('✅ Form state logged to server - you can now manually submit');
             } catch (e) {
                 writeLogServer({ event: 'error', message: 'Error logging form state', error: e.message }, 'error');
             }
