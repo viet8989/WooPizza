@@ -3187,3 +3187,17 @@ function add_custom_tax_per_product_to_cart( $cart ) {
         $cart->add_fee( __( 'VAT', 'woocommerce' ), $total_tax, false );
     }
 }
+
+
+// 1. Fix Quantity Increment on Refresh (Prevent POST resubmission)
+add_filter('woocommerce_add_to_cart_redirect', function($url) {
+    if (isset($_POST['add-to-cart']) && !defined('DOING_AJAX')) {
+        // Redirect to the current URL but without the POST data
+        return remove_query_arg('add-to-cart', add_query_arg(array(), $_SERVER['REQUEST_URI']));
+    }
+    return $url;
+});
+
+// 2. Fix Double Taxation (Disable standard taxes since we use custom VAT fee)
+add_filter( 'woocommerce_product_is_taxable', '__return_false' );
+add_filter( 'woocommerce_calc_tax', '__return_false' );
