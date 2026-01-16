@@ -3123,3 +3123,67 @@ function handle_clear_debug_logs() {
         'timestamp' => date('Y-m-d H:i:s')
     ));
 }
+
+/**
+ * ===================================================
+ * CUSTOM TAX RATE PER PRODUCT
+ * ===================================================
+ * Add a custom tax rate field to each product
+ * and calculate tax automatically in cart
+ */
+
+// Add custom tax rate field to product General tab
+add_action( 'woocommerce_product_options_general_product_data', 'add_custom_tax_rate_field' );
+function add_custom_tax_rate_field() {
+    woocommerce_wp_text_input( array(
+        'id'          => '_custom_tax_rate',
+        'label'       => __( 'Custom Tax Rate (%)', 'woocommerce' ),
+        'placeholder' => '10',
+        'desc_tip'    => true,
+        'description' => __( 'Enter the tax rate percentage for this product (e.g., 8, 10, 12). Leave empty to use default (10%).', 'woocommerce' ),
+        'type'        => 'number',
+        'custom_attributes' => array(
+            'step' => '0.01',
+            'min'  => '0',
+            'max'  => '100',
+        ),
+    ) );
+}
+
+// Save custom tax rate field
+add_action( 'woocommerce_process_product_meta', 'save_custom_tax_rate_field' );
+function save_custom_tax_rate_field( $post_id ) {
+    $custom_tax_rate = isset( $_POST['_custom_tax_rate'] ) ? sanitize_text_field( $_POST['_custom_tax_rate'] ) : '';
+    update_post_meta( $post_id, '_custom_tax_rate', $custom_tax_rate );
+}
+
+// Calculate custom tax for each cart item and add as fee
+add_action( 'woocommerce_cart_calculate_fees', 'add_custom_tax_per_product_to_cart', 20, 1 );
+function add_custom_tax_per_product_to_cart( $cart ) {
+    if ( is_admin() && ! defined( 'DOING_AJAX' ) ) {
+        return;
+    }
+
+    $total_tax = 0;
+    $default_tax_rate = 10; // Default 10% tax rate
+
+    foreach ( $cart->get_cart() as $cart_item ) {
+        $product_id = $cart_item['product_id'];
+        $item_total = $cart_item['line_total'];
+
+        // Get custom tax rate from product meta
+        $custom_rate = get_post_meta( $product_id, '_custom_tax_rate', true );
+        
+        // Use custom rate if set, otherwise use default
+        $tax_rate = ! empty( $custom_rate ) ? floatval( $custom_rate ) : $default_tax_rate;
+        
+        // Calculate tax for this item
+        $item_tax = $item_total * ( $tax_rate / 100 );
+        $total_tax += $item_tax;
+    }
+
+    // Add tax as a fee (not taxable itself)
+    if ( $total_tax > 0 ) {
+        $cart->add_fee( __( 'VAT', 'woocommerce' ), $total_tax, false );
+    }
+}
