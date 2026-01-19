@@ -386,6 +386,7 @@ function display_pizza_products_page() {
                 <th>Name</th>
                 <th>Price</th>
                 <th>Categories</th>
+                <th>Tax Rate (%)</th>
                 <th>Stock</th>
                 <th>Actions</th>
             </tr>
@@ -409,6 +410,12 @@ function display_pizza_products_page() {
                 </td>
                 <td><?php echo $product->get_price_html(); ?></td>
                 <td><?php echo wc_get_product_category_list( get_the_ID(), ', ' ); ?></td>
+                <td>
+                    <?php
+                    $custom_tax = get_post_meta( get_the_ID(), '_custom_tax_rate', true );
+                    echo esc_html( $custom_tax ? $custom_tax . '%' : '-' );
+                    ?>
+                </td>
                 <td><?php echo esc_html( $product->get_stock_status() ); ?></td>
                 <td>
                     <a href="<?php echo esc_url( add_query_arg( 'product_type', 'pizza', get_edit_post_link( get_the_ID() ) ) ); ?>"
@@ -502,6 +509,7 @@ function display_other_products_page() {
                 <th>Name</th>
                 <th>Price</th>
                 <th>Categories</th>
+                <th>Tax Rate (%)</th>
                 <th>Stock</th>
                 <th>Actions</th>
             </tr>
@@ -525,6 +533,12 @@ function display_other_products_page() {
                 </td>
                 <td><?php echo $product->get_price_html(); ?></td>
                 <td><?php echo wc_get_product_category_list( get_the_ID(), ', ' ); ?></td>
+                <td>
+                    <?php
+                    $custom_tax = get_post_meta( get_the_ID(), '_custom_tax_rate', true );
+                    echo esc_html( $custom_tax ? $custom_tax . '%' : '-' );
+                    ?>
+                </td>
                 <td><?php echo esc_html( $product->get_stock_status() ); ?></td>
                 <td>
                     <a href="<?php echo esc_url( add_query_arg( 'product_type', 'other', get_edit_post_link( get_the_ID() ) ) ); ?>"
@@ -3135,6 +3149,11 @@ function handle_clear_debug_logs() {
 // Add custom tax rate field to product General tab
 add_action( 'woocommerce_product_options_general_product_data', 'add_custom_tax_rate_field' );
 function add_custom_tax_rate_field() {
+    // Check if we are editing a topping product
+    if ( isset( $_GET['product_type'] ) && $_GET['product_type'] === 'topping' ) {
+        return;
+    }
+
     woocommerce_wp_text_input( array(
         'id'          => '_custom_tax_rate',
         'label'       => __( 'Custom Tax Rate (%)', 'woocommerce' ),
