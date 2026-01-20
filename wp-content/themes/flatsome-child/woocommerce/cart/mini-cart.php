@@ -384,6 +384,30 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 						</div>
 						<div class="mini-cart-line-total">
 							<span class="amount"><?php echo $line_total_formatted; ?></span>
+							<?php
+							// Display custom tax if set, otherwise default to 0
+							$product_id = $_product->get_id();
+							$custom_tax_rate = get_post_meta( $product_id, '_custom_tax_rate', true );
+							
+							// Debug logging
+							error_log( "Mini-Cart Tax Debug: Product ID: $product_id, Rate: $custom_tax_rate" );
+
+							// If empty and is variation, check parent
+							if ( $custom_tax_rate === '' && $_product->is_type( 'variation' ) ) {
+								$parent_id = $_product->get_parent_id();
+								$custom_tax_rate = get_post_meta( $parent_id, '_custom_tax_rate', true );
+								error_log( "Mini-Cart Tax Debug: Parent ID: $parent_id, Parent Rate: $custom_tax_rate" );
+							}
+
+							if ( ! is_numeric( $custom_tax_rate ) ) {
+								$custom_tax_rate = 0;
+							}
+							
+							$tax_amount = $line_total * ( floatval( $custom_tax_rate ) / 100 );
+							?>
+							<div class="mini-cart-tax-info" style="font-size: 11px; color: #777; margin-top: 2px; display: block !important;">
+								<?php echo sprintf( __( 'VAT (%s%%): %s', 'flatsome' ), esc_html( $custom_tax_rate ), wc_price( $tax_amount ) ); ?>
+							</div>
 						</div>
 						<div class="mini-cart-remove-action">
 							<?php
@@ -431,14 +455,41 @@ do_action( 'woocommerce_before_mini_cart' ); ?>
 					}
 				}
 			?>
-			<span class="totals-label"><?php echo esc_html( WC()->countries->tax_or_vat() . $rate_suffix ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-			<span class="totals-value"><?php wc_cart_totals_taxes_total_html(); ?></span>
+			<?php
+			// Calculate total custom tax manually
+			$total_custom_tax = 0;
+			foreach ( WC()->cart->get_cart() as $cart_item ) {
+				$product = $cart_item['data'];
+				$line_total = $cart_item['line_total'];
+				
+				$custom_tax_rate = get_post_meta( $product->get_id(), '_custom_tax_rate', true );
+				if ( ! is_numeric( $custom_tax_rate ) ) {
+					// Fallback for variations
+					if ( $product->is_type( 'variation' ) ) {
+						$parent_id = $product->get_parent_id();
+						$custom_tax_rate = get_post_meta( $parent_id, '_custom_tax_rate', true );
+					}
+				}
+				
+				if ( ! is_numeric( $custom_tax_rate ) ) {
+					$custom_tax_rate = 0;
+				}
+				
+				$total_custom_tax += $line_total * ( floatval( $custom_tax_rate ) / 100 );
+			}
+			?>
+			<span class="totals-label">Tax Total</span>
+				<span class="totals-value"><?php echo wc_price( $total_custom_tax ); ?></span>
 		</div>
 		<?php endif; ?>
 
 		<div class="totals-row total-row">
 			<span class="totals-label"><strong>Total</strong></span>
-			<span class="totals-value"><strong><?php echo WC()->cart->get_total(); ?></strong></span>
+			<span class="totals-value"><strong><?php  
+				/* $total = floatval( WC()->cart->get_subtotal() ) - floatval( WC()->cart->get_discount_total() ) + floatval( WC()->cart->get_fee_total() ) + $total_custom_tax; */
+				$total = floatval( WC()->cart->get_subtotal() ) + $total_custom_tax;
+				echo wc_price( $total ); 
+			?></strong></span>
 		</div>
 	</div>
 <!-- quantity change, total not change -->

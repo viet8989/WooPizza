@@ -326,17 +326,8 @@ defined( 'ABSPATH' ) || exit;
 									}
 								}
 							} else {
-								// Whole pizza mode - start with base price
+								// Whole pizza mode - use the product price (already includes extras in cart context)
 								$calculated_price = floatval( $_product->get_price() );
-
-								// Add whole pizza toppings
-								if ( isset( $cart_item['extra_topping_options'] ) && ! empty( $cart_item['extra_topping_options'] ) ) {
-									foreach ( $cart_item['extra_topping_options'] as $topping ) {
-										if ( isset( $topping['price'] ) ) {
-											$calculated_price += floatval( $topping['price'] );
-										}
-									}
-								}
 							}
 
 							// Format unit price (not total)
@@ -354,7 +345,19 @@ defined( 'ABSPATH' ) || exit;
 							<?php echo $unit_price_formatted . ' x ' . $cart_item['quantity']; ?>
 						</div>
 						<div class="mini-cart-line-total">
-							<span class="amount"><?php echo $line_total_formatted; ?></span>
+							<?php echo $line_total_formatted; ?>
+							<?php
+							// Display custom tax if set, otherwise default to 0
+							$custom_tax_rate = get_post_meta( $_product->get_id(), '_custom_tax_rate', true );
+							if ( ! is_numeric( $custom_tax_rate ) ) {
+								$custom_tax_rate = 0;
+							}
+							
+							$tax_amount = $line_total * ( floatval( $custom_tax_rate ) / 100 );
+							?>
+							<div class="mini-cart-tax-info" style="font-size: 11px; color: #777; margin-top: 2px;">
+								<?php echo sprintf( __( 'Tax (%s%%): %s', 'flatsome' ), esc_html( $custom_tax_rate ), wc_price( $tax_amount ) ); ?>
+							</div>
 						</div>
 					</div>
 				</li>
@@ -367,6 +370,29 @@ defined( 'ABSPATH' ) || exit;
 	</ul>
 
 	<!-- Cart Totals Breakdown -->
+	<?php
+		// Pre-calculate custom tax for use in display and Total row
+		$total_custom_tax = 0;
+		foreach ( WC()->cart->get_cart() as $cart_item ) {
+			$product = $cart_item['data'];
+			$line_total = $cart_item['line_total'];
+			
+			$custom_tax_rate = get_post_meta( $product->get_id(), '_custom_tax_rate', true );
+			if ( ! is_numeric( $custom_tax_rate ) ) {
+				// Fallback for variations
+				if ( $product->is_type( 'variation' ) ) {
+					$parent_id = $product->get_parent_id();
+					$custom_tax_rate = get_post_meta( $parent_id, '_custom_tax_rate', true );
+				}
+			}
+			
+			if ( ! is_numeric( $custom_tax_rate ) ) {
+				$custom_tax_rate = 0;
+			}
+			
+			$total_custom_tax += $line_total * ( floatval( $custom_tax_rate ) / 100 );
+		}
+	?>
 	<div class="checkout-totals-breakdown">
 		<div class="totals-row subtotal-row">
 			<span class="totals-label">Subtotal</span>
@@ -374,7 +400,7 @@ defined( 'ABSPATH' ) || exit;
 		</div>
 
 		<?php if ( wc_tax_enabled() && ! WC()->cart->display_prices_including_tax() ) : ?>
-		<div class="totals-row tax-row">
+		<div class="totals-row tax-row custom-tax-row">
 			<?php
 				$rate_suffix = '';
 				$tax_totals = WC()->cart->get_tax_totals();
@@ -385,8 +411,12 @@ defined( 'ABSPATH' ) || exit;
 					}
 				}
 			?>
-			<span class="totals-label"><?php echo esc_html( WC()->countries->tax_or_vat() . $rate_suffix ); ?></span>
-			<span class="totals-value"><?php wc_cart_totals_taxes_total_html(); ?></span>
+			<span class="totals-label">Tax Total</span>
+			<span class="totals-value">
+			<?php 
+				echo wc_price( $total_custom_tax );
+			?>
+			</span>
 		</div>
 		<?php endif; ?>
 
@@ -427,12 +457,13 @@ defined( 'ABSPATH' ) || exit;
 		<div class="totals-row total-row">
 			<span class="totals-label"><strong>Total</strong></span>
 			<span class="totals-value"><strong><?php
-				// Calculate total including fees
-				$cart_total = WC()->cart->get_cart_contents_total();
-				$cart_tax = WC()->cart->get_cart_contents_tax();
-				$fee_total = WC()->cart->get_fee_total();
-				$fee_tax = WC()->cart->get_fee_tax();
-				$total = $cart_total + $cart_tax + $fee_total + $fee_tax;
+				// Calculate total including custom tax and fees
+				$cart_subtotal = WC()->cart->get_subtotal();
+				// Use the $total_custom_tax calculated above
+				// Use the $shipping_fee calculated above
+				
+				/* $total = floatval( WC()->cart->get_subtotal() ) - floatval( WC()->cart->get_discount_total() ) + floatval( WC()->cart->get_fee_total() ) + $total_custom_tax + $shipping_fee; */
+				$total = floatval( WC()->cart->get_subtotal() ) + $total_custom_tax + $shipping_fee;
 
 				echo wc_price($total);
 			?></strong></span>

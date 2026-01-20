@@ -323,15 +323,8 @@ if ( $show_downloads ) {
 							}
 						}
 					} else {
-						// Whole pizza
+						// Whole pizza - use product price (already includes extras)
 						$calculated_price = floatval( $product->get_price() );
-						if ( ! empty( $extra_toppings ) ) {
-							foreach ( $extra_toppings as $topping ) {
-								if ( isset( $topping['price'] ) ) {
-									$calculated_price += floatval( $topping['price'] );
-								}
-							}
-						}
 					}
 
 					$unit_price_formatted = wc_price( $calculated_price );
@@ -347,7 +340,19 @@ if ( $show_downloads ) {
 							<?php echo $unit_price_formatted . ' x ' . $quantity; ?>
 						</div>
 						<div class="mini-cart-line-total">
-							<span class="amount"><?php echo $line_total_formatted; ?></span>
+							<?php echo $line_total_formatted; ?>
+							<?php
+							// Display custom tax if set, otherwise default to 0
+							$custom_tax_rate = get_post_meta( $product->get_id(), '_custom_tax_rate', true );
+							if ( ! is_numeric( $custom_tax_rate ) ) {
+								$custom_tax_rate = 0;
+							}
+							
+							$tax_amount = $line_total * ( floatval( $custom_tax_rate ) / 100 );
+							?>
+							<div class="mini-cart-tax-info" style="font-size: 11px; color: #777; margin-top: 2px;">
+								<?php echo sprintf( __( 'Tax (%s%%): %s', 'flatsome' ), esc_html( $custom_tax_rate ), wc_price( $tax_amount ) ); ?>
+							</div>
 						</div>
 					</div>
 				</li>
@@ -360,18 +365,40 @@ if ( $show_downloads ) {
 
 		<!-- Cart Totals Breakdown -->
 		<div class="checkout-totals-breakdown">
-		<div class="totals-row subtotal-row">
-			<span class="totals-label">Subtotal</span>
-			<span class="totals-value"><?php echo wc_price( $order->get_subtotal() ); ?></span>
-		</div>			<?php if ( wc_tax_enabled() && ! $order->get_prices_include_tax() ) : ?>
-			<div class="totals-row tax-row">
-				<?php
-					$tax_label = WC()->countries->tax_or_vat();
-				?>
-				<span class="totals-label"><?php echo esc_html( $tax_label ); ?></span>
-				<span class="totals-value"><?php echo wc_price( $order->get_total_tax() ); ?></span>
+			<div class="totals-row subtotal-row">
+				<span class="totals-label">Subtotal</span>
+				<span class="totals-value"><?php echo wc_price( $order->get_subtotal() ); ?></span>
 			</div>
-			<?php endif; ?>
+			<?php
+				// Pre-calculate custom tax for order details breakdown
+				$total_custom_tax = 0;
+				foreach ( $order->get_items() as $item ) {
+					$product = $item->get_product();
+					if ( ! $product ) continue;
+					
+					$line_total = $item->get_total();
+					$custom_tax_rate = get_post_meta( $product->get_id(), '_custom_tax_rate', true );
+					if ( ! is_numeric( $custom_tax_rate ) ) {
+						if ( $product->is_type( 'variation' ) ) {
+							$parent_id = $product->get_parent_id();
+							$custom_tax_rate = get_post_meta( $parent_id, '_custom_tax_rate', true );
+						}
+					}
+					if ( ! is_numeric( $custom_tax_rate ) ) $custom_tax_rate = 0;
+					$total_custom_tax += $line_total * ( floatval( $custom_tax_rate ) / 100 );
+				}
+			?>
+		<?php if ( wc_tax_enabled() && ! $order->get_prices_include_tax() ) : ?>
+			<div class="totals-row tax-row">
+				<span class="totals-label">Tax Total</span>
+				<span class="totals-value">
+				<?php  
+					// Use the $total_custom_tax calculated above
+					echo wc_price( $total_custom_tax );
+				?>
+				</span>
+			</div>
+		<?php endif; ?>
 
 			<?php
 			// Custom Shipping/Pickup Fee Row - Replaces WooCommerce default shipping display
@@ -409,10 +436,10 @@ if ( $show_downloads ) {
 
 			<div class="totals-row total-row">
 				<span class="totals-label"><strong>Total</strong></span>
-				<span class="totals-value"><strong><?php
-					// Get order total
-					$total = $order->get_total();
-					echo wc_price( $total );
+				<span class="totals-value"><strong><?php 
+					// Calculate manual total to ensure it matches the displayed rows
+					$total = floatval( $order->get_subtotal() ) - floatval( $order->get_total_discount() ) + floatval( $order->get_shipping_total() ) + $total_custom_tax;
+					echo wc_price( $total ); 
 				?></strong></span>
 			</div>
 		</div>

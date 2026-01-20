@@ -484,13 +484,15 @@ jQuery(document).ready(function($) {
 			return;
 		}
 
-		// Get subtotal (cart contents without tax or fees)
-		var $subtotalRow = $('.totals-row:not(.shipping-fee-row):not(.total-row)').first();
+		// Get subtotal
+		var $subtotalRow = $('.subtotal-row');
 		var subtotalText = $subtotalRow.find('.totals-value').text().replace(/[^\d]/g, '');
 		var subtotal = parseInt(subtotalText) || 0;
 
-		// Calculate tax (8% VAT)
-		var tax = Math.round(subtotal * 0.08);
+		// Get tax from DOM instead of hardcoding 8%
+		var $taxRow = $('.tax-row');
+		var taxText = $taxRow.find('.totals-value').text().replace(/[^\d]/g, '');
+		var tax = parseInt(taxText) || 0;
 
 		// Calculate new total: subtotal + tax + shipping fee
 		var newTotal = subtotal + tax + shippingFee;

@@ -321,7 +321,20 @@ do_action( 'woocommerce_before_cart' ); ?>
 						<td class="product-subtotal" data-title="<?php esc_attr_e( 'Subtotal', 'woocommerce' ); ?>">
 							<?php
 								echo apply_filters( 'woocommerce_cart_item_subtotal', WC()->cart->get_product_subtotal( $_product, $cart_item['quantity'] ), $cart_item, $cart_item_key ); // PHPCS: XSS ok.
-							?>
+								
+								// Display custom tax if set, otherwise default to 0
+								$custom_tax_rate = get_post_meta( $_product->get_id(), '_custom_tax_rate', true );
+								if ( ! is_numeric( $custom_tax_rate ) ) {
+									$custom_tax_rate = 0;
+								}
+
+								$line_total = $cart_item['line_total'];
+								$tax_amount = $line_total * ( floatval( $custom_tax_rate ) / 100 );
+								?>
+								<div class="cart-tax-info" style="font-size: 0.85em; color: #777; margin-top: 4px;">
+									<?php echo sprintf( __( 'VAT (%s%%): %s', 'flatsome' ), esc_html( $custom_tax_rate ), wc_price( $tax_amount ) ); ?>
+								</div>
+
 						</td>
 					</tr>
 					<?php

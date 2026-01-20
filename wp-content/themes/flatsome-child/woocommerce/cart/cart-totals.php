@@ -38,69 +38,46 @@ defined( 'ABSPATH' ) || exit;
 			</tr>
 		<?php endforeach; ?>
 
-		<?php if ( WC()->cart->needs_shipping() && WC()->cart->show_shipping() ) : ?>
-
-			<?php do_action( 'woocommerce_cart_totals_before_shipping' ); ?>
-
-			<?php wc_cart_totals_shipping_html(); ?>
-
-			<?php do_action( 'woocommerce_cart_totals_after_shipping' ); ?>
-
-		<?php elseif ( WC()->cart->needs_shipping() && 'yes' === get_option( 'woocommerce_enable_shipping_calc' ) ) : ?>
-
-			<tr class="shipping">
-				<th><?php esc_html_e( 'Shipping', 'woocommerce' ); ?></th>
-				<td data-title="<?php esc_attr_e( 'Shipping', 'woocommerce' ); ?>"><?php woocommerce_shipping_calculator(); ?></td>
-			</tr>
-
-		<?php endif; ?>
-
-		<?php foreach ( WC()->cart->get_fees() as $fee ) : ?>
-			<tr class="fee">
-				<th><?php echo esc_html( $fee->name ); ?></th>
-				<td data-title="<?php echo esc_attr( $fee->name ); ?>"><?php wc_cart_totals_fee_html( $fee ); ?></td>
-			</tr>
-		<?php endforeach; ?>
-
 		<?php
-		if ( wc_tax_enabled() && ! WC()->cart->display_prices_including_tax() ) {
-			$taxable_address = WC()->customer->get_taxable_address();
 
-			if ( 'itemized' === get_option( 'woocommerce_tax_total_display' ) ) {
-				foreach ( WC()->cart->get_tax_totals() as $code => $tax ) { // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-					?>
-					<tr class="tax-rate tax-rate-<?php echo esc_attr( sanitize_title( $code ) ); ?>">
-						<?php
-						// Try to get the percent for this tax rate id if available
-						$rate_suffix = '';
-						if ( ! empty( $tax->tax_rate_id ) ) {
-							$rate_suffix = ' (' . esc_html( WC_Tax::get_rate_percent( $tax->tax_rate_id ) ) . ')';
-						}
-						?>
-						<th><?php echo esc_html( $tax->label . $rate_suffix ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></th>
-						<td data-title="<?php echo esc_attr( $tax->label ); ?>"><?php echo wp_kses_post( $tax->formatted_amount ); ?></td>
-					</tr>
-					<?php
+		if ( wc_tax_enabled() && ! WC()->cart->display_prices_including_tax() ) {
+			?>
+			<style>
+				.cart_totals tr.tax-rate, 
+				.cart_totals tr.tax-total:not(.custom-tax-total) {
+					display: none !important;
 				}
-			} else {
-				?>
-				<tr class="tax-total">
-					<?php
-					// For non-itemized display, try to append the first tax rate percent if available
-					$rate_suffix = '';
-					$tax_totals = WC()->cart->get_tax_totals();
-					if ( ! empty( $tax_totals ) ) {
-						$first = reset( $tax_totals );
-						if ( ! empty( $first->tax_rate_id ) ) {
-							$rate_suffix = ' (' . esc_html( WC_Tax::get_rate_percent( $first->tax_rate_id ) ) . ')';
+			</style>
+			<tr class="tax-total custom-tax-total">
+				<th>Tax Total</th>
+				<td data-title="Tax Total">
+				<?php 
+					// Calculate total custom tax manually
+					$total_custom_tax = 0;
+					foreach ( WC()->cart->get_cart() as $cart_item ) {
+						$product = $cart_item['data'];
+						$line_total = $cart_item['line_total'];
+						
+						$custom_tax_rate = get_post_meta( $product->get_id(), '_custom_tax_rate', true );
+						if ( ! is_numeric( $custom_tax_rate ) ) {
+							// Fallback for variations
+							if ( $product->is_type( 'variation' ) ) {
+								$parent_id = $product->get_parent_id();
+								$custom_tax_rate = get_post_meta( $parent_id, '_custom_tax_rate', true );
+							}
 						}
+						
+						if ( ! is_numeric( $custom_tax_rate ) ) {
+							$custom_tax_rate = 0;
+						}
+						
+						$total_custom_tax += $line_total * ( floatval( $custom_tax_rate ) / 100 );
 					}
-					?>
-					<th><?php echo esc_html( WC()->countries->tax_or_vat() . $rate_suffix ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></th>
-					<td data-title="<?php echo esc_attr( WC()->countries->tax_or_vat() ); ?>"><?php wc_cart_totals_taxes_total_html(); ?></td>
-				</tr>
-				<?php
-			}
+					echo wc_price( $total_custom_tax );
+				?>
+				</td>
+			</tr>
+			<?php
 		}
 		?>
 
@@ -108,7 +85,11 @@ defined( 'ABSPATH' ) || exit;
 
 		<tr class="order-total">
 			<th><?php esc_html_e( 'Total', 'woocommerce' ); ?></th>
-			<td data-title="<?php esc_attr_e( 'Total', 'woocommerce' ); ?>"><?php wc_cart_totals_order_total_html(); ?></td>
+			<td data-title="<?php esc_attr_e( 'Total', 'woocommerce' ); ?>"><strong><?php 
+				/* $total = floatval( WC()->cart->get_subtotal() ) - floatval( WC()->cart->get_discount_total() ) + floatval( WC()->cart->get_fee_total() ) + $total_custom_tax; */
+				$total = floatval( WC()->cart->get_subtotal() ) + $total_custom_tax;
+				echo wc_price( $total ); 
+			?></strong></td>
 		</tr>
 
 		<?php do_action( 'woocommerce_cart_totals_after_order_total' ); ?>
